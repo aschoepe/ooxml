@@ -1,8 +1,12 @@
-C initial\sempty\scheck-in
-D 2018-02-09T14:20:03.000
-R d41d8cd98f00b204e9800998ecf8427e
-T *branch * trunk
-T *sym-trunk *
-U root
-Z 3d74af341dc0054cda0f71574684b0db
+C Version-1.0
+D 2018-06-20T15:01:38.000
+F ooxml.tcl 5f737667e97a0251e330aa7ee5fb38b8f6aae14457627b5c8fc0a19142f1aaab
+F pkgIndex.tcl e594b42b96c8fad06787f9c6110c5c09dbe8d5bc16e74f38afb0641ed68a701b
+P fd09cfb92203ae5d88ceb05dc8e973d1b442c6c96d95478af6a22878cb01edd4
+R a21622ad03bacb12e280d1dc29858e52
+T +bgcolor * #fea5f4
+T +sym-release *
+T +sym-version-1.0 *
+U alex
+Z 877506974791c096048b89939e842000
 # Remove this line to create a well-formed Fossil manifest.

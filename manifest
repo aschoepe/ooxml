@@ -1,12 +1,14 @@
-C Version-1.0
-D 2018-06-20T15:01:38.000
+C examples\s6-8
+D 2018-08-10T10:38:37.397
+F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
+F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
+F examples/sample6.tcl 0fe710c16768af7863dea02cbe81abd0e5c058d5eb4f019b18c5a2b88eacc85d
+F examples/sample7.tcl 75b31f687012a868ffae9c45b867caf03d4ffb7feae8ed1d66256ab7cd7dc34a
+F examples/sample8.tcl 0e18b2a0a3dd132d5db3611fe673c2bd226dcc0c5351fff7b376a4b906452531
 F ooxml.tcl 5f737667e97a0251e330aa7ee5fb38b8f6aae14457627b5c8fc0a19142f1aaab
 F pkgIndex.tcl e594b42b96c8fad06787f9c6110c5c09dbe8d5bc16e74f38afb0641ed68a701b
-P fd09cfb92203ae5d88ceb05dc8e973d1b442c6c96d95478af6a22878cb01edd4
-R a21622ad03bacb12e280d1dc29858e52
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.0 *
+P ebe891071c25e910cc6ae1b75cede50e68fa37c49d805581339861fa1a8402d3
+R e3c7a75bb46bf5e5b4cbbcc2e2490395
 U alex
-Z 877506974791c096048b89939e842000
+Z 23a33c90ecbb5d154174c52995c823fc
 # Remove this line to create a well-formed Fossil manifest.

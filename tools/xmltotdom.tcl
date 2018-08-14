@@ -80,7 +80,7 @@ proc Parse { node {level 0} } {
 	puts "[string range $indent 0 end-2]$pn appendChild \[\$doc createComment [list [$node nodeValue]]\]"
       }
       PROCESSING_INSTRUCTION_NODE {
-	puts "[string range $indent 0 end-2]$pn appendChild \[\$doc createProcessingInstruction [list [$node nodeValue]]\]"
+	puts "[string range $indent 0 end-2]$pn appendChild \[\$doc createProcessingInstruction [$node nodeName] [list [$node nodeValue]]\]"
       }
     }
   }

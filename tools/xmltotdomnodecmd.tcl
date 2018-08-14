@@ -120,13 +120,13 @@ proc Parse { node {level 0} } {
 	puts "${indent}Text [$node nodeValue]"
       }
       CDATA_SECTION_NODE {
-	puts "${indent}CData [$node nodeValue]"
+	puts "${indent}CData [list [$node nodeValue]]"
       }
       COMMENT_NODE {
-	puts "${indent}Comment [$node nodeValue]"
+	puts "${indent}Comment [list [$node nodeValue]]"
       }
       PROCESSING_INSTRUCTION_NODE {
-	puts "${indent}PInstr [$node nodeValue]"
+	puts "${indent}PInstr [$node nodeName] [list [$node nodeValue]]"
       }
     }
   }

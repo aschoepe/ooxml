@@ -1,5 +1,5 @@
-C tools\sadded
-D 2018-08-14T06:18:43.061
+C fix\stools\sprocessing\sinstruction
+D 2018-08-14T12:31:23.000
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
 F examples/sample6.tcl 0fe710c16768af7863dea02cbe81abd0e5c058d5eb4f019b18c5a2b88eacc85d
@@ -7,10 +7,10 @@ F examples/sample7.tcl 75b31f687012a868ffae9c45b867caf03d4ffb7feae8ed1d66256ab7c
 F examples/sample8.tcl 0e18b2a0a3dd132d5db3611fe673c2bd226dcc0c5351fff7b376a4b906452531
 F ooxml.tcl 5f737667e97a0251e330aa7ee5fb38b8f6aae14457627b5c8fc0a19142f1aaab
 F pkgIndex.tcl e594b42b96c8fad06787f9c6110c5c09dbe8d5bc16e74f38afb0641ed68a701b
-F tools/xmltotdom.tcl 7be0485172219fe37baa8fff8cc391b1bb9f42d2ae62ddab6bbae8801f7887b0 x
-F tools/xmltotdomnodecmd.tcl 740cba91129700e192da2606e99964e7bf650237b1a29c5162ac63d5476755db x
-P a1c7b1cb9aee34a4715c4d15c408fa24efaf77fa2b23b346fe415d7490af1912
-R 31beeb3e3bec7ca2d0cef5e4ee0e7a82
+F tools/xmltotdom.tcl 61159c76cbead88705409b9e6c79decd968ef527450f7dae21ef0bf530c3b6a0 x
+F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
+P 39d1bdcd33139711cbe10f784b92b1ab9430930def7954319f5716b5d261a825
+R 3b18aa9c55cb5bd43427ec7dfe853c4b
 U alex
-Z 93d0e3bda69e08f43bc8a715fa866d97
+Z 8174303c1ddb47b66e15188112b61c4b
 # Remove this line to create a well-formed Fossil manifest.

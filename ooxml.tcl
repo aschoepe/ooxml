@@ -162,6 +162,7 @@
 package require Tcl 8.6
 package require vfs::zip
 package require tdom 0.9.0-
+package require msgcat
 
 
 namespace eval ::ooxml {
@@ -325,6 +326,79 @@ namespace eval ::ooxml {
     thick
     thin
   }
+
+  msgcat::mcset ar Book \u0627\u0644\u0643\u062a\u0627\u0628
+  msgcat::mcset ar Worksheets "\u0623\u0648\u0631\u0627\u0642 \u0627\u0644\u0639\u0645\u0644"
+  msgcat::mcset ar Sheet \u0627\u0644\u0648\u0631\u0642\u0629
+  msgcat::mcset cs Book Ses\u030cit
+  msgcat::mcset cs Worksheets Listy
+  msgcat::mcset cs Sheet List
+  msgcat::mcset da Book Mappe
+  msgcat::mcset da Worksheets Regneark
+  msgcat::mcset da Sheet Ark
+  msgcat::mcset de Book Mappe
+  msgcat::mcset de Worksheets Arbeitsbl\u00e4tter
+  msgcat::mcset de Sheet Blatt
+  msgcat::mcset el Book \u0392\u03b9\u03b2\u03bb\u03b9\u0301\u03bf
+  msgcat::mcset el Worksheets "\u03a6\u03cd\u03bb\u03bb\u03b1 \u03b5\u03c1\u03b3\u03b1\u03c3\u03af\u03b1\u03c2"
+  msgcat::mcset el Sheet \u03a6\u03cd\u03bb\u03bb\u03bf
+  msgcat::mcset en Book Book
+  msgcat::mcset en Worksheets Worksheets
+  msgcat::mcset en Sheet Sheet
+  msgcat::mcset es Book Libro
+  msgcat::mcset es Worksheets "Hojas de c\u00e1lculo"
+  msgcat::mcset es Sheet Hoja
+  msgcat::mcset fi Book Tyo\u0308kirja
+  msgcat::mcset fi Worksheets Laskentataulukot
+  msgcat::mcset fi Sheet Taulukko
+  msgcat::mcset fr Book Classeur
+  msgcat::mcset fr Worksheets "Feuilles de calcul"
+  msgcat::mcset fr Sheet Feuil
+  msgcat::mcset he Book \u05d7\u05d5\u05d1\u05e8\u05ea
+  msgcat::mcset he Worksheets "\u05d2\u05dc\u05d9\u05d5\u05e0\u05d5\u05ea \u05e2\u05d1\u05d5\u05d3\u05d4"
+  msgcat::mcset he Sheet \u05d2\u05d9\u05dc\u05d9\u05d5\u05df
+  msgcat::mcset hu Book Munkafu\u0308zet
+  msgcat::mcset hu Worksheets Munkalapok
+  msgcat::mcset hu Sheet Munkalap
+  msgcat::mcset it Book Cartel
+  msgcat::mcset it Worksheets "Fogli di lavoro"
+  msgcat::mcset it Sheet Foglio
+  msgcat::mcset ja Book Book
+  msgcat::mcset ja Worksheets \u30ef\u30fc\u30af\u30b7\u30fc\u30c8
+  msgcat::mcset ja Sheet Sheet
+  msgcat::mcset ko Book "\u1110\u1169\u11bc\u1112\u1161\u11b8 \u1106\u116e\u11ab\u1109\u1165"
+  msgcat::mcset ko Worksheets \uc6cc\ud06c\uc2dc\ud2b8
+  msgcat::mcset ko Sheet \uc2dc\ud2b8
+  msgcat::mcset nl Book Map
+  msgcat::mcset nl Worksheets Werkbladen
+  msgcat::mcset nl Sheet Blad
+  msgcat::mcset no Book Bok
+  msgcat::mcset no Worksheets Regneark
+  msgcat::mcset no Sheet Ark
+  msgcat::mcset pl Book Skoroszyt
+  msgcat::mcset pl Worksheets Arkusze
+  msgcat::mcset pl Sheet Arkusz
+  msgcat::mcset pt Book Livro
+  msgcat::mcset pt Worksheets "Folhas de C\u00e1lculo"
+  msgcat::mcset pt Sheet Folha
+  msgcat::mcset ru Book \u041a\u043d\u0438\u0433\u0430
+  msgcat::mcset ru Worksheets \u041b\u0438\u0441\u0442\u044b
+  msgcat::mcset ru Sheet \u041b\u0438\u0441\u0442
+  msgcat::mcset sl Book Zos\u030cit
+  msgcat::mcset sl Worksheets H\u00e1rky
+  msgcat::mcset sl Sheet H\u00e1rok
+  msgcat::mcset sv Book Bok
+  msgcat::mcset sv Worksheets Kalkylblad
+  msgcat::mcset sv Sheet Blad
+  msgcat::mcset th Book \u0e2a\u0e21\u0e38\u0e14\u0e07\u0e32\u0e19
+  msgcat::mcset th Worksheets \u0e40\u0e27\u0e34\u0e23\u0e4c\u0e01\u0e0a\u0e35\u0e15
+  msgcat::mcset th Sheet \u0e41\u0e1c\u0e48\u0e19\u0e07\u0e32\u0e19
+  msgcat::mcset tr Book Kitap
+  msgcat::mcset tr Worksheets "\u00c7al\u0131\u015fma Sayfalar\u0131"
+  msgcat::mcset tr Sheet Sayfa
+  msgcat::mcset zh Book \u5de5\u4f5c\u7c3f
+  msgcat::mcset zh Worksheets \u5de5\u4f5c\u8868
+  msgcat::mcset zh Sheet \u5de5\u4f5c\u8868
 }
 
 
@@ -2183,7 +2257,7 @@ oo::class create ooxml::xl_write {
 	$node1 setAttribute size 2 baseType variant
 	set node2 [$node1 appendChild [$doc createElement vt:variant]]
 	  set node3 [$node2 appendChild [$doc createElement vt:lpstr]]
-	    $node3 appendChild [$doc createTextNode Arbeitsblätter]
+	    $node3 appendChild [$doc createTextNode [msgcat::mc Worksheets]]
 	set node2 [$node1 appendChild [$doc createElement vt:variant]]
 	  set node3 [$node2 appendChild [$doc createElement vt:i4]]
 	    $node3 appendChild [$doc createTextNode 3]
@@ -2193,7 +2267,7 @@ oo::class create ooxml::xl_write {
 	$node1 setAttribute size $obj(sheets) baseType lpstr
 	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
 	  set node2 [$node1 appendChild [$doc createElement vt:lpstr]]
-	    $node2 appendChild [$doc createTextNode Blatt$ws]
+	    $node2 appendChild [$doc createTextNode [msgcat::mc Sheet]$ws]
 	}
 
     $root appendChild [set node0 [$doc createElement Company]]

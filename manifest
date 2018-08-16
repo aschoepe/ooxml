@@ -1,11 +1,11 @@
-C merged\slanguages
-D 2018-08-15T09:17:31.000
+C changing\sxml\sgeneration\sto\snodecmd
+D 2018-08-16T09:04:22.000
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
 F examples/sample6.tcl 0fe710c16768af7863dea02cbe81abd0e5c058d5eb4f019b18c5a2b88eacc85d x
 F examples/sample7.tcl 75b31f687012a868ffae9c45b867caf03d4ffb7feae8ed1d66256ab7cd7dc34a x
 F examples/sample8.tcl 0e18b2a0a3dd132d5db3611fe673c2bd226dcc0c5351fff7b376a4b906452531 x
-F ooxml.tcl 1b5647f932a3131e3a60bf8f1076fae05414dca9395029d9d9d0af97d45f9cca
+F ooxml.tcl f28412331009733e1d2e45dc1755a060b5a690a53294e509d9993f9c14fa4168
 F pkgIndex.tcl e594b42b96c8fad06787f9c6110c5c09dbe8d5bc16e74f38afb0641ed68a701b
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
 F tools/languages/Bok1-norwegisch-no.xlsx afe817c2fd69739c755ec7f7f86defa3c7582de78b42739a0465db27138bcff3
@@ -34,8 +34,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl 61159c76cbead88705409b9e6c79decd968ef527450f7dae21ef0bf530c3b6a0 x
 F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
-P 82a2b3402524c3f050f2d543c2330f529e5f2ff22c6b12575747d54e8944f607 32d02e7be15e09a116320dc60818148ec87e75be168197331167a993b50febea
-R 3823fa6598ce462c8051b4260d946036
+P 95744c57755c68c41c912b05452977ac4de43eba28308123c980cf0de39f0171
+R 78899737a846bb98def6d39502b80ace
+T *branch * nodecmd
+T *sym-nodecmd *
+T -sym-trunk *
 U alex
-Z a9b977ea68881f4fbf0c86ef8030f31d
+Z c108ea0023b27a9e2b15c176208f357a
 # Remove this line to create a well-formed Fossil manifest.

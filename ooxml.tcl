@@ -2225,185 +2225,148 @@ oo::class create ooxml::xl_write {
     # _rels/.rels
     set doc [set obj(doc,_rels/.rels) [dom createDocument Relationships]]
     set root [$doc documentElement]
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
     set rId 0
 
-    $root appendChild [set node0 [$doc createElement Relationship]]
-      $node0 setAttribute Id rId[incr rId]
-      $node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument
-      $node0 setAttribute Target xl/workbook.xml
+    dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
 
-    $root appendChild [set node0 [$doc createElement Relationship]]
-      $node0 setAttribute Id rId[incr rId]
-      $node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties
-      $node0 setAttribute Target docProps/app.xml
+    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
-    $root appendChild [set node0 [$doc createElement Relationship]]
-      $node0 setAttribute Id rId[incr rId]
-      $node0 setAttribute Type http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties
-      $node0 setAttribute Target docProps/core.xml
+    $root appendFromScript {
+      Tag_Relationship Id rId1 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument Target xl/workbook.xml {}
+      Tag_Relationship Id rId2 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties Target docProps/app.xml {}
+      Tag_Relationship Id rId3 Type http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties Target docProps/core.xml {}
+    }
 
 
     # [Content_Types].xml
     set doc [set obj(doc,\[Content_Types\].xml) [dom createDocument Types]]
     set root [$doc documentElement]
+
+    dom createNodeCmd -tagName Default elementNode Tag_Default
+    dom createNodeCmd -tagName Override elementNode Tag_Override
+
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/content-types
 
-    $root appendChild [set node0 [$doc createElement Default]]
-      $node0 setAttribute Extension xml
-      $node0 setAttribute ContentType application/xml
-
-    $root appendChild [set node0 [$doc createElement Default]]
-      $node0 setAttribute Extension rels
-      $node0 setAttribute ContentType application/vnd.openxmlformats-package.relationships+xml
-
-    $root appendChild [set node0 [$doc createElement Override]]
-      $node0 setAttribute PartName /xl/workbook.xml
-      $node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml
-
-    for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      $root appendChild [set node0 [$doc createElement Override]]
-	$node0 setAttribute PartName /xl/worksheets/sheet${ws}.xml
-	$node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml
+    $root appendFromScript {
+      Tag_Default Extension xml ContentType application/xml {}
+      Tag_Default Extension rels ContentType application/vnd.openxmlformats-package.relationships+xml {}
+      Tag_Override PartName /xl/workbook.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml {}
+      Tag_Override PartName /xl/worksheets/sheet1.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml {}
+      for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+	Tag_Override PartName /xl/theme/theme${ws}.xml ContentType application/vnd.openxmlformats-officedocument.theme+xml {}
+      }
+      Tag_Override PartName /xl/styles.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml {}
+      if {$obj(sharedStrings) > 0} {
+	Tag_Override PartName /xl/sharedStrings.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml {}
+      }
+      if {$obj(calcChain)} {
+	Tag_Override PartName /xl/calcChain.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml {}
+      }
+      Tag_Override PartName /docProps/core.xml ContentType application/vnd.openxmlformats-package.core-properties+xml {}
+      Tag_Override PartName /docProps/app.xml ContentType application/vnd.openxmlformats-officedocument.extended-properties+xml {}
     }
-
-    $root appendChild [set node0 [$doc createElement Override]]
-      $node0 setAttribute PartName /xl/theme/theme1.xml
-      $node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.theme+xml
-
-    $root appendChild [set node0 [$doc createElement Override]]
-      $node0 setAttribute PartName /xl/styles.xml
-      $node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml
-
-    if {$obj(sharedStrings) > 0} {
-      $root appendChild [set node0 [$doc createElement Override]]
-	$node0 setAttribute PartName /xl/sharedStrings.xml
-	$node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml
-    }
-
-    if {$obj(calcChain)} {
-      $root appendChild [set node0 [$doc createElement Override]]
-	$node0 setAttribute PartName /xl/calcChain.xml
-	$node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml
-    }
-
-    $root appendChild [set node0 [$doc createElement Override]]
-      $node0 setAttribute PartName /docProps/core.xml
-      $node0 setAttribute ContentType application/vnd.openxmlformats-package.core-properties+xml
-
-    $root appendChild [set node0 [$doc createElement Override]]
-      $node0 setAttribute PartName /docProps/app.xml
-      $node0 setAttribute ContentType application/vnd.openxmlformats-officedocument.extended-properties+xml
 
 
     # docProps/app.xml
     set doc [set obj(doc,docProps/app.xml) [dom createDocument Properties]]
     set root [$doc documentElement]
+
+    dom createNodeCmd textNode Text
+    dom createNodeCmd -tagName AppVersion elementNode Tag_AppVersion
+    dom createNodeCmd -tagName Application elementNode Tag_Application
+    dom createNodeCmd -tagName Company elementNode Tag_Company
+    dom createNodeCmd -tagName DocSecurity elementNode Tag_DocSecurity
+    dom createNodeCmd -tagName HeadingPairs elementNode Tag_HeadingPairs
+    dom createNodeCmd -tagName HyperlinksChanged elementNode Tag_HyperlinksChanged
+    dom createNodeCmd -tagName LinksUpToDate elementNode Tag_LinksUpToDate
+    dom createNodeCmd -tagName ScaleCrop elementNode Tag_ScaleCrop
+    dom createNodeCmd -tagName SharedDoc elementNode Tag_SharedDoc
+    dom createNodeCmd -tagName TitlesOfParts elementNode Tag_TitlesOfParts
+    dom createNodeCmd -tagName vt:i4 elementNode Tag_vt:i4
+    dom createNodeCmd -tagName vt:lpstr elementNode Tag_vt:lpstr
+    dom createNodeCmd -tagName vt:variant elementNode Tag_vt:variant
+    dom createNodeCmd -tagName vt:vector elementNode Tag_vt:vector
+
     $root setAttribute xmlns http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
     $root setAttribute xmlns:vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
 
-    $root appendChild [set node0 [$doc createElement Application]]
-      $node0 appendChild [$doc createTextNode {Tcl - Office Open XML - Spreadsheet}]
-
-    $root appendChild [set node0 [$doc createElement DocSecurity]]
-      $node0 appendChild [$doc createTextNode 0]
-
-    $root appendChild [set node0 [$doc createElement ScaleCrop]]
-      $node0 appendChild [$doc createTextNode false]
-
-    $root appendChild [set node0 [$doc createElement HeadingPairs]]
-      set node1 [$node0 appendChild [$doc createElement vt:vector]]
-	$node1 setAttribute size 2 baseType variant
-	set node2 [$node1 appendChild [$doc createElement vt:variant]]
-	  set node3 [$node2 appendChild [$doc createElement vt:lpstr]]
-	    $node3 appendChild [$doc createTextNode [msgcat::mc Worksheets]]
-	set node2 [$node1 appendChild [$doc createElement vt:variant]]
-	  set node3 [$node2 appendChild [$doc createElement vt:i4]]
-	    $node3 appendChild [$doc createTextNode 3]
-
-    $root appendChild [set node0 [$doc createElement TitlesOfParts]]
-      set node1 [$node0 appendChild [$doc createElement vt:vector]]
-	$node1 setAttribute size $obj(sheets) baseType lpstr
-	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	  set node2 [$node1 appendChild [$doc createElement vt:lpstr]]
-	    $node2 appendChild [$doc createTextNode [msgcat::mc Sheet]$ws]
+    $root appendFromScript {
+      Tag_Application { Text {Tcl - Office Open XML - Spreadsheet} }
+      Tag_DocSecurity { Text 0 }
+      Tag_ScaleCrop { Text false }
+      Tag_HeadingPairs {
+	Tag_vt:vector size 2 baseType variant {
+	  Tag_vt:variant {
+	    Tag_vt:lpstr { Text [msgcat::mc Worksheets] }
+	  }
+	  Tag_vt:variant {
+	    Tag_vt:i4 { Text 3 }
+	  }
 	}
-
-    $root appendChild [set node0 [$doc createElement Company]]
-
-    $root appendChild [set node0 [$doc createElement LinksUpToDate]]
-      $node0 appendChild [$doc createTextNode false]
-
-    $root appendChild [set node0 [$doc createElement SharedDoc]]
-      $node0 appendChild [$doc createTextNode false]
-
-    $root appendChild [set node0 [$doc createElement HyperlinksChanged]]
-      $node0 appendChild [$doc createTextNode false]
-
-    $root appendChild [set node0 [$doc createElement AppVersion]]
-      $node0 appendChild [$doc createTextNode 1.0]
+      }
+      Tag_TitlesOfParts {
+	Tag_vt:vector size $obj(sheets) baseType lpstr {
+	  Tag_vt:lpstr {
+	    for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+	      Text [msgcat::mc Sheet]$ws
+	    }
+	  }
+	}
+      }
+      Tag_Company {}
+      Tag_LinksUpToDate { Text false }
+      Tag_SharedDoc { Text false }
+      Tag_HyperlinksChanged { Text false }
+      Tag_AppVersion { Text 1.0 }
+    }
 
 
     # docProps/core.xml
     set doc [set obj(doc,docProps/core.xml) [dom createDocument cp:coreProperties]]
     set root [$doc documentElement]
+
+    dom createNodeCmd textNode Text
+    dom createNodeCmd -tagName cp:lastModifiedBy elementNode Tag_cp:lastModifiedBy
+    dom createNodeCmd -tagName dc:creator elementNode Tag_dc:creator
+    dom createNodeCmd -tagName dcterms:created elementNode Tag_dcterms:created
+    dom createNodeCmd -tagName dcterms:modified elementNode Tag_dcterms:modified
+
     $root setAttribute xmlns:cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
     $root setAttribute xmlns:dc http://purl.org/dc/elements/1.1/
     $root setAttribute xmlns:dcterms http://purl.org/dc/terms/
     $root setAttribute xmlns:dcmitype http://purl.org/dc/dcmitype/
     $root setAttribute xmlns:xsi http://www.w3.org/2001/XMLSchema-instance
 
-    $root appendChild [set node0 [$doc createElement dc:creator]]
-      $node0 appendChild [$doc createTextNode $obj(creator)]
-
-    $root appendChild [set node0 [$doc createElement cp:lastModifiedBy]]
-      $node0 appendChild [$doc createTextNode $obj(creator)]
-
-    $root appendChild [set node0 [$doc createElement dcterms:created]]
-      $node0 setAttribute xsi:type dcterms:W3CDTF
-      $node0 appendChild [$doc createTextNode $obj(created)]
-
-    $root appendChild [set node0 [$doc createElement dcterms:modified]]
-      $node0 setAttribute xsi:type dcterms:W3CDTF
-      $node0 appendChild [$doc createTextNode $obj(created)]
+    $root appendFromScript {
+      Tag_dc:creator { Text $obj(creator) }
+      Tag_cp:lastModifiedBy { Text $obj(creator) }
+      Tag_dcterms:created xsi:type dcterms:W3CDTF { Text $obj(created) }
+      Tag_dcterms:modified xsi:type dcterms:W3CDTF { Text $obj(created) }
+    }
 
 
     # xl/_rels/workbook.xml.rels
     set doc [set obj(doc,xl/_rels/workbook.xml.rels) [dom createDocument Relationships]]
     set root [$doc documentElement]
+
+    dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
+
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
-    for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      $root appendChild [set node0 [$doc createElement Relationship]]
-	$node0 setAttribute Id rId$ws
-	$node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet
-	$node0 setAttribute Target worksheets/sheet${ws}.xml
-    }
-    set rId [incr ws -1]
-
-    $root appendChild [set node0 [$doc createElement Relationship]]
-      $node0 setAttribute Id rId[incr rId]
-      $node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme
-      $node0 setAttribute Target theme/theme1.xml
-
-    $root appendChild [set node0 [$doc createElement Relationship]]
-      $node0 setAttribute Id rId[incr rId]
-      $node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles
-      $node0 setAttribute Target styles.xml
-
-    if {$obj(sharedStrings) > 0} {
-      $root appendChild [set node0 [$doc createElement Relationship]]
-	$node0 setAttribute Id rId[incr rId]
-	$node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings
-	$node0 setAttribute Target sharedStrings.xml
-    }
-
-    if $obj(calcChain) {
-      $root appendChild [set node0 [$doc createElement Relationship]]
-	$node0 setAttribute Id rId[incr rId]
-	$node0 setAttribute Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain
-      $node0 setAttribute Target calcChain.xml
+    $root appendFromScript {
+      for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+	Tag_Relationship Id rId$ws Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet Target worksheets/sheet${ws}.xml {}
+      }
+      set rId [incr ws -1]
+      Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme Target theme/theme1.xml {}
+      Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles Target styles.xml {}
+      if {$obj(sharedStrings) > 0} {
+	Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings Target sharedStrings.xml {}
+      }
+      if {$obj(calcChain)} {
+	Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain Target calcChain.xml {}
+      }
     }
 
 
@@ -2411,620 +2374,657 @@ oo::class create ooxml::xl_write {
     if {$obj(sharedStrings) > 0} {
       set doc [set obj(doc,xl/sharedStrings.xml) [dom createDocument sst]]
       set root [$doc documentElement]
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-      $root setAttribute count [llength $sharedStrings] uniqueCount [llength $sharedStrings]
 
-      foreach string $sharedStrings {
-	$root appendChild [set node0 [$doc createElement si]]
-	  $node0 appendChild [set node1 [$doc createElement t]]
-	    $node1 appendChild [$doc createTextNode $string]
+      dom createNodeCmd textNode Text
+      dom createNodeCmd -tagName si elementNode Tag_si
+      dom createNodeCmd -tagName t elementNode Tag_t
+
+      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
+      $root setAttribute count [llength $sharedStrings]
+      $root setAttribute uniqueCount [llength $sharedStrings]
+
+      $root appendFromScript {
+	foreach string $sharedStrings {
+	  Tag_si {
+	    Tag_t { Text $string }
+	  }
+	}
       }
     }
 
 
     # xl/calcChain.xml
-    if $obj(calcChain) {
+    if {$obj(calcChain)} {
       set doc [set obj(doc,xl/calcChain.xml) [dom createDocument calcChain]]
       set root [$doc documentElement]
+      dom createNodeCmd -tagName c elementNode Tag_c
+
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
 
-      $root appendChild [set node0 [$doc createElement c]]
-	$node0 setAttribute r C1 i 3 l 1
-
-      $root appendChild [set node0 [$doc createElement c]]
-	$node0 setAttribute r A3 i 2
+      $root appendFromScript {
+	Tag_c r C1 i 3 l 1 {}
+	Tag_c r A3 i 2 {}
+      }
     }
 
 
     # xl/styles.xml
     set doc [set obj(doc,xl/styles.xml) [dom createDocument styleSheet]]
     set root [$doc documentElement]
+
+    dom createNodeCmd -tagName alignment elementNode Tag_alignment
+    dom createNodeCmd -tagName b elementNode Tag_b
+    dom createNodeCmd -tagName bgColor elementNode Tag_bgColor
+    dom createNodeCmd -tagName border elementNode Tag_border
+    dom createNodeCmd -tagName borders elementNode Tag_borders
+    dom createNodeCmd -tagName bottom elementNode Tag_bottom
+    dom createNodeCmd -tagName cellStyle elementNode Tag_cellStyle
+    dom createNodeCmd -tagName cellStyleXfs elementNode Tag_cellStyleXfs
+    dom createNodeCmd -tagName cellStyles elementNode Tag_cellStyles
+    dom createNodeCmd -tagName cellXfs elementNode Tag_cellXfs
+    dom createNodeCmd -tagName color elementNode Tag_color
+    dom createNodeCmd -tagName diagonal elementNode Tag_diagonal
+    dom createNodeCmd -tagName dxfs elementNode Tag_dxfs
+    dom createNodeCmd -tagName family elementNode Tag_family
+    dom createNodeCmd -tagName fgColor elementNode Tag_fgColor
+    dom createNodeCmd -tagName fill elementNode Tag_fill
+    dom createNodeCmd -tagName fills elementNode Tag_fills
+    dom createNodeCmd -tagName font elementNode Tag_font
+    dom createNodeCmd -tagName fonts elementNode Tag_fonts
+    dom createNodeCmd -tagName i elementNode Tag_i
+    dom createNodeCmd -tagName left elementNode Tag_left
+    dom createNodeCmd -tagName name elementNode Tag_name
+    dom createNodeCmd -tagName numFmt elementNode Tag_numFmt
+    dom createNodeCmd -tagName numFmts elementNode Tag_numFmts
+    dom createNodeCmd -tagName patternFill elementNode Tag_patternFill
+    dom createNodeCmd -tagName right elementNode Tag_right
+    dom createNodeCmd -tagName scheme elementNode Tag_scheme
+    dom createNodeCmd -tagName sz elementNode Tag_sz
+    dom createNodeCmd -tagName tableStyles elementNode Tag_tableStyles
+    dom createNodeCmd -tagName top elementNode Tag_top
+    dom createNodeCmd -tagName u elementNode Tag_u
+    dom createNodeCmd -tagName xf elementNode Tag_xf
+
     $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
     $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
     $root setAttribute xmlns:x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
     $root setAttribute mc:Ignorable x14ac
 
-    if {$obj(numFmts) > $::ooxml::defaults(numFmts,start)} {
-      $root appendChild [set node0 [$doc createElement numFmts]]
-	$node0 setAttribute count [llength [array names numFmts]]
-	foreach idx [lsort -integer [array names numFmts]] {
-	  $node0 appendChild [set node1 [$doc createElement numFmt]]
-	    $node1 setAttribute numFmtId $idx formatCode $numFmts($idx)
+    $root appendFromScript {
+      if {$obj(numFmts) > $::ooxml::defaults(numFmts,start)} {
+	Tag_numFmts count [llength [array names numFmts]] {
+	  foreach idx [lsort -integer [array names numFmts]] {
+	    Tag_numFmt numFmtId $idx formatCode $numFmts($idx) {}
+	  }
 	}
-    }
-    $root appendChild [set node0 [$doc createElement fonts]]
-      $node0 setAttribute count $obj(fonts) x14ac:knownFonts 1
-      foreach idx [lsort -integer [array names fonts]] {
-	$node0 appendChild [set node1 [$doc createElement font]]
-	  if {[dict get $fonts($idx) bold] == 1} {
-	    $node1 appendChild [set node2 [$doc createElement b]]
-	  }
-	  if {[dict get $fonts($idx) italic] == 1} {
-	    $node1 appendChild [set node2 [$doc createElement i]]
-	  }
-	  if {[dict get $fonts($idx) underline] == 1} {
-	    $node1 appendChild [set node2 [$doc createElement u]]
-	  }
-	  $node1 appendChild [set node2 [$doc createElement sz]]
-	    $node2 setAttribute val [dict get $fonts($idx) size]
-	  if {[dict get $fonts($idx) color] ne {}} {
-	    $node1 appendChild [set node2 [$doc createElement color]]
-	      $node2 setAttribute [lindex [dict get $fonts($idx) color] 0]  [lindex [dict get $fonts($idx) color] 1]
-	  }
-	  $node1 appendChild [set node2 [$doc createElement name]]
-	    $node2 setAttribute val [dict get $fonts($idx) name]
-	  $node1 appendChild [set node2 [$doc createElement family]]
-	    $node2 setAttribute val [dict get $fonts($idx) family]
-	  $node1 appendChild [set node2 [$doc createElement scheme]]
-	    $node2 setAttribute val [dict get $fonts($idx) scheme]
       }
-
-    if {$obj(fills) > 0} {
-      $root appendChild [set node0 [$doc createElement fills]]
-	$node0 setAttribute count $obj(fills)
-	foreach idx [lsort -integer [array names fills]] {
-	  $node0 appendChild [set node1 [$doc createElement fill]]
-	    $node1 appendChild [set node2 [$doc createElement patternFill]]
-	      $node2 setAttribute patternType [dict get $fills($idx) patterntype]
-	      foreach tag {fgColor bgColor} {
-	        set key [string tolower $tag]
-		if {[dict get $fills($idx) $key] ne {}} {
-		  $node2 appendChild [set node3 [$doc createElement $tag]]
-		    $node3 setAttribute [lindex [dict get $fills($idx) $key] 0] [lindex [dict get $fills($idx) $key] 1]
+      Tag_fonts count $obj(fonts) x14ac:knownFonts 1 {
+	foreach idx [lsort -integer [array names fonts]] {
+	  Tag_font {
+	    if {[dict get $fonts($idx) color] ne {}} {
+	      Tag_color [lindex [dict get $fonts($idx) color] 0] [lindex [dict get $fonts($idx) color] 1]
+	    }
+	    if {[dict get $fonts($idx) bold] == 1} {
+	      Tag_b {}
+	    }
+	    if {[dict get $fonts($idx) italic] == 1} {
+	      Tag_i {}
+	    }
+	    if {[dict get $fonts($idx) underline] == 1} {
+	      Tag_u {}
+	    }
+	    Tag_sz val [dict get $fonts($idx) size] {}
+	    Tag_name val [dict get $fonts($idx) name] {}
+	    Tag_family val [dict get $fonts($idx) family] {}
+	    Tag_scheme val [dict get $fonts($idx) scheme] {}
+	  }
+	}
+      }
+      if {$obj(fills) > 0} {
+	Tag_fills count $obj(fills) {
+	  foreach idx [lsort -integer [array names fills]] {
+	    Tag_fill {
+	      Tag_patternFill patternType [dict get $fills($idx) patterntype] {
+		foreach tag {fgColor bgColor} {
+		  set key [string tolower $tag]
+		  if {[dict get $fills($idx) $key] ne {}} {
+		    Tag_$tag [lindex [dict get $fills($idx) $key] 0] [lindex [dict get $fills($idx) $key] 1] {}
+		  }
 		}
 	      }
+	    }
+	  }
 	}
-    }
-
-    if {$obj(borders) > 0} {
-      $root appendChild [set node0 [$doc createElement borders]]
-	$node0 setAttribute count $obj(borders)
-	foreach idx [lsort -integer [array names borders]] {
-	  $node0 appendChild [set node1 [$doc createElement border]]
+      }
+      if {$obj(borders) > 0} {
+	Tag_borders count $obj(borders) {
+	  foreach idx [lsort -integer [array names borders]] {
+	    set attr {}
 	    if {[dict exists $borders($idx) diagonal direction] && [dict get $borders($idx) diagonal direction] ne {}} {
-	      $node1 setAttribute [string map {up diagonalUp down diagonalDown} [dict get $borders($idx) diagonal direction]] 1
+	      lappend attr [string map {up diagonalUp down diagonalDown} [dict get $borders($idx) diagonal direction]] 1
 	    }
-	    foreach item {left right top bottom diagonal} {
-	      $node1 appendChild [set node2 [$doc createElement $item]]
-	      if {[dict exists $borders($idx) $item style] && [dict get $borders($idx) $item style] ne {}} {
-		$node2 setAttribute style [dict get $borders($idx) $item style]
-	      }
-	      if {[dict exists $borders($idx) $item color] && [dict get $borders($idx) $item color] ne {}} {
-		$node2 appendChild [set node3 [$doc createElement color]]
-		  $node3 setAttribute [lindex [dict get $borders($idx) $item color] 0] [lindex [dict get $borders($idx) $item color] 1]
+	    Tag_border {*}$attr {
+	      foreach item {left right top bottom diagonal} {
+		set attr {}
+		if {[dict exists $borders($idx) $item style] && [dict get $borders($idx) $item style] ne {}} {
+		  lappend attr style [dict get $borders($idx) $item style]
+		}
+	        Tag_$item {*}$attr {
+		  if {[dict exists $borders($idx) $item color] && [dict get $borders($idx) $item color] ne {}} {
+		    Tag_color [lindex [dict get $borders($idx) $item color] 0] [lindex [dict get $borders($idx) $item color] 1] {}
+		  }
+		}
 	      }
 	    }
+	  }
 	}
-    }
-
-    $root appendChild [set node0 [$doc createElement cellStyleXfs]]
-      $node0 setAttribute count 1
-      $node0 appendChild [set node1 [$doc createElement xf]]
-	$node1 setAttribute numFmtId 0
-	$node1 setAttribute fontId 0
-	$node1 setAttribute fillId 0
-	$node1 setAttribute borderId 0
-
-    $root appendChild [set node0 [$doc createElement cellXfs]]
-      $node0 setAttribute count $obj(styles)
-      foreach idx [lsort -integer [array names styles]] {
-	$node0 appendChild [set node1 [$doc createElement xf]]
-	  $node1 setAttribute numFmtId [dict get $styles($idx) numfmt]
-	  $node1 setAttribute fontId [dict get $styles($idx) font]
-	  $node1 setAttribute fillId [dict get $styles($idx) fill]
-	  $node1 setAttribute borderId [dict get $styles($idx) border]
-	  $node1 setAttribute xfId [dict get $styles($idx) xf]
+      }
+      Tag_cellStyleXfs count 1 {
+	Tag_xf numFmtId 0 fontId 0 fillId 0 borderId 0 {}
+      }
+      Tag_cellXfs count $obj(styles) {
+	foreach idx [lsort -integer [array names styles]] {
+	  set attr {}
+	  lappend attr numFmtId [dict get $styles($idx) numfmt]
+	  lappend attr fontId [dict get $styles($idx) font]
+	  lappend attr fillId [dict get $styles($idx) fill]
+	  lappend attr borderId [dict get $styles($idx) border]
+	  lappend attr xfId [dict get $styles($idx) xf]
 	  if {[dict get $styles($idx) numfmt] > 0} {
-	    $node1 setAttribute applyNumberFormat 1
+	    lappend attr applyNumberFormat 1
 	  }
 	  if {[dict get $styles($idx) font] > 0} {
-	    $node1 setAttribute applyFont 1
+	    lappend attr applyFont 1
 	  }
 	  if {[dict get $styles($idx) fill] > 0} {
-	    $node1 setAttribute applyFill 1
+	    lappend attr applyFill 1
 	  }
 	  if {[dict get $styles($idx) border] > 0} {
-	    $node1 setAttribute applyBorder 1
+	    lappend attr applyBorder 1
 	  }
+	  # lappend attr applyProtection 1 quotePrefix 1
 	  if {[dict get $styles($idx) horizontal] ne {} || [dict get $styles($idx) vertical] ne {} || [dict get $styles($idx) rotate] ne {}} {
-	    $node1 setAttribute applyAlignment 1
-	    $node1 appendChild [set node2 [$doc createElement alignment]]
+	    lappend attr applyAlignment 1
+	    set alignment 1
+	  } else {
+	    set alignment 0
+	  }
+	  Tag_xf {*}$attr {
+	    set attr {}
+	    if {$alignment} {
 	      if {[dict get $styles($idx) horizontal] ne {}} {
-		$node2 setAttribute horizontal [dict get $styles($idx) horizontal]
+		lappend attr horizontal [dict get $styles($idx) horizontal]
 	      }
 	      if {[dict get $styles($idx) vertical] ne {}} {
-		$node2 setAttribute vertical [dict get $styles($idx) vertical]
+		lappend attr vertical [dict get $styles($idx) vertical]
 	      }
 	      if {[dict get $styles($idx) rotate] ne {}} {
-		$node2 setAttribute textRotation [dict get $styles($idx) rotate]
+		lappend attr textRotation [dict get $styles($idx) rotate]
 	      }
+	      Tag_alignment {*}$attr {}
+	    }
 	  }
-	  # $node1 setAttribute applyProtection 1 quotePrefix 1
+	}
       }
-
-    $root appendChild [set node0 [$doc createElement cellStyles]]
-      $node0 setAttribute count 1
-      $node0 appendChild [set node1 [$doc createElement cellStyle]]
-	$node1 setAttribute name Standard
-	$node1 setAttribute xfId 0
-	$node1 setAttribute builtinId 0
-
-    $root appendChild [set node0 [$doc createElement dxfs]]
-      $node0 setAttribute count 0
-
-    $root appendChild [set node0 [$doc createElement tableStyles]]
-    $node0 setAttribute count 0
+      Tag_cellStyles count 1 {
+	Tag_cellStyle name Standard xfId 0 builtinId 0 {}
+      }
+      Tag_dxfs count 0 {}
+      Tag_tableStyles count 0 {}
+    }
 
 
     # xl/theme/theme1.xml
     set doc [set obj(doc,xl/theme/theme1.xml) [dom createDocument a:theme]]
     set root [$doc documentElement]
+
+    dom createNodeCmd -tagName a:accent1 elementNode Tag_a:accent1
+    dom createNodeCmd -tagName a:accent2 elementNode Tag_a:accent2
+    dom createNodeCmd -tagName a:accent3 elementNode Tag_a:accent3
+    dom createNodeCmd -tagName a:accent4 elementNode Tag_a:accent4
+    dom createNodeCmd -tagName a:accent5 elementNode Tag_a:accent5
+    dom createNodeCmd -tagName a:accent6 elementNode Tag_a:accent6
+    dom createNodeCmd -tagName a:alpha elementNode Tag_a:alpha
+    dom createNodeCmd -tagName a:bevelT elementNode Tag_a:bevelT
+    dom createNodeCmd -tagName a:bgFillStyleLst elementNode Tag_a:bgFillStyleLst
+    dom createNodeCmd -tagName a:bodyPr elementNode Tag_a:bodyPr
+    dom createNodeCmd -tagName a:camera elementNode Tag_a:camera
+    dom createNodeCmd -tagName a:clrScheme elementNode Tag_a:clrScheme
+    dom createNodeCmd -tagName a:cs elementNode Tag_a:cs
+    dom createNodeCmd -tagName a:dk1 elementNode Tag_a:dk1
+    dom createNodeCmd -tagName a:dk2 elementNode Tag_a:dk2
+    dom createNodeCmd -tagName a:ea elementNode Tag_a:ea
+    dom createNodeCmd -tagName a:effectLst elementNode Tag_a:effectLst
+    dom createNodeCmd -tagName a:effectRef elementNode Tag_a:effectRef
+    dom createNodeCmd -tagName a:effectStyle elementNode Tag_a:effectStyle
+    dom createNodeCmd -tagName a:effectStyleLst elementNode Tag_a:effectStyleLst
+    dom createNodeCmd -tagName a:extraClrSchemeLst elementNode Tag_a:extraClrSchemeLst
+    dom createNodeCmd -tagName a:fillRef elementNode Tag_a:fillRef
+    dom createNodeCmd -tagName a:fillStyleLst elementNode Tag_a:fillStyleLst
+    dom createNodeCmd -tagName a:fillToRect elementNode Tag_a:fillToRect
+    dom createNodeCmd -tagName a:fmtScheme elementNode Tag_a:fmtScheme
+    dom createNodeCmd -tagName a:folHlink elementNode Tag_a:folHlink
+    dom createNodeCmd -tagName a:font elementNode Tag_a:font
+    dom createNodeCmd -tagName a:fontRef elementNode Tag_a:fontRef
+    dom createNodeCmd -tagName a:fontScheme elementNode Tag_a:fontScheme
+    dom createNodeCmd -tagName a:gradFill elementNode Tag_a:gradFill
+    dom createNodeCmd -tagName a:gs elementNode Tag_a:gs
+    dom createNodeCmd -tagName a:gsLst elementNode Tag_a:gsLst
+    dom createNodeCmd -tagName a:hlink elementNode Tag_a:hlink
+    dom createNodeCmd -tagName a:latin elementNode Tag_a:latin
+    dom createNodeCmd -tagName a:lightRig elementNode Tag_a:lightRig
+    dom createNodeCmd -tagName a:lin elementNode Tag_a:lin
+    dom createNodeCmd -tagName a:ln elementNode Tag_a:ln
+    dom createNodeCmd -tagName a:lnDef elementNode Tag_a:lnDef
+    dom createNodeCmd -tagName a:lnRef elementNode Tag_a:lnRef
+    dom createNodeCmd -tagName a:lnStyleLst elementNode Tag_a:lnStyleLst
+    dom createNodeCmd -tagName a:lstStyle elementNode Tag_a:lstStyle
+    dom createNodeCmd -tagName a:lt1 elementNode Tag_a:lt1
+    dom createNodeCmd -tagName a:lt2 elementNode Tag_a:lt2
+    dom createNodeCmd -tagName a:majorFont elementNode Tag_a:majorFont
+    dom createNodeCmd -tagName a:minorFont elementNode Tag_a:minorFont
+    dom createNodeCmd -tagName a:objectDefaults elementNode Tag_a:objectDefaults
+    dom createNodeCmd -tagName a:outerShdw elementNode Tag_a:outerShdw
+    dom createNodeCmd -tagName a:path elementNode Tag_a:path
+    dom createNodeCmd -tagName a:prstDash elementNode Tag_a:prstDash
+    dom createNodeCmd -tagName a:rot elementNode Tag_a:rot
+    dom createNodeCmd -tagName a:satMod elementNode Tag_a:satMod
+    dom createNodeCmd -tagName a:scene3d elementNode Tag_a:scene3d
+    dom createNodeCmd -tagName a:schemeClr elementNode Tag_a:schemeClr
+    dom createNodeCmd -tagName a:shade elementNode Tag_a:shade
+    dom createNodeCmd -tagName a:solidFill elementNode Tag_a:solidFill
+    dom createNodeCmd -tagName a:sp3d elementNode Tag_a:sp3d
+    dom createNodeCmd -tagName a:spDef elementNode Tag_a:spDef
+    dom createNodeCmd -tagName a:spPr elementNode Tag_a:spPr
+    dom createNodeCmd -tagName a:srgbClr elementNode Tag_a:srgbClr
+    dom createNodeCmd -tagName a:style elementNode Tag_a:style
+    dom createNodeCmd -tagName a:sysClr elementNode Tag_a:sysClr
+    dom createNodeCmd -tagName a:themeElements elementNode Tag_a:themeElements
+    dom createNodeCmd -tagName a:tint elementNode Tag_a:tint
+
     $root setAttribute xmlns:a http://schemas.openxmlformats.org/drawingml/2006/main
     $root setAttribute name Office-Design
 
-    $root appendChild [set node0 [$doc createElement a:themeElements]]
-      $node0 appendChild [set node1 [$doc createElement a:clrScheme]]
-	$node1 setAttribute name Office
-	$node1 appendChild [set node2 [$doc createElement a:dk1]]
-	  $node2 appendChild [set node3 [$doc createElement a:sysClr]]
-	    $node3 setAttribute val windowText lastClr 000000
-	$node1 appendChild [set node2 [$doc createElement a:lt1]]
-	  $node2 appendChild [set node3 [$doc createElement a:sysClr]]
-	    $node3 setAttribute val window lastClr FFFFFF
-	$node1 appendChild [set node2 [$doc createElement a:dk2]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 1F497D
-	$node1 appendChild [set node2 [$doc createElement a:lt2]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val EEECE1
-	$node1 appendChild [set node2 [$doc createElement a:accent1]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 4F81BD
-	$node1 appendChild [set node2 [$doc createElement a:accent2]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val C0504D
-	$node1 appendChild [set node2 [$doc createElement a:accent3]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 9BBB59
-	$node1 appendChild [set node2 [$doc createElement a:accent4]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 8064A2
-	$node1 appendChild [set node2 [$doc createElement a:accent5]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 4BACC6
-	$node1 appendChild [set node2 [$doc createElement a:accent6]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val F79646
-	$node1 appendChild [set node2 [$doc createElement a:hlink]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 0000FF
-	$node1 appendChild [set node2 [$doc createElement a:folHlink]]
-	  $node2 appendChild [set node3 [$doc createElement a:srgbClr]]
-	    $node3 setAttribute val 800080
-      $node0 appendChild [set node1 [$doc createElement a:fontScheme]]
-	$node1 setAttribute name Office
-	$node1 appendChild [set node2 [$doc createElement a:majorFont]]
-	  $node2 appendChild [set node3 [$doc createElement a:latin]]
-	    $node3 setAttribute typeface Cambria
-	  $node2 appendChild [set node3 [$doc createElement a:ea]]
-	    $node3 setAttribute typeface {}
-	  $node2 appendChild [set node3 [$doc createElement a:cs]]
-	    $node3 setAttribute typeface {}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hans typeface \u5B8B\u4F53
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hant typeface \u65B0\u7D30\u660E\u9AD4
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Arab typeface {Times New Roman}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hebr typeface {Times New Roman}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Thai typeface Tahoma
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Ethi typeface Nyala
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Beng typeface Vrinda
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Gujr typeface Shruti
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Khmr typeface MoolBoran
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Knda typeface Tunga
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Guru typeface Raavi
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Cans typeface Euphemia
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Cher typeface {Plantagenet Cherokee}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Yiii typeface {Microsoft Yi Baiti}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Tibt typeface {Microsoft Himalaya}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Thaa typeface {MV Boli}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Deva typeface Mangal
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Telu typeface Gautami
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Taml typeface Latha
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Syrc typeface {Estrangelo Edessa}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Orya typeface Kalinga
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Mlym typeface Kartika
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Laoo typeface DokChampa
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Sinh typeface {Iskoola Pota}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Mong typeface {Mongolian Baiti}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Viet typeface {Times New Roman}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Uigh typeface {Microsoft Uighur}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Geor typeface Sylfaen
-	$node1 appendChild [set node2 [$doc createElement a:minorFont]]
-	  $node2 appendChild [set node3 [$doc createElement a:latin]]
-	    $node3 setAttribute typeface Calibri
-	  $node2 appendChild [set node3 [$doc createElement a:ea]]
-	    $node3 setAttribute typeface {}
-	  $node2 appendChild [set node3 [$doc createElement a:cs]]
-	    $node3 setAttribute typeface {}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hans typeface \u5B8B\u4F53
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hant typeface \u65B0\u7D30\u660E\u9AD4
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Arab typeface Arial
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Hebr typeface Arial
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Thai typeface Tahoma
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Ethi typeface Nyala
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Beng typeface Vrinda
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Gujr typeface Shruti
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Khmr typeface DaunPenh
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Knda typeface Tunga
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Guru typeface Raavi
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Cans typeface Euphemia
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Cher typeface {Plantagenet Cherokee}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Yiii typeface {Microsoft Yi Baiti}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Tibt typeface {Microsoft Himalaya}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Thaa typeface {MV Boli}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Deva typeface Mangal
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Telu typeface Gautami
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Taml typeface Latha
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Syrc typeface {Estrangelo Edessa}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Orya typeface Kalinga
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Mlym typeface Kartika
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Laoo typeface DokChampa
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Sinh typeface {Iskoola Pota}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Mong typeface {Mongolian Baiti}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Viet typeface Arial
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Uigh typeface {Microsoft Uighur}
-	  $node2 appendChild [set node3 [$doc createElement a:font]]
-	    $node3 setAttribute script Geor typeface Sylfaen
-      $node0 appendChild [set node1 [$doc createElement a:fmtScheme]]
-	$node1 setAttribute name Office
-	$node1 appendChild [set node2 [$doc createElement a:fillStyleLst]]
-	  $node2 appendChild [set node3 [$doc createElement a:solidFill]]
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val phClr
-	  $node2 appendChild [set node3 [$doc createElement a:gradFill]]
-	    $node3 setAttribute rotWithShape 1
-	    $node3 appendChild [set node4 [$doc createElement a:gsLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 0
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 50000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 300000
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 35000
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 37000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 300000
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 100000
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 15000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 350000
-	    $node3 appendChild [set node4 [$doc createElement a:lin]]
-	      $node4 setAttribute ang 16200000 scaled 1
-	  $node2 appendChild [set node3 [$doc createElement a:gradFill]]
-	    $node3 setAttribute rotWithShape 1
-	    $node3 appendChild [set node4 [$doc createElement a:gsLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 0
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 100000
-		  $node6 appendChild [set node7 [$doc createElement a:shade]]
-		    $node7 setAttribute val 100000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 130000
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 100000
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 50000
-		  $node6 appendChild [set node7 [$doc createElement a:shade]]
-		    $node7 setAttribute val 100000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 350000
-	    $node3 appendChild [set node4 [$doc createElement a:lin]]
-	      $node4 setAttribute ang 16200000 scaled 0
-	$node1 appendChild [set node2 [$doc createElement a:lnStyleLst]]
-	  $node2 appendChild [set node3 [$doc createElement a:ln]]
-	    $node3 setAttribute w 9525 cap flat cmpd sng algn ctr
-	    $node3 appendChild [set node4 [$doc createElement a:solidFill]]
-	      $node4 appendChild [set node5 [$doc createElement a:schemeClr]]
-		$node5 setAttribute val phClr
-		$node5 appendChild [set node6 [$doc createElement a:shade]]
-		  $node6 setAttribute val 95000
-		$node5 appendChild [set node6 [$doc createElement a:satMod]]
-		  $node6 setAttribute val 105000
-	    $node3 appendChild [set node4 [$doc createElement a:prstDash]]
-	      $node4 setAttribute val solid
-	  $node2 appendChild [set node3 [$doc createElement a:ln]]
-	    $node3 setAttribute w 25400 cap flat cmpd sng algn ctr
-	    $node3 appendChild [set node4 [$doc createElement a:solidFill]]
-	      $node4 appendChild [set node5 [$doc createElement a:schemeClr]]
-		$node5 setAttribute val phClr
-	    $node3 appendChild [set node4 [$doc createElement a:prstDash]]
-		  $node4 setAttribute val solid
-	  $node2 appendChild [set node3 [$doc createElement a:ln]]
-	    $node3 setAttribute w 38100 cap flat cmpd sng algn ctr
-	    $node3 appendChild [set node4 [$doc createElement a:solidFill]]
-	      $node4 appendChild [set node5 [$doc createElement a:schemeClr]]
-		$node5 setAttribute val phClr
-	    $node3 appendChild [set node4 [$doc createElement a:prstDash]]
-	      $node4 setAttribute val solid
-	$node1 appendChild [set node2 [$doc createElement a:effectStyleLst]]
-	  $node2 appendChild [set node3 [$doc createElement a:effectStyle]]
-	    $node3 appendChild [set node4 [$doc createElement a:effectLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:outerShdw]]
-		$node5 setAttribute blurRad 40000 dist 20000 dir 5400000 rotWithShape 0
-		$node5 appendChild [set node6 [$doc createElement a:srgbClr]]
-		  $node6 setAttribute val 000000
-		  $node6 appendChild [set node7 [$doc createElement a:alpha]]
-		    $node7 setAttribute val 38000
-	  $node2 appendChild [set node3 [$doc createElement a:effectStyle]]
-	    $node3 appendChild [set node4 [$doc createElement a:effectLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:outerShdw]]
-		$node5 setAttribute blurRad 40000 dist 23000 dir 5400000 rotWithShape 0
-		$node5 appendChild [set node6 [$doc createElement a:srgbClr]]
-		  $node6 setAttribute val 000000
-		  $node6 appendChild [set node7 [$doc createElement a:alpha]]
-		    $node7 setAttribute val 35000
-	  $node2 appendChild [set node3 [$doc createElement a:effectStyle]]
-	    $node3 appendChild [set node4 [$doc createElement a:effectLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:outerShdw]]
-		$node5 setAttribute blurRad 40000 dist 23000 dir 5400000 rotWithShape 0
-		$node5 appendChild [set node6 [$doc createElement a:srgbClr]]
-		  $node6 setAttribute val 000000
-		  $node6 appendChild [set node7 [$doc createElement a:alpha]]
-		    $node7 setAttribute val 35000
-	    $node3 appendChild [set node4 [$doc createElement a:scene3d]]
-	      $node4 appendChild [set node5 [$doc createElement a:camera]]
-		$node5 setAttribute prst orthographicFront
-		$node5 appendChild [set node6 [$doc createElement a:rot]]
-		  $node6 setAttribute lat 0 lon 0 rev 0
-	      $node4 appendChild [set node5 [$doc createElement a:lightRig]]
-		$node5 setAttribute rig threePt dir t
-		$node5 appendChild [set node6 [$doc createElement a:rot]]
-		  $node6 setAttribute lat 0 lon 0 rev 1200000
-	    $node3 appendChild [set node4 [$doc createElement a:sp3d]]
-	      $node4 appendChild [set node5 [$doc createElement a:bevelT]]
-		$node5 setAttribute w 63500 h 25400
-	$node1 appendChild [set node2 [$doc createElement a:bgFillStyleLst]]
-	  $node2 appendChild [set node3 [$doc createElement a:solidFill]]
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val phClr
-	  $node2 appendChild [set node3 [$doc createElement a:gradFill]]
-	    $node3 setAttribute rotWithShape 1
-	    $node3 appendChild [set node4 [$doc createElement a:gsLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 0
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 40000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 350000
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 40000
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 45000
-		  $node6 appendChild [set node7 [$doc createElement a:shade]]
-		    $node7 setAttribute val 99000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 350000
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 100000
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:shade]]
-		    $node7 setAttribute val 20000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 255000
-	    $node3 appendChild [set node4 [$doc createElement a:path]]
-	      $node4 setAttribute path circle
-	      $node4 appendChild [set node5 [$doc createElement a:fillToRect]]
-		$node5 setAttribute l 50000 t -80000 r 50000 b 180000
-	  $node2 appendChild [set node3 [$doc createElement a:gradFill]]
-	    $node3 setAttribute rotWithShape 1
-	    $node3 appendChild [set node4 [$doc createElement a:gsLst]]
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 0
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:tint]]
-		    $node7 setAttribute val 80000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 300000
-	      $node4 appendChild [set node5 [$doc createElement a:gs]]
-		$node5 setAttribute pos 100000
-		$node5 appendChild [set node6 [$doc createElement a:schemeClr]]
-		  $node6 setAttribute val phClr
-		  $node6 appendChild [set node7 [$doc createElement a:shade]]
-		    $node7 setAttribute val 30000
-		  $node6 appendChild [set node7 [$doc createElement a:satMod]]
-		    $node7 setAttribute val 200000
-	    $node3 appendChild [set node4 [$doc createElement a:path]]
-	      $node4 setAttribute path circle
-	      $node4 appendChild [set node5 [$doc createElement a:fillToRect]]
-		$node5 setAttribute l 50000 t 50000 r 50000 b 50000
-
-    $root appendChild [set node0 [$doc createElement a:objectDefaults]]
-      $node0 appendChild [set node1 [$doc createElement a:spDef]]
-	$node1 appendChild [set node2 [$doc createElement a:spPr]]
-	$node1 appendChild [set node2 [$doc createElement a:bodyPr]]
-	$node1 appendChild [set node2 [$doc createElement a:lstStyle]]
-	$node1 appendChild [set node2 [$doc createElement a:style]]
-	  $node2 appendChild [set node3 [$doc createElement a:lnRef]]
-	    $node3 setAttribute idx 1
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val accent1
-	  $node2 appendChild [set node3 [$doc createElement a:fillRef]]
-	    $node3 setAttribute idx 3
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val accent1
-	  $node2 appendChild [set node3 [$doc createElement a:effectRef]]
-	    $node3 setAttribute idx 2
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val accent1
-	  $node2 appendChild [set node3 [$doc createElement a:fontRef]]
-	    $node3 setAttribute idx minor
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val lt1
-      $node0 appendChild [set node1 [$doc createElement a:lnDef]]
-	$node1 appendChild [set node2 [$doc createElement a:spPr]]
-	$node1 appendChild [set node2 [$doc createElement a:bodyPr]]
-	$node1 appendChild [set node2 [$doc createElement a:lstStyle]]
-	$node1 appendChild [set node2 [$doc createElement a:style]]
-	  $node2 appendChild [set node3 [$doc createElement a:lnRef]]
-	    $node3 setAttribute idx 2
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	    $node4 setAttribute val accent1
-	  $node2 appendChild [set node3 [$doc createElement a:fillRef]]
-	    $node3 setAttribute idx 0
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val accent1
-	  $node2 appendChild [set node3 [$doc createElement a:effectRef]]
-	    $node3 setAttribute idx 1
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val accent1
-	  $node2 appendChild [set node3 [$doc createElement a:fontRef]]
-	    $node3 setAttribute idx minor
-	    $node3 appendChild [set node4 [$doc createElement a:schemeClr]]
-	      $node4 setAttribute val tx1
-
-    $root appendChild [set node0 [$doc createElement a:extraClrSchemeLst]]
+    $root appendFromScript {
+      Tag_a:themeElements {
+	Tag_a:clrScheme name Office {
+	  Tag_a:dk1 {
+	    Tag_a:sysClr val windowText lastClr 000000 {}
+	  }
+	  Tag_a:lt1 {
+	    Tag_a:sysClr val window lastClr FFFFFF {}
+	  }
+	  Tag_a:dk2 {
+	    Tag_a:srgbClr val 1F497D {}
+	  }
+	  Tag_a:lt2 {
+	    Tag_a:srgbClr val EEECE1 {}
+	  }
+	  Tag_a:accent1 {
+	    Tag_a:srgbClr val 4F81BD {}
+	  }
+	  Tag_a:accent2 {
+	    Tag_a:srgbClr val C0504D {}
+	  }
+	  Tag_a:accent3 {
+	    Tag_a:srgbClr val 9BBB59 {}
+	  }
+	  Tag_a:accent4 {
+	    Tag_a:srgbClr val 8064A2 {}
+	  }
+	  Tag_a:accent5 {
+	    Tag_a:srgbClr val 4BACC6 {}
+	  }
+	  Tag_a:accent6 {
+	    Tag_a:srgbClr val F79646 {}
+	  }
+	  Tag_a:hlink {
+	    Tag_a:srgbClr val 0000FF {}
+	  }
+	  Tag_a:folHlink {
+	    Tag_a:srgbClr val 800080 {}
+	  }
+	}
+	Tag_a:fontScheme name Office {
+	  Tag_a:majorFont {
+	    Tag_a:latin typeface Cambria {}
+	    Tag_a:ea typeface {} {}
+	    Tag_a:cs typeface {} {}
+	    Tag_a:font script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF {}
+	    Tag_a:font script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515 {}
+	    Tag_a:font script Hans typeface \u5B8B\u4F53 {}
+	    Tag_a:font script Hant typeface \u65B0\u7D30\u660E\u9AD4 {}
+	    Tag_a:font script Arab typeface {Times New Roman} {}
+	    Tag_a:font script Hebr typeface {Times New Roman} {}
+	    Tag_a:font script Thai typeface Tahoma {}
+	    Tag_a:font script Ethi typeface Nyala {}
+	    Tag_a:font script Beng typeface Vrinda {}
+	    Tag_a:font script Gujr typeface Shruti {}
+	    Tag_a:font script Khmr typeface MoolBoran {}
+	    Tag_a:font script Knda typeface Tunga {}
+	    Tag_a:font script Guru typeface Raavi {}
+	    Tag_a:font script Cans typeface Euphemia {}
+	    Tag_a:font script Cher typeface {Plantagenet Cherokee} {}
+	    Tag_a:font script Yiii typeface {Microsoft Yi Baiti} {}
+	    Tag_a:font script Tibt typeface {Microsoft Himalaya} {}
+	    Tag_a:font script Thaa typeface {MV Boli} {}
+	    Tag_a:font script Deva typeface Mangal {}
+	    Tag_a:font script Telu typeface Gautami {}
+	    Tag_a:font script Taml typeface Latha {}
+	    Tag_a:font script Syrc typeface {Estrangelo Edessa} {}
+	    Tag_a:font script Orya typeface Kalinga {}
+	    Tag_a:font script Mlym typeface Kartika {}
+	    Tag_a:font script Laoo typeface DokChampa {}
+	    Tag_a:font script Sinh typeface {Iskoola Pota} {}
+	    Tag_a:font script Mong typeface {Mongolian Baiti} {}
+	    Tag_a:font script Viet typeface {Times New Roman} {}
+	    Tag_a:font script Uigh typeface {Microsoft Uighur} {}
+	    Tag_a:font script Geor typeface Sylfaen {}
+	  }
+	  Tag_a:minorFont {
+	    Tag_a:latin typeface Calibri {}
+	    Tag_a:ea typeface {} {}
+	    Tag_a:cs typeface {} {}
+	    Tag_a:font script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF {}
+	    Tag_a:font script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515 {}
+	    Tag_a:font script Hans typeface \u5B8B\u4F53 {}
+	    Tag_a:font script Hant typeface \u65B0\u7D30\u660E\u9AD4 {}
+	    Tag_a:font script Arab typeface Arial {}
+	    Tag_a:font script Hebr typeface Arial {}
+	    Tag_a:font script Thai typeface Tahoma {}
+	    Tag_a:font script Ethi typeface Nyala {}
+	    Tag_a:font script Beng typeface Vrinda {}
+	    Tag_a:font script Gujr typeface Shruti {}
+	    Tag_a:font script Khmr typeface DaunPenh {}
+	    Tag_a:font script Knda typeface Tunga {}
+	    Tag_a:font script Guru typeface Raavi {}
+	    Tag_a:font script Cans typeface Euphemia {}
+	    Tag_a:font script Cher typeface {Plantagenet Cherokee} {}
+	    Tag_a:font script Yiii typeface {Microsoft Yi Baiti} {}
+	    Tag_a:font script Tibt typeface {Microsoft Himalaya} {}
+	    Tag_a:font script Thaa typeface {MV Boli} {}
+	    Tag_a:font script Deva typeface Mangal {}
+	    Tag_a:font script Telu typeface Gautami {}
+	    Tag_a:font script Taml typeface Latha {}
+	    Tag_a:font script Syrc typeface {Estrangelo Edessa} {}
+	    Tag_a:font script Orya typeface Kalinga {}
+	    Tag_a:font script Mlym typeface Kartika {}
+	    Tag_a:font script Laoo typeface DokChampa {}
+	    Tag_a:font script Sinh typeface {Iskoola Pota} {}
+	    Tag_a:font script Mong typeface {Mongolian Baiti} {}
+	    Tag_a:font script Viet typeface Arial {}
+	    Tag_a:font script Uigh typeface {Microsoft Uighur} {}
+	    Tag_a:font script Geor typeface Sylfaen {}
+	  }
+	}
+	Tag_a:fmtScheme name Office {
+	  Tag_a:fillStyleLst {
+	    Tag_a:solidFill {
+	      Tag_a:schemeClr val phClr {}
+	    }
+	    Tag_a:gradFill rotWithShape 1 {
+	      Tag_a:gsLst {
+		Tag_a:gs pos 0 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 50000 {}
+		    Tag_a:satMod val 300000 {}
+		  }
+		}
+		Tag_a:gs pos 35000 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 37000 {}
+		    Tag_a:satMod val 300000 {}
+		  }
+		}
+		Tag_a:gs pos 100000 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 15000 {}
+		    Tag_a:satMod val 350000 {}
+		  }
+		}
+	      }
+	      Tag_a:lin ang 16200000 scaled 1 {}
+	    }
+	    Tag_a:gradFill rotWithShape 1 {
+	      Tag_a:gsLst {
+		Tag_a:gs pos 0 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 100000 {}
+		    Tag_a:shade val 100000 {}
+		    Tag_a:satMod val 130000 {}
+		  }
+		}
+		Tag_a:gs pos 100000 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 50000 {}
+		    Tag_a:shade val 100000 {}
+		    Tag_a:satMod val 350000 {}
+		  }
+		}
+	      }
+	      Tag_a:lin ang 16200000 scaled 0 {}
+	    }
+	  }
+	  Tag_a:lnStyleLst {
+	    Tag_a:ln w 9525 cap flat cmpd sng algn ctr {
+	      Tag_a:solidFill {
+		Tag_a:schemeClr val phClr {
+		  Tag_a:shade val 95000 {
+		  }
+		  Tag_a:satMod val 105000 {
+		  }
+		}
+	      }
+	      Tag_a:prstDash val solid {}
+	    }
+	    Tag_a:ln w 25400 cap flat cmpd sng algn ctr {
+	      Tag_a:solidFill {
+		Tag_a:schemeClr val phClr {}
+	      }
+	      Tag_a:prstDash val solid {}
+	    }
+	    Tag_a:ln w 38100 cap flat cmpd sng algn ctr {
+	      Tag_a:solidFill {
+		Tag_a:schemeClr val phClr {}
+	      }
+	      Tag_a:prstDash val solid {}
+	    }
+	  }
+	  Tag_a:effectStyleLst {
+	    Tag_a:effectStyle {
+	      Tag_a:effectLst {
+		Tag_a:outerShdw blurRad 40000 dist 20000 dir 5400000 rotWithShape 0 {
+		  Tag_a:srgbClr val 000000 {
+		    Tag_a:alpha val 38000 {}
+		  }
+		}
+	      }
+	    }
+	    Tag_a:effectStyle {
+	      Tag_a:effectLst {
+		Tag_a:outerShdw blurRad 40000 dist 23000 dir 5400000 rotWithShape 0 {
+		  Tag_a:srgbClr val 000000 {
+		    Tag_a:alpha val 35000 {}
+		  }
+		}
+	      }
+	    }
+	    Tag_a:effectStyle {
+	      Tag_a:effectLst {
+		Tag_a:outerShdw blurRad 40000 dist 23000 dir 5400000 rotWithShape 0 {
+		  Tag_a:srgbClr val 000000 {
+		    Tag_a:alpha val 35000 {}
+		  }
+		}
+	      }
+	      Tag_a:scene3d {
+		Tag_a:camera prst orthographicFront {
+		  Tag_a:rot lat 0 lon 0 rev 0 {
+		  }
+		}
+		Tag_a:lightRig rig threePt dir t {
+		  Tag_a:rot lat 0 lon 0 rev 1200000 {
+		  }
+		}
+	      }
+	      Tag_a:sp3d {
+		Tag_a:bevelT w 63500 h 25400 {}
+	      }
+	    }
+	  }
+	  Tag_a:bgFillStyleLst {
+	    Tag_a:solidFill {
+	      Tag_a:schemeClr val phClr {}
+	    }
+	    Tag_a:gradFill rotWithShape 1 {
+	      Tag_a:gsLst {
+		Tag_a:gs pos 0 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 40000 {}
+		    Tag_a:satMod val 350000 {}
+		  }
+		}
+		Tag_a:gs pos 40000 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 45000 {}
+		    Tag_a:shade val 99000 {}
+		    Tag_a:satMod val 350000 {}
+		  }
+		}
+		Tag_a:gs pos 100000 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:shade val 20000 {}
+		    Tag_a:satMod val 255000 {}
+		  }
+		}
+	      }
+	      Tag_a:path path circle {
+		Tag_a:fillToRect l 50000 t -80000 r 50000 b 180000 {}
+	      }
+	    }
+	    Tag_a:gradFill rotWithShape 1 {
+	      Tag_a:gsLst {
+		Tag_a:gs pos 0 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:tint val 80000 {}
+		    Tag_a:satMod val 300000 {}
+		  }
+		}
+		Tag_a:gs pos 100000 {
+		  Tag_a:schemeClr val phClr {
+		    Tag_a:shade val 30000 {}
+		    Tag_a:satMod val 200000 {}
+		  }
+		}
+	      }
+	      Tag_a:path path circle {
+		Tag_a:fillToRect l 50000 t 50000 r 50000 b 50000 {}
+	      }
+	    }
+	  }
+	}
+      }
+      Tag_a:objectDefaults {
+	Tag_a:spDef {
+	  Tag_a:spPr {}
+	  Tag_a:bodyPr {}
+	  Tag_a:lstStyle {}
+	  Tag_a:style {
+	    Tag_a:lnRef idx 1 {
+	      Tag_a:schemeClr val accent1 {}
+	    }
+	    Tag_a:fillRef idx 3 {
+	      Tag_a:schemeClr val accent1 {}
+	    }
+	    Tag_a:effectRef idx 2 {
+	      Tag_a:schemeClr val accent1 {}
+	    }
+	    Tag_a:fontRef idx minor {
+	      Tag_a:schemeClr val lt1 {}
+	    }
+	  }
+	}
+	Tag_a:lnDef {
+	  Tag_a:spPr {}
+	  Tag_a:bodyPr {}
+	  Tag_a:lstStyle {}
+	  Tag_a:style {
+	    Tag_a:lnRef idx 2 {
+	      Tag_a:schemeClr val accent1 {}
+	    }
+	    Tag_a:fillRef idx 0 {
+	      Tag_a:schemeClr val accent1 {}
+	    }
+	    Tag_a:effectRef idx 1 {
+	      Tag_a:schemeClr val accent1 {}
+	    }
+	    Tag_a:fontRef idx minor {
+	      Tag_a:schemeClr val tx1 {}
+	    }
+	  }
+	}
+      }
+      Tag_a:extraClrSchemeLst {}
+    }
 
 
     # xl/workbook.xml
     set doc [set obj(doc,xl/workbook.xml) [dom createDocument workbook]]
     set root [$doc documentElement]
+
+    dom createNodeCmd textNode Text
+    dom createNodeCmd -tagName bookViews elementNode Tag_bookViews
+    dom createNodeCmd -tagName calcPr elementNode Tag_calcPr
+    dom createNodeCmd -tagName definedName elementNode Tag_definedName
+    dom createNodeCmd -tagName definedNames elementNode Tag_definedNames
+    dom createNodeCmd -tagName fileVersion elementNode Tag_fileVersion
+    dom createNodeCmd -tagName sheet elementNode Tag_sheet
+    dom createNodeCmd -tagName sheets elementNode Tag_sheets
+    dom createNodeCmd -tagName workbookPr elementNode Tag_workbookPr
+    dom createNodeCmd -tagName workbookView elementNode Tag_workbookView
+
     $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
     $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
 
-    $root appendChild [set node0 [$doc createElement fileVersion]]
-      $node0 setAttribute appName xl lastEdited 5 lowestEdited 5 rupBuild 5000
-
-    $root appendChild [set node0 [$doc createElement workbookPr]]
-      $node0 setAttribute showInkAnnotation 0 autoCompressPictures 0
-
-    $root appendChild [set node0 [$doc createElement bookViews]]
-      $node0 appendChild [set node1 [$doc createElement workbookView]]
-	$node1 setAttribute activeTab 1
-
-    $root appendChild [set node0 [$doc createElement sheets]]
-      for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	$node0 appendChild [set node1 [$doc createElement sheet]]
-	  $node1 setAttribute name $obj(sheet,$ws)
-	  $node1 setAttribute sheetId $ws
-	  $node1 setAttribute r:id rId$ws
+    $root appendFromScript {
+      Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
+      Tag_workbookPr showInkAnnotation 0 autoCompressPictures 0 {}
+      Tag_bookViews {
+	Tag_workbookView activeTab 1 {}
       }
-
-    if 0 {
-    $root appendChild [set node0 [$doc createElement definedNames]]
-      $node0 appendChild [set node1 [$doc createElement definedName]]
-	$node1 setAttribute name _xlnm._FilterDatabase localSheetId 0 hidden 1
-	$node1 appendChild [$doc createTextNode {Blatt1!$A$1:$C$1}]
-    }
-
-    $root appendChild [set node0 [$doc createElement calcPr]]
-      $node0 setAttribute calcId 140000 concurrentCalc 0
+      Tag_sheets {
+	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+	  Tag_sheet name $obj(sheet,$ws) sheetId $ws r:id rId$ws {}
+	}
+      }
+      if {0} {
+	Tag_definedNames {
+	  Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
+	}
+      }
+      Tag_calcPr calcId 140000 concurrentCalc 0 {}
       # fullCalcOnLoad 1
+    }
 
 
     # xl/worksheets/sheet1.xml SHEET
+    dom createNodeCmd textNode Text
+    dom createNodeCmd -tagName autoFilter elementNode Tag_autoFilter
+    dom createNodeCmd -tagName c elementNode Tag_c
+    dom createNodeCmd -tagName col elementNode Tag_col
+    dom createNodeCmd -tagName cols elementNode Tag_cols
+    dom createNodeCmd -tagName dimension elementNode Tag_dimension
+    dom createNodeCmd -tagName mergeCell elementNode Tag_mergeCell
+    dom createNodeCmd -tagName mergeCells elementNode Tag_mergeCells
+    dom createNodeCmd -tagName pageMargins elementNode Tag_pageMargins
+    dom createNodeCmd -tagName pane elementNode Tag_pane
+    dom createNodeCmd -tagName row elementNode Tag_row
+    dom createNodeCmd -tagName sheetData elementNode Tag_sheetData
+    dom createNodeCmd -tagName sheetFormatPr elementNode Tag_sheetFormatPr
+    dom createNodeCmd -tagName sheetView elementNode Tag_sheetView
+    dom createNodeCmd -tagName sheetViews elementNode Tag_sheetViews
+    dom createNodeCmd -tagName v elementNode Tag_v
+
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
       set doc [set obj(doc,xl/worksheets/sheet$ws.xml) [dom createDocument worksheet]]
       set root [$doc documentElement]
@@ -3034,104 +3034,102 @@ oo::class create ooxml::xl_write {
       $root setAttribute xmlns:x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
       $root setAttribute mc:Ignorable x14ac
 
-      $root appendChild [set node0 [$doc createElement dimension]]
- 	$node0 setAttribute ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)]
-
-      $root appendChild [set node0 [$doc createElement sheetViews]]
-	$node0 appendChild [set node1 [$doc createElement sheetView]]
-	  $node1 setAttribute workbookViewId 0
-	  if {$obj(freeze,$ws) ne {}} {
-	    lassign [split [::ooxml::StringToRowColumn $obj(freeze,$ws)] ,] row col
-	    $node1 appendChild [set node2 [$doc createElement pane]]
-	      $node2 setAttribute xSplit $col ySplit $row topLeftCell $obj(freeze,$ws) state frozen
+      $root appendFromScript {
+	Tag_dimension ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)] {}
+	Tag_sheetViews {
+	  Tag_sheetView workbookViewId 0 {
+	    if {$obj(freeze,$ws) ne {}} {
+	      lassign [split [::ooxml::StringToRowColumn $obj(freeze,$ws)] ,] row col
+	      Tag_pane xSplit $col ySplit $row topLeftCell $obj(freeze,$ws) state frozen {}
+	    }
 	  }
-
-      $root appendChild [set node0 [$doc createElement sheetFormatPr]]
-	$node0 setAttribute baseColWidth 10 defaultRowHeight 16 x14ac:dyDescent 0.2
-
-      if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
-	$root appendChild [set node0 [$doc createElement cols]]
-	  set colsNode $node0
-      }
-
-      $root appendChild [set node0 [$doc createElement sheetData]]
-
-      set lastRow -1
-      foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
-	lassign [split $idx ,] sheet row col
-	set maxCol $col
-	if {$row != $lastRow} {
-	  set lastRow $row
-	  set minCol $col
-	  $node0 appendChild [set node1 [$doc createElement row]]
-	    $node1 setAttribute r [expr {$row + 1}]
-	    if {[dict exists $obj(rowHeight,$ws) $row]} {
-	      $node1 setAttribute ht [dict get $obj(rowHeight,$ws) $row] customHeight 1
-	    }
-        }
-	if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {})} {
-	  #$node1 setAttribute spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
-	  $node1 appendChild [set node2 [$doc createElement c]]
-	    $node2 setAttribute r [::ooxml::RowColumnToString $row,$col]
-	    if {[dict exists $cells($idx) v] && [dict get $cells($idx) v] ne {}} {
-	      if {[dict exists $cells($idx) s] && [dict get $cells($idx) s] > 0} {
-		$node2 setAttribute s [dict get $cells($idx) s]
-	      }
-	      if {[dict exists $cells($idx) t] && [dict get $cells($idx) t] ne {n}} {
-		$node2 setAttribute t [dict get $cells($idx) t]
-	      }
-	      $node2 appendChild [set node3 [$doc createElement v]]
-		$node3 appendChild [$doc createTextNode [dict get $cells($idx) v]]
-	    }
-	    if {[dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}} {
-	      $node2 appendChild [set node3 [$doc createElement f]]
-		$node3 appendChild [$doc createTextNode [dict get $cells($idx) f]]
-	    }
-	} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
-	  $node1 appendChild [set node2 [$doc createElement c]]
-	    $node2 setAttribute r [::ooxml::RowColumnToString $row,$col]
-	    $node2 setAttribute s [dict get $cells($idx) s]
 	}
-      }
-
-      if {$obj(autofilter,$ws) ne {}} {
-	$root appendChild [set node0 [$doc createElement autoFilter]]
-	  $node0 setAttribute ref $obj(autofilter,$ws)
-      }
-
-      if {[info exists obj(merge,$ws)] && $obj(merge,$ws) ne {}} {
-	$root appendChild [set node0 [$doc createElement mergeCells]]
-	  $node0 setAttribute count [llength $obj(merge,$ws)]
-	  foreach item $obj(merge,$ws) {
-	    $node0 appendChild [set node1 [$doc createElement mergeCell]]
-	      $node1 setAttribute ref $item
+	Tag_sheetFormatPr baseColWidth 10 defaultRowHeight 16 x14ac:dyDescent 0.2 {}
+	if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
+	  Tag_cols {}
+	}
+	Tag_sheetData {
+	  set lastRow -1
+	  set rows {}
+	  foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
+	    lassign [split $idx ,] sheet row col
+	    lappend rows $row
 	  }
+	  foreach row [lsort -unique -integer $rows] {
+	    set maxCol $col
+	    if {$row != $lastRow} {
+	      set lastRow $row
+	      set minCol $col
+	    }
+	    set attr {}
+	    if {[dict exists $obj(rowHeight,$ws) $row]} {
+	      lappend attr ht [dict get $obj(rowHeight,$ws) $row] customHeight 1
+	    }
+	    # lappend attr spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
+	    Tag_row r [expr {$row + 1}] {*}$attr {
+	      foreach idx [lsort -dictionary [array names cells $ws,$row,*]] {
+		lassign [split $idx ,] sheet row col
+		if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {})} {
+		  set attr {}
+		  if {[dict exists $cells($idx) s] && [dict get $cells($idx) s] > 0} {
+		    lappend attr s [dict get $cells($idx) s]
+		  }
+		  if {[dict exists $cells($idx) t] && [dict get $cells($idx) t] ne {n}} {
+		    lappend attr t [dict get $cells($idx) t]
+		  }
+		  Tag_c r [::ooxml::RowColumnToString $row,$col] {*}$attr {
+		    if {[dict exists $cells($idx) v] && [dict get $cells($idx) v] ne {}} {
+		      Tag_v { Text [dict get $cells($idx) v] }
+		    }
+		    if {[dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}} {
+		      Tag_f { Text [dict get $cells($idx) f] }
+		    }
+		  }
+		} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
+		  Tag_c r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
+		}
+	      }
+	    }
+	  }
+	}
+	if {$obj(autofilter,$ws) ne {}} {
+	  Tag_autoFilter ref $obj(autofilter,$ws) {}
+	}
+	if {[info exists obj(merge,$ws)] && $obj(merge,$ws) ne {}} {
+	  Tag_mergeCells count [llength $obj(merge,$ws)] {
+	    foreach item $obj(merge,$ws) {
+	      Tag_mergeCell ref $item {}
+	    }
+	  }
+	}
+	Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
       }
 
-      $root appendChild [set node0 [$doc createElement pageMargins]]
-	$node0 setAttribute left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5
-
-      if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
-	set node0 $colsNode
-	  foreach idx [lsort -dictionary [array names cols $ws,*]] {
-	    $node0 appendChild [set node1 [$doc createElement col]]
-	      $node1 setAttribute min [expr {[dict get $cols($idx) min] + 1}] max [expr {[dict get $cols($idx) max] + 1}]
+      if {[set colsNode [$root selectNodes {/worksheet/cols}]] ne {}} {
+	if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
+	  $colsNode appendFromScript {
+	    foreach idx [lsort -dictionary [array names cols $ws,*]] {
+	      set attr {}
+	      lappend attr min [expr {[dict get $cols($idx) min] + 1}] max [expr {[dict get $cols($idx) max] + 1}]
 	      if {[dict get $cols($idx) width] ne {}} {
-		$node1 setAttribute width [dict get $cols($idx) width]
+		lappend attr width [dict get $cols($idx) width]
 		if {[dict get $cols($idx) width] != $::ooxml::defaults(cols,width)} {
 		  dict set $cols($idx) customwidth 1
 		}
 	      }
 	      if {[dict get $cols($idx) style] ne {} && [dict get $cols($idx) style] > 0} {
-		$node1 setAttribute style [dict get $cols($idx) style]
+		lappend attr style [dict get $cols($idx) style]
 	      }
 	      if {[dict get $cols($idx) bestfit] == 1} {
-		$node1 setAttribute bestFit [dict get $cols($idx) bestfit]
+		lappend attr bestFit [dict get $cols($idx) bestfit]
 	      }
 	      if {[dict get $cols($idx) customwidth] == 1} {
-		$node1 setAttribute customWidth [dict get $cols($idx) customwidth]
+		lappend attr customWidth [dict get $cols($idx) customwidth]
 	      }
+	      Tag_col {*}$attr {}
+	    }
 	  }
+	}
       }
     }
 

@@ -1,7 +1,11 @@
-C fix\sexamples\s6-8
-D 2018-08-17T08:17:52.000
+C added\sexamples\s1-3
+D 2018-08-17T11:23:41.000
+F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
+F examples/sample1.tcl 08100118488d4bf3153890f322a05e5fa6f8d35971c126ab947a4a3a28103125 x
+F examples/sample2.tcl b4c372acfe53d92a3a9245e35cc43a064b30fdf1a0617a24b0be2293a9b46f48 x
+F examples/sample3.tcl 0a251a324d1de056b6c1b439b816fbf580291e1ec63625db8eae13b1c5ed6bc1 x
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
@@ -34,8 +38,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl 61159c76cbead88705409b9e6c79decd968ef527450f7dae21ef0bf530c3b6a0 x
 F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
-P 95744c57755c68c41c912b05452977ac4de43eba28308123c980cf0de39f0171
-R 02a6f9feb59ae75d0c2cbf8d8abb0445
+P e9e11493c12b7719a9ecbb6c6f00c66765ff7e2f89624eb9ca4feb91f97cc754
+R 3d95ece58c0a56915526823125585870
 U alex
-Z 951e812ed873e32eecbdc720c391cf24
+Z b88b229b4b56e2f85535e725d91c8e59
 # Remove this line to create a well-formed Fossil manifest.

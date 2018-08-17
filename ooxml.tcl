@@ -3293,4 +3293,4 @@ proc ::ooxml::tablelist_to_xl_callback { spreadsheet sheet maxcol column title w
   }
 }
 
-package provide ooxml 1.0
+package provide ooxml 1.1

@@ -3,7 +3,7 @@
 exec tclsh8.6 "$0" "$@"
 
 #package require ooxml
-source ooxml.tcl
+source ../ooxml.tcl
 
 set spreadsheet [::ooxml::xl_write new -creator {Alexander Schöpe}]
 if {[set sheet [$spreadsheet worksheet {Blatt 1}]] > -1} {

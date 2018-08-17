@@ -3,7 +3,7 @@
 exec tclsh8.6 "$0" "$@"
 
 #package require ooxml
-source ooxml.tcl
+source ../ooxml.tcl
 
 array set workbook [ooxml::xl_read form8.xlsx]
 

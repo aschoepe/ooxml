@@ -2194,7 +2194,7 @@ oo::class create ooxml::xl_write {
       Tag_Override PartName /xl/workbook.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml {}
       Tag_Override PartName /xl/worksheets/sheet1.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml {}
       for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	Tag_Override PartName /xl/theme/sheet${ws}.xml ContentType application/vnd.openxmlformats-officedocument.theme+xml {}
+	Tag_Override PartName /xl/theme/theme${ws}.xml ContentType application/vnd.openxmlformats-officedocument.theme+xml {}
       }
       Tag_Override PartName /xl/styles.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml {}
       if {$obj(sharedStrings) > 0} {
@@ -2937,8 +2937,8 @@ oo::class create ooxml::xl_write {
 	  Tag_sheet name $obj(sheet,$ws) sheetId $ws r:id rId$ws {}
 	}
       }
-      Tag_definedNames {
-	if {0} {
+      if {0} {
+	Tag_definedNames {
 	  Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
 	}
       }
@@ -2977,8 +2977,8 @@ oo::class create ooxml::xl_write {
       $root appendFromScript {
 	Tag_dimension ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)] {}
 	Tag_sheetViews {
-	  if {$obj(freeze,$ws) ne {}} {
-	    Tag_sheetView workbookViewId 0 {
+	  Tag_sheetView workbookViewId 0 {
+	    if {$obj(freeze,$ws) ne {}} {
 	      lassign [split [::ooxml::StringToRowColumn $obj(freeze,$ws)] ,] row col
 	      Tag_pane xSplit $col ySplit $row topLeftCell $obj(freeze,$ws) state frozen {}
 	    }
@@ -2995,7 +2995,7 @@ oo::class create ooxml::xl_write {
 	    lassign [split $idx ,] sheet row col
 	    lappend rows $row
 	  }
-	  foreach row [lsort -unique $rows] {
+	  foreach row [lsort -unique -integer $rows] {
 	    set maxCol $col
 	    if {$row != $lastRow} {
 	      set lastRow $row
@@ -3007,7 +3007,7 @@ oo::class create ooxml::xl_write {
 	    }
 	    # lappend attr spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
 	    Tag_row r [expr {$row + 1}] {*}$attr {
-	      foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
+	      foreach idx [lsort -dictionary [array names cells $ws,$row,*]] {
 		lassign [split $idx ,] sheet row col
 		if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {})} {
 		  set attr {}
@@ -3026,7 +3026,7 @@ oo::class create ooxml::xl_write {
 		    }
 		  }
 		} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
-		  Tag_c setAttribute r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
+		  Tag_c r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
 		}
 	      }
 	    }

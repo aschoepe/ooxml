@@ -1,5 +1,5 @@
-C add\smsgcat\stk_messageBox;\sfix\sexample\s3
-D 2018-08-17T14:01:27.000
+C added\sbuilddiff.sh\sfor\sdebugging\sxlsx\sfiles
+D 2018-08-17T20:31:18.149
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -13,6 +13,7 @@ F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba302
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
 F ooxml.tcl 66fc30ffe1532ad62de91c97112fe746896947021231cf6f6b3917cfc7daefd8
 F pkgIndex.tcl e594b42b96c8fad06787f9c6110c5c09dbe8d5bc16e74f38afb0641ed68a701b
+F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
 F tools/languages/Bok1-norwegisch-no.xlsx afe817c2fd69739c755ec7f7f86defa3c7582de78b42739a0465db27138bcff3
 F tools/languages/Bok1-schwedisch-sv.xlsx 126c011b6c96207c71514dc12b35449a81b992fc16d821ef0ba05aecb3e4329a
@@ -40,8 +41,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl 61159c76cbead88705409b9e6c79decd968ef527450f7dae21ef0bf530c3b6a0 x
 F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
-P f4f5f9cdf6643834b4a7e9a712f20c402162b413e584c0fee8cc2fe32ce9c7e5
-R 15586c8aa2061769d0eb63b7eb6ad305
+P bf59e1b6aaea6441a3d2195c801f432a91c4dce66ecdcc5377f9627923af7dc9
+R 9fb3fb588bcf3554eecedf99bc1b1385
 U alex
-Z 83a4fa761ee417ff1516fde7f3610d91
+Z aeba8a9e7e55c6a0f272efa4a6bbca45
 # Remove this line to create a well-formed Fossil manifest.

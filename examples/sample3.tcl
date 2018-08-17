@@ -32,7 +32,7 @@ foreach name [lsort -dictionary [array names data]] {
   lassign [split $name ,] row col
   if {$row == 0} {
     switch -- $data($name) {
-      supplier {
+      {order number} {
         set justify center
       }
       item - price {
@@ -51,7 +51,7 @@ foreach name [lsort -dictionary [array names data]] {
 
 foreach row [lsort -integer -unique $rows] {
   set list {}
-  for {set col 0} {$col < $cols} {incr col} {
+  for {set col 0} {$col <= $cols} {incr col} {
     if {[info exists data($row,$col)]} {
       lappend list $data($row,$col)
     } else {

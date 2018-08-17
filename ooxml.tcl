@@ -327,75 +327,135 @@ namespace eval ::ooxml {
     thin
   }
 
+  # ar - Arabic - العربية 
+  msgcat::mcset ar LANGUAGE \u0627\u0644\u0639\u0631\u0628\u064a\u0629
   msgcat::mcset ar Book \u0627\u0644\u0643\u062a\u0627\u0628
   msgcat::mcset ar Worksheets "\u0623\u0648\u0631\u0627\u0642 \u0627\u0644\u0639\u0645\u0644"
   msgcat::mcset ar Sheet \u0627\u0644\u0648\u0631\u0642\u0629
+  # cs - Czech - čeština, český jazyk
+  msgcat::mcset cs LANGUAGE \u010de\u0161tina
   msgcat::mcset cs Book Ses\u030cit
   msgcat::mcset cs Worksheets Listy
   msgcat::mcset cs Sheet List
+  # da - Danish - dansk
+  msgcat::mcset da LANGUAGE dansk
   msgcat::mcset da Book Mappe
   msgcat::mcset da Worksheets Regneark
   msgcat::mcset da Sheet Ark
+  # de - German - Deutsch
+  msgcat::mcset de LANGUAGE Deutsch
   msgcat::mcset de Book Mappe
   msgcat::mcset de Worksheets Arbeitsbl\u00e4tter
   msgcat::mcset de Sheet Blatt
+  msgcat::mcset de {Tablelist does not exists!} {Die Tablelist existiert nicht!}
+  msgcat::mcset de {No file selected!} "Keine Datei ausgew\u00e4hlt!"
+  # el - Greek - ελληνικά
+  msgcat::mcset el LANGUAGE \u03b5\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac
   msgcat::mcset el Book \u0392\u03b9\u03b2\u03bb\u03b9\u0301\u03bf
   msgcat::mcset el Worksheets "\u03a6\u03cd\u03bb\u03bb\u03b1 \u03b5\u03c1\u03b3\u03b1\u03c3\u03af\u03b1\u03c2"
   msgcat::mcset el Sheet \u03a6\u03cd\u03bb\u03bb\u03bf
+  # en - English - English
+  msgcat::mcset en LANGUAGE English
   msgcat::mcset en Book Book
   msgcat::mcset en Worksheets Worksheets
   msgcat::mcset en Sheet Sheet
+  msgcat::mcset en {Tablelist does not exists!} {Tablelist does not exists!}
+  msgcat::mcset en {No file selected!} {No file selected!}
+  # es - Spanish - Español
+  msgcat::mcset es LANGUAGE Espa\u00f1ol
   msgcat::mcset es Book Libro
   msgcat::mcset es Worksheets "Hojas de c\u00e1lculo"
   msgcat::mcset es Sheet Hoja
+  msgcat::mcset es {Tablelist does not exists!} "\u00a1Tablelist no existe!"
+  msgcat::mcset es {No file selected!} "\u00a1Ning\u00fan archivo seleccionado!"
+  # fi - Finnish - suomi, suomen kieli
+  msgcat::mcset fi LANGUAGE suomi
   msgcat::mcset fi Book Tyo\u0308kirja
   msgcat::mcset fi Worksheets Laskentataulukot
   msgcat::mcset fi Sheet Taulukko
+  # fr - French - français, langue française
+  msgcat::mcset fr LANGUAGE fran\u00e7ais
   msgcat::mcset fr Book Classeur
   msgcat::mcset fr Worksheets "Feuilles de calcul"
   msgcat::mcset fr Sheet Feuil
+  msgcat::mcset fr {Tablelist does not exists!} {Tablelist n'existe pas!}
+  msgcat::mcset fr {No file selected!} "Aucun fichier s\u00e9lectionn\u00e9!"
+  # he - Hebrew - עברית
+  msgcat::mcset he LANGUAGE \u05e2\u05d1\u05e8\u05d9\u05ea
   msgcat::mcset he Book \u05d7\u05d5\u05d1\u05e8\u05ea
   msgcat::mcset he Worksheets "\u05d2\u05dc\u05d9\u05d5\u05e0\u05d5\u05ea \u05e2\u05d1\u05d5\u05d3\u05d4"
   msgcat::mcset he Sheet \u05d2\u05d9\u05dc\u05d9\u05d5\u05df
+  # hu - Hungarian - magyar
+  msgcat::mcset hu LANGUAGE magyar
   msgcat::mcset hu Book Munkafu\u0308zet
   msgcat::mcset hu Worksheets Munkalapok
   msgcat::mcset hu Sheet Munkalap
+  # it - italian - Italiano
+  msgcat::mcset it LANGUAGE Italiano
   msgcat::mcset it Book Cartel
   msgcat::mcset it Worksheets "Fogli di lavoro"
   msgcat::mcset it Sheet Foglio
+  msgcat::mcset it {Tablelist does not exists!} {Tablelist non esiste!}
+  msgcat::mcset it {No file selected!} {Nessun file selezionato!}
+  # ja - Japanese - 日本語 (にほんご)
+  msgcat::mcset ja LANGUAGE "\u65e5\u672c\u8a9e (\u306b\u307b\u3093\u3054)"
   msgcat::mcset ja Book Book
   msgcat::mcset ja Worksheets \u30ef\u30fc\u30af\u30b7\u30fc\u30c8
   msgcat::mcset ja Sheet Sheet
+  # ko - Korean - 한국어
+  msgcat::mcset ko LANGUAGE "\ud55c\uad6d\uc5b4"
   msgcat::mcset ko Book "\u1110\u1169\u11bc\u1112\u1161\u11b8 \u1106\u116e\u11ab\u1109\u1165"
   msgcat::mcset ko Worksheets \uc6cc\ud06c\uc2dc\ud2b8
   msgcat::mcset ko Sheet \uc2dc\ud2b8
+  # nl - Dutch, Flemish - Nederlands, Vlaams
+  msgcat::mcset nl LANGUAGE Nederlands
   msgcat::mcset nl Book Map
   msgcat::mcset nl Worksheets Werkbladen
   msgcat::mcset nl Sheet Blad
+  msgcat::mcset nl {Tablelist does not exists!} {Tablelist bestaat niet!}
+  msgcat::mcset nl {No file selected!} {Geen bestand geselecteerd!}
+  # no - Norwegian - Norsk
+  msgcat::mcset no LANGUAGE Norsk
   msgcat::mcset no Book Bok
   msgcat::mcset no Worksheets Regneark
   msgcat::mcset no Sheet Ark
+  # pl - Polish - język polski, polszczyzna
+  msgcat::mcset pl LANGUAGE polszczyzna
   msgcat::mcset pl Book Skoroszyt
   msgcat::mcset pl Worksheets Arkusze
   msgcat::mcset pl Sheet Arkusz
+  # pt - Portuguese - Português
+  msgcat::mcset pt LANGUAGE Portugu\u00eas
   msgcat::mcset pt Book Livro
   msgcat::mcset pt Worksheets "Folhas de C\u00e1lculo"
   msgcat::mcset pt Sheet Folha
+  # ru - Russian - русский
+  msgcat::mcset ru LANGUAGE \u0440\u0443\u0441\u0441\u043a\u0438\u0439
   msgcat::mcset ru Book \u041a\u043d\u0438\u0433\u0430
   msgcat::mcset ru Worksheets \u041b\u0438\u0441\u0442\u044b
   msgcat::mcset ru Sheet \u041b\u0438\u0441\u0442
+  # sl - Slovenian - Slovenski Jezik, Slovenščina
+  msgcat::mcset sl LANGUAGE Sloven\u0161\u010dina
   msgcat::mcset sl Book Zos\u030cit
   msgcat::mcset sl Worksheets H\u00e1rky
   msgcat::mcset sl Sheet H\u00e1rok
+  # sv - Swedish - Svenska
+  msgcat::mcset sv LANGUAGE Svenska
   msgcat::mcset sv Book Bok
   msgcat::mcset sv Worksheets Kalkylblad
   msgcat::mcset sv Sheet Blad
+  # th - Thai - ไทย
+  msgcat::mcset th LANGUAGE \u0e44\u0e17\u0e22
   msgcat::mcset th Book \u0e2a\u0e21\u0e38\u0e14\u0e07\u0e32\u0e19
   msgcat::mcset th Worksheets \u0e40\u0e27\u0e34\u0e23\u0e4c\u0e01\u0e0a\u0e35\u0e15
   msgcat::mcset th Sheet \u0e41\u0e1c\u0e48\u0e19\u0e07\u0e32\u0e19
+  # tr - Turkish - Türkçe
+  msgcat::mcset tr LANGUAGE T\u00fcrk\u00e7e
   msgcat::mcset tr Book Kitap
   msgcat::mcset tr Worksheets "\u00c7al\u0131\u015fma Sayfalar\u0131"
   msgcat::mcset tr Sheet Sayfa
+  # zh - Chinese - 中文 (Zhōngwén), 汉语, 漢語
+  msgcat::mcset zh LANGUAGE \u4e2d\u6587
   msgcat::mcset zh Book \u5de5\u4f5c\u7c3f
   msgcat::mcset zh Worksheets \u5de5\u4f5c\u8868
   msgcat::mcset zh Sheet \u5de5\u4f5c\u8868
@@ -3121,7 +3181,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
   variable defaults
 
   if {![winfo exists $lb]} {
-    tk_messageBox -message {Die Tablelist existiert nicht!}
+    tk_messageBox -message [msgcat::mc {Tablelist does not exists!}]
     return
   }
 
@@ -3144,7 +3204,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
 
   set file [tk_getSaveFile -confirmoverwrite 1 -filetypes {{{Excel Office Open XML} {.xlsx}}} -initialdir $opts(path) -initialfile $opts(file) -parent . -title "Excel Office Open XML"]
   if {$file eq {}} {
-    tk_messageBox -message {Keine Datei ausgewählt!}
+    tk_messageBox -message [msgcat::mc {No file selected!}]
     return
   }
 

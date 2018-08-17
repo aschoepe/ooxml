@@ -1,5 +1,5 @@
-C merged\snodecmd
-D 2018-08-17T20:46:42.351
+C fix\stablelist_to_xl\stitle\sexport
+D 2018-08-17T20:49:50.912
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl ea9f5196c245f900396f28ea684637f432961eb0d0590f9ea9b78d62a9f8c9a6
+F ooxml.tcl ac19a20222153d3a68aab81a1ba2a2dc6d89d7bc2f04ba1adef3897679a7e575
 F pkgIndex.tcl e594b42b96c8fad06787f9c6110c5c09dbe8d5bc16e74f38afb0641ed68a701b
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -41,8 +41,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl 61159c76cbead88705409b9e6c79decd968ef527450f7dae21ef0bf530c3b6a0 x
 F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
-P cd177fffd858c9a547b8d7688058ad2b4ee6a3a3db44bc94a731da81130a977e a617380752c1c07dda55190304682820a38e0fcab971b63e34c248e24bfb697c
-R 06e055d130b1aebec21d6cfb571b0b4e
+P b8bfdabfdbf37ec988d0b0fe797d3e7ef06f51c133ea92daf7ff656ca3ad2f79
+R 16487be2e48324502710007b32100771
 U alex
-Z 5bc78d547ef63098d6b4140a00aa836d
+Z 57557df9fbf0a44675051a1883a0f037
 # Remove this line to create a well-formed Fossil manifest.

@@ -3226,7 +3226,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
     $opts(callback) $spreadsheet $sheet $columncount $col $title $width $align $sortmode $hide
 
     $spreadsheet row $sheet
-    for {set col 0} {$col < $columncount} {incr col} {
+    for {set col 0} {$col <= $columncount} {incr col} {
       set title [$lb columncget $col -title]
       set width [$lb columncget $col -width]
       set align [$lb columncget $col -align]

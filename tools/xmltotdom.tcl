@@ -1,4 +1,4 @@
-tcl#!/bin/s2
+#!/bin/sh
 #\
 exec tclsh8.6 "$0" "$@"
 

@@ -1,5 +1,5 @@
-C Version-1.1
-D 2018-08-17T20:52:17.113
+C tools:\sfix\scorrupted\sheader;\sadded\sdemo.xml
+D 2018-08-20T07:02:13.609
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -14,6 +14,7 @@ F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9
 F ooxml.tcl 7eb87025b4a25929c785cfeb0f38d8ff98e101cec310b737dacb7adaf0b80427
 F pkgIndex.tcl 0da1b27523dc260b5f4772195446b93c71d9ed7f1c1bbcddae6f0c4b85c2000d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
+F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
 F tools/languages/Bok1-norwegisch-no.xlsx afe817c2fd69739c755ec7f7f86defa3c7582de78b42739a0465db27138bcff3
 F tools/languages/Bok1-schwedisch-sv.xlsx 126c011b6c96207c71514dc12b35449a81b992fc16d821ef0ba05aecb3e4329a
@@ -39,13 +40,10 @@ F tools/languages/الكتاب1-arabisch-ar.xlsx 9c716332082f7ed01a817a1c6bc0101
 F tools/languages/สมุดงาน1-thailändisch-th.xlsx 62fbf07dc72e7afcaca345f9121b79cccbc83a91564d05ac7a58f41d66dbd36c
 F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da2226624bb3101c1d8d596d6425bb7de93e
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
-F tools/xmltotdom.tcl 61159c76cbead88705409b9e6c79decd968ef527450f7dae21ef0bf530c3b6a0 x
+F tools/xmltotdom.tcl 5ffb03b7c7f014efd1a8339d5cc28ba177ebdd9f24d01796658a1dfceb050307 x
 F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
-P e32cc1a8dc014ae6f1be83615d3ff2ba30aa1c00bbdb1f7c31f9a4d784bc0815
-R 6e84d54b5b8b92c074654d96b999b6e4
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.1 *
+P 4d15e48c3c39a07d84915fdbd8628cd18cc5018ea0c2a1f724b671081dda8af6
+R 1f6fe2b30856b8ae85dd36cd72ec63ef
 U alex
-Z ba69e14c6b4013ea4e6444c81f34ea91
+Z 169e8e699bacde2537a611f5d19c7edb
 # Remove this line to create a well-formed Fossil manifest.

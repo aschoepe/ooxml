@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Demo>
+  <!--comment block goes here-->
+  <Node attribute="value">
+    <SubNode>text data</SubNode>
+  </Node>
+  <?piTag the processing instructions goes here?>
+  <Node><![CDATA[</this is malformed!</malformed</malformed & worse cDATA>]]></Node>
+</Demo>
+

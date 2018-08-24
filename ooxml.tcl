@@ -1969,6 +1969,9 @@ oo::class create ooxml::xl_write {
       incr obj(row,$sheet)
     }
 
+    if {[regexp {^[A-Z]+\d+$} $opts(index)]} {
+      set opts(index) [::ooxml::StringToRowColumn $opts(index)]
+    }
     lassign [split $opts(index) ,] row col
     if {[string is integer -strict $opts(index)] && $opts(index) > -1} {
       set obj(col,$sheet) $opts(index)
@@ -3014,6 +3017,7 @@ oo::class create ooxml::xl_write {
     dom createNodeCmd -tagName col elementNode Tag_col
     dom createNodeCmd -tagName cols elementNode Tag_cols
     dom createNodeCmd -tagName dimension elementNode Tag_dimension
+    dom createNodeCmd -tagName f elementNode Tag_f
     dom createNodeCmd -tagName mergeCell elementNode Tag_mergeCell
     dom createNodeCmd -tagName mergeCells elementNode Tag_mergeCells
     dom createNodeCmd -tagName pageMargins elementNode Tag_pageMargins

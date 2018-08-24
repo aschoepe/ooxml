@@ -1,5 +1,5 @@
-C tools:\sfix\scorrupted\sheader;\sadded\sdemo.xml
-D 2018-08-20T07:02:13.609
+C fix\sTag_f\smissing\swhile\sadding\sformulas;\sparsing\serror\scell\s-index\swhile\susing\sExcel\snotation
+D 2018-08-24T11:14:29.675
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl 7eb87025b4a25929c785cfeb0f38d8ff98e101cec310b737dacb7adaf0b80427
+F ooxml.tcl 49d8b738ec87484f0c647759d46a93291400a595cc6bcd78495ed7d100960607
 F pkgIndex.tcl 0da1b27523dc260b5f4772195446b93c71d9ed7f1c1bbcddae6f0c4b85c2000d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -42,8 +42,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl 5ffb03b7c7f014efd1a8339d5cc28ba177ebdd9f24d01796658a1dfceb050307 x
 F tools/xmltotdomnodecmd.tcl af70a6c09296990060b0f49b6213c49aaf67fcbb7de35e3ff2b1ffbd04a5fcb8 x
-P 4d15e48c3c39a07d84915fdbd8628cd18cc5018ea0c2a1f724b671081dda8af6
-R 1f6fe2b30856b8ae85dd36cd72ec63ef
+P beaf36a3afddbdab046ee169133171bd47e53c1f7539e1d891a215a52a4faa0a
+R 6a59aba060220338fca516eaa5506d2b
 U alex
-Z 169e8e699bacde2537a611f5d19c7edb
+Z 12ee694f8cf02d87635d2f5414e622d5
 # Remove this line to create a well-formed Fossil manifest.

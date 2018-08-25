@@ -11,12 +11,12 @@ set spreadsheet [::ooxml::xl_write new -creator {Alexander Schöpe}]
 if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
   set center [$spreadsheet style -horizontal center]
   set date [$spreadsheet style -numfmt [$spreadsheet numberformat -datetime]]
-  set decimal [$spreadsheet style -numfmt [$spreadsheet numberformat -decimal -red]]
+  set decimal [$spreadsheet style -numfmt [$spreadsheet numberformat -decimal -separator -red]]
   set text [$spreadsheet style -numfmt [$spreadsheet numberformat -string]]
 
   $spreadsheet column $sheet -width 30 -index 1
-  $spreadsheet column $sheet -style $decimal -index 11
-  $spreadsheet column $sheet -style $date -width [::ooxml::CalcColumnWidth 16] -index 5
+  $spreadsheet column $sheet -style $decimal -index 4
+  $spreadsheet column $sheet -style $date -width [::ooxml::CalcColumnWidth 16]
 
   $spreadsheet autofilter $sheet 0,0 0,6
   $spreadsheet freeze $sheet C2
@@ -33,7 +33,7 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
 	$spreadsheet cell $sheet $data($name) -index $col -string
       }
       default {
-	$spreadsheet cell $sheet $data($name) -index $col
+	$spreadsheet cell $sheet $data($name) -index $col -globalstyle
       }
     }
   }

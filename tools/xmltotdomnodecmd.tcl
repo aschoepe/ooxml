@@ -34,7 +34,7 @@ exec tclsh8.6 "$0" "$@"
 #
 
 
-package require tdom 0.9.0-
+package require tdom 0.9.1-
 
 set file $argv
 set cmds {}
@@ -46,7 +46,7 @@ if {[catch {open $file r} fd]} {
 
 fconfigure $fd -encoding utf-8
 
-if {[catch {dom parse [read $fd]} doc]} {
+if {[catch {dom parse -keepCDATA [read $fd]} doc]} {
   puts stderr "dom parse: $doc"
   return
 }
@@ -146,7 +146,6 @@ proc Parse { node {level 0} } {
 set root [$doc documentElement]
 puts "package require tdom 0.9.0-"
 puts "set encoding utf-8"
-puts "dom setResultEncoding \$encoding"
 Preparse $root
 foreach cmd [lsort $cmds] {
   switch -- $cmd {

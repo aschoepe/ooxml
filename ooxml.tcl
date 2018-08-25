@@ -153,7 +153,7 @@
 # 
 #
 # ::ooxml::tablelist_to_xl lb args
-#   -callback CALLBACK -path PATH -file FILENAME -creator CREATOR -name NAME -rootonly -addtimestamp
+#   -callback CALLBACK -path PATH -file FILENAME -creator CREATOR -name NAME -rootonly -addtimestamp -globalstyle
 #   Callback arguments
 #     spreadsheet sheet maxcol column title width align sortmode hide
 #
@@ -3069,7 +3069,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
     return
   }
 
-  if {[::ooxml::Getopt opts [list callback.arg {::ooxml::tablelist_to_xl_callback} path.arg $defaults(path) file.arg {tablelist.xlsx} creator.arg {unknown} name.arg {Tablelist1} rootonly addtimestamp] $args]} {
+  if {[::ooxml::Getopt opts [list callback.arg {::ooxml::tablelist_to_xl_callback} path.arg $defaults(path) file.arg {tablelist.xlsx} creator.arg {unknown} name.arg {Tablelist1} rootonly addtimestamp globalstyle] $args]} {
     error $opts(-errmsg)
   }
   if {[string trim $opts(path)] eq {}} {
@@ -3085,6 +3085,11 @@ proc ::ooxml::tablelist_to_xl { lb args } {
     append opts(file) _[clock format [clock seconds] -format %Y%m%dT%H%M%S]
   }
   append opts(file) {.xlsx}
+  if {$opts(globalstyle)} {
+    set globalstyle {-globalstyle}
+  } else {
+    set globalstyle {}
+  }
 
   set file [tk_getSaveFile -confirmoverwrite 1 -filetypes {{{Excel Office Open XML} {.xlsx}}} -initialdir $opts(path) -initialfile $opts(file) -parent . -title "Excel Office Open XML"]
   if {$file eq {}} {
@@ -3132,7 +3137,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
 	set idx 0
 	foreach col $row {
 	  if {[string trim $col] ne {}} {
-	    $spreadsheet cell $sheet $col -index $idx
+	    $spreadsheet cell $sheet $col -index $idx {*}$globalstyle
 	  }
 	  incr idx
 	}
@@ -3143,7 +3148,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
 	set idx 0
 	foreach col $row {
 	  if {[string trim $col] ne {}} {
-	    $spreadsheet cell $sheet $col -index $idx
+	    $spreadsheet cell $sheet $col -index $idx {*}$globalstyle
 	  }
 	  incr idx
 	}

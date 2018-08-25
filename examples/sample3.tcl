@@ -23,7 +23,7 @@ $lb configure -yscrollcommand [list .y set]
 grid .y -row 0 -column 1 -sticky ns
 grid columnconfigure . 0 -weight 1
 grid rowconfigure . 0 -weight 1
-ttk::button .export -text Export -command [list ::ooxml::tablelist_to_xl $lb -file export3.xlsx]
+ttk::button .export -text Export -command [list ::ooxml::tablelist_to_xl $lb -file export3.xlsx -globalstyle]
 grid .export -row 2 -column 0
 
 set list {}
@@ -42,7 +42,7 @@ foreach name [lsort -dictionary [array names data]] {
         set justify left
       }
     }
-    $lb insertcolumns end 10 $data($name) $justify
+    $lb insertcolumns end 0 $data($name) $justify
     incr cols
   } elseif {$row > 0} {
     lappend rows $row

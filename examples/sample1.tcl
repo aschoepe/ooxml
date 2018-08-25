@@ -11,7 +11,7 @@ set spreadsheet [::ooxml::xl_write new -creator {Alexander Schöpe}]
 if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
   set center [$spreadsheet style -horizontal center]
   set date [$spreadsheet style -numfmt [$spreadsheet numberformat -datetime]]
-  set decimal [$spreadsheet style -numfmt [$spreadsheet numberformat -decimal -red]]
+  set decimal [$spreadsheet style -numfmt [$spreadsheet numberformat -decimal -separator]]
   set text [$spreadsheet style -numfmt [$spreadsheet numberformat -string]]
 
   $spreadsheet column $sheet
@@ -32,7 +32,7 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
 	$spreadsheet cell $sheet $value -index $name -string
       }
       default {
-	$spreadsheet cell $sheet $value -index $name
+	$spreadsheet cell $sheet $value -index $name -globalstyle
       }
     }
   }

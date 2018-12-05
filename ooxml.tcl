@@ -3072,6 +3072,9 @@ proc ::ooxml::tablelist_to_xl { lb args } {
   if {[::ooxml::Getopt opts [list callback.arg {::ooxml::tablelist_to_xl_callback} path.arg $defaults(path) file.arg {tablelist.xlsx} creator.arg {unknown} name.arg {Tablelist1} rootonly addtimestamp globalstyle] $args]} {
     error $opts(-errmsg)
   }
+  if {$opts(callback) eq {} || ([info commands $opts(callback)] eq {} && [info commands ::$opts(callback)] eq {})} {
+    set opts(callback) ::ooxml::tablelist_to_xl_callback
+  }
   if {[string trim $opts(path)] eq {}} {
     set opts(path) {.}
   }
@@ -3124,9 +3127,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
       set sortmode [$lb columncget $col -sortmode]
       set hide [$lb columncget $col -hide]
 
-      if {[info commands $opts(callback)] eq $opts(callback)} {
-        $opts(callback) $spreadsheet $sheet $columncount $col $title $width $align $sortmode $hide
-      }
+      $opts(callback) $spreadsheet $sheet $columncount $col $title $width $align $sortmode $hide
 
       $spreadsheet cell $sheet $title
     }

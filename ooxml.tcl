@@ -120,7 +120,7 @@
 #     return BORDERID
 # 
 #   method style args
-#     -list -numfmt NUMFMTID -font FONTID -fill FILLID -border BORDERID -xf XFID -horizontal HORIZONTAL -vertical VERTICAL -rotate DEGREE
+#     -list -numfmt NUMFMTID -font FONTID -fill FILLID -border BORDERID -xf XFID -horizontal HORIZONTAL -vertical VERTICAL -rotate DEGREE -wrap
 #     return STYLEID
 # 
 #   method worksheet name
@@ -1205,7 +1205,7 @@ proc ::ooxml::xl_read { file args } {
       array unset a *
       foreach node [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:styleSheet/X:cellXfs/X:xf}] {
 	incr idx
-	array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {}}
+	array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
         if {[$node hasAttribute numFmtId]} {
 	  set a(numfmt) [$node getAttribute numFmtId]
 	}
@@ -1232,6 +1232,9 @@ proc ::ooxml::xl_read { file args } {
 	      }
 	      if {[$node1 hasAttribute textRotation]} {
 		set a(rotate) [$node1 getAttribute textRotation]
+	      }
+	      if {[$node1 hasAttribute wrapText]} {
+		set a(wrap) [$node1 getAttribute wrapText]
 	      }
 	    }
 	  }
@@ -1479,7 +1482,7 @@ oo::class create ooxml::xl_write {
     set fonts(0) {name Calibri family 2 size 12 color {theme 1} scheme minor bold 0 italic 0 underline 0 color {}}
 
     set obj(styles) 1
-    set styles(0) {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {}}
+    set styles(0) {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
 
     set obj(cols) 0
     array set cols {}
@@ -1786,7 +1789,7 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable styles
 
-    if {[::ooxml::Getopt opts {list numfmt.arg 0 font.arg 0 fill.arg 0 border.arg 0 xf.arg 0 horizontal.arg {} vertical.arg {} rotate.arg {}} $args]} {
+    if {[::ooxml::Getopt opts {list numfmt.arg 0 font.arg 0 fill.arg 0 border.arg 0 xf.arg 0 horizontal.arg {} vertical.arg {} rotate.arg {} wrap} $args]} {
       error $opts(-errmsg)
     }
 
@@ -1820,6 +1823,9 @@ oo::class create ooxml::xl_write {
     if {![string is integer -strict $opts(rotate)] || $opts(rotate) < 0 || $opts(rotate) > 360} {
       set opts(rotate) {}
     }
+    if {$opts(wrap) ne {1}} {
+      set opts(wrap) {}
+    }
 
     foreach idx [lsort -integer [array names styles]] {
       array set a $styles($idx)
@@ -1836,7 +1842,7 @@ oo::class create ooxml::xl_write {
     }
 
     set styles($obj(styles)) {}
-    foreach item {numfmt font fill border xf horizontal vertical rotate} {
+    foreach item {numfmt font fill border xf horizontal vertical rotate wrap} {
       lappend styles($obj(styles)) $item $opts($item)
     }
     set idx $obj(styles)
@@ -2502,7 +2508,7 @@ oo::class create ooxml::xl_write {
 	    lappend attr applyBorder 1
 	  }
 	  # lappend attr applyProtection 1 quotePrefix 1
-	  if {[dict get $styles($idx) horizontal] ne {} || [dict get $styles($idx) vertical] ne {} || [dict get $styles($idx) rotate] ne {}} {
+	  if {[dict get $styles($idx) horizontal] ne {} || [dict get $styles($idx) vertical] ne {} || [dict get $styles($idx) rotate] ne {} || [dict get $styles($idx) wrap] ne {}} {
 	    lappend attr applyAlignment 1
 	    set alignment 1
 	  } else {
@@ -2519,6 +2525,9 @@ oo::class create ooxml::xl_write {
 	      }
 	      if {[dict get $styles($idx) rotate] ne {}} {
 		lappend attr textRotation [dict get $styles($idx) rotate]
+	      }
+	      if {[dict get $styles($idx) wrap] ne {}} {
+		lappend attr wrapText [dict get $styles($idx) wrap]
 	      }
 	      Tag_alignment {*}$attr {}
 	    }

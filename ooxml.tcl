@@ -926,7 +926,7 @@ proc ::ooxml::xl_sheets { file } {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
 	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes [subst -nobackslashes -nocommands {/X:Relationships/X:Relationship[@Id="$rid"]}]] {
+	  foreach node [$relsroot selectNodes {/X:Relationships/X:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
 	    }
@@ -992,7 +992,7 @@ proc ::ooxml::xl_read { file args } {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
 	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes [subst -nobackslashes -nocommands {/X:Relationships/X:Relationship[@Id="$rid"]}]] {
+	  foreach node [$relsroot selectNodes {/X:Relationships/X:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
 	    }

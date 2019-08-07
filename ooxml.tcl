@@ -921,9 +921,9 @@ proc ::ooxml::xl_sheets { file } {
       set idx -1
       foreach node [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:workbook/X:sheets/X:sheet}] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-	  set sheetId [$node getAttribute sheetId]
-	  set name [$node getAttribute name]
-	  set rid [$node getAttribute r:id]
+	  set sheetId [$node @sheetId]
+	  set name [$node @name]
+	  set rid [$node @r:id]
 	  foreach node [$relsroot selectNodes -namespaces [list X [$relsroot namespaceURI]] [subst -nobackslashes -nocommands {/X:Relationships/X:Relationship[@Id="$rid"]}]] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
@@ -985,12 +985,12 @@ proc ::ooxml::xl_read { file args } {
       set idx -1
       foreach node [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:workbook/X:sheets/X:sheet}] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-	  set sheetId [$node getAttribute sheetId]
-	  set name [$node getAttribute name]
-	  set rid [$node getAttribute r:id]
+	  set sheetId [$node @sheetId]
+	  set name [$node @name]
+	  set rid [$node @r:id]
 	  foreach node [$relsroot selectNodes -namespaces [list X [$relsroot namespaceURI]] [subst -nobackslashes -nocommands {/X:Relationships/X:Relationship[@Id="$rid"]}]] {
 	    if {[$node hasAttribute Target]} {
-	      lappend sheets [incr idx] $sheetId $name $rid [$node getAttribute Target]
+	      lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
 	    }
 	  }
 	}
@@ -1032,8 +1032,8 @@ proc ::ooxml::xl_read { file args } {
       foreach node [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:styleSheet/X:numFmts/X:numFmt}] {
         incr idx
 	if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
-	  set numFmtId [$node getAttribute numFmtId]
-	  set formatCode [$node getAttribute formatCode]
+	  set numFmtId [$node @numFmtId]
+	  set formatCode [$node @formatCode]
 	  set datetime 0
 	  foreach tag {*y* *m* *d* *h* *s*} {
 	    if {[string match -nocase $tag [string map {Black {} Blue {} Cyan {} Green {} Magenta {} Red {} White {} Yellow {}} $formatCode]]} {
@@ -1048,9 +1048,9 @@ proc ::ooxml::xl_read { file args } {
       foreach node [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:styleSheet/X:cellXfs/X:xf}] {
         incr idx
 	if {[$node hasAttribute numFmtId]} {
-	  set numFmtId [$node getAttribute numFmtId]
+	  set numFmtId [$node @numFmtId]
 	  if {[$node hasAttribute applyNumberFormat]} {
-	    set applyNumberFormat [$node getAttribute applyNumberFormat]
+	    set applyNumberFormat [$node @applyNumberFormat]
 	  } else {
 	    set applyNumberFormat 0
 	  }
@@ -1067,7 +1067,7 @@ proc ::ooxml::xl_read { file args } {
       set wb(s,numFmtsIds) {}
       foreach node [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:styleSheet/X:numFmts/X:numFmt}] {
         if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
-	  set wb(s,numFmts,[set idx [$node getAttribute numFmtId]]) [$node getAttribute formatCode]
+	  set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
 	  lappend wb(s,numFmtsIds) $idx
 	  if {$idx > $a(max)} {
 	    set a(max) $idx
@@ -1098,33 +1098,33 @@ proc ::ooxml::xl_read { file args } {
 	    }
 	    sz {
 	      if {[$node1 hasAttribute val]} {
-		set a(size) [$node1 getAttribute val]
+		set a(size) [$node1 @val]
 	      }
 	    }
 	    color {
 	      if {[$node1 hasAttribute auto]} {
-		set a(color) [list auto [$node1 getAttribute auto]]
+		set a(color) [list auto [$node1 @auto]]
 	      } elseif {[$node1 hasAttribute rgb]} {
-		set a(color) [list rgb [$node1 getAttribute rgb]]
+		set a(color) [list rgb [$node1 @rgb]]
 	      } elseif {[$node1 hasAttribute indexed]} {
-		set a(color) [list indexed [$node1 getAttribute indexed]]
+		set a(color) [list indexed [$node1 @indexed]]
 	      } elseif {[$node1 hasAttribute theme]} {
-		set a(color) [list theme [$node1 getAttribute theme]]
+		set a(color) [list theme [$node1 @theme]]
 	      }
 	    }
 	    name {
 	      if {[$node1 hasAttribute val]} {
-		set a(name) [$node1 getAttribute val]
+		set a(name) [$node1 @val]
 	      }
 	    }
 	    family {
 	      if {[$node1 hasAttribute val]} {
-		set a(family) [$node1 getAttribute val]
+		set a(family) [$node1 @val]
 	      }
 	    }
 	    scheme {
 	      if {[$node1 hasAttribute val]} {
-		set a(scheme) [$node1 getAttribute val]
+		set a(scheme) [$node1 @val]
 	      }
 	    }
 	  }
@@ -1143,18 +1143,18 @@ proc ::ooxml::xl_read { file args } {
 	  switch -- [$node1 nodeName] {
 	    patternFill {
 	      if {[$node1 hasAttribute patternType]} {
-		set a(patterntype) [$node1 getAttribute patternType]
+		set a(patterntype) [$node1 @patternType]
 	      }
 	      foreach node2 [$node1 childNodes] {
 		if {[$node2 nodeName] in { fgColor bgColor}} {
 		  if {[$node2 hasAttribute auto]} {
-		    set a([string tolower [$node2 nodeName]]) [list auto [$node2 getAttribute auto]]
+		    set a([string tolower [$node2 nodeName]]) [list auto [$node2 @auto]]
 		  } elseif {[$node2 hasAttribute rgb]} {
-		    set a([string tolower [$node2 nodeName]]) [list rgb [$node2 getAttribute rgb]]
+		    set a([string tolower [$node2 nodeName]]) [list rgb [$node2 @rgb]]
 		  } elseif {[$node2 hasAttribute indexed]} {
-		    set a([string tolower [$node2 nodeName]]) [list indexed [$node2 getAttribute indexed]]
+		    set a([string tolower [$node2 nodeName]]) [list indexed [$node2 @indexed]]
 		  } elseif {[$node2 hasAttribute theme]} {
-		    set a([string tolower [$node2 nodeName]]) [list theme [$node2 getAttribute theme]]
+		    set a([string tolower [$node2 nodeName]]) [list theme [$node2 @theme]]
 		  }
 		}
 	      }
@@ -1173,7 +1173,7 @@ proc ::ooxml::xl_read { file args } {
 	set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
 	foreach node1 [$node childNodes] {
 	  if {[$node1 hasAttribute style]} {
-	    set style [$node1 getAttribute style]
+	    set style [$node1 @style]
 	  } else {
 	    set style {}
 	  }
@@ -1181,13 +1181,13 @@ proc ::ooxml::xl_read { file args } {
 	  foreach node2 [$node1 childNodes] {
 	    if {[$node2 nodeName] eq {color}} {
 	      if {[$node2 hasAttribute auto]} {
-		set color [list auto [$node2 getAttribute auto]]
+		set color [list auto [$node2 @auto]]
 	      } elseif {[$node2 hasAttribute rgb]} {
-		set color [list rgb [$node2 getAttribute rgb]]
+		set color [list rgb [$node2 @rgb]]
 	      } elseif {[$node2 hasAttribute indexed]} {
-		set color [list indexed [$node2 getAttribute indexed]]
+		set color [list indexed [$node2 @indexed]]
 	      } elseif {[$node2 hasAttribute theme]} {
-		set color [list theme [$node2 getAttribute theme]]
+		set color [list theme [$node2 @theme]]
 	      }
 	    }
 	  }
@@ -1216,34 +1216,34 @@ proc ::ooxml::xl_read { file args } {
 	incr idx
 	array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
         if {[$node hasAttribute numFmtId]} {
-	  set a(numfmt) [$node getAttribute numFmtId]
+	  set a(numfmt) [$node @numFmtId]
 	}
         if {[$node hasAttribute fontId]} {
-	  set a(font) [$node getAttribute fontId]
+	  set a(font) [$node @fontId]
 	}
         if {[$node hasAttribute fillId]} {
-	  set a(fill) [$node getAttribute fillId]
+	  set a(fill) [$node @fillId]
 	}
         if {[$node hasAttribute borderId]} {
-	  set a(border) [$node getAttribute borderId]
+	  set a(border) [$node @borderId]
 	}
         if {[$node hasAttribute xfId]} {
-	  set a(xf) [$node getAttribute xfId]
+	  set a(xf) [$node @xfId]
 	}
 	foreach node1 [$node childNodes] {
 	  switch -- [$node1 nodeName] {
 	    alignment {
 	      if {[$node1 hasAttribute horizontal]} {
-		set a(horizontal) [$node1 getAttribute horizontal]
+		set a(horizontal) [$node1 @horizontal]
 	      }
 	      if {[$node1 hasAttribute vertical]} {
-		set a(vertical) [$node1 getAttribute vertical]
+		set a(vertical) [$node1 @vertical]
 	      }
 	      if {[$node1 hasAttribute textRotation]} {
-		set a(rotate) [$node1 getAttribute textRotation]
+		set a(rotate) [$node1 @textRotation]
 	      }
 	      if {[$node1 hasAttribute wrapText]} {
-		set a(wrap) [$node1 getAttribute wrapText]
+		set a(wrap) [$node1 @wrapText]
 	      }
 	    }
 	  }
@@ -1298,10 +1298,10 @@ proc ::ooxml::xl_read { file args } {
 	    if {[$col hasAttribute $item]} {
 	      switch -- $item {
 	        min - max {
-		  lappend wb($sheet,col,$idx) [string tolower $item] [expr {[$col getAttribute $item] - 1}]
+		  lappend wb($sheet,col,$idx) [string tolower $item] [expr {[$col @$item] - 1}]
 		}
 		default {
-		  lappend wb($sheet,col,$idx) [string tolower $item] [$col getAttribute $item]
+		  lappend wb($sheet,col,$idx) [string tolower $item] [$col @$item]
 		}
 	      }
 	    } else {
@@ -1313,7 +1313,7 @@ proc ::ooxml::xl_read { file args } {
 	set wb($sheet,cols) [incr idx]
 	foreach cell [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:worksheet/X:sheetData/X:row/X:c}] {
 	  if {[$cell hasAttribute t]} {
-	    set type [$cell getAttribute t]
+	    set type [$cell @t]
 	  } else {
 	    set type n
 	  }
@@ -1325,7 +1325,7 @@ proc ::ooxml::xl_read { file args } {
 	      if {[set node [$cell selectNodes -namespaces [list X [$cell namespaceURI]] X:v/text()]] ne {}} {
 		set value [$node nodeValue]
 		if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
-		  set idx [$cell getAttribute s]
+		  set idx [$cell @s]
 		  if {[dict exists $cellXfs($idx) nfi]} {
 		    set numFmtId [dict get $cellXfs($idx) nfi]
 		    if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
@@ -1369,52 +1369,52 @@ proc ::ooxml::xl_read { file args } {
 
 	  if {[$cell hasAttribute r]} {
 	    if {!$opts(valuesonly)} {
-	      set wb($sheet,c,[StringToRowColumn [$cell getAttribute r]]) [$cell getAttribute r]
+	      set wb($sheet,c,[StringToRowColumn [$cell @r]]) [$cell @r]
 	    }
 	    if {!$opts(valuesonly)} {
 	      if {[$cell hasAttribute s]} {
-		set wb($sheet,s,[StringToRowColumn [$cell getAttribute r]]) [$cell getAttribute s]
+		set wb($sheet,s,[StringToRowColumn [$cell @r]]) [$cell @s]
 	      }
 	    }
 	    if {!$opts(valuesonly)} {
 	      if {[$cell hasAttribute t]} {
-		set wb($sheet,t,[StringToRowColumn [$cell getAttribute r]]) [$cell getAttribute t]
+		set wb($sheet,t,[StringToRowColumn [$cell @r]]) [$cell @t]
 	      }
 	    }
-	    set wb($sheet,v,[StringToRowColumn [$cell getAttribute r]]) $value
+	    set wb($sheet,v,[StringToRowColumn [$cell @r]]) $value
 	    if {!$opts(valuesonly) && $datetime ne {}} {
-	      set wb($sheet,d,[StringToRowColumn [$cell getAttribute r]]) $datetime
+	      set wb($sheet,d,[StringToRowColumn [$cell @r]]) $datetime
 	    }
 	    if {!$opts(valuesonly) && [set node [$cell selectNodes -namespaces [list X [$cell namespaceURI]] X:f/text()]] ne {}} {
-	      set wb($sheet,f,[StringToRowColumn [$cell getAttribute r]]) [$node nodeValue]
+	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
 	  foreach row [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:worksheet/X:sheetData/X:row}] {
-	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row getAttribute customHeight] == 1} {
-	      dict set wb($sheet,rowheight) [expr {[$row getAttribute r] - 1}] [$row getAttribute ht]
+	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
+	      dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
 	  foreach freeze [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:worksheet/X:sheetViews/X:sheetView/X:pane}] {
-	    if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze getAttribute state] eq {frozen}} {
-	      set wb($sheet,freeze) [$freeze getAttribute topLeftCell]
+	    if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
+	      set wb($sheet,freeze) [$freeze @topLeftCell]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
 	  foreach filter [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:worksheet/X:autoFilter}] {
 	    if {[$filter hasAttribute ref]} {
-	      lappend wb($sheet,filter) [$filter getAttribute ref]
+	      lappend wb($sheet,filter) [$filter @ref]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
 	  foreach merge [$root selectNodes -namespaces [list X [$root namespaceURI]] {/X:worksheet/X:mergeCells/X:mergeCell}] {
 	    if {[$merge hasAttribute ref]} {
-	      lappend wb($sheet,merge) [$merge getAttribute ref]
+	      lappend wb($sheet,merge) [$merge @ref]
 	    }
 	  }
 	}
@@ -3204,3 +3204,7 @@ proc ::ooxml::tablelist_to_xl_callback { spreadsheet sheet maxcol column title w
 }
 
 package provide ooxml 1.2
+
+# Local Variables:
+# tcl-indent-level: 2
+# End:

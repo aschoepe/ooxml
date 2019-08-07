@@ -1,5 +1,5 @@
-C Made\ssample4\srun\sfrom\sthe\ssource\sdir\seven\swithout\sooxml\sformally\sinstalled\s(as\sthe\sother\sexample\sscripts.)
-D 2019-08-07T19:35:24.462
+C Replaced\sall\sthe\s"-namespaces\s[list\sX\s...]"\soptions\son\sselectNodes\smethod\scalls\sby\susing\sthe\sdoc\sglobal\sprefix\snamespace\smapping.
+D 2019-08-07T19:37:26.250
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl d38ab010e443ab417807612d03f5aa7a752cbbe11187393ac3e85f7b23a540ee
+F ooxml.tcl 450440f921b2c9cbba4ca7db0f3886f581b74f88f606ac238f3b71087c3e1bb0
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -42,8 +42,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 0d90d32d801c5628c92db77869963e162b22f14912aeb62f01f5975dcf58212c
-R 43ef9377c24398f5007cd178f71c7cf1
+P f7bd540ee0718307982bbcdfb7470d4d2d5c7a5a3d460ce96f793dbfad1297b3
+R 94d011b27fa558ed263f580bd4c985ea
 U rolf
-Z 5d9f2dc8bbfa6956ff690318de373479
+Z 4597ecb99d033204e20d6d0dbeed0398
 # Remove this line to create a well-formed Fossil manifest.

@@ -670,6 +670,113 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
 }
 
 
+proc ::ooxml::ZipInitialize { *v file } {
+  upvar ${*v} v
+
+  set fd [open $file w]
+  set v(fd) $fd
+  set v(base) [tell $fd]
+  set v(toc) {}
+  fconfigure $fd -translation binary -encoding binary
+}
+
+
+proc ::ooxml::ZipEmit { *v s } {
+  upvar ${*v} v
+
+  puts -nonewline $v(fd) $s
+}
+
+
+proc ::ooxml::ZipDosTime { sec } {
+  set f [clock format $sec -format {%Y %m %d %H %M %S} -gmt 1]
+  regsub -all { 0(\d)} $f { \1} f
+  foreach {Y M D h m s} $f break
+  set date [expr {(($Y-1980)<<9) | ($M<<5) | $D}]
+  set time [expr {($h<<11) | ($m<<5) | ($s>>1)}]
+  return [list $date $time]
+}
+
+
+proc ::ooxml::ZipAddEntry { *v name contents {date {}} {force 0} } {
+  upvar ${*v} v
+
+  if {$date eq {}} {
+    set date [clock seconds]
+  }
+  lassign [ZipDosTime $date] date time
+  set flag 0
+  set type 0 ;# stored
+  set fsize [string length $contents]
+  set csize $fsize
+  set fnlen [string length $name]
+  
+  if {$force > 0 && $force != [string length $contents]} {
+    set csize $fsize
+    set fsize $force
+    set type 8 ;# if we're passing in compressed data, it's deflated
+  }
+  
+  if {[catch {zlib crc32 $contents} crc]} {
+    set crc 0
+  } elseif {$type == 0} {
+    set cdata [zlib deflate $contents 9]
+    if {[string length $cdata] < [string length $contents]} {
+      set contents $cdata
+      set csize [string length $cdata]
+      set type 8 ;# deflate
+    }
+  }
+  
+  lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
+  
+  ZipEmit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
+  ZipEmit v $name
+  ZipEmit v $contents
+}
+
+
+proc ::ooxml::ZipAddDirectory { *v name {date {}} {force 0} } {
+  upvar ${*v} v
+
+  set name "${name}/"
+  if {$date eq {}} {
+    set date [clock seconds]
+  }
+  lassign [ZipDosTime $date] date time
+  set flag 0
+  set type 0 ;# stored
+  set fsize 0
+  set csize 0
+  set fnlen [string length $name]
+  set crc 0
+  
+  lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
+  
+  ZipEmit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
+  ZipEmit v $name
+}
+
+
+proc ::ooxml::ZipFinalize { *v } {
+  upvar ${*v} v
+
+  set pos [tell $v(fd)]
+  set ntoc [llength $v(toc)]
+  foreach x $v(toc) {
+    ZipEmit v $x
+  }
+  set v(toc) {}
+  
+  set len [expr {[tell $v(fd)] - $pos}]
+  incr pos -$v(base)
+  
+  ZipEmit v [binary format a2c2ssssiis PK {5 6} 0 0 $ntoc $ntoc $len $pos 0]
+  
+  close $v(fd)
+}
+
+
 proc ::ooxml::Zip { zipfile directory files } {
   array set v { fd {} base {} toc {} }
 
@@ -677,135 +784,37 @@ proc ::ooxml::Zip { zipfile directory files } {
   # at http://equi4.com/critlib/ and http://wiki.tcl.tk/36689
   # by Tom Krehbiel 2012 krehbiel.tom at gmail dot com
 
-  proc Initialize { *v file } {
-    upvar ${*v} v
 
-    set fd [open $file w]
-    set v(fd) $fd
-    set v(base) [tell $fd]
-    set v(toc) {}
-    fconfigure $fd -translation binary -encoding binary
-  }
-
-  proc Emit { *v s } {
-    upvar ${*v} v
-
-    puts -nonewline $v(fd) $s
-  }
-
-  proc DosTime { sec } {
-    set f [clock format $sec -format {%Y %m %d %H %M %S} -gmt 1]
-    regsub -all { 0(\d)} $f { \1} f
-    foreach {Y M D h m s} $f break
-    set date [expr {(($Y-1980)<<9) | ($M<<5) | $D}]
-    set time [expr {($h<<11) | ($m<<5) | ($s>>1)}]
-    return [list $date $time]
-  }
-
-  proc AddEntry { *v name contents {date {}} {force 0} } {
-    upvar ${*v} v
-
-    if {$date eq {}} {
-      set date [clock seconds]
-    }
-    lassign [DosTime $date] date time
-    set flag 0
-    set type 0 ;# stored
-    set fsize [string length $contents]
-    set csize $fsize
-    set fnlen [string length $name]
-    
-    if {$force > 0 && $force != [string length $contents]} {
-      set csize $fsize
-      set fsize $force
-      set type 8 ;# if we're passing in compressed data, it's deflated
-    }
-    
-    if {[catch {zlib crc32 $contents} crc]} {
-      set crc 0
-    } elseif {$type == 0} {
-      set cdata [zlib deflate $contents 9]
-      if {[string length $cdata] < [string length $contents]} {
-	set contents $cdata
-	set csize [string length $cdata]
-	set type 8 ;# deflate
-      }
-    }
-    
-    lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
-    
-    Emit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
-    Emit v $name
-    Emit v $contents
-  }
-
-  proc AddDirectory { *v name {date {}} {force 0} } {
-    upvar ${*v} v
-
-    set name "${name}/"
-    if {$date eq {}} {
-      set date [clock seconds]
-    }
-    lassign [DosTime $date] date time
-    set flag 0
-    set type 0 ;# stored
-    set fsize 0
-    set csize 0
-    set fnlen [string length $name]
-    set crc 0
-    
-    lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
-    
-    Emit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
-    Emit v $name
-  }
-
-  proc Finalize { *v } {
-    upvar ${*v} v
-
-    set pos [tell $v(fd)]
-    set ntoc [llength $v(toc)]
-    foreach x $v(toc) {
-      Emit v $x
-    }
-    set v(toc) {}
-    
-    set len [expr {[tell $v(fd)] - $pos}]
-    incr pos -$v(base)
-    
-    Emit v [binary format a2c2ssssiis PK {5 6} 0 0 $ntoc $ntoc $len $pos 0]
-    
-    close $v(fd)
-  }
-
-  Initialize v $zipfile
+  ZipInitialize v $zipfile
   foreach file $files {
     regsub {^\./} $file {} to
     set from [file join [file normalize $directory] $to]
     if {[file isfile $from]} {
       set fd [open $from r]
       fconfigure $fd -translation binary -encoding binary
-      AddEntry v $to [read $fd] [file mtime $from]
+      ZipAddEntry v $to [read $fd] [file mtime $from]
       close $fd
     } elseif {[file isdir $from]} {
-      AddDirectory v $to [file mtime $from]
+      ZipAddDirectory v $to [file mtime $from]
       lappend dirs $file
     }
   }
-  Finalize v
+  ZipFinalize v
+}
+
+
+proc ::ooxml::Column { col } {
+  set name {}
+  while {$col >= 0} {
+    set char [binary format c [expr {($col % 26) + 65}]]
+    set name $char$name
+    set col [expr {$col / 26 -1}]
+  }
+  return $name
 }
 
 
 proc ::ooxml::RowColumnToString { rowcol } {
-  proc Column { col } {
-    set name {}
-    while {$col >= 0} {
-      set char [binary format c [expr {($col % 26) + 65}]]
-      set name $char$name
-      set col [expr {$col / 26 -1}]
-    }
-    return $name
-  }
   lassign [split $rowcol ,] row col
   return [Column $col][incr row 1]
 }

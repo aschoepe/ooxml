@@ -1,5 +1,5 @@
-C style\s-wrap\s(wrapText)
-D 2019-07-15T20:40:05.815
+C code\scleanup
+D 2019-08-07T09:16:12.426
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl 3c86e5366abe0fbbde014aad1256c0163c32c3118fc1d545924029fa3dee564f
+F ooxml.tcl 1225f5f0e9c4ad43e453c83a280bbd696922ff0c77cb009f4fa85f2544592685
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -42,8 +42,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 6138ed30bf5d364268b17a3131ff8d9fdf3d9a0e447ef4c953024ece3a1bab96
-R 2a23ef3f377ab5074697799b1ec06890
+P 6be30c4acc688b7584fa162997dfe494c9b0de6b9e16ee962138505fe508379c
+R 5693c3e33c0a13d6edaf00b1bd26ff19
 U alex
-Z 2fe45c77b6b6065670b5bc1fdc978399
+Z 498a72be8cd0e130b7e69354136a6c1e
 # Remove this line to create a well-formed Fossil manifest.

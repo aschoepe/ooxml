@@ -2229,16 +2229,21 @@ oo::class create ooxml::xl_write {
 
     foreach {n v} [array get cells] {
       if {[dict exists $v t] && [dict get $v t] eq {s} && [dict exists $v v] && [dict get $v v] ne {}} {
-	if {[set pos [lsearch -exact $sharedStrings [dict get $v v]]] == -1} {
-	  lappend sharedStrings [dict get $v v]
-	  set pos [lsearch -exact $sharedStrings [dict get $v v]]
+        set thisv [dict get $v v]
+        if {[info exists lookup($thisv)]} {
+          set pos $lookup($thisv)
+        } else {
+	  lappend sharedStrings $thisv
+	  set pos [expr {[llength $sharedStrings] - 1}]
+          set lookup($thisv) $pos
 	}
-	set obj(sharedStrings) 1
+        set obj(sharedStrings) 1
 	dict set cells($n) v $pos
       }
     }
     unset -nocomplain n v
-
+    array unset lookup
+    
     # _rels/.rels
     set doc [set obj(doc,_rels/.rels) [dom createDocument Relationships]]
     set root [$doc documentElement]

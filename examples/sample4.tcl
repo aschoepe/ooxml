@@ -3,7 +3,9 @@
 exec tclsh8.6 "$0" "$@"
 
 lappend auto_path .
-package require ooxml
+if {[catch {package require ooxml}]} {
+    source ../ooxml.tcl
+}
 
 source array.tcl
 

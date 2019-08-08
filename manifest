@@ -1,6 +1,7 @@
-C Found\sand\sfixed\sone\smajor\sproblem:\sThe\scode\salready\ssorts\sthe\scomplete\scells\sonce.\sJust\sstore\sthe\sresults\sand\suse\sthem\seasily\slooked\sup\slater.\sStill\sthe\s#\sof\smilliseconds\sgoes\sup\sslightly\swith\sthe\s#\sof\scells\sto\swrite.\sBut\sit's\smutch\smore\sbetter\snow.\sSee\s[20c5ed5f11].
-D 2019-08-08T22:09:23.143
+C Added\sa\ssimple\sbench\stest\sfile,\sto\shave\sat\sleast\ssomething\shandy\swithin\sthe\ssource\stree.
+D 2019-08-08T22:57:19.529
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
+F examples/bench.tcl e8ae05bcae1b14d60b9ea584d2690259259d9c468bd5ca5e8f49131e0725478a
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
 F examples/sample1.tcl 757eddc875caa30b820d4e0147ab439c7091ba103af09a86b2e3276c8a251641 x
@@ -42,8 +43,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 87b0383960ac18add918f7d7fe69a5418aa59f4f4c305abcc836d5cfba987a58
-R 8e84e03b4bd0bb69215f418ef37d7073
+P 998892470a99d4b2828984b158e815d5dd5859875adedafa5ba4c6e31b71afdf
+R 4220dd125941219ef5cf567380ccf86b
 U rolf
-Z f68e6d30d268ff1c6ea04fc80930bf34
+Z 8f24de0087500576a9dcf9a98c8abcb0
 # Remove this line to create a well-formed Fossil manifest.

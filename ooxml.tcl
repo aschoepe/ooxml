@@ -2965,12 +2965,12 @@ oo::class create ooxml::xl_write {
 	  Tag_cols {}
 	}
 	Tag_sheetData {
-	  set rows {}
+	  array unset rows
 	  foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
 	    lassign [split $idx ,] sheet row col
-	    lappend rows $row
+            set rows($row) ""
 	  }
-	  foreach row [lsort -unique -integer $rows] {
+	  foreach row [lsort -integer [array names rows]] {
 	    set attr {}
 	    if {[dict exists $obj(rowHeight,$ws) $row]} {
 	      lappend attr ht [dict get $obj(rowHeight,$ws) $row] customHeight 1

@@ -1,5 +1,5 @@
-C Removed\sa\sbit\suseless\scode:\slastRow,\sminCol\sand\smaxCol\sare\sonly\swritten,\sbut\snever\sused.
-D 2019-08-08T20:19:54.352
+C Minor\simprovement:\sDon't\screate\sa\slist\sof\slength\snr\sof\scells\sin\sthe\ssheet\s(and\sas\smuch\sTcl_Objs,\swith\stypically\stons\sof\sdoublets)\sbut\san\sarray\swith\sjust\snr\sof\srows\sin\sthe\ssheet\sas\sentries.\sAnd,\sas\san\seffect,\sthe\sfollowing\ssort\shas\smuch\slesser\swork.
+D 2019-08-08T20:32:45.287
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl 03fff99b9014b65558494d8cb1a557fae1743063b1a24e37c2bfe6215aa64c44
+F ooxml.tcl e18e075c640e80fef4509d6c230ea68a39077f1b2e96dc53c956aa88a10d1763
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -42,8 +42,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 47cf52d42be6a2bbe2f3ecd862d4ae90eb78f73f4b8db85a9f6a00f02f1573c3
-R 8d493f6c224db426d59690d110eeb322
+P 03ff1d1e5c168b85ab476ab65894c9a93bafdaeb258bfc5da623f0683890fd8a
+R 5c1acd11e3558feb505efd3e4ba52e95
 U rolf
-Z c53fbff00e276a312dea3185e754c008
+Z 1b67f5efc86f7a5c915d1942dab2ca34
 # Remove this line to create a well-formed Fossil manifest.

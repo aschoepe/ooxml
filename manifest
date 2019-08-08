@@ -1,5 +1,5 @@
-C Use\sa\sfast\stemporary\slookup\sarray\sfor\sall\selements\sof\ssharedStrings,\sto\savoid\srepeated\slsearch\son\sa\spotential\severy\sgrowing\slist.\sInside\sthe\sloop:\ssince\snew\selements\sare\salways\sappended\son\sthe\slist,\sthe\spos\sof\sthe\snew\slist\sis\sjust\sthe\sllength\s-\s1.\sFor\smy\stests,\sthis\schanges\salready\sspeeds\sthe\swriting\sup\sof\salmost\s3\stimes.
-D 2019-08-08T18:51:59.679
+C Saving\sthe\s[expr\s...]\sis\sprobably\seven\sa\stiny\slittle\sbetter.
+D 2019-08-08T19:03:08.952
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl 08977822b95cf06f724573d7de4a6f0e31c684ea77358c8420e7c1a7bcdf503f
+F ooxml.tcl 72c4522ce6a557f19452ba5f6300286b810362d51572ec809e8011fd415a9887
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -42,11 +42,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 07a138a2f1f0874b701225812f7123e3456b85c03f00bad734170392600cc0dd
-R 2b60483d610a2768d347cae819902a2e
-T *branch * speed
-T *sym-speed *
-T -sym-trunk *
+P 2b3d6087ca3bdd68ad579d37593a50b1292a4e18801ac345fb66c3dab0f3e982
+R 150b3ed1b8d90219a8dbc335f5b96e62
 U rolf
-Z 996140caf5488a8ab1c7414e3698c983
+Z 609d78bade31fc097ea796bfda168aaa
 # Remove this line to create a well-formed Fossil manifest.

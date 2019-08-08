@@ -2233,8 +2233,8 @@ oo::class create ooxml::xl_write {
         if {[info exists lookup($thisv)]} {
           set pos $lookup($thisv)
         } else {
+          set pos [llength $sharedStrings]
 	  lappend sharedStrings $thisv
-	  set pos [expr {[llength $sharedStrings] - 1}]
           set lookup($thisv) $pos
 	}
         set obj(sharedStrings) 1

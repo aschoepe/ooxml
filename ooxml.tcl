@@ -2968,7 +2968,7 @@ oo::class create ooxml::xl_write {
 	  array unset rows
 	  foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
 	    lassign [split $idx ,] sheet row col
-            set rows($row) ""
+            lappend rows($row) $col
 	  }
 	  foreach row [lsort -integer [array names rows]] {
 	    set attr {}
@@ -2977,8 +2977,8 @@ oo::class create ooxml::xl_write {
 	    }
 	    # lappend attr spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
 	    Tag_row r [expr {$row + 1}] {*}$attr {
-	      foreach idx [lsort -dictionary [array names cells $ws,$row,*]] {
-		lassign [split $idx ,] sheet row col
+              foreach col $rows($row) {
+                set idx "$ws,$row,$col"
 		if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {})} {
 		  set attr {}
 		  if {[dict exists $cells($idx) s] && [dict get $cells($idx) s] > 0} {

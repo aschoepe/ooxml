@@ -1466,7 +1466,7 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
 
-    if {[::ooxml::Getopt opts {creator.arg {unknown}} $args]} {
+    if {[::ooxml::Getopt opts {creator.arg {unknown} application.args {}} $args]} {
       error $opts(-errmsg)
     }
 
@@ -1476,7 +1476,13 @@ oo::class create ooxml::xl_write {
     set obj(indent) none
 
     set obj(creator) $opts(creator)
+    set obj(lastModifiedBy) $opts(creator)
     set obj(created) [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+    set obj(modified) $obj(created)
+    set obj(application) $opts(application)
+    if {[string trim $obj(application)] eq {}} {
+      set obj(application) {Tcl - Office Open XML - Spreadsheet}
+    }
 
     set obj(sheets) 0
     array set sheets {}
@@ -2300,7 +2306,7 @@ oo::class create ooxml::xl_write {
     $root setAttribute xmlns:vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
 
     $root appendFromScript {
-      Tag_Application { Text {Tcl - Office Open XML - Spreadsheet} }
+      Tag_Application { Text $obj(application) }
       Tag_DocSecurity { Text 0 }
       Tag_ScaleCrop { Text false }
       Tag_HeadingPairs {
@@ -2347,9 +2353,9 @@ oo::class create ooxml::xl_write {
 
     $root appendFromScript {
       Tag_dc:creator { Text $obj(creator) }
-      Tag_cp:lastModifiedBy { Text $obj(creator) }
+      Tag_cp:lastModifiedBy { Text $obj(lastModifiedBy) }
       Tag_dcterms:created xsi:type dcterms:W3CDTF { Text $obj(created) }
-      Tag_dcterms:modified xsi:type dcterms:W3CDTF { Text $obj(created) }
+      Tag_dcterms:modified xsi:type dcterms:W3CDTF { Text $obj(modified) }
     }
 
 

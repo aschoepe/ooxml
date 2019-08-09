@@ -98,6 +98,10 @@
 # 
 #   constructor args
 #     -creator CREATOR
+#     -created UTC-TIMESTAMP
+#     -modifiedby NAME
+#     -modified UTC-TIMESTAMP
+#     -application NAME
 #     return class
 # 
 #   method numberformat args
@@ -1466,7 +1470,7 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
 
-    if {[::ooxml::Getopt opts {creator.arg {unknown} application.args {}} $args]} {
+    if {[::ooxml::Getopt opts {creator.arg {unknown} created.arg {} modifiedby.arg {} modified.arg {} application.arg {}} $args]} {
       error $opts(-errmsg)
     }
 
@@ -1475,13 +1479,30 @@ oo::class create ooxml::xl_write {
     set obj(encoding) utf-8
     set obj(indent) none
 
-    set obj(creator) $opts(creator)
-    set obj(lastModifiedBy) $opts(creator)
-    set obj(created) [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
-    set obj(modified) $obj(created)
-    set obj(application) $opts(application)
-    if {[string trim $obj(application)] eq {}} {
+    if {[string trim $opts(creator)] eq {}} {
+      set obj(creator) {unknown}
+    } else {
+      set obj(creator) $opts(creator)
+    }
+    if {[string trim $opts(created)] eq {} || [catch {clock scan $opts(created)}]} {
+      set obj(created) [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+    } else {
+      set obj(created) $opts(created)
+    }
+    if {[string trim $opts(modifiedby)] eq {}} {
+      set obj(lastModifiedBy) $opts(creator)
+    } else {
+      set obj(lastModifiedBy) $opts(modifiedby)
+    }
+    if {[string trim $opts(modified)] eq {} || [catch {clock scan $opts(modified)}]} {
+      set obj(modified) [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+    } else {
+      set obj(modified) $opts(modified)
+    }
+    if {[string trim $opts(application)] eq {}} {
       set obj(application) {Tcl - Office Open XML - Spreadsheet}
+    } else {
+      set obj(application) $opts(application)
     }
 
     set obj(sheets) 0

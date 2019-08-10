@@ -5,8 +5,10 @@ exec wish8.6 "$0" "$@"
 package require Tk
 package require tablelist
 
-#package require ooxml
-source ../ooxml.tcl
+set auto_path [linsert $auto_path 0 ..]
+if {[catch {package require ooxml}]} {
+  source ../ooxml.tcl
+}
 
 source array.tcl
 

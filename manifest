@@ -1,5 +1,5 @@
-C pkg\sreq\smodification
-D 2019-08-10T09:15:13.724
+C merged\snew\sconstructor\soptions
+D 2019-08-10T09:21:40.941
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx 9414eeac919276317062d04fbc14427a0bbf7c52b8aa55bf75863d46d549695d
@@ -11,7 +11,7 @@ F examples/sample5.tcl 9f367a94728d9b6832ad18c793ccc111ec5f51dd91395d79596b7e88e
 F examples/sample6.tcl a5a7d8eae26fde1240341b6ea546c6440563a760b49fc429f6e97022c859639f x
 F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba30de5d6 x
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
-F ooxml.tcl 8f9feb6f0b9ff06ccad365f718726c3cfb84ce5af96cc56237a31d6cd703d291
+F ooxml.tcl 8e0e7850ba5038584c6256cbbfdcdab5a2bcaecacc9c84c16262f3f858062dcb
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -42,8 +42,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 07a138a2f1f0874b701225812f7123e3456b85c03f00bad734170392600cc0dd
-R dda37fa7c715a17ed58694f83f038801
+P a3e6c25ebfa518e2b3fec389a26841248e54341039fdeae59e0acd5b0c5e140e b37b7c9994d90ba3080b118b3ecfac3d51d67bd686ead055fd171e03dd7607cd
+R 9dfa31d59647600773c97ead10884756
 U alex
-Z f6454c2308d82de87dfd77dcb0baa640
+Z 7924ee66cab219ab93ab57808dd24e6a
 # Remove this line to create a well-formed Fossil manifest.

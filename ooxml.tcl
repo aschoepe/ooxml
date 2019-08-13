@@ -1975,9 +1975,74 @@ oo::class create ooxml::xl_write {
     my variable cells
     my variable cols
 
-    if {[::ooxml::Getopt opts {index.arg {} style.arg 0 formula.arg {} string nozero globalstyle height.arg {}} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      index ""
+      style ""
+      formula ""
+      string 0
+      nozero 0
+      globalstyle 0
+      height ""
     }
+    set len [llength $args]
+    set loopInd 0
+    while {$loopInd < $len} {
+      switch -glob [lindex $args $loopInd] {
+        "-index" {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(index) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-index: missing argument"
+          }            
+        }
+        "-style" {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(style) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-style: missing argument"
+          }
+        }
+        "-formula"  {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(formula) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-formula: missing argument"
+          }
+        }
+        "-string" {
+          set opts(string) 1
+          incr loopInd
+        }
+        "-nozero" {
+          set opts(nozero) 1
+        }
+        "-globalstyle" {
+          set opts(globalstyle) 1
+          incr loopInd
+        }
+        "-height" {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(height) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-height: missing argument"
+          }
+        }
+        default {
+          error "unknown option [lindex $args $loopInd]"
+        }
+      }
+    }
+    # if {[::ooxml::Getopt opts {index.arg {} style.arg 0 formula.arg {} string nozero globalstyle height.arg {}} $args]} {
+    #   error $opts(-errmsg)
+    # }
 
     if {!$obj(callRow,$obj(sheets))} {
       set obj(callRow,$obj(sheets)) 1

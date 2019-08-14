@@ -471,22 +471,23 @@ namespace eval ::ooxml {
 #   |Y|Y|Y|Y|Y|Y|Y|m| |m|m|m|d|d|d|d|d| |h|h|h|h|h|m|m|m| |m|m|m|s|s|s|s|s|
 #   +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #
-  proc ::timet_to_dos {time_t} {
-    set s [clock format $time_t -format {%Y %m %e %k %M %S}]
-    scan $s {%d %d %d %d %d %d} year month day hour min sec
-    expr {(($year-1980) << 25) | ($month << 21) | ($day << 16) 
-          | ($hour << 11) | ($min << 5) | ($sec >> 1)}
-  }
+# From tcllib / zipfile::mkzip      
+proc ::ooxml::timet_to_dos {time_t} {
+  set s [clock format $time_t -format {%Y %m %e %k %M %S}]
+  scan $s {%d %d %d %d %d %d} year month day hour min sec
+  expr {(($year-1980) << 25) | ($month << 21) | ($day << 16) 
+        | ($hour << 11) | ($min << 5) | ($sec >> 1)}
+}
 
-  # ooxml::add_str_to_archive --
-  #
-  #        Add a string as a single file with string as content with
-  #        argument path to a zip archive. The zipchan channel should
-  #        already be open and binary. The return value is the central
-  #        directory record that will need to be used when finalizing
-  #        the zip archive.
-  #
-
+# ooxml::add_str_to_archive --
+#
+#        Add a string as a single file with string as content with
+#        argument path to a zip archive. The zipchan channel must
+#        already be open and binary. The return value is the central
+#        directory record that will need to be used when finalizing
+#        the zip archive.
+#
+# Derived from tcllib / zipfile::mkzip::add_file_to_archive
 proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
   set mtime [timet_to_dos [clock seconds]]
   set utfpath [encoding convertto utf-8 $path]
@@ -743,140 +744,6 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
   }
   return {}
 }
-
-
-proc ::ooxml::ZipInitialize { *v file } {
-  upvar ${*v} v
-
-  set fd [open $file w]
-  set v(fd) $fd
-  set v(base) [tell $fd]
-  set v(toc) {}
-  fconfigure $fd -translation binary -encoding binary
-}
-
-
-proc ::ooxml::ZipEmit { *v s } {
-  upvar ${*v} v
-
-  puts -nonewline $v(fd) $s
-}
-
-
-proc ::ooxml::ZipDosTime { sec } {
-  set f [clock format $sec -format {%Y %m %d %H %M %S} -gmt 1]
-  regsub -all { 0(\d)} $f { \1} f
-  foreach {Y M D h m s} $f break
-  set date [expr {(($Y-1980)<<9) | ($M<<5) | $D}]
-  set time [expr {($h<<11) | ($m<<5) | ($s>>1)}]
-  return [list $date $time]
-}
-
-
-proc ::ooxml::ZipAddEntry { *v name contents {date {}} {force 0} } {
-  upvar ${*v} v
-
-  if {$date eq {}} {
-    set date [clock seconds]
-  }
-  lassign [ZipDosTime $date] date time
-  set flag 0
-  set type 0 ;# stored
-  set fsize [string length $contents]
-  set csize $fsize
-  set fnlen [string length $name]
-  
-  if {$force > 0 && $force != [string length $contents]} {
-    set csize $fsize
-    set fsize $force
-    set type 8 ;# if we're passing in compressed data, it's deflated
-  }
-  
-  if {[catch {zlib crc32 $contents} crc]} {
-    set crc 0
-  } elseif {$type == 0} {
-    set cdata [zlib deflate $contents 9]
-    if {[string length $cdata] < [string length $contents]} {
-      set contents $cdata
-      set csize [string length $cdata]
-      set type 8 ;# deflate
-    }
-  }
-  
-  lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
-  
-  ZipEmit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
-  ZipEmit v $name
-  ZipEmit v $contents
-}
-
-
-proc ::ooxml::ZipAddDirectory { *v name {date {}} {force 0} } {
-  upvar ${*v} v
-
-  set name "${name}/"
-  if {$date eq {}} {
-    set date [clock seconds]
-  }
-  lassign [ZipDosTime $date] date time
-  set flag 0
-  set type 0 ;# stored
-  set fsize 0
-  set csize 0
-  set fnlen [string length $name]
-  set crc 0
-  
-  lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
-  
-  ZipEmit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
-  ZipEmit v $name
-}
-
-
-proc ::ooxml::ZipFinalize { *v } {
-  upvar ${*v} v
-
-  set pos [tell $v(fd)]
-  set ntoc [llength $v(toc)]
-  foreach x $v(toc) {
-    ZipEmit v $x
-  }
-  set v(toc) {}
-  
-  set len [expr {[tell $v(fd)] - $pos}]
-  incr pos -$v(base)
-  
-  ZipEmit v [binary format a2c2ssssiis PK {5 6} 0 0 $ntoc $ntoc $len $pos 0]
-  
-  close $v(fd)
-}
-
-
-proc ::ooxml::Zip { zipfile directory files } {
-  array set v { fd {} base {} toc {} }
-
-  # this code is a rewrite and extension of the zipper code found
-  # at http://equi4.com/critlib/ and http://wiki.tcl.tk/36689
-  # by Tom Krehbiel 2012 krehbiel.tom at gmail dot com
-
-
-  ZipInitialize v $zipfile
-  foreach file $files {
-    regsub {^\./} $file {} to
-    set from [file join [file normalize $directory] $to]
-    if {[file isfile $from]} {
-      set fd [open $from r]
-      fconfigure $fd -translation binary -encoding binary
-      ZipAddEntry v $to [read $fd] [file mtime $from]
-      close $fd
-    } elseif {[file isdir $from]} {
-      ZipAddDirectory v $to [file mtime $from]
-      lappend dirs $file
-    }
-  }
-  ZipFinalize v
-}
-
 
 proc ::ooxml::Column { col } {
   set name {}

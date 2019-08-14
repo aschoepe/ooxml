@@ -461,6 +461,81 @@ namespace eval ::ooxml {
   msgcat::mcset zh Sheet \u5de5\u4f5c\u8868
 }
 
+# ooxml::timet_to_dos
+#
+#        Convert a unix timestamp into a DOS timestamp for ZIP times.
+#
+#   DOS timestamps are 32 bits split into bit regions as follows:
+#                  24                16                 8                 0
+#   +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#   |Y|Y|Y|Y|Y|Y|Y|m| |m|m|m|d|d|d|d|d| |h|h|h|h|h|m|m|m| |m|m|m|s|s|s|s|s|
+#   +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#
+  proc ::timet_to_dos {time_t} {
+    set s [clock format $time_t -format {%Y %m %e %k %M %S}]
+    scan $s {%d %d %d %d %d %d} year month day hour min sec
+    expr {(($year-1980) << 25) | ($month << 21) | ($day << 16) 
+          | ($hour << 11) | ($min << 5) | ($sec >> 1)}
+  }
+
+  # ooxml::add_str_to_archive --
+  #
+  #        Add a string as a single file with string as content with
+  #        argument path to a zip archive. The zipchan channel should
+  #        already be open and binary. The return value is the central
+  #        directory record that will need to be used when finalizing
+  #        the zip archive.
+  #
+
+proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
+  set mtime [timet_to_dos [clock seconds]]
+  set utfpath [encoding convertto utf-8 $path]
+  set utfcomment [encoding convertto utf-8 $comment]
+  set flags [expr {(1<<11)}] ;# utf-8 comment and path
+  set method 0               ;# store 0, deflate 8
+  set attr 0                 ;# text or binary (default binary)
+  set version 20             ;# minumum version req'd to extract
+  set extra ""
+  set crc 0
+  set size 0
+  set csize 0
+  set seekable [expr {[tell $zipchan] != -1}]
+  set attrex 0x81b60020  ;# 0o100666 (-rw-rw-rw-)
+  
+  set utfdata [encoding convertto utf-8 $data]
+  set size [string length $utfdata]
+  
+  set offset [tell $zipchan]
+  set local [binary format a4sssiiiiss PK\03\04 \
+                 $version $flags $method $mtime $crc $csize $size \
+                 [string length $utfpath] [string length $extra]]
+  append local $utfpath $extra
+  puts -nonewline $zipchan $local
+  
+  set crc [::zlib crc32 $utfdata]
+  set cdata [::zlib deflate $utfdata]
+  if {[string length $cdata] < $size} {
+    set method 8
+    set utfdata $cdata
+  }
+  set csize [string length $utfdata]
+  puts -nonewline $zipchan $utfdata
+
+  # update the header
+  set local [binary format a4sssiiii PK\03\04 \
+                 $version $flags $method $mtime $crc $csize $size]
+  set current [tell $zipchan]
+  seek $zipchan $offset
+  puts -nonewline $zipchan $local
+  seek $zipchan $current
+  
+  set hdr [binary format a4ssssiiiisssssii PK\01\02 0x0317 \
+               $version $flags $method $mtime $crc $csize $size \
+               [string length $utfpath] [string length $extra]\
+               [string length $utfcomment] 0 $attr $attrex $offset]
+  append hdr $utfpath $extra $utfcomment
+  return $hdr
+}
 
 proc ::ooxml::Default { name value } {
   variable defaults
@@ -3116,31 +3191,30 @@ oo::class create ooxml::xl_write {
     if {[file extension $file] ne {.xlsx}} {
       append file {.xlsx}
     }
-    set path [file dirname $file]
-    set uid [format xl_%X [clock microseconds]]
-    set filesToZip {}
+    if {[catch {set zf [open $file w]}]} {
+      error "Unable to write $file"
+    }
+    fconfigure $zf \
+        -encoding    binary \
+        -translation binary \
+        -eofchar     {}
+    set count 0
+    set cd ""
     foreach {tag doc} [array get obj doc,*] {
-      lappend filesToZip [set docname [lindex [split $tag ,] 1]]
-      set xmlfile [file join $path $uid $docname]
-      file mkdir [file dirname $xmlfile]
-      if {![catch {open $xmlfile w} fd]} {
-	fconfigure $fd -encoding utf-8
-	#puts $fd "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-	puts $fd [[$doc documentElement] asXML -indent $obj(indent) -xmlDeclaration 1 -encString [string toupper $obj(encoding)]]
-	close $fd
-	$doc delete
-      }
+      append cd [::ooxml::add_str_to_archive $zf \
+                     [lindex [split $tag ,] 1] \
+                     [[$doc documentElement] asXML \
+                          -indent $obj(indent) -xmlDeclaration 1 \
+                          -encString [string toupper $obj(encoding)]]]
+      incr count
+      $doc delete
     }
-    set pwd [pwd]
-    cd [file join $path $uid]
-    if {$path eq {.}} {
-      set file [file join .. $file]
-    }
-    ::ooxml::Zip $file . $filesToZip
-    cd $pwd
-    if {!$opts(holdcontainerdirectory)} {
-      file delete -force [file join $path $uid]
-    }
+    set cdoffset [tell $zf]
+    set endrec [binary format a4ssssiis PK\05\06 0 0 \
+                    $count $count [string length $cd] $cdoffset 0]
+    puts -nonewline $zf $cd
+    puts -nonewline $zf $endrec
+    close $zf
     return 0
   }
 }

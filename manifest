@@ -1,5 +1,5 @@
-C Reworked\sthe\soption\sparsing\sof\sthe\scell\smethod\sfor\sspeed.
-D 2019-08-13T21:10:46.300
+C Turns\sout,\sthat\screating\sthe\szip\s(at\sleast\sas\sit\scurrently\sdone\swith\svfs)\seats\sup\ssome\stime.\sRemoved\sthe\sneed\sfor\svfs\s(only\sfor\swriting!),\snow\sthe\szip\sis\screated\swith\score\son-board\smeans.\sThis\sreduces\sthe\stime\sper\scell\sneeded\sfor\swriting\sto\s2/3.
+D 2019-08-14T15:52:48.305
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl e8ae05bcae1b14d60b9ea584d2690259259d9c468bd5ca5e8f49131e0725478a
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -12,7 +12,7 @@ F examples/sample5.tcl 341a4cbd7d5bc92db404e91e2c3648368b791cbb0573bc897aa1babdf
 F examples/sample6.tcl 2e75521984e18f6ca39d7c637c37984c70e14ab453e97c977a9028c5999754bd x
 F examples/sample7.tcl 0f8f51f54f5079c857a504d66b30caf6a2425ba892936d3421dfba3027d295cb x
 F examples/sample8.tcl a4549c1eb1159a39f7fe481ddd32aefd2ada95cb85e7f73048e2e47c9c769c53 x
-F ooxml.tcl cfdccc2f7a49cb0bff834437b72b7bc01649ed47a64e8091889e3a8ae12fb280
+F ooxml.tcl 520d6eef51699b174b67db1e09d89f4148bb24c042e33514bbf159b28ab694e7
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -43,11 +43,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 5cebb3f58ff38872a56eff9809ca9a3fe6f17d5efd4106ce0510fa1dd208c45f
-R b09809dc6aa9af7cd5a2788b02fe2f73
-T *branch * populationspeed
-T *sym-populationspeed *
-T -sym-speed *
+P 6c6aa2f98f67ca9932888e8b2ce4a4a0d9519b08b00c24c64eda36887f65b1d1
+R 6de7f51ae2d4ddd03eb19fe9e08ae7d8
 U rolf
-Z 5c6d948e31996bf7efdad6cf532b39ce
+Z aefc7ca903b694095a28e6d06cbaebd2
 # Remove this line to create a well-formed Fossil manifest.

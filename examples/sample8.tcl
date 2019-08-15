@@ -2,8 +2,10 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
-#package require ooxml
-source ../ooxml.tcl
+set auto_path [linsert $auto_path 0 ..]
+if {[catch {package require ooxml}]} {
+  source ../ooxml.tcl
+}
 
 array set workbook [ooxml::xl_read form8.xlsx]
 

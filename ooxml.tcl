@@ -160,7 +160,6 @@
 
 
 package require Tcl 8.6
-package require vfs::zip
 package require tdom 0.9.0-
 package require msgcat
 
@@ -842,6 +841,8 @@ proc ::ooxml::Color { color } {
 #
 
 proc ::ooxml::xl_sheets { file } {
+  package require vfs::zip
+
   set sheets {}
 
   set mnt [vfs::zip::Mount $file xlsx]
@@ -897,6 +898,8 @@ proc ::ooxml::xl_sheets { file } {
 proc ::ooxml::xl_read { file args } {
   variable predefNumFmts
 
+  package require vfs::zip
+
   array set cellXfs {}
   array set numFmts [array get predefNumFmts]
   array set sharedStrings {}
@@ -908,7 +911,6 @@ proc ::ooxml::xl_read { file args } {
   if {[string trim $opts(sheets)] eq {} && [string trim $opts(sheetnames)] eq {}} {
     set opts(sheetnames) *
   }
-
 
   set mnt [vfs::zip::Mount $file xlsx]
 

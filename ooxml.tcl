@@ -163,7 +163,7 @@
 #
 
 
-package require Tcl 8.6
+package require Tcl 8.6.7-
 package require tdom 0.9.0-
 package require msgcat
 

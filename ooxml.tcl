@@ -2471,6 +2471,8 @@ oo::class create ooxml::xl_write {
 	    Tag_t { Text $string }
 	  }
 	}
+	# garbage collection
+	set sharedStrings {}
       }
       ::ooxml::Dom2zip $zf $root "xl/sharedStrings.xml" cd count
       $doc delete

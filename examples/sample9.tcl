@@ -11,7 +11,7 @@ set spreadsheet [::ooxml::xl_write new -creator {User A} -created {2019-08-10 10
 set wrap [$spreadsheet style -wrap]
 
 if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
-  $spreadsheet cell $sheet {my text the will be automatically wrapped by excel} -index A1 -style $wrap
+  $spreadsheet cell $sheet {this text will be automatically wrapped by excel} -index A1 -style $wrap
   $spreadsheet write export9.xlsx
 }
 $spreadsheet destroy

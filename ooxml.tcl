@@ -1957,7 +1957,7 @@ oo::class create ooxml::xl_write {
 
     array set opts {
       index ""
-      style ""
+      style 0
       formula ""
       string 0
       nozero 0
@@ -1967,7 +1967,7 @@ oo::class create ooxml::xl_write {
     set len [llength $args]
     set loopInd 0
     while {$loopInd < $len} {
-      switch -glob [lindex $args $loopInd] {
+      switch -- [lindex $args $loopInd] {
         "-index" {
           incr loopInd
           if {$loopInd < $len} {

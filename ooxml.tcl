@@ -172,6 +172,7 @@ namespace eval ::ooxml {
   namespace export xl_sheets xl_read xl_write
 
   variable defaults
+  variable initNodeCmds
   variable predefNumFmts
   variable predefColors
   variable predefColorsName
@@ -1406,6 +1407,66 @@ proc ooxml::Dom2zip {zf node path cd count} {
   incr mycount
 }
 
+
+#
+# ooxml::InitNodeCommands
+#
+
+
+proc ooxml::InitNodeCommands {} {
+  variable initNodeCmds
+
+  if {[info exists initNodeCmds] && $initNodeCmds} return
+
+  set elementNodes {
+    AppVersion Application
+    Company
+    Default DocSecurity
+    HeadingPairs HyperlinksChanged
+    LinksUpToDate
+    Override
+    Relationship
+    ScaleCrop SharedDoc
+    TitlesOfParts
+    a:accent1 a:accent2 a:accent3 a:accent4 a:accent5 a:accent6 a:alpha a:bevelT a:bgFillStyleLst a:bodyPr a:camera
+    a:clrScheme a:cs a:dk1 a:dk2 a:ea a:effectLst a:effectRef a:effectStyle a:effectStyleLst a:extraClrSchemeLst
+    a:fillRef a:fillStyleLst a:fillToRect a:fmtScheme a:folHlink a:font a:fontRef a:fontScheme a:gradFill a:gs
+    a:gsLst a:hlink a:latin a:lightRig a:lin a:ln a:lnDef a:lnRef a:lnStyleLst a:lstStyle a:lt1 a:lt2 a:majorFont
+    a:minorFont a:objectDefaults a:outerShdw a:path a:prstDash a:rot a:satMod a:scene3d a:schemeClr a:shade
+    a:solidFill a:sp3d a:spDef a:spPr a:srgbClr a:style a:sysClr a:themeElements a:tint
+    alignment autoFilter
+    b bgColor bookViews border borders bottom
+    c calcPr cellStyle cellStyleXfs cellStyles cellXfs col color cols
+    cp:lastModifiedBy
+    dc:creator
+    dcterms:created dcterms:modified
+    definedName definedNames diagonal dimension dxfs
+    f family fgColor fileVersion fill fills font fonts
+    i
+    left
+    mergeCell mergeCells
+    name numFmt numFmts
+    pageMargins pane patternFill
+    right row
+    scheme sheet sheetData sheetFormatPr sheetView sheetViews sheets si sz
+    t tableStyles top
+    u
+    v
+    vt:i4 vt:lpstr vt:lpstrvt:lpstr vt:variant vt:vector
+    workbookPr workbookView
+    xf
+  }
+
+  namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
+
+  foreach tag $elementNodes {
+    namespace eval ::ooxml "dom createNodeCmd -tagName $tag elementNode Tag_$tag; namespace export Tag_$tag"
+  }
+  
+  set initNodeCmds 1
+}
+
+
 #
 # ooxml::xl_write
 #
@@ -2272,6 +2333,9 @@ oo::class create ooxml::xl_write {
       error $opts(-errmsg)
     }
 
+    ooxml::InitNodeCommands
+    namespace import ::ooxml::Tag_* ::ooxml::Text
+
     # Initialize zip file
     set file [string trim $file]
     if {$file eq {}} {
@@ -2313,8 +2377,6 @@ oo::class create ooxml::xl_write {
 
     set rId 0
 
-    dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
-
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
     $root appendFromScript {
@@ -2329,9 +2391,6 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument Types]
     set root [$doc documentElement]
 
-    foreach tag {Default Override} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/content-types
 
@@ -2359,12 +2418,6 @@ oo::class create ooxml::xl_write {
     # docProps/app.xml
     set doc [set obj(doc,) [dom createDocument Properties]]
     set root [$doc documentElement]
-
-    dom createNodeCmd textNode Text
-    foreach tag {AppVersion Application Company DocSecurity HeadingPairs HyperlinksChanged LinksUpToDate ScaleCrop SharedDoc TitlesOfParts
-                 vt:i4 vt:lpstrvt:lpstr vt:lpstr vt:variant vt:vector} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
     $root setAttribute xmlns:vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
@@ -2405,11 +2458,6 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument cp:coreProperties]
     set root [$doc documentElement]
 
-    dom createNodeCmd textNode Text
-    foreach tag {cp:lastModifiedBy dc:creator dcterms:created dcterms:modified} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
-
     $root setAttribute xmlns:cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
     $root setAttribute xmlns:dc http://purl.org/dc/elements/1.1/
     $root setAttribute xmlns:dcterms http://purl.org/dc/terms/
@@ -2428,8 +2476,6 @@ oo::class create ooxml::xl_write {
     # xl/_rels/workbook.xml.rels
     set doc [dom createDocument Relationships]
     set root [$doc documentElement]
-
-    dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
@@ -2456,11 +2502,6 @@ oo::class create ooxml::xl_write {
       set doc [dom createDocument sst]
       set root [$doc documentElement]
 
-      dom createNodeCmd textNode Text
-      foreach tag {si t} {
-	dom createNodeCmd -tagName $tag elementNode Tag_$tag
-      }
-
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
       $root setAttribute count [llength $sharedStrings]
       $root setAttribute uniqueCount [llength $sharedStrings]
@@ -2484,8 +2525,6 @@ oo::class create ooxml::xl_write {
       set doc [dom createDocument calcChain]
       set root [$doc documentElement]
 
-      dom createNodeCmd -tagName c elementNode Tag_c
-
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
 
       $root appendFromScript {
@@ -2500,11 +2539,6 @@ oo::class create ooxml::xl_write {
     # xl/styles.xml
     set doc [dom createDocument styleSheet]
     set root [$doc documentElement]
-
-    foreach tag {alignment b bgColor border borders bottom cellStyle cellStyleXfs cellStyles cellXfs color diagonal dxfs family
-                 fgColor fill fills font fonts i left name numFmt numFmts patternFill right scheme sz tableStyles top u xf} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
     $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
@@ -2643,15 +2677,6 @@ oo::class create ooxml::xl_write {
     # xl/theme/theme1.xml
     set doc [dom createDocument a:theme]
     set root [$doc documentElement]
-
-    foreach tag {a:accent1 a:accent2 a:accent3 a:accent4 a:accent5 a:accent6 a:alpha a:bevelT a:bgFillStyleLst a:bodyPr a:camera
-		 a:clrScheme a:cs a:dk1 a:dk2 a:ea a:effectLst a:effectRef a:effectStyle a:effectStyleLst a:extraClrSchemeLst
-		 a:fillRef a:fillStyleLst a:fillToRect a:fmtScheme a:folHlink a:font a:fontRef a:fontScheme a:gradFill a:gs a:gsLst
-		 a:hlink a:latin a:lightRig a:lin a:ln a:lnDef a:lnRef a:lnStyleLst a:lstStyle a:lt1 a:lt2 a:majorFont a:minorFont
-		 a:objectDefaults a:outerShdw a:path a:prstDash a:rot a:satMod a:scene3d a:schemeClr a:shade a:solidFill a:sp3d
-		 a:spDef a:spPr a:srgbClr a:style a:sysClr a:themeElements a:tint} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns:a http://schemas.openxmlformats.org/drawingml/2006/main
     $root setAttribute name Office-Design
@@ -2985,11 +3010,6 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument workbook]
     set root [$doc documentElement]
 
-    dom createNodeCmd textNode Text
-    foreach tag {bookViews calcPr definedName definedNames fileVersion sheet sheets workbookPr workbookView} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
-
     $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
     $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
 
@@ -3017,10 +3037,6 @@ oo::class create ooxml::xl_write {
 
 
     # xl/worksheets/sheet1.xml SHEET
-    dom createNodeCmd textNode Text
-    foreach tag {autoFilter c col cols dimension f mergeCell mergeCells pageMargins pane row sheetData sheetFormatPr sheetView sheetViews v} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
       set doc [dom createDocument worksheet]

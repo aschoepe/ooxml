@@ -3077,6 +3077,8 @@ oo::class create ooxml::xl_write {
 		} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
 		  Tag_c r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
 		}
+		# garbage collection
+	        unset -nocomplain cells($idx)
 	      }
 	    }
 	  }

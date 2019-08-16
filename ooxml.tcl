@@ -1396,6 +1396,15 @@ proc ::ooxml::xl_read { file args } {
   return [array get wb]
 }
 
+# Internal helper
+proc ooxml::Dom2zip {zf node path cd count} {
+  upvar $cd mycd
+  upvar $count mycount
+  append mycd [::ooxml::add_str_to_archive $zf $path \
+                   [$node asXML -indent none -xmlDeclaration 1 \
+                        -encString "UTF-8"]]
+  incr mycount
+}
 
 #
 # ooxml::xl_write
@@ -2263,6 +2272,24 @@ oo::class create ooxml::xl_write {
       error $opts(-errmsg)
     }
 
+    # Initialize zip file
+    set file [string trim $file]
+    if {$file eq {}} {
+      set file {spreadsheetml.xlsx}
+    }
+    if {[file extension $file] ne {.xlsx}} {
+      append file {.xlsx}
+    }
+    if {[catch {set zf [open $file w]}]} {
+      error "Unable to write $file"
+    }
+    fconfigure $zf \
+        -encoding    binary \
+        -translation binary \
+        -eofchar     {}
+    set count 0
+    set cd ""
+    
     foreach {n v} [array get cells] {
       if {[dict exists $v t] && [dict get $v t] eq {s} && [dict exists $v v] && [dict get $v v] ne {}} {
         set thisv [dict get $v v]
@@ -2281,7 +2308,7 @@ oo::class create ooxml::xl_write {
     array unset lookup
     
     # _rels/.rels
-    set doc [set obj(doc,_rels/.rels) [dom createDocument Relationships]]
+    set doc [dom createDocument Relationships]
     set root [$doc documentElement]
 
     set rId 0
@@ -2295,10 +2322,11 @@ oo::class create ooxml::xl_write {
       Tag_Relationship Id rId2 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties Target docProps/app.xml {}
       Tag_Relationship Id rId3 Type http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties Target docProps/core.xml {}
     }
-
+    ::ooxml::Dom2zip $zf $root "_rels/.rels" cd count
+    $doc delete
 
     # [Content_Types].xml
-    set doc [set obj(doc,\[Content_Types\].xml) [dom createDocument Types]]
+    set doc [dom createDocument Types]
     set root [$doc documentElement]
 
     foreach tag {Default Override} {
@@ -2325,10 +2353,11 @@ oo::class create ooxml::xl_write {
       Tag_Override PartName /docProps/core.xml ContentType application/vnd.openxmlformats-package.core-properties+xml {}
       Tag_Override PartName /docProps/app.xml ContentType application/vnd.openxmlformats-officedocument.extended-properties+xml {}
     }
-
+    ::ooxml::Dom2zip $zf $root "\[Content_Types\].xml" cd count
+    $doc delete
 
     # docProps/app.xml
-    set doc [set obj(doc,docProps/app.xml) [dom createDocument Properties]]
+    set doc [set obj(doc,) [dom createDocument Properties]]
     set root [$doc documentElement]
 
     dom createNodeCmd textNode Text
@@ -2369,10 +2398,11 @@ oo::class create ooxml::xl_write {
       Tag_HyperlinksChanged { Text false }
       Tag_AppVersion { Text 1.0 }
     }
-
+    ::ooxml::Dom2zip $zf $root "docProps/app.xml" cd count
+    $doc delete
 
     # docProps/core.xml
-    set doc [set obj(doc,docProps/core.xml) [dom createDocument cp:coreProperties]]
+    set doc [dom createDocument cp:coreProperties]
     set root [$doc documentElement]
 
     dom createNodeCmd textNode Text
@@ -2392,10 +2422,11 @@ oo::class create ooxml::xl_write {
       Tag_dcterms:created xsi:type dcterms:W3CDTF { Text $obj(created) }
       Tag_dcterms:modified xsi:type dcterms:W3CDTF { Text $obj(modified) }
     }
-
+    ::ooxml::Dom2zip $zf $root "docProps/core.xml" cd count
+    $doc delete
 
     # xl/_rels/workbook.xml.rels
-    set doc [set obj(doc,xl/_rels/workbook.xml.rels) [dom createDocument Relationships]]
+    set doc [dom createDocument Relationships]
     set root [$doc documentElement]
 
     dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
@@ -2416,11 +2447,13 @@ oo::class create ooxml::xl_write {
 	Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain Target calcChain.xml {}
       }
     }
+    ::ooxml::Dom2zip $zf $root "xl/_rels/workbook.xml.rels" cd count
+    $doc delete
 
 
     # xl/sharedStrings.xml
     if {$obj(sharedStrings) > 0} {
-      set doc [set obj(doc,xl/sharedStrings.xml) [dom createDocument sst]]
+      set doc [dom createDocument sst]
       set root [$doc documentElement]
 
       dom createNodeCmd textNode Text
@@ -2439,12 +2472,14 @@ oo::class create ooxml::xl_write {
 	  }
 	}
       }
+      ::ooxml::Dom2zip $zf $root "xl/sharedStrings.xml" cd count
+      $doc delete
     }
 
 
     # xl/calcChain.xml
     if {$obj(calcChain)} {
-      set doc [set obj(doc,xl/calcChain.xml) [dom createDocument calcChain]]
+      set doc [dom createDocument calcChain]
       set root [$doc documentElement]
 
       dom createNodeCmd -tagName c elementNode Tag_c
@@ -2455,11 +2490,13 @@ oo::class create ooxml::xl_write {
 	Tag_c r C1 i 3 l 1 {}
 	Tag_c r A3 i 2 {}
       }
+      ::ooxml::Dom2zip $zf $root "xl/calcChain.xml" cd count
+      $doc delete
     }
 
 
     # xl/styles.xml
-    set doc [set obj(doc,xl/styles.xml) [dom createDocument styleSheet]]
+    set doc [dom createDocument styleSheet]
     set root [$doc documentElement]
 
     foreach tag {alignment b bgColor border borders bottom cellStyle cellStyleXfs cellStyles cellXfs color diagonal dxfs family
@@ -2597,10 +2634,12 @@ oo::class create ooxml::xl_write {
       Tag_dxfs count 0 {}
       Tag_tableStyles count 0 {}
     }
+    ::ooxml::Dom2zip $zf $root "xl/styles.xml" cd count
+    $doc delete
 
 
     # xl/theme/theme1.xml
-    set doc [set obj(doc,xl/theme/theme1.xml) [dom createDocument a:theme]]
+    set doc [dom createDocument a:theme]
     set root [$doc documentElement]
 
     foreach tag {a:accent1 a:accent2 a:accent3 a:accent4 a:accent5 a:accent6 a:alpha a:bevelT a:bgFillStyleLst a:bodyPr a:camera
@@ -2936,10 +2975,12 @@ oo::class create ooxml::xl_write {
       }
       Tag_a:extraClrSchemeLst {}
     }
+    ::ooxml::Dom2zip $zf $root "xl/theme/theme1.xml" cd count
+    $doc delete
 
 
     # xl/workbook.xml
-    set doc [set obj(doc,xl/workbook.xml) [dom createDocument workbook]]
+    set doc [dom createDocument workbook]
     set root [$doc documentElement]
 
     dom createNodeCmd textNode Text
@@ -2969,6 +3010,8 @@ oo::class create ooxml::xl_write {
       Tag_calcPr calcId 140000 concurrentCalc 0 {}
       # fullCalcOnLoad 1
     }
+    ::ooxml::Dom2zip $zf $root "xl/workbook.xml" cd count
+    $doc delete
 
 
     # xl/worksheets/sheet1.xml SHEET
@@ -2978,7 +3021,7 @@ oo::class create ooxml::xl_write {
     }
 
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      set doc [set obj(doc,xl/worksheets/sheet$ws.xml) [dom createDocument worksheet]]
+      set doc [dom createDocument worksheet]
       set root [$doc documentElement]
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
       $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
@@ -3077,34 +3120,11 @@ oo::class create ooxml::xl_write {
 	  }
 	}
       }
-    }
-
-    # Content-Type application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-    set file [string trim $file]
-    if {$file eq {}} {
-      set file {spreadsheetml.xlsx}
-    }
-    if {[file extension $file] ne {.xlsx}} {
-      append file {.xlsx}
-    }
-    if {[catch {set zf [open $file w]}]} {
-      error "Unable to write $file"
-    }
-    fconfigure $zf \
-        -encoding    binary \
-        -translation binary \
-        -eofchar     {}
-    set count 0
-    set cd ""
-    foreach {tag doc} [array get obj doc,*] {
-      append cd [::ooxml::add_str_to_archive $zf \
-                     [lindex [split $tag ,] 1] \
-                     [[$doc documentElement] asXML \
-                          -indent $obj(indent) -xmlDeclaration 1 \
-                          -encString [string toupper $obj(encoding)]]]
-      incr count
+      ::ooxml::Dom2zip $zf $root "xl/worksheets/sheet$ws.xml" cd count
       $doc delete
     }
+
+    # Finalize zip.
     set cdoffset [tell $zf]
     set endrec [binary format a4ssssiis PK\05\06 0 0 \
                     $count $count [string length $cd] $cdoffset 0]

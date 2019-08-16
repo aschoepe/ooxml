@@ -1,5 +1,5 @@
-C minimum\sversion\sTcl\s8.6.7\srequired
-D 2019-08-16T03:33:42.000
+C Modified\swriting:\shold\sonly\sjust\sone\sDOM\stree\sof\sthe\sxml\sfiles\sto\sgenerate\sin\smemory\sand\sdrop\sthat\simmediately\safter\sdone\swith\sit,\sto\sreduce\smaxium\smem\speek\s(at\sbit).
+D 2019-08-16T09:54:26.000
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl e8ae05bcae1b14d60b9ea584d2690259259d9c468bd5ca5e8f49131e0725478a
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -13,7 +13,7 @@ F examples/sample6.tcl a5a7d8eae26fde1240341b6ea546c6440563a760b49fc429f6e97022c
 F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba30de5d6 x
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 8dd801dcf6626a539104e2b4a39b8c45d673df2072e888d217a55c07a9ca6b34 x
-F ooxml.tcl 89ee8be86ded0e55c8cb33fab6d6a78d2b0edffe8a86273510ad9562e135050a
+F ooxml.tcl b6abbf2f7a7dc00b9255df5bbf4a33e8fd0d9f2da54d1dcd9333d2b491fae399
 F pkgIndex.tcl 5d7e13d5a875c4a7c262f4df76a12d38f8a58ccf5dc5c5dc0add10ec89f80d9d
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -44,8 +44,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 0c057761f8caa3e4cca4a3ecb2bdd31013194c4ff1905228696e9cb08a4d13b6
-R 58c8ba31559f53a47b6e68226e85fb9c
-U alex
-Z bcfbd505cca9bbd632c362aebabb7d64
+P 32eaa747377eae13acfcd407c83161ca255336110ee2147d441e3d5683f030ba
+R 57c78e22158406ae0b6ff07636dd2e13
+U rolf
+Z eb8d141584ce27005d9236516ed985ad
 # Remove this line to create a well-formed Fossil manifest.

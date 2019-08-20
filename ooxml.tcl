@@ -4,7 +4,8 @@
 #
 #  $Id: ooxml.tcl,v 1.28 2018/06/20 15:01:38 alex Exp $
 #
-#  Copyright (C) 2018 Alexander Schoepe, Bochum, DE, <schoepe@users.sourceforge.net>
+#  Copyright (C) 2018-2019 Alexander Schoepe, Bochum, DE, <schoepe@users.sourceforge.net>
+#  Copyright (C) 2019 Rolf Ade, DE
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without modification,
@@ -163,8 +164,7 @@
 #
 
 
-package require Tcl 8.6
-package require vfs::zip
+package require Tcl 8.6.7-
 package require tdom 0.9.0-
 package require msgcat
 
@@ -173,6 +173,7 @@ namespace eval ::ooxml {
   namespace export xl_sheets xl_read xl_write
 
   variable defaults
+  variable initNodeCmds
   variable predefNumFmts
   variable predefColors
   variable predefColorsName
@@ -465,6 +466,82 @@ namespace eval ::ooxml {
   msgcat::mcset zh Sheet \u5de5\u4f5c\u8868
 }
 
+# ooxml::timet_to_dos
+#
+#        Convert a unix timestamp into a DOS timestamp for ZIP times.
+#
+#   DOS timestamps are 32 bits split into bit regions as follows:
+#                  24                16                 8                 0
+#   +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#   |Y|Y|Y|Y|Y|Y|Y|m| |m|m|m|d|d|d|d|d| |h|h|h|h|h|m|m|m| |m|m|m|s|s|s|s|s|
+#   +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#
+# From tcllib / zipfile::mkzip      
+proc ::ooxml::timet_to_dos {time_t} {
+  set s [clock format $time_t -format {%Y %m %e %k %M %S}]
+  scan $s {%d %d %d %d %d %d} year month day hour min sec
+  expr {(($year-1980) << 25) | ($month << 21) | ($day << 16) 
+        | ($hour << 11) | ($min << 5) | ($sec >> 1)}
+}
+
+# ooxml::add_str_to_archive --
+#
+#        Add a string as a single file with string as content with
+#        argument path to a zip archive. The zipchan channel must
+#        already be open and binary. The return value is the central
+#        directory record that will need to be used when finalizing
+#        the zip archive.
+#
+# Derived from tcllib / zipfile::mkzip::add_file_to_archive
+proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
+  set mtime [timet_to_dos [clock seconds]]
+  set utfpath [encoding convertto utf-8 $path]
+  set utfcomment [encoding convertto utf-8 $comment]
+  set flags [expr {(1<<11)}] ;# utf-8 comment and path
+  set method 0               ;# store 0, deflate 8
+  set attr 0                 ;# text or binary (default binary)
+  set version 20             ;# minumum version req'd to extract
+  set extra ""
+  set crc 0
+  set size 0
+  set csize 0
+  set seekable [expr {[tell $zipchan] != -1}]
+  set attrex 0x81b60020  ;# 0o100666 (-rw-rw-rw-)
+  
+  set utfdata [encoding convertto utf-8 $data]
+  set size [string length $utfdata]
+  
+  set offset [tell $zipchan]
+  set local [binary format a4sssiiiiss PK\03\04 \
+                 $version $flags $method $mtime $crc $csize $size \
+                 [string length $utfpath] [string length $extra]]
+  append local $utfpath $extra
+  puts -nonewline $zipchan $local
+  
+  set crc [::zlib crc32 $utfdata]
+  set cdata [::zlib deflate $utfdata]
+  if {[string length $cdata] < $size} {
+    set method 8
+    set utfdata $cdata
+  }
+  set csize [string length $utfdata]
+  puts -nonewline $zipchan $utfdata
+
+  # update the header
+  set local [binary format a4sssiiii PK\03\04 \
+                 $version $flags $method $mtime $crc $csize $size]
+  set current [tell $zipchan]
+  seek $zipchan $offset
+  puts -nonewline $zipchan $local
+  seek $zipchan $current
+  
+  set hdr [binary format a4ssssiiiisssssii PK\01\02 0x0317 \
+               $version $flags $method $mtime $crc $csize $size \
+               [string length $utfpath] [string length $extra]\
+               [string length $utfcomment] 0 $attr $attrex $offset]
+  append hdr $utfpath $extra $utfcomment
+  return $hdr
+}
 
 proc ::ooxml::Default { name value } {
   variable defaults
@@ -673,140 +750,6 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
   return {}
 }
 
-
-proc ::ooxml::ZipInitialize { *v file } {
-  upvar ${*v} v
-
-  set fd [open $file w]
-  set v(fd) $fd
-  set v(base) [tell $fd]
-  set v(toc) {}
-  fconfigure $fd -translation binary -encoding binary
-}
-
-
-proc ::ooxml::ZipEmit { *v s } {
-  upvar ${*v} v
-
-  puts -nonewline $v(fd) $s
-}
-
-
-proc ::ooxml::ZipDosTime { sec } {
-  set f [clock format $sec -format {%Y %m %d %H %M %S} -gmt 1]
-  regsub -all { 0(\d)} $f { \1} f
-  foreach {Y M D h m s} $f break
-  set date [expr {(($Y-1980)<<9) | ($M<<5) | $D}]
-  set time [expr {($h<<11) | ($m<<5) | ($s>>1)}]
-  return [list $date $time]
-}
-
-
-proc ::ooxml::ZipAddEntry { *v name contents {date {}} {force 0} } {
-  upvar ${*v} v
-
-  if {$date eq {}} {
-    set date [clock seconds]
-  }
-  lassign [ZipDosTime $date] date time
-  set flag 0
-  set type 0 ;# stored
-  set fsize [string length $contents]
-  set csize $fsize
-  set fnlen [string length $name]
-  
-  if {$force > 0 && $force != [string length $contents]} {
-    set csize $fsize
-    set fsize $force
-    set type 8 ;# if we're passing in compressed data, it's deflated
-  }
-  
-  if {[catch {zlib crc32 $contents} crc]} {
-    set crc 0
-  } elseif {$type == 0} {
-    set cdata [zlib deflate $contents 9]
-    if {[string length $cdata] < [string length $contents]} {
-      set contents $cdata
-      set csize [string length $cdata]
-      set type 8 ;# deflate
-    }
-  }
-  
-  lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
-  
-  ZipEmit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
-  ZipEmit v $name
-  ZipEmit v $contents
-}
-
-
-proc ::ooxml::ZipAddDirectory { *v name {date {}} {force 0} } {
-  upvar ${*v} v
-
-  set name "${name}/"
-  if {$date eq {}} {
-    set date [clock seconds]
-  }
-  lassign [ZipDosTime $date] date time
-  set flag 0
-  set type 0 ;# stored
-  set fsize 0
-  set csize 0
-  set fnlen [string length $name]
-  set crc 0
-  
-  lappend v(toc) "[binary format a2c6ssssiiiss4ii PK {1 2 20 0 20 0} $flag $type $time $date $crc $csize $fsize $fnlen {0 0 0 0} 128 [tell $v(fd)]]$name"
-  
-  ZipEmit v [binary format a2c4ssssiiiss PK {3 4 20 0} $flag $type $time $date $crc $csize $fsize $fnlen 0]
-  ZipEmit v $name
-}
-
-
-proc ::ooxml::ZipFinalize { *v } {
-  upvar ${*v} v
-
-  set pos [tell $v(fd)]
-  set ntoc [llength $v(toc)]
-  foreach x $v(toc) {
-    ZipEmit v $x
-  }
-  set v(toc) {}
-  
-  set len [expr {[tell $v(fd)] - $pos}]
-  incr pos -$v(base)
-  
-  ZipEmit v [binary format a2c2ssssiis PK {5 6} 0 0 $ntoc $ntoc $len $pos 0]
-  
-  close $v(fd)
-}
-
-
-proc ::ooxml::Zip { zipfile directory files } {
-  array set v { fd {} base {} toc {} }
-
-  # this code is a rewrite and extension of the zipper code found
-  # at http://equi4.com/critlib/ and http://wiki.tcl.tk/36689
-  # by Tom Krehbiel 2012 krehbiel.tom at gmail dot com
-
-
-  ZipInitialize v $zipfile
-  foreach file $files {
-    regsub {^\./} $file {} to
-    set from [file join [file normalize $directory] $to]
-    if {[file isfile $from]} {
-      set fd [open $from r]
-      fconfigure $fd -translation binary -encoding binary
-      ZipAddEntry v $to [read $fd] [file mtime $from]
-      close $fd
-    } elseif {[file isdir $from]} {
-      ZipAddDirectory v $to [file mtime $from]
-      lappend dirs $file
-    }
-  }
-  ZipFinalize v
-}
-
-
 proc ::ooxml::Column { col } {
   set name {}
   while {$col >= 0} {
@@ -904,6 +847,8 @@ proc ::ooxml::Color { color } {
 #
 
 proc ::ooxml::xl_sheets { file } {
+  package require vfs::zip
+
   set sheets {}
 
   set mnt [vfs::zip::Mount $file xlsx]
@@ -959,6 +904,8 @@ proc ::ooxml::xl_sheets { file } {
 proc ::ooxml::xl_read { file args } {
   variable predefNumFmts
 
+  package require vfs::zip
+
   array set cellXfs {}
   array set numFmts [array get predefNumFmts]
   array set sharedStrings {}
@@ -970,7 +917,6 @@ proc ::ooxml::xl_read { file args } {
   if {[string trim $opts(sheets)] eq {} && [string trim $opts(sheetnames)] eq {}} {
     set opts(sheetnames) *
   }
-
 
   set mnt [vfs::zip::Mount $file xlsx]
 
@@ -1450,6 +1396,75 @@ proc ::ooxml::xl_read { file args } {
     }
   }
   return [array get wb]
+}
+
+# Internal helper
+proc ooxml::Dom2zip {zf node path cd count} {
+  upvar $cd mycd
+  upvar $count mycount
+  append mycd [::ooxml::add_str_to_archive $zf $path \
+                   [$node asXML -indent none -xmlDeclaration 1 \
+                        -encString "UTF-8"]]
+  incr mycount
+}
+
+
+#
+# ooxml::InitNodeCommands
+#
+
+
+proc ooxml::InitNodeCommands {} {
+  variable initNodeCmds
+
+  if {[info exists initNodeCmds] && $initNodeCmds} return
+
+  set elementNodes {
+    AppVersion Application
+    Company
+    Default DocSecurity
+    HeadingPairs HyperlinksChanged
+    LinksUpToDate
+    Override
+    Relationship
+    ScaleCrop SharedDoc
+    TitlesOfParts
+    a:accent1 a:accent2 a:accent3 a:accent4 a:accent5 a:accent6 a:alpha a:bevelT a:bgFillStyleLst a:bodyPr a:camera
+    a:clrScheme a:cs a:dk1 a:dk2 a:ea a:effectLst a:effectRef a:effectStyle a:effectStyleLst a:extraClrSchemeLst
+    a:fillRef a:fillStyleLst a:fillToRect a:fmtScheme a:folHlink a:font a:fontRef a:fontScheme a:gradFill a:gs
+    a:gsLst a:hlink a:latin a:lightRig a:lin a:ln a:lnDef a:lnRef a:lnStyleLst a:lstStyle a:lt1 a:lt2 a:majorFont
+    a:minorFont a:objectDefaults a:outerShdw a:path a:prstDash a:rot a:satMod a:scene3d a:schemeClr a:shade
+    a:solidFill a:sp3d a:spDef a:spPr a:srgbClr a:style a:sysClr a:themeElements a:tint
+    alignment autoFilter
+    b bgColor bookViews border borders bottom
+    c calcPr cellStyle cellStyleXfs cellStyles cellXfs col color cols
+    cp:lastModifiedBy
+    dc:creator
+    dcterms:created dcterms:modified
+    definedName definedNames diagonal dimension dxfs
+    f family fgColor fileVersion fill fills font fonts
+    i
+    left
+    mergeCell mergeCells
+    name numFmt numFmts
+    pageMargins pane patternFill
+    right row
+    scheme sheet sheetData sheetFormatPr sheetView sheetViews sheets si sz
+    t tableStyles top
+    u
+    v
+    vt:i4 vt:lpstr vt:lpstrvt:lpstr vt:variant vt:vector
+    workbookPr workbookView
+    xf
+  }
+
+  namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
+
+  foreach tag $elementNodes {
+    namespace eval ::ooxml "dom createNodeCmd -tagName $tag elementNode Tag_$tag; namespace export Tag_$tag"
+  }
+  
+  set initNodeCmds 1
 }
 
 
@@ -2002,9 +2017,74 @@ oo::class create ooxml::xl_write {
     my variable cells
     my variable cols
 
-    if {[::ooxml::Getopt opts {index.arg {} style.arg 0 formula.arg {} string nozero globalstyle height.arg {}} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      index ""
+      style 0
+      formula ""
+      string 0
+      nozero 0
+      globalstyle 0
+      height ""
     }
+    set len [llength $args]
+    set loopInd 0
+    while {$loopInd < $len} {
+      switch -- [lindex $args $loopInd] {
+        "-index" {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(index) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-index: missing argument"
+          }            
+        }
+        "-style" {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(style) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-style: missing argument"
+          }
+        }
+        "-formula"  {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(formula) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-formula: missing argument"
+          }
+        }
+        "-string" {
+          set opts(string) 1
+          incr loopInd
+        }
+        "-nozero" {
+          set opts(nozero) 1
+        }
+        "-globalstyle" {
+          set opts(globalstyle) 1
+          incr loopInd
+        }
+        "-height" {
+          incr loopInd
+          if {$loopInd < $len} {
+            set opts(height) [lindex $args $loopInd]
+            incr loopInd
+          } else {
+            error "-height: missing argument"
+          }
+        }
+        default {
+          error "unknown option [lindex $args $loopInd]"
+        }
+      }
+    }
+    # if {[::ooxml::Getopt opts {index.arg {} style.arg 0 formula.arg {} string nozero globalstyle height.arg {}} $args]} {
+    #   error $opts(-errmsg)
+    # }
 
     if {!$obj(callRow,$obj(sheets))} {
       set obj(callRow,$obj(sheets)) 1
@@ -2254,25 +2334,49 @@ oo::class create ooxml::xl_write {
       error $opts(-errmsg)
     }
 
+    ooxml::InitNodeCommands
+    namespace import ::ooxml::Tag_* ::ooxml::Text
+
+    # Initialize zip file
+    set file [string trim $file]
+    if {$file eq {}} {
+      set file {spreadsheetml.xlsx}
+    }
+    if {[file extension $file] ne {.xlsx}} {
+      append file {.xlsx}
+    }
+    if {[catch {set zf [open $file w]}]} {
+      error "Unable to write $file"
+    }
+    fconfigure $zf \
+        -encoding    binary \
+        -translation binary \
+        -eofchar     {}
+    set count 0
+    set cd ""
+    
     foreach {n v} [array get cells] {
       if {[dict exists $v t] && [dict get $v t] eq {s} && [dict exists $v v] && [dict get $v v] ne {}} {
-	if {[set pos [lsearch -exact $sharedStrings [dict get $v v]]] == -1} {
-	  lappend sharedStrings [dict get $v v]
-	  set pos [lsearch -exact $sharedStrings [dict get $v v]]
+        set thisv [dict get $v v]
+        if {[info exists lookup($thisv)]} {
+          set pos $lookup($thisv)
+        } else {
+          set pos [llength $sharedStrings]
+	  lappend sharedStrings $thisv
+          set lookup($thisv) $pos
 	}
-	set obj(sharedStrings) 1
+        set obj(sharedStrings) 1
 	dict set cells($n) v $pos
       }
     }
     unset -nocomplain n v
-
+    array unset lookup
+    
     # _rels/.rels
-    set doc [set obj(doc,_rels/.rels) [dom createDocument Relationships]]
+    set doc [dom createDocument Relationships]
     set root [$doc documentElement]
 
     set rId 0
-
-    dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
@@ -2281,15 +2385,13 @@ oo::class create ooxml::xl_write {
       Tag_Relationship Id rId2 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties Target docProps/app.xml {}
       Tag_Relationship Id rId3 Type http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties Target docProps/core.xml {}
     }
-
+    ::ooxml::Dom2zip $zf $root "_rels/.rels" cd count
+    $doc delete
 
     # [Content_Types].xml
-    set doc [set obj(doc,\[Content_Types\].xml) [dom createDocument Types]]
+    set doc [dom createDocument Types]
     set root [$doc documentElement]
 
-    foreach tag {Default Override} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/content-types
 
@@ -2311,17 +2413,12 @@ oo::class create ooxml::xl_write {
       Tag_Override PartName /docProps/core.xml ContentType application/vnd.openxmlformats-package.core-properties+xml {}
       Tag_Override PartName /docProps/app.xml ContentType application/vnd.openxmlformats-officedocument.extended-properties+xml {}
     }
-
+    ::ooxml::Dom2zip $zf $root "\[Content_Types\].xml" cd count
+    $doc delete
 
     # docProps/app.xml
-    set doc [set obj(doc,docProps/app.xml) [dom createDocument Properties]]
+    set doc [set obj(doc,) [dom createDocument Properties]]
     set root [$doc documentElement]
-
-    dom createNodeCmd textNode Text
-    foreach tag {AppVersion Application Company DocSecurity HeadingPairs HyperlinksChanged LinksUpToDate ScaleCrop SharedDoc TitlesOfParts
-                 vt:i4 vt:lpstrvt:lpstr vt:lpstr vt:variant vt:vector} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
     $root setAttribute xmlns:vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
@@ -2355,16 +2452,12 @@ oo::class create ooxml::xl_write {
       Tag_HyperlinksChanged { Text false }
       Tag_AppVersion { Text 1.0 }
     }
-
+    ::ooxml::Dom2zip $zf $root "docProps/app.xml" cd count
+    $doc delete
 
     # docProps/core.xml
-    set doc [set obj(doc,docProps/core.xml) [dom createDocument cp:coreProperties]]
+    set doc [dom createDocument cp:coreProperties]
     set root [$doc documentElement]
-
-    dom createNodeCmd textNode Text
-    foreach tag {cp:lastModifiedBy dc:creator dcterms:created dcterms:modified} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns:cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
     $root setAttribute xmlns:dc http://purl.org/dc/elements/1.1/
@@ -2378,13 +2471,12 @@ oo::class create ooxml::xl_write {
       Tag_dcterms:created xsi:type dcterms:W3CDTF { Text $obj(created) }
       Tag_dcterms:modified xsi:type dcterms:W3CDTF { Text $obj(modified) }
     }
-
+    ::ooxml::Dom2zip $zf $root "docProps/core.xml" cd count
+    $doc delete
 
     # xl/_rels/workbook.xml.rels
-    set doc [set obj(doc,xl/_rels/workbook.xml.rels) [dom createDocument Relationships]]
+    set doc [dom createDocument Relationships]
     set root [$doc documentElement]
-
-    dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
@@ -2402,17 +2494,14 @@ oo::class create ooxml::xl_write {
 	Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain Target calcChain.xml {}
       }
     }
+    ::ooxml::Dom2zip $zf $root "xl/_rels/workbook.xml.rels" cd count
+    $doc delete
 
 
     # xl/sharedStrings.xml
     if {$obj(sharedStrings) > 0} {
-      set doc [set obj(doc,xl/sharedStrings.xml) [dom createDocument sst]]
+      set doc [dom createDocument sst]
       set root [$doc documentElement]
-
-      dom createNodeCmd textNode Text
-      foreach tag {si t} {
-	dom createNodeCmd -tagName $tag elementNode Tag_$tag
-      }
 
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
       $root setAttribute count [llength $sharedStrings]
@@ -2424,16 +2513,18 @@ oo::class create ooxml::xl_write {
 	    Tag_t { Text $string }
 	  }
 	}
+	# garbage collection
+	set sharedStrings {}
       }
+      ::ooxml::Dom2zip $zf $root "xl/sharedStrings.xml" cd count
+      $doc delete
     }
 
 
     # xl/calcChain.xml
     if {$obj(calcChain)} {
-      set doc [set obj(doc,xl/calcChain.xml) [dom createDocument calcChain]]
+      set doc [dom createDocument calcChain]
       set root [$doc documentElement]
-
-      dom createNodeCmd -tagName c elementNode Tag_c
 
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
 
@@ -2441,17 +2532,14 @@ oo::class create ooxml::xl_write {
 	Tag_c r C1 i 3 l 1 {}
 	Tag_c r A3 i 2 {}
       }
+      ::ooxml::Dom2zip $zf $root "xl/calcChain.xml" cd count
+      $doc delete
     }
 
 
     # xl/styles.xml
-    set doc [set obj(doc,xl/styles.xml) [dom createDocument styleSheet]]
+    set doc [dom createDocument styleSheet]
     set root [$doc documentElement]
-
-    foreach tag {alignment b bgColor border borders bottom cellStyle cellStyleXfs cellStyles cellXfs color diagonal dxfs family
-                 fgColor fill fills font fonts i left name numFmt numFmts patternFill right scheme sz tableStyles top u xf} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
     $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
@@ -2583,20 +2671,13 @@ oo::class create ooxml::xl_write {
       Tag_dxfs count 0 {}
       Tag_tableStyles count 0 {}
     }
+    ::ooxml::Dom2zip $zf $root "xl/styles.xml" cd count
+    $doc delete
 
 
     # xl/theme/theme1.xml
-    set doc [set obj(doc,xl/theme/theme1.xml) [dom createDocument a:theme]]
+    set doc [dom createDocument a:theme]
     set root [$doc documentElement]
-
-    foreach tag {a:accent1 a:accent2 a:accent3 a:accent4 a:accent5 a:accent6 a:alpha a:bevelT a:bgFillStyleLst a:bodyPr a:camera
-		 a:clrScheme a:cs a:dk1 a:dk2 a:ea a:effectLst a:effectRef a:effectStyle a:effectStyleLst a:extraClrSchemeLst
-		 a:fillRef a:fillStyleLst a:fillToRect a:fmtScheme a:folHlink a:font a:fontRef a:fontScheme a:gradFill a:gs a:gsLst
-		 a:hlink a:latin a:lightRig a:lin a:ln a:lnDef a:lnRef a:lnStyleLst a:lstStyle a:lt1 a:lt2 a:majorFont a:minorFont
-		 a:objectDefaults a:outerShdw a:path a:prstDash a:rot a:satMod a:scene3d a:schemeClr a:shade a:solidFill a:sp3d
-		 a:spDef a:spPr a:srgbClr a:style a:sysClr a:themeElements a:tint} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns:a http://schemas.openxmlformats.org/drawingml/2006/main
     $root setAttribute name Office-Design
@@ -2922,16 +3003,13 @@ oo::class create ooxml::xl_write {
       }
       Tag_a:extraClrSchemeLst {}
     }
+    ::ooxml::Dom2zip $zf $root "xl/theme/theme1.xml" cd count
+    $doc delete
 
 
     # xl/workbook.xml
-    set doc [set obj(doc,xl/workbook.xml) [dom createDocument workbook]]
+    set doc [dom createDocument workbook]
     set root [$doc documentElement]
-
-    dom createNodeCmd textNode Text
-    foreach tag {bookViews calcPr definedName definedNames fileVersion sheet sheets workbookPr workbookView} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
     $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
@@ -2955,16 +3033,14 @@ oo::class create ooxml::xl_write {
       Tag_calcPr calcId 140000 concurrentCalc 0 {}
       # fullCalcOnLoad 1
     }
+    ::ooxml::Dom2zip $zf $root "xl/workbook.xml" cd count
+    $doc delete
 
 
     # xl/worksheets/sheet1.xml SHEET
-    dom createNodeCmd textNode Text
-    foreach tag {autoFilter c col cols dimension f mergeCell mergeCells pageMargins pane row sheetData sheetFormatPr sheetView sheetViews v} {
-      dom createNodeCmd -tagName $tag elementNode Tag_$tag
-    }
 
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      set doc [set obj(doc,xl/worksheets/sheet$ws.xml) [dom createDocument worksheet]]
+      set doc [dom createDocument worksheet]
       set root [$doc documentElement]
       $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
       $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
@@ -2987,26 +3063,20 @@ oo::class create ooxml::xl_write {
 	  Tag_cols {}
 	}
 	Tag_sheetData {
-	  set lastRow -1
-	  set rows {}
+	  array unset rows
 	  foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
 	    lassign [split $idx ,] sheet row col
-	    lappend rows $row
+            lappend rows($row) $col
 	  }
-	  foreach row [lsort -unique -integer $rows] {
-	    set maxCol $col
-	    if {$row != $lastRow} {
-	      set lastRow $row
-	      set minCol $col
-	    }
+	  foreach row [lsort -integer [array names rows]] {
 	    set attr {}
 	    if {[dict exists $obj(rowHeight,$ws) $row]} {
 	      lappend attr ht [dict get $obj(rowHeight,$ws) $row] customHeight 1
 	    }
 	    # lappend attr spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
 	    Tag_row r [expr {$row + 1}] {*}$attr {
-	      foreach idx [lsort -dictionary [array names cells $ws,$row,*]] {
-		lassign [split $idx ,] sheet row col
+              foreach col $rows($row) {
+                set idx "$ws,$row,$col"
 		if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {})} {
 		  set attr {}
 		  if {[dict exists $cells($idx) s] && [dict get $cells($idx) s] > 0} {
@@ -3026,6 +3096,8 @@ oo::class create ooxml::xl_write {
 		} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
 		  Tag_c r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
 		}
+		# garbage collection
+	        unset -nocomplain cells($idx)
 	      }
 	    }
 	  }
@@ -3069,41 +3141,17 @@ oo::class create ooxml::xl_write {
 	  }
 	}
       }
+      ::ooxml::Dom2zip $zf $root "xl/worksheets/sheet$ws.xml" cd count
+      $doc delete
     }
 
-    # Content-Type application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-    set file [string trim $file]
-    if {$file eq {}} {
-      set file {spreadsheetml.xlsx}
-    }
-    if {[file extension $file] ne {.xlsx}} {
-      append file {.xlsx}
-    }
-    set path [file dirname $file]
-    set uid [format xl_%X [clock microseconds]]
-    set filesToZip {}
-    foreach {tag doc} [array get obj doc,*] {
-      lappend filesToZip [set docname [lindex [split $tag ,] 1]]
-      set xmlfile [file join $path $uid $docname]
-      file mkdir [file dirname $xmlfile]
-      if {![catch {open $xmlfile w} fd]} {
-	fconfigure $fd -encoding utf-8
-	#puts $fd "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-	puts $fd [[$doc documentElement] asXML -indent $obj(indent) -xmlDeclaration 1 -encString [string toupper $obj(encoding)]]
-	close $fd
-	$doc delete
-      }
-    }
-    set pwd [pwd]
-    cd [file join $path $uid]
-    if {$path eq {.}} {
-      set file [file join .. $file]
-    }
-    ::ooxml::Zip $file . $filesToZip
-    cd $pwd
-    if {!$opts(holdcontainerdirectory)} {
-      file delete -force [file join $path $uid]
-    }
+    # Finalize zip.
+    set cdoffset [tell $zf]
+    set endrec [binary format a4ssssiis PK\05\06 0 0 \
+                    $count $count [string length $cd] $cdoffset 0]
+    puts -nonewline $zf $cd
+    puts -nonewline $zf $endrec
+    close $zf
     return 0
   }
 }
@@ -3237,7 +3285,7 @@ proc ::ooxml::tablelist_to_xl_callback { spreadsheet sheet maxcol column title w
   }
 }
 
-package provide ooxml 1.2
+package provide ooxml 1.3
 
 # Local Variables:
 # tcl-indent-level: 2

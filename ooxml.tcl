@@ -559,89 +559,6 @@ proc ::ooxml::Default { name value } {
 }
 
 
-proc ::ooxml::Getopt { *result declaration to_parse } {
-  if {${*result} ne {}} {
-    upvar 1 ${*result} result
-  }
-
-  set error 0
-  set errmsg {} 
-  array set result {}
-
-  set optopts {}
-  set argcnt [llength $declaration]
-  for {set argc 0} {$argc < $argcnt} {incr argc} {
-    set opt [lindex $declaration $argc]
-    if {[lsearch -exact {. -} [string index $opt 0]] > -1} {
-      set error 1
-      lappend errmsg "option name can not start with '.' or '-'"
-      set result(-error) $error
-      set result(-errmsg) $errmsg
-      return $error
-    }
-    if {[regsub -- {\..*$} $opt {} name]} {
-      regsub -- (${name}) $opt {} opt
-    }
-    if {![regsub -- {\.arg\M} $opt {} opt]} {
-      dict set optopts $name arg 0
-      set result($name) 0
-    } else {
-      dict set optopts $name arg 1
-      incr argc
-      if {$argc < $argcnt} {
-	set result($name) [lindex $declaration $argc]
-      } else {
-	set result($name) {}
-	set error 1
-	lappend errmsg "declaration of '$name' missing default value"
-	set result(-error) $error
-	set result(-errmsg) $errmsg
-	return $error
-      }
-    }
-  }
-
-  set argcnt [llength $to_parse]
-  for {set argc 0} {$argc < $argcnt} {incr argc} {
-    set opt [lindex $to_parse $argc]
-    if {$opt eq {--}} {
-      set result(--) [lrange $to_parse ${argc}+1 end]
-      break
-    } elseif {[string index $opt 0] eq {-}} {
-      set opt [string range $opt 1 end]
-      if {[dict keys $optopts $opt] eq $opt || [llength [set opt [dict keys $optopts ${opt}*]]] == 1} {
-	if {[dict get $optopts $opt arg]} {
-	  incr argc
-	  if {$argc < $argcnt} {
-	    set result($opt) [lindex $to_parse $argc]
-	  } else {
-	    set error 1
-	    lappend errmsg "${opt}: missing argument"
-	  }
-	} else {
-	  set result($opt) 1
-	}
-      } else {
-	set error 1
-	lappend errmsg "[lindex $to_parse $argc]: unknown or ambiguous option"
-      }
-    } else {
-      set error 1
-      lappend errmsg "${opt}: syntax error"
-    }
-  }
-
-  if {![info exists result(--)]} {
-    set result(--) {}
-  }
-
-  set result(-error) $error
-  set result(-errmsg) $errmsg
-
-  return $error
-}
-
-
 proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
   set d  1
   set m  1
@@ -911,8 +828,34 @@ proc ::ooxml::xl_read { file args } {
   array set sharedStrings {}
   set sheets {}
 
-  if {[::ooxml::Getopt opts {valuesonly keylist sheets.arg {} sheetnames.arg {} datefmt.arg {%Y-%m-%d %H:%M:%S} as.arg array} $args]} {
-    error $opts(-errmsg)
+  array set opts {
+    valuesonly 0
+    keylist 0
+    sheets {}
+    sheetnames {}
+    datefmt {%Y-%m-%d %H:%M:%S}
+    as array
+  }
+
+  set len [llength $args]
+  set idx 0
+  for {set idx 0} {$idx < $len} {incr idx} {
+    switch -- [set opt [lindex $args $idx]] {
+      -sheets - -sheetnames - -datefmt - -as {
+	incr idx
+	if {$idx < $len} {
+	  set opts([string range $opt 1 end]) [lindex $args $idx]
+	} else {
+	  error "option '$opt': missing argument"
+	}            
+      }
+      -valuesonly - -keylist {
+	set opts([string range $opt 1 end]) 1
+      }
+      default {
+	error "unknown option '$opt'"
+      }
+    }
   }
   if {[string trim $opts(sheets)] eq {} && [string trim $opts(sheetnames)] eq {}} {
     set opts(sheetnames) *
@@ -1485,8 +1428,30 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
 
-    if {[::ooxml::Getopt opts {creator.arg {unknown} created.arg {} modifiedby.arg {} modified.arg {} application.arg {}} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      creator {unknown}
+      created {}
+      modifiedby {}
+      modified {}
+      application {}
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -creator - -created - -modifiedby - -modified - -application {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     set obj(blockPreset) 0
@@ -1562,8 +1527,44 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable numFmts
 
-    if {[::ooxml::Getopt opts {list format.arg {} general date time datetime iso8601 number decimal red separator fraction scientific percent string text} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      list 0
+      format {}
+      general 0
+      date 0
+      time 0
+      datetime 0
+      iso8601 0
+      number 0
+      decimal 0
+      red 0
+      separator 0
+      fraction 0
+      scientific 0
+      percent 0
+      string 0
+      text 0
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -format {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -list - -general - -date - -time - -datetime - -iso8601 - -number - -decimal - -red - -separator - -fraction - -scientific - -percent - -string - -text {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {$opts(list)} {
@@ -1669,8 +1670,38 @@ oo::class create ooxml::xl_write {
     my variable fonts
 
     array set a $fonts(0)
-    if {[::ooxml::Getopt opts [list list name.arg $a(name) family.arg $a(family) size.arg $a(size) color $a(color) scheme $a(scheme) bold italic underline color.arg {}] $args]} {
-      error $opts(-errmsg)
+
+    array set opts "
+      list 0
+      name [list $a(name)]
+      family [list $a(family)]
+      size [list $a(size)]
+      color [list $a(color)]
+      scheme [list $a(scheme)]
+      bold 0
+      italic 0
+      underline 0
+    "
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -name - -family - -size - -color - -scheme {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -list - -bold - -italic - -underline {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {$opts(list)} {
@@ -1720,8 +1751,32 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable fills
 
-    if {[::ooxml::Getopt opts {list patterntype.arg none fgcolor.arg {} bgcolor.arg {}} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      list 0
+      patterntype none
+      fgcolor {}
+      bgcolor {}
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -patterntype - -fgcolor - -bgcolor {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -list {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {$opts(list)} {
@@ -1764,8 +1819,40 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable borders
 
-    if {[::ooxml::Getopt opts {list leftstyle.arg {} leftcolor.arg {} rightstyle.arg {} rightcolor.arg {} topstyle.arg {} topcolor.arg {} bottomstyle.arg {} bottomcolor.arg {} diagonalstyle.arg {} diagonalcolor.arg {} diagonaldirection.arg {}} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      list 0
+      leftstyle {}
+      leftcolor {}
+      rightstyle {}
+      rightcolor {}
+      topstyle {}
+      topcolor {}
+      bottomstyle {}
+      bottomcolor {}
+      diagonalstyle {}
+      diagonalcolor {}
+      diagonaldirection {}
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+	-leftstyle - -leftcolor - -rightstyle - -rightcolor - -topstyle - -topcolor - -bottomstyle - -bottomcolor - -diagonalstyle - -diagonalcolor - -diagonaldirection {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -list {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {$opts(list)} {
@@ -1847,8 +1934,38 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable styles
 
-    if {[::ooxml::Getopt opts {list numfmt.arg 0 font.arg 0 fill.arg 0 border.arg 0 xf.arg 0 horizontal.arg {} vertical.arg {} rotate.arg {} wrap} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      list 0
+      numfmt 0
+      font 0
+      fill 0
+      border 0
+      xf 0
+      horizontal {}
+      vertical {}
+      rotate {}
+      wrap 0
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -numfmt - -font - -fill - -border - -xf - -horizontal - -vertical - -rotate {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -list - -wrap {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {$opts(list)} {
@@ -1933,8 +2050,37 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable cols
 
-    if {[::ooxml::Getopt opts {index.arg {} to.arg {} width.arg {} style.arg {} bestfit customwidth string nozero calcfit} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      index {}
+      to {}
+      width {}
+      style {}
+      bestfit 0
+      customwidth 0
+      string 0
+      nozero 0
+      calcfit 0
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -index - -to - -width - -style  {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -bestfit - -customwidth - -string - -nozero - -calcfit {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {[regexp {^\d+$} $opts(index)] && $opts(index) > -1} {
@@ -1973,8 +2119,27 @@ oo::class create ooxml::xl_write {
   method row { sheet args } {
     my variable obj
 
-    if {[::ooxml::Getopt opts {index.arg {} height.arg {}} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      index {}
+      height {}
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -index - -height  {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     if {![string is integer -strict $opts(height)] || $opts(height) < 1 || $opts(height) > 1024} {
@@ -2018,73 +2183,35 @@ oo::class create ooxml::xl_write {
     my variable cols
 
     array set opts {
-      index ""
+      index {}
       style 0
-      formula ""
+      formula {}
       string 0
       nozero 0
       globalstyle 0
-      height ""
+      height {}
     }
+
     set len [llength $args]
-    set loopInd 0
-    while {$loopInd < $len} {
-      switch -- [lindex $args $loopInd] {
-        "-index" {
-          incr loopInd
-          if {$loopInd < $len} {
-            set opts(index) [lindex $args $loopInd]
-            incr loopInd
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -index - -style - -formula - -height  {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
-            error "-index: missing argument"
+            error "option '$opt': missing argument"
           }            
         }
-        "-style" {
-          incr loopInd
-          if {$loopInd < $len} {
-            set opts(style) [lindex $args $loopInd]
-            incr loopInd
-          } else {
-            error "-style: missing argument"
-          }
-        }
-        "-formula"  {
-          incr loopInd
-          if {$loopInd < $len} {
-            set opts(formula) [lindex $args $loopInd]
-            incr loopInd
-          } else {
-            error "-formula: missing argument"
-          }
-        }
-        "-string" {
-          set opts(string) 1
-          incr loopInd
-        }
-        "-nozero" {
-          set opts(nozero) 1
-        }
-        "-globalstyle" {
-          set opts(globalstyle) 1
-          incr loopInd
-        }
-        "-height" {
-          incr loopInd
-          if {$loopInd < $len} {
-            set opts(height) [lindex $args $loopInd]
-            incr loopInd
-          } else {
-            error "-height: missing argument"
-          }
+        -string - -nozero - -globalstyle {
+	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option [lindex $args $loopInd]"
+          error "unknown option '$opt'"
         }
       }
     }
-    # if {[::ooxml::Getopt opts {index.arg {} style.arg 0 formula.arg {} string nozero globalstyle height.arg {}} $args]} {
-    #   error $opts(-errmsg)
-    # }
 
     if {!$obj(callRow,$obj(sheets))} {
       set obj(callRow,$obj(sheets)) 1
@@ -2330,8 +2457,21 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
 
-    if {[::ooxml::Getopt opts {holdcontainerdirectory} $args]} {
-      error $opts(-errmsg)
+    array set opts {
+      holdcontainerdirectory 0
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -holdcontainerdirectory {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option '$opt'"
+        }
+      }
     }
 
     ooxml::InitNodeCommands
@@ -3169,8 +3309,36 @@ proc ::ooxml::tablelist_to_xl { lb args } {
     return
   }
 
-  if {[::ooxml::Getopt opts [list callback.arg {::ooxml::tablelist_to_xl_callback} path.arg $defaults(path) file.arg {tablelist.xlsx} creator.arg {unknown} name.arg {Tablelist1} rootonly addtimestamp globalstyle] $args]} {
-    error $opts(-errmsg)
+  array set opts "
+    callback ::ooxml::tablelist_to_xl_callback
+    path [list $defaults(path)]
+    file tablelist.xlsx
+    creator unknown
+    name Tablelist1
+    rootonly 0
+    addtimestamp 0
+    globalstyle 0
+  "
+
+  set len [llength $args]
+  set idx 0
+  for {set idx 0} {$idx < $len} {incr idx} {
+    switch -- [set opt [lindex $args $idx]] {
+      -callback - -path - -file - -creator - -name {
+	incr idx
+	if {$idx < $len} {
+	  set opts([string range $opt 1 end]) [lindex $args $idx]
+	} else {
+	  error "option '$opt': missing argument"
+	}            
+      }
+      -rootonly - -addtimestamp - -globalstyle {
+	set opts([string range $opt 1 end]) 1
+      }
+      default {
+	error "unknown option '$opt'"
+      }
+    }
   }
   if {$opts(callback) eq {} || ([info commands $opts(callback)] eq {} && [info commands ::$opts(callback)] eq {})} {
     set opts(callback) ::ooxml::tablelist_to_xl_callback

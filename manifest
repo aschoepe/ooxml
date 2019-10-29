@@ -1,5 +1,5 @@
-C Version-1.3
-D 2019-08-20T08:00:06.708
+C Getopt\sremoved\sfor\smore\sspeed
+D 2019-10-29T06:48:57.399
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl e8ae05bcae1b14d60b9ea584d2690259259d9c468bd5ca5e8f49131e0725478a
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -13,7 +13,7 @@ F examples/sample6.tcl a5a7d8eae26fde1240341b6ea546c6440563a760b49fc429f6e97022c
 F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba30de5d6 x
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 28b8c95cc9ee680be511fb8a45d3c41faa99fdd6996519b07c80288dc3d25eb0 x
-F ooxml.tcl 77c022d44f1613d8c458f17776c112351c1ad49d2bd6787109be28445276b94f
+F ooxml.tcl 9472231bd09320b932268b8d682a02e190a6391d613a06688347c4afb3ef8920
 F pkgIndex.tcl e57308b4875bd0cca1ff7cffdc4f8902ef557fc6aa11d941d1ca89a1214802b2
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -44,11 +44,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 4a610b3601a841929204c4f95cde85ffbf158c209d6897f29925692e2ce9c16c 56d2fef577bf6ee202fadf74bf4ea1f04e28afb374cab2cdde85aa5aaa0198a5
-R 97766fb545390e0961cd4c655a23c74f
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.3 *
+P 3e16defd13a801555d59f8f70fc9867e0a3b238357f266a58c8378b35d5cdf0e
+R f31169f6398f037bd26255daa85c57aa
 U alex
-Z 36323b1fa8466755344f8e67cbf47faa
+Z c6b882e4868e493abad29820ed2f8dbf
 # Remove this line to create a well-formed Fossil manifest.

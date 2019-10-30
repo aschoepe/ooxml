@@ -1,5 +1,8 @@
-C Getopt\sremoved\sfor\smore\sspeed
-D 2019-10-29T06:48:57.399
+C TEA\ssupport\s(Tcl\sExtension\sArchitecture)
+D 2019-10-30T22:05:29.594
+F Makefile.in 50428faee5314688b1507d358b253bcc0f083da7936cc416fd56c7ea32bd4f51
+F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
+F configure.ac 93c5a964cbadd03e05104124ca8c0359c834b8966370d5b89a5565bc8e1f2a4a
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl e8ae05bcae1b14d60b9ea584d2690259259d9c468bd5ca5e8f49131e0725478a
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -14,7 +17,13 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 28b8c95cc9ee680be511fb8a45d3c41faa99fdd6996519b07c80288dc3d25eb0 x
 F ooxml.tcl 9472231bd09320b932268b8d682a02e190a6391d613a06688347c4afb3ef8920
-F pkgIndex.tcl e57308b4875bd0cca1ff7cffdc4f8902ef557fc6aa11d941d1ca89a1214802b2
+F pkgIndex.tcl 3bc8d0fd52032312e233655bb6052018fef7cb39d601ab1d5040b8c2c1897ba4
+F pkgIndex.tcl.in 0227178a9188f94786b3099dc739de5a1c08db96e212b14fc1ab9728d5aa7586
+F tclconfig/ChangeLog 799919acfbb616b44882e6ccabe94d682aba0b24d8b411839a0b6789f237e24a
+F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
+F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b34d1d4f8 x
+F tclconfig/tcl.m4 f659cf1a282f831b62843ad28e8b11e83d8e94b88e6b41a7789594a6e2cc6c3d
+F tests/all.tcl ffafc720bde50e29eeff797fdcab71d638c1be49f9e607effdebca156fe2c179
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -44,8 +53,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 3e16defd13a801555d59f8f70fc9867e0a3b238357f266a58c8378b35d5cdf0e
-R f31169f6398f037bd26255daa85c57aa
+P 3d420672dd151b10fa878547f9c9c726b23a346a39058242154617a87319000b
+R 5795c5da92d3e226f3c09f14aea432af
+T *branch * TEA
+T *sym-TEA *
+T -sym-trunk *
 U alex
-Z c6b882e4868e493abad29820ed2f8dbf
+Z 1a07f4053431f44027c8e14577ed9cc9
 # Remove this line to create a well-formed Fossil manifest.

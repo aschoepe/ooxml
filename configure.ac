@@ -3,6 +3,8 @@ dnl     This file is an input file used by the GNU "autoconf" program to
 dnl     generate the file "configure", which is run during Tcl installation
 dnl     to configure the system for the local environment.
 
+# Copyright (C) 2019 Alexander Schoepe, Bochum, DE
+
 #-----------------------------------------------------------------------
 # This initializes the environment with PACKAGE_NAME and PACKAGE_VERSION
 # set as provided.  These will also be added as -D defs in your Makefile
@@ -37,6 +39,17 @@ TEA_LOAD_TCLCONFIG
 
 TEA_PREFIX
 
+#-----------------------------------------------------------------------
+# Specify the C source files to compile in TEA_ADD_SOURCES,
+# public headers that need to be installed in TEA_ADD_HEADERS,
+# stub library C source files to compile in TEA_ADD_STUB_SOURCES,
+# and runtime Tcl library files in TEA_ADD_TCL_SOURCES.
+# This defines PKG(_STUB)_SOURCES, PKG(_STUB)_OBJECTS, PKG_HEADERS
+# and PKG_TCL_SOURCES.
+#-----------------------------------------------------------------------
+
+TEA_ADD_TCL_SOURCES([ooxml.tcl])
+
 #--------------------------------------------------------------------
 # You can add more files to clean if your extension creates any extra
 # files by extending CLEANFILES.
@@ -47,7 +60,7 @@ TEA_PREFIX
 # TEA_ADD_* any platform specific compiler/build info here.
 #--------------------------------------------------------------------
 
-CLEANFILES="$CLEANFILES pkgIndex.tcl"
+#CLEANFILES="$CLEANFILES"
 
 #--------------------------------------------------------------------
 # Determine the name of the tclsh and/or wish executables in the

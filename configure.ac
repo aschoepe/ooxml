@@ -19,7 +19,7 @@ AC_INIT([ooxml], [1.3])
 # as well as PKG_LIB_FILE and PKG_STUB_LIB_FILE.
 #--------------------------------------------------------------------
 
-TEA_INIT([3.9])
+TEA_INIT()
 
 AC_CONFIG_AUX_DIR(tclconfig)
 
@@ -38,8 +38,6 @@ TEA_LOAD_TCLCONFIG
 TEA_PREFIX
 
 #--------------------------------------------------------------------
-# __CHANGE__
-#
 # You can add more files to clean if your extension creates any extra
 # files by extending CLEANFILES.
 # Add pkgIndex.tcl if it is generated in the Makefile instead of ./configure

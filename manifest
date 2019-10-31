@@ -1,5 +1,5 @@
-C TEA\simplemented;\snext\stodo:\stcl\stests
-D 2019-10-31T15:51:44.275
+C starting\stest\ssuite
+D 2019-10-31T22:42:05.992
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -25,6 +25,7 @@ F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922
 F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b34d1d4f8 x
 F tclconfig/tcl.m4 c8d2c040778a20f1b59bc39d721d0b14f04917ebb25e0f81106b926732c76ada
 F tests/all.tcl ffafc720bde50e29eeff797fdcab71d638c1be49f9e607effdebca156fe2c179
+F tests/misc.test 8910a26d9316f49d18c4129f6c228d9b379d861a6a716c265af6167924f3d31e
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -54,8 +55,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 3d420672dd151b10fa878547f9c9c726b23a346a39058242154617a87319000b c74eafa14f9745e407d9964c77a99261be829082280782617d5bda1a85f0830d
-R d0c510b2992b5b7443893f357633fe92
+P 6b3980c2a97be7d78f3cbe4855b7d48395b85ed0e16ef208920ad885f8e0bc86
+R bb9ae3e9414a6894e01b1e707f6b1ba6
+T *branch * tcltest
+T *sym-tcltest *
+T -sym-trunk *
 U alex
-Z 4884130b77406704627478efb210618b
+Z 877b11dd8830b721ac498a0428501b1c
 # Remove this line to create a well-formed Fossil manifest.

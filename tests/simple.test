@@ -16,7 +16,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 }
 
 
-puts [package require ooxml]
+package require ooxml
 
 
 test SimpleExcel-1.1 {Write Simple Excel Sheet} {
@@ -27,11 +27,18 @@ test SimpleExcel-1.1 {Write Simple Excel Sheet} {
   }
   $spreadsheet destroy
 
-  #set fd [open simple.xlsx rb]
-  #set cksum [zlib adler [read $fd]]
-  #close $fd
-  #set cksum
-} 0
+  return [file exists simple.xlsx]
+} 1
+
+
+test SimpleExcel-1.2 {Read Simple Excel Sheet} {
+  array set workbook [ooxml::xl_read simple.xlsx]
+  #parray workbook
+  return $workbook(0,c,0,0)
+} A1
+
+
+file delete -force simple.xlsx
 
 
 # cleanup

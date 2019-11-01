@@ -10,8 +10,6 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-puts "argv=$argv"
-
 package prefer latest
 package require Tcl 8.5
 package require tcltest 2.2

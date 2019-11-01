@@ -1,0 +1,40 @@
+#
+# Commands covered: simple excel sheet^
+#
+
+#
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+puts [package require ooxml]
+
+
+test SimpleExcel-1.1 {Write Simple Excel Sheet} {
+  set spreadsheet [::ooxml::xl_write new -creator {User A} -created {2019-10-31 15:10:23} -modifiedby {User B} -modified {2019-10-31 15:10:23} -application {Tcl Test}]
+  if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
+    $spreadsheet cell $sheet {Tcl Test - SimpleExcel} -index A1
+    $spreadsheet write simple.xlsx
+  }
+  $spreadsheet destroy
+
+  #set fd [open simple.xlsx rb]
+  #set cksum [zlib adler [read $fd]]
+  #close $fd
+  #set cksum
+} 0
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+

@@ -1,5 +1,5 @@
 #
-# Commands covered: simple excel sheet^
+# Commands covered: simple excel sheet
 #
 
 #
@@ -37,8 +37,38 @@ test SimpleExcel-1.2 {Read Simple Excel Sheet} {
   return $workbook(0,c,0,0)
 } A1
 
+test SimpleExcel-1.3 {Read Simple Excel and Check App, User, DateTime} {
+  package require vfs::zip
+  set mnt [vfs::zip::Mount simple.xlsx xlsx]
 
-file delete -force simple.xlsx
+  # docProps/app.xml # Properties: Application
+  set fd [open xlsx/docProps/app.xml r]
+  fconfigure $fd -encoding utf-8
+  set doc [dom parse [read $fd]]
+  close $fd
+
+  set root [$doc documentElement]
+  $doc selectNodesNamespaces [list X [$root namespaceURI]]
+  # ...
+  $doc delete
+
+  # docProps/core.xml # cp:coreProperties: dc:creator, cp:lastModifiedBy, dcterms:created and dcterms:modified
+  set fd [open xlsx/docProps/app.xml r]
+  fconfigure $fd -encoding utf-8
+  set doc [dom parse [read $fd]]
+  close $fd
+
+  set root [$doc documentElement]
+  # ...
+  $doc delete
+
+  vfs::zip::Unmount $mnt xlsx
+
+  return 0
+} 0
+
+
+#file delete -force simple.xlsx
 
 
 # cleanup

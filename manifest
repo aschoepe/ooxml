@@ -1,5 +1,5 @@
-C two\sbasic\stests
-D 2019-11-01T14:06:53.284
+C save\swork
+D 2019-11-04T13:44:14.460
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -26,7 +26,7 @@ F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b3
 F tclconfig/tcl.m4 c8d2c040778a20f1b59bc39d721d0b14f04917ebb25e0f81106b926732c76ada
 F tests/all.tcl c56ee198de4934d07e36af2c28a9f3e33fb1a08db94411aaaf499a14ab72cf13
 F tests/misc.test 579b69dd6996ebfcffe9c992d48fdb2bbd9fbf06fc39d8239cfbd2cd1aefe4aa
-F tests/simple.test 2963cc662749fb22a1f2bcae5653e5be82969cdcc17f166e8ccf0b7c5b7a7ab7
+F tests/simple.test 0ff9142c077d2a2449f3d537688c21259dda5e3a8c1fe7e9935d271093a19045
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -56,8 +56,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P dbe69451eaf7f7e5276424ba30683f7baed56db4d0fd69ddae8df384fa15a99d
-R 1499230d3879bd5cd25ef1692c56ce63
+P 90da6d6d6d407609c3406b82879a0f2af08fe60e40ecc6db842cefc506c21c02
+R 6385306b87f11309a3a27dd30120b553
 U alex
-Z bc53a8bb189bad5da42d2744c2a3887b
+Z 62c4829094840a9919800503f44801ec
 # Remove this line to create a well-formed Fossil manifest.

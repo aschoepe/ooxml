@@ -1,0 +1,121 @@
+#
+# Commands covered: simple excel sheet
+#
+
+#
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+package require vfs::zip
+
+test SimpleExcelWrite-1.1 {Write a Simple Excel Sheet} {
+  set cDT {2019-10-31 15:10:23}
+  set mCT [clock scan {2019-10-31 17:20:45}]
+
+  set spreadsheet [::ooxml::xl_write new -creator {User A} -created $cDT -modifiedby {User B} -modified $mCT -application {Tcl Test}]
+  if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
+    $spreadsheet cell $sheet {Tcl Test - SimpleExcel} -index A1
+    $spreadsheet write simple.xlsx
+  }
+  $spreadsheet destroy
+
+  return [file exists simple.xlsx]
+} 1
+
+
+test SimpleExcelRead-1.2 {Read a Simple Excel Sheet} {
+  array set workbook [ooxml::xl_read simple.xlsx]
+  return $workbook(0,c,0,0)
+} A1
+
+
+test MountXLSX-2.1 {Mount XLSX File} {
+  catch {vfs::zip::Mount simple.xlsx xlsx} mnt
+} 0
+
+
+test DocPropsApp-3.1 {Parse xlsx/docProps/app.xml} {
+  set fd [open xlsx/docProps/app.xml r]
+  fconfigure $fd -encoding utf-8
+  set doc [dom parse [read $fd]]
+  close $fd
+
+  set appXmlNs {
+    x http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
+    vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+  }
+
+  return [set appDoc [string match domDoc* $doc]]
+} 1
+
+testConstraint appCheck $appDoc
+
+test DocPropsApp-3.2 {Check Application -application} appCheck {
+  $doc selectNodesNamespaces $appXmlNs
+  [$doc selectNodes /x:Properties/x:Application/text()] nodeValue
+} {Tcl Test}
+ 
+
+$doc delete
+
+
+test DocPropsCore-4.1 {Parse xlsx/docProps/core.xml} {
+  set fd [open xlsx/docProps/core.xml r]
+  fconfigure $fd -encoding utf-8
+  set doc [dom parse [read $fd]]
+  close $fd
+
+  set coreXmlNs {
+    cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
+    dc http://purl.org/dc/elements/1.1/
+    dcterms http://purl.org/dc/terms/
+  }
+
+  return [set coreDoc [string match domDoc* $doc]]
+} 1
+
+testConstraint coreCheck $coreDoc
+
+test DocPropsCore-4.2 {Check Creator -creator} coreCheck {
+  $doc selectNodesNamespaces $coreXmlNs
+  [$doc selectNodes /cp:coreProperties/dc:creator/text()] nodeValue
+} {User A}
+ 
+test DocPropsCore-4.3 {Check Modified By -modifiedby} coreCheck {
+  $doc selectNodesNamespaces $coreXmlNs
+  [$doc selectNodes /cp:coreProperties/cp:lastModifiedBy/text()] nodeValue
+} {User B}
+
+test DocPropsCore-4.4 {Check Modified By -created} coreCheck {
+  $doc selectNodesNamespaces $coreXmlNs
+  [$doc selectNodes /cp:coreProperties/dcterms:created/text()] nodeValue
+} {2019-10-31T14:10:23Z}
+
+test DocPropsCore-4.5 {Check Modified By -modified} coreCheck {
+  $doc selectNodesNamespaces $coreXmlNs
+  [$doc selectNodes /cp:coreProperties/dcterms:modified/text()] nodeValue
+} {2019-10-31T16:20:45Z}
+
+
+$doc delete
+
+
+vfs::zip::Unmount $mnt xlsx
+#file delete -force simple.xlsx
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+

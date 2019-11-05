@@ -49,7 +49,7 @@ test DocPropsApp-3.1 {Parse xlsx/docProps/app.xml} {
   close $fd
 
   set appXmlNs {
-    ? http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
+    x http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
     vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
   }
 
@@ -58,10 +58,10 @@ test DocPropsApp-3.1 {Parse xlsx/docProps/app.xml} {
 
 testConstraint appCheck $appDoc
 
-#test DocPropsApp-3.2 {Check Application -application} appCheck {
-#  $doc selectNodesNamespaces $appXmlNs
-#  [$doc selectNodes /Application/text()] nodeValue
-#} {Tcl Test}
+test DocPropsApp-3.2 {Check Application -application} appCheck {
+  $doc selectNodesNamespaces $appXmlNs
+  [$doc selectNodes /x:Properties/x:Application/text()] nodeValue
+} {Tcl Test}
  
 
 $doc delete
@@ -109,7 +109,7 @@ $doc delete
 
 
 vfs::zip::Unmount $mnt xlsx
-file delete -force simple.xlsx
+#file delete -force simple.xlsx
 
 
 # cleanup

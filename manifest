@@ -1,5 +1,5 @@
-C TEA\simplemented;\snext\stodo:\stcl\stests
-D 2019-10-31T15:51:44.275
+C xl_write\sconstructor\s-created|-modified\sare\snow\slocaltime\sdate\sstring\sor\sctime
+D 2019-11-05T21:48:30.648
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -17,7 +17,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 28b8c95cc9ee680be511fb8a45d3c41faa99fdd6996519b07c80288dc3d25eb0 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
-F ooxml.tcl 9472231bd09320b932268b8d682a02e190a6391d613a06688347c4afb3ef8920
+F ooxml.tcl 1192dafa2475c1661a48e827cd7222027712181af61c4f8de397a51894240770
 F pkgIndex.tcl b9a7ac3d3e4f68fe2d75bfefeabf3a9cb21e1561a1475d9b60c584da1e2df649
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -54,8 +54,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 3d420672dd151b10fa878547f9c9c726b23a346a39058242154617a87319000b c74eafa14f9745e407d9964c77a99261be829082280782617d5bda1a85f0830d
-R d0c510b2992b5b7443893f357633fe92
+P 6b3980c2a97be7d78f3cbe4855b7d48395b85ed0e16ef208920ad885f8e0bc86
+R 0790ad23207a2df481b2bab7e5319966
 U alex
-Z 4884130b77406704627478efb210618b
+Z 1ad8b83948e05e6d5ad8c394b45b0e62
 # Remove this line to create a well-formed Fossil manifest.

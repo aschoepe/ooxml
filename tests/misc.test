@@ -1,0 +1,155 @@
+#
+# Commands covered: internal helper procs
+#
+
+#
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+
+
+test ScanDateTime-1.1 {ScanDateTime takes args} -body {
+  ::ooxml::ScanDateTime
+} -returnCodes error -result "wrong # args: should be \"::ooxml::ScanDateTime scan ?iso8601?\""
+
+test ScanDateTime-1.2 {ScanDateTime ole time} {
+  ::ooxml::ScanDateTime {2019-10-31 15:10:23}
+} 43769.63221064815
+
+test ScanDateTime-1.3 {ScanDateTime iso8601} {
+  ::ooxml::ScanDateTime {2019-10-31 15:10:23} 1
+} 2019-10-31T15:10:23
+
+
+test Column-1.1 {Column takes args} -body {
+  ::ooxml::Column
+} -returnCodes error -result "wrong # args: should be \"::ooxml::Column col\""
+
+test Column-1.2 {Column 3} {
+  ::ooxml::Column 3
+} D
+
+test Column-1.3 {Column 33} {
+  ::ooxml::Column 33
+} AH
+
+test Column-1.4 {Column A} -body {
+  ::ooxml::Column A
+} -returnCodes error -result "can't use non-numeric string as operand of \"%\""
+
+
+test RowColumnToString-1.1 {RowColumnToString takes args} -body {
+  ::ooxml::RowColumnToString
+} -returnCodes error -result "wrong # args: should be \"::ooxml::RowColumnToString rowcol\""
+
+test RowColumnToString-1.2 {RowColumnToString 0,0} {
+  ::ooxml::RowColumnToString 0,0
+} A1
+
+test RowColumnToString-1.3 {RowColumnToString 33,33} {
+  ::ooxml::RowColumnToString 33,33
+} AH34
+
+test RowColumnToString-1.4 {RowColumnToString A1} -body {
+  ::ooxml::RowColumnToString A1
+} -returnCodes error -result "expected integer but got \"A1\""
+
+test RowColumnToString-1.5 {RowColumnToString 0} {
+  ::ooxml::RowColumnToString 0
+} 1
+
+
+test StringToRowColumn-1.1 {StringToRowColumn takes args} -body {
+  ::ooxml::StringToRowColumn
+} -returnCodes error -result "wrong # args: should be \"::ooxml::StringToRowColumn name\""
+
+test StringToRowColumn-1.2 {StringToRowColumn A1} {
+  ::ooxml::StringToRowColumn A1
+} 0,0
+
+test StringToRowColumn-1.3 {StringToRowColumn AH34} {
+  ::ooxml::StringToRowColumn AH34
+} 33,33
+
+test StringToRowColumn-1.4 {StringToRowColumn 0} {
+  ::ooxml::StringToRowColumn 0
+} -1,-1
+
+
+test IndexToString-1.1 {IndexToString takes args} -body {
+  ::ooxml::IndexToString
+} -returnCodes error -result "wrong # args: should be \"::ooxml::IndexToString index\""
+
+test IndexToString-1.2 {IndexToString 0,0} {
+  ::ooxml::IndexToString 0,0
+} A1
+
+test IndexToString-1.3 {IndexToString A1} {
+  ::ooxml::IndexToString A1
+} A1
+
+test IndexToString-1.4 {IndexToString 1} {
+  ::ooxml::IndexToString 1
+} {}
+
+test IndexToString-1.5 {IndexToString A} {
+  ::ooxml::IndexToString A
+} {}
+
+
+test CalcColumnWidth-1.1 {CalcColumnWidth takes args} -body {
+  ::ooxml::CalcColumnWidth
+} -returnCodes error -result "wrong # args: should be \"::ooxml::CalcColumnWidth numberOfCharacters ?maximumDigitWidth? ?pixelPadding?\""
+
+test CalcColumnWidth-1.2 {CalcColumnWidth 11} {
+  ::ooxml::CalcColumnWidth 11
+} 11.7109375
+
+
+test Color-1.1 {Color takes args} -body {
+  ::ooxml::Color
+} -returnCodes error -result "wrong # args: should be \"::ooxml::Color color\""
+
+test color-1.2 {Color {}} {
+  ::ooxml::Color {}
+} {}
+
+test color-1.3 {Color auto} {
+  ::ooxml::Color auto
+} {auto 1}
+
+test color-1.4 {Color none} {
+  ::ooxml::Color none
+} {none 1}
+
+test color-1.5 {Color 6} {
+  ::ooxml::Color 6
+} {indexed 6}
+
+test color-1.6 {Color Fuchsia} {
+  ::ooxml::Color Fuchsia
+} {indexed 6}
+
+test color-1.7 {Color 00FF00FF} {
+  ::ooxml::Color 00FF00FF
+} {indexed 6}
+
+test color-1.8 {Color 00123456} {
+  ::ooxml::Color 00123456
+} {rgb 00123456}
+
+
+# cleanup
+::tcltest::cleanupTests
+return

@@ -1466,8 +1466,10 @@ oo::class create ooxml::xl_write {
     }
     if {[string trim $opts(created)] eq {} || [catch {clock scan $opts(created)}]} {
       set obj(created) [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+    } elseif {[string is integer -strict $opts(created)] && $opts(created) > 0} {
+      set obj(created) [clock format $opts(created) -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
     } else {
-      set obj(created) [clock format [clock scan $opts(created) -gmt 1] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+      set obj(created) [clock format [clock scan $opts(created)] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
     }
     if {[string trim $opts(modifiedby)] eq {}} {
       set obj(lastModifiedBy) $opts(creator)
@@ -1476,8 +1478,10 @@ oo::class create ooxml::xl_write {
     }
     if {[string trim $opts(modified)] eq {} || [catch {clock scan $opts(modified)}]} {
       set obj(modified) [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+    } elseif {[string is integer -strict $opts(modified)] && $opts(modified) > 0} {
+      set obj(modified) [clock format $opts(modified) -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
     } else {
-      set obj(modified) [clock format [clock scan $opts(modified) -gmt 1] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+      set obj(modified) [clock format [clock scan $opts(modified)] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
     }
     if {[string trim $opts(application)] eq {}} {
       set obj(application) {Tcl - Office Open XML - Spreadsheet}

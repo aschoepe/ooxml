@@ -20,7 +20,10 @@ package require ooxml
 package require vfs::zip
 
 test SimpleExcelWrite-1.1 {Write a Simple Excel Sheet} {
-  set spreadsheet [::ooxml::xl_write new -creator {User A} -created {2019-10-31 15:10:23} -modifiedby {User B} -modified {2019-10-31 17:20:45} -application {Tcl Test}]
+  set cDT {2019-10-31 15:10:23}
+  set mCT [clock scan {2019-10-31 17:20:45}]
+
+  set spreadsheet [::ooxml::xl_write new -creator {User A} -created $cDT -modifiedby {User B} -modified $mCT -application {Tcl Test}]
   if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
     $spreadsheet cell $sheet {Tcl Test - SimpleExcel} -index A1
     $spreadsheet write simple.xlsx
@@ -97,12 +100,12 @@ test DocPropsCore-4.3 {Check Modified By -modifiedby} coreCheck {
 test DocPropsCore-4.4 {Check Modified By -created} coreCheck {
   $doc selectNodesNamespaces $coreXmlNs
   [$doc selectNodes /cp:coreProperties/dcterms:created/text()] nodeValue
-} {2019-10-31T15:10:23Z}
+} {2019-10-31T14:10:23Z}
 
 test DocPropsCore-4.5 {Check Modified By -modified} coreCheck {
   $doc selectNodesNamespaces $coreXmlNs
   [$doc selectNodes /cp:coreProperties/dcterms:modified/text()] nodeValue
-} {2019-10-31T17:20:45Z}
+} {2019-10-31T16:20:45Z}
 
 
 $doc delete

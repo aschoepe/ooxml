@@ -63,7 +63,7 @@ testConstraint appCheck $appDoc
 
 test DocPropsApp-3.2 {Check Application -application} appCheck {
   $doc selectNodesNamespaces $appXmlNs
-  [$doc selectNodes /x:Properties/x:Application/text()] nodeValue
+  $doc selectNodes string(/x:Properties/x:Application)
 } {Tcl Test}
  
 
@@ -89,22 +89,22 @@ testConstraint coreCheck $coreDoc
 
 test DocPropsCore-4.2 {Check Creator -creator} coreCheck {
   $doc selectNodesNamespaces $coreXmlNs
-  [$doc selectNodes /cp:coreProperties/dc:creator/text()] nodeValue
+  $doc selectNodes string(/cp:coreProperties/dc:creator)
 } {User A}
  
 test DocPropsCore-4.3 {Check Modified By -modifiedby} coreCheck {
   $doc selectNodesNamespaces $coreXmlNs
-  [$doc selectNodes /cp:coreProperties/cp:lastModifiedBy/text()] nodeValue
+  $doc selectNodes string(/cp:coreProperties/cp:lastModifiedBy)
 } {User B}
 
 test DocPropsCore-4.4 {Check Modified By -created} coreCheck {
   $doc selectNodesNamespaces $coreXmlNs
-  [$doc selectNodes /cp:coreProperties/dcterms:created/text()] nodeValue
+  $doc selectNodes string(/cp:coreProperties/dcterms:created)
 } {2019-10-31T14:10:23Z}
 
 test DocPropsCore-4.5 {Check Modified By -modified} coreCheck {
   $doc selectNodesNamespaces $coreXmlNs
-  [$doc selectNodes /cp:coreProperties/dcterms:modified/text()] nodeValue
+  $doc selectNodes string(/cp:coreProperties/dcterms:modified)
 } {2019-10-31T16:20:45Z}
 
 

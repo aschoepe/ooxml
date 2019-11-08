@@ -1,5 +1,5 @@
-C revise\sxQuery\sxl_sheets
-D 2019-11-08T12:32:13.832
+C revise\sxQuery\sxl_read
+D 2019-11-08T13:08:14.676
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -17,7 +17,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 28b8c95cc9ee680be511fb8a45d3c41faa99fdd6996519b07c80288dc3d25eb0 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
-F ooxml.tcl a0285a3e3ae7e21436b344abf5f1fff0e96231546c02ddb476e026f18d030b6c
+F ooxml.tcl a15537d50082ab3a4b7d263a6dcbea2a689aeb5c489fda15e47e09d3138b5ccd
 F pkgIndex.tcl b9a7ac3d3e4f68fe2d75bfefeabf3a9cb21e1561a1475d9b60c584da1e2df649
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -56,11 +56,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P d7bececf50d8f73329aac4085e7f7b1ee8a3e6289b8719a8c79c397e87db6612
-R 32284f1cfef0075ed56a2029cf629ec5
-T *branch * xquery
-T *sym-xquery *
-T -sym-trunk *
+P 6f6ba1295a3537cec0c999b38c0964559e7e0bd85268d35d59e0540c626217d3
+R 07582bf01e7a17692a39ad6c3b0a0c55
 U alex
-Z f63d9848dea86c22b9776262d2596c17
+Z 25e10df628b628530504d4f800f83647
 # Remove this line to create a well-formed Fossil manifest.

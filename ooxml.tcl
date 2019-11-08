@@ -776,7 +776,9 @@ proc ::ooxml::xl_sheets { file } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces [list X [$relsroot namespaceURI]]
+      $rdoc selectNodesNamespaces {
+        G http://schemas.openxmlformats.org/package/2006/relationships
+      }
     }
     close $fd
   }
@@ -785,14 +787,17 @@ proc ::ooxml::xl_sheets { file } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list X [$root namespaceURI]]
+      $doc selectNodesNamespaces {
+	G http://schemas.openxmlformats.org/spreadsheetml/2006/main
+	r http://schemas.openxmlformats.org/officeDocument/2006/relationships
+      }
       set idx -1
-      foreach node [$root selectNodes /X:workbook/X:sheets/X:sheet] {
+      foreach node [$root selectNodes /G:workbook/G:sheets/G:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
 	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes {/X:Relationships/X:Relationship[@Id=$rid]}] {
+	  foreach node [$relsroot selectNodes {/G:Relationships/G:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
 	    }

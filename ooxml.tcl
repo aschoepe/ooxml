@@ -180,6 +180,7 @@ namespace eval ::ooxml {
   variable predefColorsARBG
   variable predefBorderLineStyles
   variable predefPatternType
+  variable xmlns
 
   set defaults(path) {.}
 
@@ -330,6 +331,24 @@ namespace eval ::ooxml {
     slantDashDot
     thick
     thin
+  }
+
+  array set xmlns {
+    M http://schemas.openxmlformats.org/spreadsheetml/2006/main
+    CT http://schemas.openxmlformats.org/package/2006/content-types
+    EP http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
+    PR http://schemas.openxmlformats.org/package/2006/relationships
+    a http://schemas.openxmlformats.org/drawingml/2006/main
+    cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
+    dc http://purl.org/dc/elements/1.1/
+    dcmitype http://purl.org/dc/dcmitype/
+    dcterms http://purl.org/dc/terms/
+    mc http://schemas.openxmlformats.org/markup-compatibility/2006
+    r http://schemas.openxmlformats.org/officeDocument/2006/relationships
+    vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+    x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
+    x16r2 http://schemas.microsoft.com/office/spreadsheetml/2015/02/main
+    xsi http://www.w3.org/2001/XMLSchema-instance
   }
 
   # ar - Arabic - العربية 
@@ -764,6 +783,8 @@ proc ::ooxml::Color { color } {
 #
 
 proc ::ooxml::xl_sheets { file } {
+  variable xmlns
+
   package require vfs::zip
 
   set sheets {}
@@ -776,9 +797,7 @@ proc ::ooxml::xl_sheets { file } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces {
-        G http://schemas.openxmlformats.org/package/2006/relationships
-      }
+      $rdoc selectNodesNamespaces [list G $xmlns(PR)]
     }
     close $fd
   }
@@ -787,10 +806,7 @@ proc ::ooxml::xl_sheets { file } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces {
-	G http://schemas.openxmlformats.org/spreadsheetml/2006/main
-	r http://schemas.openxmlformats.org/officeDocument/2006/relationships
-      }
+      $doc selectNodesNamespaces [list G $xmlns(M) r $xmlns(r)]
       set idx -1
       foreach node [$root selectNodes /G:workbook/G:sheets/G:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
@@ -824,6 +840,8 @@ proc ::ooxml::xl_sheets { file } {
 #
 
 proc ::ooxml::xl_read { file args } {
+  variable xmlns
+
   variable predefNumFmts
 
   package require vfs::zip
@@ -874,9 +892,7 @@ proc ::ooxml::xl_read { file args } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces {
-        G http://schemas.openxmlformats.org/package/2006/relationships
-      }
+      $rdoc selectNodesNamespaces [list G $xmlns(PR)]
     }
     close $fd
   }
@@ -885,10 +901,7 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces {
-        G http://schemas.openxmlformats.org/spreadsheetml/2006/main
-        r http://schemas.openxmlformats.org/officeDocument/2006/relationships
-      }
+      $doc selectNodesNamespaces [list G $xmlns(M) r $xmlns(r)]
       set idx -1
       foreach node [$root selectNodes /G:workbook/G:sheets/G:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
@@ -915,9 +928,7 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces {
-        G http://schemas.openxmlformats.org/spreadsheetml/2006/main
-      }
+      $doc selectNodesNamespaces [list G $xmlns(M)]
       set idx -1
       foreach shared [$root selectNodes /G:sst/G:si] {
 	incr idx
@@ -938,12 +949,7 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces {
-        G http://schemas.openxmlformats.org/spreadsheetml/2006/main
-	mc http://schemas.openxmlformats.org/markup-compatibility/2006
-	x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
-	x16r2 http://schemas.microsoft.com/office/spreadsheetml/2015/02/main
-      }
+      $doc selectNodesNamespaces [list G $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
       foreach node [$root selectNodes /G:styleSheet/G:numFmts/G:numFmt] {
         incr idx
@@ -1207,12 +1213,7 @@ proc ::ooxml::xl_read { file args } {
       fconfigure $fd -encoding utf-8
       if {![catch {dom parse [read $fd]} doc]} {
 	set root [$doc documentElement]
-        $doc selectNodesNamespaces {
-	  G http://schemas.openxmlformats.org/spreadsheetml/2006/main
-	  r http://schemas.openxmlformats.org/officeDocument/2006/relationships
-	  mc http://schemas.openxmlformats.org/markup-compatibility/2006
-	  x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
-	}
+        $doc selectNodesNamespaces [list G $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
 	set idx -1
 	foreach col [$root selectNodes /G:worksheet/G:cols/G:col] {
 	  incr idx
@@ -1381,6 +1382,7 @@ proc ooxml::Dom2zip {zf node path cd count} {
 
 proc ooxml::InitNodeCommands {} {
   variable initNodeCmds
+  variable xmlns
 
   if {[info exists initNodeCmds] && $initNodeCmds} return
 
@@ -1418,7 +1420,7 @@ proc ooxml::InitNodeCommands {} {
     t tableStyles top
     u
     v
-    vt:i4 vt:lpstr vt:lpstrvt:lpstr vt:variant vt:vector
+    vt:i4 vt:lpstr vt:variant vt:vector
     workbookPr workbookView
     xf
   }
@@ -2483,6 +2485,8 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
 
+    upvar #0 ::ooxml::xmlns xmlns
+
     array set opts {
       holdcontainerdirectory 0
     }
@@ -2544,7 +2548,7 @@ oo::class create ooxml::xl_write {
 
     set rId 0
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
+    $root setAttribute xmlns $xmlns(PR)
 
     $root appendFromScript {
       Tag_Relationship Id rId1 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument Target xl/workbook.xml {}
@@ -2559,7 +2563,7 @@ oo::class create ooxml::xl_write {
     set root [$doc documentElement]
 
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/content-types
+    $root setAttribute xmlns $xmlns(CT)
 
     $root appendFromScript {
       Tag_Default Extension xml ContentType application/xml {}
@@ -2586,8 +2590,8 @@ oo::class create ooxml::xl_write {
     set doc [set obj(doc,) [dom createDocument Properties]]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
-    $root setAttribute xmlns:vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+    $root setAttribute xmlns $xmlns(EP)
+    $root setAttribute xmlns:vt $xmlns(vt)
 
     $root appendFromScript {
       Tag_Application { Text $obj(application) }
@@ -2625,11 +2629,11 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument cp:coreProperties]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns:cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
-    $root setAttribute xmlns:dc http://purl.org/dc/elements/1.1/
-    $root setAttribute xmlns:dcterms http://purl.org/dc/terms/
-    $root setAttribute xmlns:dcmitype http://purl.org/dc/dcmitype/
-    $root setAttribute xmlns:xsi http://www.w3.org/2001/XMLSchema-instance
+    $root setAttribute xmlns:cp $xmlns(cp)
+    $root setAttribute xmlns:dc $xmlns(dc)
+    $root setAttribute xmlns:dcterms $xmlns(dcterms)
+    $root setAttribute xmlns:dcmitype $xmlns(dcmitype)
+    $root setAttribute xmlns:xsi $xmlns(xsi)
 
     $root appendFromScript {
       Tag_dc:creator { Text $obj(creator) }
@@ -2644,7 +2648,7 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument Relationships]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
+    $root setAttribute xmlns $xmlns(PR)
 
     $root appendFromScript {
       for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
@@ -2669,7 +2673,7 @@ oo::class create ooxml::xl_write {
       set doc [dom createDocument sst]
       set root [$doc documentElement]
 
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
+      $root setAttribute xmlns $xmlns(M)
       $root setAttribute count [llength $sharedStrings]
       $root setAttribute uniqueCount [llength $sharedStrings]
 
@@ -2692,7 +2696,7 @@ oo::class create ooxml::xl_write {
       set doc [dom createDocument calcChain]
       set root [$doc documentElement]
 
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
+      $root setAttribute xmlns $xmlns(M)
 
       $root appendFromScript {
 	Tag_c r C1 i 3 l 1 {}
@@ -2707,9 +2711,9 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument styleSheet]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-    $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
-    $root setAttribute xmlns:x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
+    $root setAttribute xmlns $xmlns(M)
+    $root setAttribute xmlns:mc $xmlns(mc)
+    $root setAttribute xmlns:x14ac $xmlns(x14ac)
     $root setAttribute mc:Ignorable x14ac
 
     $root appendFromScript {
@@ -2845,7 +2849,7 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument a:theme]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns:a http://schemas.openxmlformats.org/drawingml/2006/main
+    $root setAttribute xmlns:a $xmlns(a)
     $root setAttribute name Office-Design
 
     $root appendFromScript {
@@ -3177,8 +3181,8 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocument workbook]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-    $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
+    $root setAttribute xmlns $xmlns(M)
+    $root setAttribute xmlns:r $xmlns(r)
 
     $root appendFromScript {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
@@ -3208,10 +3212,10 @@ oo::class create ooxml::xl_write {
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
       set doc [dom createDocument worksheet]
       set root [$doc documentElement]
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-      $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
-      $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
-      $root setAttribute xmlns:x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
+      $root setAttribute xmlns $xmlns(M)
+      $root setAttribute xmlns:r $xmlns(r)
+      $root setAttribute xmlns:mc $xmlns(mc)
+      $root setAttribute xmlns:x14ac $xmlns(x14ac)
       $root setAttribute mc:Ignorable x14ac
 
       $root appendFromScript {

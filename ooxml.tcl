@@ -797,7 +797,7 @@ proc ::ooxml::xl_sheets { file } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces [list G $xmlns(PR)]
+      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
     close $fd
   }
@@ -812,8 +812,8 @@ proc ::ooxml::xl_sheets { file } {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
-	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes {/G:Relationships/G:Relationship[@Id=$rid]}] {
+	  set rid [$node getAttributeNS $xmlns(r) id]
+	  foreach node [$relsroot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
 	    }
@@ -892,7 +892,7 @@ proc ::ooxml::xl_read { file args } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces [list G $xmlns(PR)]
+      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
     close $fd
   }
@@ -907,8 +907,8 @@ proc ::ooxml::xl_read { file args } {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
-	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes {/G:Relationships/G:Relationship[@Id=$rid]}] {
+	  set rid [$node getAttributeNS $xmlns(r) id]
+	  foreach node [$relsroot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
 	    }

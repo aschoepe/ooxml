@@ -806,9 +806,9 @@ proc ::ooxml::xl_sheets { file } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list G $xmlns(M) r $xmlns(r)]
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
-      foreach node [$root selectNodes /G:workbook/G:sheets/G:sheet] {
+      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
@@ -901,9 +901,9 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list G $xmlns(M) r $xmlns(r)]
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
-      foreach node [$root selectNodes /G:workbook/G:sheets/G:sheet] {
+      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
@@ -928,14 +928,14 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list G $xmlns(M)]
+      $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
-      foreach shared [$root selectNodes /G:sst/G:si] {
+      foreach shared [$root selectNodes /M:sst/M:si] {
 	incr idx
-	foreach node [$shared selectNodes G:t/text()] {
+	foreach node [$shared selectNodes M:t/text()] {
 	  append sharedStrings($idx) [$node nodeValue]
 	}
-	foreach node [$shared selectNodes */G:t/text()] {
+	foreach node [$shared selectNodes */M:t/text()] {
 	  append sharedStrings($idx) [$node nodeValue]
 	}
       }
@@ -949,9 +949,9 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list G $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
+      $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
-      foreach node [$root selectNodes /G:styleSheet/G:numFmts/G:numFmt] {
+      foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
         incr idx
 	if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
 	  set numFmtId [$node @numFmtId]
@@ -967,7 +967,7 @@ proc ::ooxml::xl_read { file args } {
 	}
       }
       set idx -1
-      foreach node [$root selectNodes /G:styleSheet/G:cellXfs/G:xf] {
+      foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
         incr idx
 	if {[$node hasAttribute numFmtId]} {
 	  set numFmtId [$node @numFmtId]
@@ -987,7 +987,7 @@ proc ::ooxml::xl_read { file args } {
       array unset a *
       set a(max) 0
       set wb(s,numFmtsIds) {}
-      foreach node [$root selectNodes /G:styleSheet/G:numFmts/G:numFmt] {
+      foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
         if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
 	  set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
 	  lappend wb(s,numFmtsIds) $idx
@@ -1004,7 +1004,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       array unset a *
-      foreach node [$root selectNodes /G:styleSheet/G:fonts/G:font] {
+      foreach node [$root selectNodes /M:styleSheet/M:fonts/M:font] {
 	incr idx
 	array set a {name {} family {} size {} color {} scheme {} bold 0 italic 0 underline 0 color {}}
 	foreach node1 [$node childNodes] {
@@ -1058,7 +1058,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       array unset a *
-      foreach node [$root selectNodes /G:styleSheet/G:fills/G:fill] {
+      foreach node [$root selectNodes /M:styleSheet/M:fills/M:fill] {
 	incr idx
 	array set a {patterntype {} fgcolor {} bgcolor {}}
 	foreach node1 [$node childNodes] {
@@ -1090,7 +1090,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       unset -nocomplain d
-      foreach node [$root selectNodes /G:styleSheet/G:borders/G:border] {
+      foreach node [$root selectNodes /M:styleSheet/M:borders/M:border] {
 	incr idx
 	set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
 	foreach node1 [$node childNodes] {
@@ -1134,7 +1134,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       array unset a *
-      foreach node [$root selectNodes /G:styleSheet/G:cellXfs/G:xf] {
+      foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
 	incr idx
 	array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
         if {[$node hasAttribute numFmtId]} {
@@ -1213,9 +1213,9 @@ proc ::ooxml::xl_read { file args } {
       fconfigure $fd -encoding utf-8
       if {![catch {dom parse [read $fd]} doc]} {
 	set root [$doc documentElement]
-        $doc selectNodesNamespaces [list G $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
+        $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
 	set idx -1
-	foreach col [$root selectNodes /G:worksheet/G:cols/G:col] {
+	foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
 	  incr idx
 	  foreach item {min max width style bestFit customWidth} {
 	    if {[$col hasAttribute $item]} {
@@ -1234,7 +1234,7 @@ proc ::ooxml::xl_read { file args } {
 	  lappend wb($sheet,col,$idx) string 0 nozero 0 calcfit 0
 	}
 	set wb($sheet,cols) [incr idx]
-	foreach cell [$root selectNodes /G:worksheet/G:sheetData/G:row/G:c] {
+	foreach cell [$root selectNodes /M:worksheet/M:sheetData/M:row/M:c] {
 	  if {[$cell hasAttribute t]} {
 	    set type [$cell @t]
 	  } else {
@@ -1245,7 +1245,7 @@ proc ::ooxml::xl_read { file args } {
 	  switch -- $type {
 	    n - b - d - str {
 	      # number (default), boolean, iso-date, formula string
-	      if {[set node [$cell selectNodes G:v/text()]] ne {}} {
+	      if {[set node [$cell selectNodes M:v/text()]] ne {}} {
 		set value [$node nodeValue]
 		if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
 		  set idx [$cell @s]
@@ -1263,7 +1263,7 @@ proc ::ooxml::xl_read { file args } {
 	    }
 	    s {
 	      # shared string
-	      if {[set node [$cell selectNodes G:v/text()]] ne {}} {
+	      if {[set node [$cell selectNodes M:v/text()]] ne {}} {
 		set index [$node nodeValue]
 		if {[info exists sharedStrings($index)]} {
 		  set value $sharedStrings($index)
@@ -1274,11 +1274,11 @@ proc ::ooxml::xl_read { file args } {
 	    }
 	    inlineStr {
 	      # inline string
-	      if {[set string [$cell selectNodes G:is]] ne {}} {
-		foreach node [$string selectNodes G:t/text()] {
+	      if {[set string [$cell selectNodes M:is]] ne {}} {
+		foreach node [$string selectNodes M:t/text()] {
 		  append value [$node nodeValue]
 		}
-		foreach node [$string selectNodes */G:t/text()] {
+		foreach node [$string selectNodes */M:t/text()] {
 		  append value [$node nodeValue]
 		}
 	      } else {
@@ -1308,34 +1308,34 @@ proc ::ooxml::xl_read { file args } {
 	    if {!$opts(valuesonly) && $datetime ne {}} {
 	      set wb($sheet,d,[StringToRowColumn [$cell @r]]) $datetime
 	    }
-	    if {!$opts(valuesonly) && [set node [$cell selectNodes G:f/text()]] ne {}} {
+	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
 	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach row [$root selectNodes /G:worksheet/G:sheetData/G:row] {
+	  foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
 	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
 	      dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach freeze [$root selectNodes /G:worksheet/G:sheetViews/G:sheetView/G:pane] {
+	  foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
 	    if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
 	      set wb($sheet,freeze) [$freeze @topLeftCell]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach filter [$root selectNodes /G:worksheet/G:autoFilter] {
+	  foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
 	    if {[$filter hasAttribute ref]} {
 	      lappend wb($sheet,filter) [$filter @ref]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach merge [$root selectNodes /G:worksheet/G:mergeCells/G:mergeCell] {
+	  foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
 	    if {[$merge hasAttribute ref]} {
 	      lappend wb($sheet,merge) [$merge @ref]
 	    }

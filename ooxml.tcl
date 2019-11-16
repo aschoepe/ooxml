@@ -180,6 +180,7 @@ namespace eval ::ooxml {
   variable predefColorsARBG
   variable predefBorderLineStyles
   variable predefPatternType
+  variable xmlns
 
   set defaults(path) {.}
 
@@ -330,6 +331,24 @@ namespace eval ::ooxml {
     slantDashDot
     thick
     thin
+  }
+
+  array set xmlns {
+    M http://schemas.openxmlformats.org/spreadsheetml/2006/main
+    CT http://schemas.openxmlformats.org/package/2006/content-types
+    EP http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
+    PR http://schemas.openxmlformats.org/package/2006/relationships
+    a http://schemas.openxmlformats.org/drawingml/2006/main
+    cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
+    dc http://purl.org/dc/elements/1.1/
+    dcmitype http://purl.org/dc/dcmitype/
+    dcterms http://purl.org/dc/terms/
+    mc http://schemas.openxmlformats.org/markup-compatibility/2006
+    r http://schemas.openxmlformats.org/officeDocument/2006/relationships
+    vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+    x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
+    x16r2 http://schemas.microsoft.com/office/spreadsheetml/2015/02/main
+    xsi http://www.w3.org/2001/XMLSchema-instance
   }
 
   # ar - Arabic - العربية 
@@ -764,6 +783,8 @@ proc ::ooxml::Color { color } {
 #
 
 proc ::ooxml::xl_sheets { file } {
+  variable xmlns
+
   package require vfs::zip
 
   set sheets {}
@@ -776,7 +797,7 @@ proc ::ooxml::xl_sheets { file } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces [list X [$relsroot namespaceURI]]
+      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
     close $fd
   }
@@ -785,14 +806,14 @@ proc ::ooxml::xl_sheets { file } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list X [$root namespaceURI]]
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
-      foreach node [$root selectNodes /X:workbook/X:sheets/X:sheet] {
+      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
-	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes {/X:Relationships/X:Relationship[@Id=$rid]}] {
+	  set rid [$node getAttributeNS $xmlns(r) id]
+	  foreach node [$relsroot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
 	    }
@@ -819,6 +840,8 @@ proc ::ooxml::xl_sheets { file } {
 #
 
 proc ::ooxml::xl_read { file args } {
+  variable xmlns
+
   variable predefNumFmts
 
   package require vfs::zip
@@ -869,7 +892,7 @@ proc ::ooxml::xl_read { file args } {
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
       set relsroot [$rdoc documentElement]
-      $rdoc selectNodesNamespaces [list X [$relsroot namespaceURI]]
+      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
     close $fd
   }
@@ -878,14 +901,14 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list X [$root namespaceURI]]
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
-      foreach node [$root selectNodes /X:workbook/X:sheets/X:sheet] {
+      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
 	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
-	  set rid [$node @r:id]
-	  foreach node [$relsroot selectNodes {/X:Relationships/X:Relationship[@Id=$rid]}] {
+	  set rid [$node getAttributeNS $xmlns(r) id]
+	  foreach node [$relsroot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
 	    }
@@ -905,14 +928,14 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list X [$root namespaceURI]]
+      $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
-      foreach shared [$root selectNodes /X:sst/X:si] {
+      foreach shared [$root selectNodes /M:sst/M:si] {
 	incr idx
-	foreach node [$shared selectNodes X:t/text()] {
+	foreach node [$shared selectNodes M:t/text()] {
 	  append sharedStrings($idx) [$node nodeValue]
 	}
-	foreach node [$shared selectNodes */X:t/text()] {
+	foreach node [$shared selectNodes */M:t/text()] {
 	  append sharedStrings($idx) [$node nodeValue]
 	}
       }
@@ -926,9 +949,9 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       set root [$doc documentElement]
-      $doc selectNodesNamespaces [list X [$root namespaceURI]]
+      $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
-      foreach node [$root selectNodes /X:styleSheet/X:numFmts/X:numFmt] {
+      foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
         incr idx
 	if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
 	  set numFmtId [$node @numFmtId]
@@ -944,7 +967,7 @@ proc ::ooxml::xl_read { file args } {
 	}
       }
       set idx -1
-      foreach node [$root selectNodes /X:styleSheet/X:cellXfs/X:xf] {
+      foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
         incr idx
 	if {[$node hasAttribute numFmtId]} {
 	  set numFmtId [$node @numFmtId]
@@ -964,7 +987,7 @@ proc ::ooxml::xl_read { file args } {
       array unset a *
       set a(max) 0
       set wb(s,numFmtsIds) {}
-      foreach node [$root selectNodes /X:styleSheet/X:numFmts/X:numFmt] {
+      foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
         if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
 	  set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
 	  lappend wb(s,numFmtsIds) $idx
@@ -981,7 +1004,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       array unset a *
-      foreach node [$root selectNodes /X:styleSheet/X:fonts/X:font] {
+      foreach node [$root selectNodes /M:styleSheet/M:fonts/M:font] {
 	incr idx
 	array set a {name {} family {} size {} color {} scheme {} bold 0 italic 0 underline 0 color {}}
 	foreach node1 [$node childNodes] {
@@ -1035,7 +1058,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       array unset a *
-      foreach node [$root selectNodes /X:styleSheet/X:fills/X:fill] {
+      foreach node [$root selectNodes /M:styleSheet/M:fills/M:fill] {
 	incr idx
 	array set a {patterntype {} fgcolor {} bgcolor {}}
 	foreach node1 [$node childNodes] {
@@ -1067,7 +1090,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       unset -nocomplain d
-      foreach node [$root selectNodes /X:styleSheet/X:borders/X:border] {
+      foreach node [$root selectNodes /M:styleSheet/M:borders/M:border] {
 	incr idx
 	set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
 	foreach node1 [$node childNodes] {
@@ -1111,7 +1134,7 @@ proc ::ooxml::xl_read { file args } {
 
       set idx -1
       array unset a *
-      foreach node [$root selectNodes /X:styleSheet/X:cellXfs/X:xf] {
+      foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
 	incr idx
 	array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
         if {[$node hasAttribute numFmtId]} {
@@ -1190,9 +1213,9 @@ proc ::ooxml::xl_read { file args } {
       fconfigure $fd -encoding utf-8
       if {![catch {dom parse [read $fd]} doc]} {
 	set root [$doc documentElement]
-        $doc selectNodesNamespaces [list X [$root namespaceURI]]
+        $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
 	set idx -1
-	foreach col [$root selectNodes /X:worksheet/X:cols/X:col] {
+	foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
 	  incr idx
 	  foreach item {min max width style bestFit customWidth} {
 	    if {[$col hasAttribute $item]} {
@@ -1211,7 +1234,7 @@ proc ::ooxml::xl_read { file args } {
 	  lappend wb($sheet,col,$idx) string 0 nozero 0 calcfit 0
 	}
 	set wb($sheet,cols) [incr idx]
-	foreach cell [$root selectNodes /X:worksheet/X:sheetData/X:row/X:c] {
+	foreach cell [$root selectNodes /M:worksheet/M:sheetData/M:row/M:c] {
 	  if {[$cell hasAttribute t]} {
 	    set type [$cell @t]
 	  } else {
@@ -1222,7 +1245,7 @@ proc ::ooxml::xl_read { file args } {
 	  switch -- $type {
 	    n - b - d - str {
 	      # number (default), boolean, iso-date, formula string
-	      if {[set node [$cell selectNodes X:v/text()]] ne {}} {
+	      if {[set node [$cell selectNodes M:v/text()]] ne {}} {
 		set value [$node nodeValue]
 		if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
 		  set idx [$cell @s]
@@ -1240,7 +1263,7 @@ proc ::ooxml::xl_read { file args } {
 	    }
 	    s {
 	      # shared string
-	      if {[set node [$cell selectNodes X:v/text()]] ne {}} {
+	      if {[set node [$cell selectNodes M:v/text()]] ne {}} {
 		set index [$node nodeValue]
 		if {[info exists sharedStrings($index)]} {
 		  set value $sharedStrings($index)
@@ -1251,11 +1274,11 @@ proc ::ooxml::xl_read { file args } {
 	    }
 	    inlineStr {
 	      # inline string
-	      if {[set string [$cell selectNodes X:is]] ne {}} {
-		foreach node [$string selectNodes X:t/text()] {
+	      if {[set string [$cell selectNodes M:is]] ne {}} {
+		foreach node [$string selectNodes M:t/text()] {
 		  append value [$node nodeValue]
 		}
-		foreach node [$string selectNodes */X:t/text()] {
+		foreach node [$string selectNodes */M:t/text()] {
 		  append value [$node nodeValue]
 		}
 	      } else {
@@ -1285,34 +1308,34 @@ proc ::ooxml::xl_read { file args } {
 	    if {!$opts(valuesonly) && $datetime ne {}} {
 	      set wb($sheet,d,[StringToRowColumn [$cell @r]]) $datetime
 	    }
-	    if {!$opts(valuesonly) && [set node [$cell selectNodes X:f/text()]] ne {}} {
+	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
 	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach row [$root selectNodes /X:worksheet/X:sheetData/X:row] {
+	  foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
 	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
 	      dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach freeze [$root selectNodes /X:worksheet/X:sheetViews/X:sheetView/X:pane] {
+	  foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
 	    if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
 	      set wb($sheet,freeze) [$freeze @topLeftCell]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach filter [$root selectNodes /X:worksheet/X:autoFilter] {
+	  foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
 	    if {[$filter hasAttribute ref]} {
 	      lappend wb($sheet,filter) [$filter @ref]
 	    }
 	  }
 	}
 	if {!$opts(valuesonly)} {
-	  foreach merge [$root selectNodes /X:worksheet/X:mergeCells/X:mergeCell] {
+	  foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
 	    if {[$merge hasAttribute ref]} {
 	      lappend wb($sheet,merge) [$merge @ref]
 	    }
@@ -1359,6 +1382,7 @@ proc ooxml::Dom2zip {zf node path cd count} {
 
 proc ooxml::InitNodeCommands {} {
   variable initNodeCmds
+  variable xmlns
 
   if {[info exists initNodeCmds] && $initNodeCmds} return
 
@@ -1396,7 +1420,7 @@ proc ooxml::InitNodeCommands {} {
     t tableStyles top
     u
     v
-    vt:i4 vt:lpstr vt:lpstrvt:lpstr vt:variant vt:vector
+    vt:i4 vt:lpstr vt:variant vt:vector
     workbookPr workbookView
     xf
   }
@@ -1404,7 +1428,36 @@ proc ooxml::InitNodeCommands {} {
   namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
 
   foreach tag $elementNodes {
-    namespace eval ::ooxml "dom createNodeCmd -tagName $tag elementNode Tag_$tag; namespace export Tag_$tag"
+    switch -glob -- $tag {
+      a:* {
+	set ns $xmlns(a)
+      }
+      cp:* {
+	set ns $xmlns(cp)
+      }
+      dc:* {
+	set ns $xmlns(dc)
+      }
+      dcterms:* {
+	set ns $xmlns(dcterms)
+      }
+      vt:* {
+	set ns $xmlns(vt)
+      }
+      AppVersion - Application - Company - DocSecurity - HeadingPairs - HyperlinksChanged - LinksUpToDate - ScaleCrop - SharedDoc - TitlesOfParts {
+	set ns $xmlns(EP)
+      }
+      Default - Override {
+	set ns $xmlns(CT)
+      }
+      Relationship {
+	set ns $xmlns(PR)
+      }
+      default {
+	set ns $xmlns(M)
+      }
+    }
+    namespace eval ::ooxml "dom createNodeCmd -tagName $tag -namespace $ns elementNode Tag_$tag; namespace export Tag_$tag"
   }
   
   set initNodeCmds 1
@@ -2461,6 +2514,8 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
 
+    upvar #0 ::ooxml::xmlns xmlns
+
     array set opts {
       holdcontainerdirectory 0
     }
@@ -2517,12 +2572,10 @@ oo::class create ooxml::xl_write {
     array unset lookup
     
     # _rels/.rels
-    set doc [dom createDocument Relationships]
+    set doc [dom createDocumentNS $xmlns(PR) Relationships]
     set root [$doc documentElement]
 
     set rId 0
-
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
     $root appendFromScript {
       Tag_Relationship Id rId1 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument Target xl/workbook.xml {}
@@ -2533,11 +2586,8 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # [Content_Types].xml
-    set doc [dom createDocument Types]
+    set doc [dom createDocumentNS $xmlns(CT) Types]
     set root [$doc documentElement]
-
-
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/content-types
 
     $root appendFromScript {
       Tag_Default Extension xml ContentType application/xml {}
@@ -2561,11 +2611,10 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # docProps/app.xml
-    set doc [set obj(doc,) [dom createDocument Properties]]
+    set doc [set obj(doc,) [dom createDocumentNS $xmlns(EP) Properties]]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
-    $root setAttribute xmlns:vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+    $root setAttributeNS {} xmlns:vt $xmlns(vt)
 
     $root appendFromScript {
       Tag_Application { Text $obj(application) }
@@ -2600,14 +2649,13 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # docProps/core.xml
-    set doc [dom createDocument cp:coreProperties]
+    set doc [dom createDocumentNS $xmlns(cp) cp:coreProperties]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns:cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
-    $root setAttribute xmlns:dc http://purl.org/dc/elements/1.1/
-    $root setAttribute xmlns:dcterms http://purl.org/dc/terms/
-    $root setAttribute xmlns:dcmitype http://purl.org/dc/dcmitype/
-    $root setAttribute xmlns:xsi http://www.w3.org/2001/XMLSchema-instance
+    $root setAttributeNS {} xmlns:dc $xmlns(dc)
+    $root setAttributeNS {} xmlns:dcterms $xmlns(dcterms)
+    $root setAttributeNS {} xmlns:dcmitype $xmlns(dcmitype)
+    $root setAttributeNS {} xmlns:xsi $xmlns(xsi)
 
     $root appendFromScript {
       Tag_dc:creator { Text $obj(creator) }
@@ -2619,10 +2667,8 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # xl/_rels/workbook.xml.rels
-    set doc [dom createDocument Relationships]
+    set doc [dom createDocumentNS $xmlns(PR) Relationships]
     set root [$doc documentElement]
-
-    $root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
 
     $root appendFromScript {
       for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
@@ -2644,10 +2690,9 @@ oo::class create ooxml::xl_write {
 
     # xl/sharedStrings.xml
     if {$obj(sharedStrings) > 0} {
-      set doc [dom createDocument sst]
+      set doc [dom createDocumentNS $xmlns(M) sst]
       set root [$doc documentElement]
 
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
       $root setAttribute count [llength $sharedStrings]
       $root setAttribute uniqueCount [llength $sharedStrings]
 
@@ -2667,10 +2712,8 @@ oo::class create ooxml::xl_write {
 
     # xl/calcChain.xml
     if {$obj(calcChain)} {
-      set doc [dom createDocument calcChain]
+      set doc [dom createDocumentNS $xmlns(M) calcChain]
       set root [$doc documentElement]
-
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
 
       $root appendFromScript {
 	Tag_c r C1 i 3 l 1 {}
@@ -2682,12 +2725,11 @@ oo::class create ooxml::xl_write {
 
 
     # xl/styles.xml
-    set doc [dom createDocument styleSheet]
+    set doc [dom createDocumentNS $xmlns(M) styleSheet]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-    $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
-    $root setAttribute xmlns:x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
+    $root setAttributeNS {} xmlns:mc $xmlns(mc)
+    $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
     $root setAttribute mc:Ignorable x14ac
 
     $root appendFromScript {
@@ -2820,10 +2862,9 @@ oo::class create ooxml::xl_write {
 
 
     # xl/theme/theme1.xml
-    set doc [dom createDocument a:theme]
+    set doc [dom createDocumentNS $xmlns(a) a:theme]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns:a http://schemas.openxmlformats.org/drawingml/2006/main
     $root setAttribute name Office-Design
 
     $root appendFromScript {
@@ -3152,11 +3193,10 @@ oo::class create ooxml::xl_write {
 
 
     # xl/workbook.xml
-    set doc [dom createDocument workbook]
+    set doc [dom createDocumentNS $xmlns(M) workbook]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-    $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
+    $root setAttributeNS {} xmlns:r $xmlns(r)
 
     $root appendFromScript {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
@@ -3184,13 +3224,15 @@ oo::class create ooxml::xl_write {
     # xl/worksheets/sheet1.xml SHEET
 
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      set doc [dom createDocument worksheet]
+      set doc [dom createDocumentNS $xmlns(M) worksheet]
       set root [$doc documentElement]
-      $root setAttribute xmlns http://schemas.openxmlformats.org/spreadsheetml/2006/main
-      $root setAttribute xmlns:r http://schemas.openxmlformats.org/officeDocument/2006/relationships
-      $root setAttribute xmlns:mc http://schemas.openxmlformats.org/markup-compatibility/2006
-      $root setAttribute xmlns:x14ac http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac
+
+      $root setAttributeNS {} xmlns:r $xmlns(r)
+      $root setAttributeNS {} xmlns:mc $xmlns(mc)
+      $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
       $root setAttribute mc:Ignorable x14ac
+
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) ac $xmlns(x14ac)]
 
       $root appendFromScript {
 	Tag_dimension ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)] {}
@@ -3259,7 +3301,7 @@ oo::class create ooxml::xl_write {
 	Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
       }
 
-      if {[set colsNode [$root selectNodes /worksheet/cols]] ne {}} {
+      if {[set colsNode [$root selectNodes /M:worksheet/M:cols]] ne {}} {
 	if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
 	  $colsNode appendFromScript {
 	    foreach idx [lsort -dictionary [array names cols $ws,*]] {

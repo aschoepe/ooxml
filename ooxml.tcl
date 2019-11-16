@@ -1428,7 +1428,36 @@ proc ooxml::InitNodeCommands {} {
   namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
 
   foreach tag $elementNodes {
-    namespace eval ::ooxml "dom createNodeCmd -tagName $tag elementNode Tag_$tag; namespace export Tag_$tag"
+    switch -glob -- $tag {
+      a:* {
+	set ns $xmlns(a)
+      }
+      cp:* {
+	set ns $xmlns(cp)
+      }
+      dc:* {
+	set ns $xmlns(dc)
+      }
+      dcterms:* {
+	set ns $xmlns(dcterms)
+      }
+      vt:* {
+	set ns $xmlns(vt)
+      }
+      AppVersion - Application - Company - DocSecurity - HeadingPairs - HyperlinksChanged - LinksUpToDate - ScaleCrop - SharedDoc - TitlesOfParts {
+	set ns $xmlns(EP)
+      }
+      Default - Override {
+	set ns $xmlns(CT)
+      }
+      Relationship {
+	set ns $xmlns(PR)
+      }
+      default {
+	set ns $xmlns(M)
+      }
+    }
+    namespace eval ::ooxml "dom createNodeCmd -tagName $tag -namespace $ns elementNode Tag_$tag; namespace export Tag_$tag"
   }
   
   set initNodeCmds 1
@@ -2543,12 +2572,10 @@ oo::class create ooxml::xl_write {
     array unset lookup
     
     # _rels/.rels
-    set doc [dom createDocument Relationships]
+    set doc [dom createDocumentNS $xmlns(PR) Relationships]
     set root [$doc documentElement]
 
     set rId 0
-
-    $root setAttribute xmlns $xmlns(PR)
 
     $root appendFromScript {
       Tag_Relationship Id rId1 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument Target xl/workbook.xml {}
@@ -2559,11 +2586,8 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # [Content_Types].xml
-    set doc [dom createDocument Types]
+    set doc [dom createDocumentNS $xmlns(CT) Types]
     set root [$doc documentElement]
-
-
-    $root setAttribute xmlns $xmlns(CT)
 
     $root appendFromScript {
       Tag_Default Extension xml ContentType application/xml {}
@@ -2587,11 +2611,10 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # docProps/app.xml
-    set doc [set obj(doc,) [dom createDocument Properties]]
+    set doc [set obj(doc,) [dom createDocumentNS $xmlns(EP) Properties]]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns $xmlns(EP)
-    $root setAttribute xmlns:vt $xmlns(vt)
+    $root setAttributeNS {} xmlns:vt $xmlns(vt)
 
     $root appendFromScript {
       Tag_Application { Text $obj(application) }
@@ -2626,14 +2649,13 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # docProps/core.xml
-    set doc [dom createDocument cp:coreProperties]
+    set doc [dom createDocumentNS $xmlns(cp) cp:coreProperties]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns:cp $xmlns(cp)
-    $root setAttribute xmlns:dc $xmlns(dc)
-    $root setAttribute xmlns:dcterms $xmlns(dcterms)
-    $root setAttribute xmlns:dcmitype $xmlns(dcmitype)
-    $root setAttribute xmlns:xsi $xmlns(xsi)
+    $root setAttributeNS {} xmlns:dc $xmlns(dc)
+    $root setAttributeNS {} xmlns:dcterms $xmlns(dcterms)
+    $root setAttributeNS {} xmlns:dcmitype $xmlns(dcmitype)
+    $root setAttributeNS {} xmlns:xsi $xmlns(xsi)
 
     $root appendFromScript {
       Tag_dc:creator { Text $obj(creator) }
@@ -2645,10 +2667,8 @@ oo::class create ooxml::xl_write {
     $doc delete
 
     # xl/_rels/workbook.xml.rels
-    set doc [dom createDocument Relationships]
+    set doc [dom createDocumentNS $xmlns(PR) Relationships]
     set root [$doc documentElement]
-
-    $root setAttribute xmlns $xmlns(PR)
 
     $root appendFromScript {
       for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
@@ -2670,10 +2690,9 @@ oo::class create ooxml::xl_write {
 
     # xl/sharedStrings.xml
     if {$obj(sharedStrings) > 0} {
-      set doc [dom createDocument sst]
+      set doc [dom createDocumentNS $xmlns(M) sst]
       set root [$doc documentElement]
 
-      $root setAttribute xmlns $xmlns(M)
       $root setAttribute count [llength $sharedStrings]
       $root setAttribute uniqueCount [llength $sharedStrings]
 
@@ -2693,10 +2712,8 @@ oo::class create ooxml::xl_write {
 
     # xl/calcChain.xml
     if {$obj(calcChain)} {
-      set doc [dom createDocument calcChain]
+      set doc [dom createDocumentNS $xmlns(M) calcChain]
       set root [$doc documentElement]
-
-      $root setAttribute xmlns $xmlns(M)
 
       $root appendFromScript {
 	Tag_c r C1 i 3 l 1 {}
@@ -2708,12 +2725,11 @@ oo::class create ooxml::xl_write {
 
 
     # xl/styles.xml
-    set doc [dom createDocument styleSheet]
+    set doc [dom createDocumentNS $xmlns(M) styleSheet]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns $xmlns(M)
-    $root setAttribute xmlns:mc $xmlns(mc)
-    $root setAttribute xmlns:x14ac $xmlns(x14ac)
+    $root setAttributeNS {} xmlns:mc $xmlns(mc)
+    $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
     $root setAttribute mc:Ignorable x14ac
 
     $root appendFromScript {
@@ -2846,10 +2862,9 @@ oo::class create ooxml::xl_write {
 
 
     # xl/theme/theme1.xml
-    set doc [dom createDocument a:theme]
+    set doc [dom createDocumentNS $xmlns(a) a:theme]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns:a $xmlns(a)
     $root setAttribute name Office-Design
 
     $root appendFromScript {
@@ -3178,11 +3193,10 @@ oo::class create ooxml::xl_write {
 
 
     # xl/workbook.xml
-    set doc [dom createDocument workbook]
+    set doc [dom createDocumentNS $xmlns(M) workbook]
     set root [$doc documentElement]
 
-    $root setAttribute xmlns $xmlns(M)
-    $root setAttribute xmlns:r $xmlns(r)
+    $root setAttributeNS {} xmlns:r $xmlns(r)
 
     $root appendFromScript {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
@@ -3210,13 +3224,15 @@ oo::class create ooxml::xl_write {
     # xl/worksheets/sheet1.xml SHEET
 
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      set doc [dom createDocument worksheet]
+      set doc [dom createDocumentNS $xmlns(M) worksheet]
       set root [$doc documentElement]
-      $root setAttribute xmlns $xmlns(M)
-      $root setAttribute xmlns:r $xmlns(r)
-      $root setAttribute xmlns:mc $xmlns(mc)
-      $root setAttribute xmlns:x14ac $xmlns(x14ac)
+
+      $root setAttributeNS {} xmlns:r $xmlns(r)
+      $root setAttributeNS {} xmlns:mc $xmlns(mc)
+      $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
       $root setAttribute mc:Ignorable x14ac
+
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) ac $xmlns(x14ac)]
 
       $root appendFromScript {
 	Tag_dimension ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)] {}
@@ -3285,7 +3301,7 @@ oo::class create ooxml::xl_write {
 	Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
       }
 
-      if {[set colsNode [$root selectNodes /worksheet/cols]] ne {}} {
+      if {[set colsNode [$root selectNodes /M:worksheet/M:cols]] ne {}} {
 	if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
 	  $colsNode appendFromScript {
 	    foreach idx [lsort -dictionary [array names cols $ws,*]] {

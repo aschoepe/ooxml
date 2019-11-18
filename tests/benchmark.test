@@ -1,0 +1,66 @@
+#
+# Commands covered: simple excel sheet
+#
+
+#
+# (c) 2019 Rolf Ade
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+
+
+proc doit {rows cols} {
+  set spreadsheet [::ooxml::xl_write new -creator "me"]
+  set sheet [$spreadsheet worksheet "my data"]
+  set row 0
+  while {$row < $rows} {
+    set col 0
+    while {$col < $cols} {
+      $spreadsheet cell $sheet "Cell $row,$col"
+      incr col
+    }
+    $spreadsheet row $sheet
+    incr row
+  }
+  $spreadsheet write "$rows-$cols.xlsx"
+  $spreadsheet destroy
+}
+
+
+test Benchmark-1.1 {benchmark cell generating} {
+  set rc 1
+
+  set first -1
+  foreach {rows cols} { 500 10 1000 10 3000 10 5000 10 } {
+    set msec [lindex [time {doit $rows $cols}] 0]
+    set perCell [expr {$msec / $rows / $cols}]
+    if {$first == -1} {
+      set first $perCell
+    }
+    if {$perCell > $first} {
+      set rc 0
+    }
+  }
+
+  return $rc
+} 1
+
+
+file delete -force 500-10.xlsx 1000-10.xlsx 3000-10.xlsx 5000-10.xlsx
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+

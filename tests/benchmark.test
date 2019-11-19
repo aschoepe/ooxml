@@ -41,14 +41,17 @@ proc doit {rows cols} {
 test Benchmark-1.1 {benchmark cell generating} {
   set rc 1
 
+  set list {msec per cell}
   set first -1
   foreach {rows cols} { 500 10 1000 10 3000 10 5000 10 } {
     set msec [lindex [time {doit $rows $cols}] 0]
     set perCell [expr {$msec / $rows / $cols}]
+    lappend list $perCell
     if {$first == -1} {
-      set first $perCell
+      set first [expr {int($perCell * 1.04)}]
     }
     if {$perCell > $first} {
+      puts $list
       set rc 0
     }
   }

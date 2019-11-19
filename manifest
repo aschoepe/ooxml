@@ -1,5 +1,5 @@
-C test\sbechmark
-D 2019-11-18T18:28:01.693
+C patches\sfor\ssimple\sund\sbenchmark\stests
+D 2019-11-19T13:31:02.992
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -25,9 +25,9 @@ F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922
 F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b34d1d4f8 x
 F tclconfig/tcl.m4 c8d2c040778a20f1b59bc39d721d0b14f04917ebb25e0f81106b926732c76ada
 F tests/all.tcl c56ee198de4934d07e36af2c28a9f3e33fb1a08db94411aaaf499a14ab72cf13
-F tests/benchmark.test 970ff01f1f948edb907edeb21aaaa9542a3a997715fd744a33ff7ef48eb88894
+F tests/benchmark.test c0cf5bddab28015d68806df1bfab230b95c433768cfc277bdf3c77ee161cb9de
 F tests/misc.test 579b69dd6996ebfcffe9c992d48fdb2bbd9fbf06fc39d8239cfbd2cd1aefe4aa
-F tests/simple.test 83a7c87b1b8ce48e8dce92ae8e44cc10a16b6a6d4ec8418fb77598e7681b636e
+F tests/simple.test c02984f90a521693dc8f3ba428b8f961894823afbb039f9363df2ae701e48658
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -57,8 +57,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 5b32057030ec193714ab10b4dbfdd3595004ee4ed13bc20b49f7c37579bfc0fb
-R 39446dbbffcf21cd45a1a37e44c0d0f4
+P 9d252baedabd1af8472a7ce6772d4728ed98461c9177b04252371c2799bddcb3
+R 39da5ef38667513a5fec4530f5fbb0f7
 U alex
-Z c3d840074ea30af0b6a0c6e673ff0997
+Z 296c467206bf6cabdbc184f9c4ffadf5
 # Remove this line to create a well-formed Fossil manifest.

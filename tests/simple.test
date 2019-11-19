@@ -26,18 +26,31 @@ test SimpleExcelWrite-1.1 {Write a Simple Excel Sheet} {
   set spreadsheet [::ooxml::xl_write new -creator {User A} -created $cDT -modifiedby {User B} -modified $mCT -application {Tcl Test}]
   if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
     $spreadsheet cell $sheet {Tcl Test - SimpleExcel} -index A1
-    $spreadsheet write simple.xlsx
   }
+  if {[set sheet [$spreadsheet worksheet {Sheet 2}]] > -1} {
+    $spreadsheet cell $sheet {Sheet 2} -index B2
+  }
+  $spreadsheet write simple.xlsx
   $spreadsheet destroy
 
   return [file exists simple.xlsx]
 } 1
 
 
-test SimpleExcelRead-1.2 {Read a Simple Excel Sheet} {
+test SimpleExcelRead-1.2 {Read a Simple Excel Sheets} {
   array set workbook [ooxml::xl_read simple.xlsx]
+  return [llength $workbook(sheets)]
+} 2
+
+
+test SimpleExcelRead-1.3 {Read a Simple Excel Sheet1 A1} {
   return $workbook(0,c,0,0)
 } A1
+
+
+test SimpleExcelRead-1.4 {Read a Simple Excel Sheet2 B2} {
+  return $workbook(1,c,1,1)
+} B2
 
 
 test MountXLSX-2.1 {Mount XLSX File} {
@@ -112,7 +125,7 @@ $doc delete
 
 
 vfs::zip::Unmount $mnt xlsx
-#file delete -force simple.xlsx
+file delete -force simple.xlsx
 
 
 # cleanup

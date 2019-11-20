@@ -1,5 +1,5 @@
-C merged\sfrom\strunk
-D 2019-11-20T18:13:35.823
+C save\sinternal\sdata\sfor\sanalysis
+D 2019-11-20T20:30:52.952
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -26,7 +26,7 @@ F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b3
 F tclconfig/tcl.m4 c8d2c040778a20f1b59bc39d721d0b14f04917ebb25e0f81106b926732c76ada
 F tests/all.tcl c56ee198de4934d07e36af2c28a9f3e33fb1a08db94411aaaf499a14ab72cf13
 F tests/benchmark.test c0cf5bddab28015d68806df1bfab230b95c433768cfc277bdf3c77ee161cb9de
-F tests/formatcell.test 0c202c858afd195fc00da01428fca547ab208a6cd1ba32535e4d8612994729b0
+F tests/formatcell.test e2b0fbef6757ce8f6bf04358c899055771fddb2a6a0689250a633a2354abad74
 F tests/misc.test 579b69dd6996ebfcffe9c992d48fdb2bbd9fbf06fc39d8239cfbd2cd1aefe4aa
 F tests/simple.test c02984f90a521693dc8f3ba428b8f961894823afbb039f9363df2ae701e48658
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
@@ -58,8 +58,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 5203eec69491b03c8788066573c3239da61a35ba6828746dddc530bc41530f1b b4f165d97cdb5f7c94b73af1efa9c88bb8ab3ff877c8dc4791758f1a1742b51d
-R efe922ddf4e7db74523517367c7813cd
+P 2c9b93dbcb8bc6fd3598c2eea73e26809737d862a884c5fe94e5aa634efb4d67
+R b1207be5bbf0f3b6b2c4a4d64ada5f6b
 U alex
-Z 587540fa61f6595174d032e363900396
+Z 083e7a81e648c723841d9a9307dd28d1
 # Remove this line to create a well-formed Fossil manifest.

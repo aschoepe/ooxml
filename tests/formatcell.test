@@ -842,6 +842,11 @@ test FormatCellMerge-7.1 {Merge} {
 } 0
 
 
+foreach item {obj cells fonts numFmts styles fills borders cols} {
+  array set $item [array get ${spreadsheet}::$item]
+}
+
+
 test FormatCellWriteSpreatsheet-8.1 {Write Spreatsheet} {
   $spreadsheet write formatcell.xlsx
 } 0

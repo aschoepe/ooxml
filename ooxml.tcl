@@ -876,7 +876,7 @@ proc ::ooxml::xl_read { file args } {
 	set opts([string range $opt 1 end]) 1
       }
       default {
-	error "unknown option '$opt'"
+	error "unknown option \"$opt\", should be: -sheets, -sheetnames, -datefmt, -as, -valuesonly or -keylist"
       }
     }
   }
@@ -1502,7 +1502,7 @@ oo::class create ooxml::xl_write {
           }            
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -creator, -created, -modifiedby, -modified or -application"
         }
       }
     }
@@ -1619,7 +1619,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -format, -list, -general, -date, -time, -datetime, -iso8601, -number, -decimal, -red, -separator, -fraction, -scientific, -percent, -string or -text"
         }
       }
     }
@@ -1756,7 +1756,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -name, -family, -size, -color, -scheme, -list, -bold, -italic or -underline"
         }
       }
     }
@@ -1831,7 +1831,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -patterntype, -fgcolor, -bgcolor or -list"
         }
       }
     }
@@ -1907,7 +1907,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -leftstyle, -leftcolor, -rightstyle, -rightcolor, -topstyle, -topcolor, -bottomstyle, -bottomcolor, -diagonalstyle, -diagonalcolor, -diagonaldirection or -list"
         }
       }
     }
@@ -2020,7 +2020,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -numfmt, -font, -fill, -border, -xf, -horizontal, -vertical, -rotate, -list or -wrap"
         }
       }
     }
@@ -2135,7 +2135,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -index, -to, -width, -style, -bestfit, -customwidth, -string, -nozero or -calcfit"
         }
       }
     }
@@ -2194,7 +2194,7 @@ oo::class create ooxml::xl_write {
           }            
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -index or -height"
         }
       }
     }
@@ -2265,7 +2265,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string, -nozero or -globalstyle"
         }
       }
     }
@@ -2528,7 +2528,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option '$opt'"
+          error "unknown option \"$opt\", should be: -holdcontainerdirectory"
         }
       }
     }
@@ -3382,7 +3382,7 @@ proc ::ooxml::tablelist_to_xl { lb args } {
 	set opts([string range $opt 1 end]) 1
       }
       default {
-	error "unknown option '$opt'"
+	error "unknown option \"$opt\", should be: -callback, -path, -file, -creator, -name, -rootonly, -addtimestamp or -globalstyle"
       }
     }
   }

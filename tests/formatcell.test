@@ -1,0 +1,863 @@
+#
+# Commands covered: format cell  excel sheet
+#
+
+#
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+package require vfs::zip
+
+
+test FormatCellNewSpreatsheet-1.1 {Create New Spreadsheet} -body {
+  set spreadsheet [::ooxml::xl_write new -creator {Alexander Schöpe}]
+} -result {::oo::Obj*} -match glob
+
+test FormatCellNewWorksheet-1.2 {Create New Worksheet} {
+  set sheet [$spreadsheet worksheet {Blatt 1}]
+} 1
+
+test FormatCellNewStyle-2.1 {New Style} {
+  set bold [$spreadsheet style -font [$spreadsheet font -bold]]
+} 1
+
+test FormatCellNewStyle-2.2 {New Style} {
+  set italic [$spreadsheet style -font [$spreadsheet font -italic]]
+} 2
+
+test FormatCellNewStyle-2.3 {New Style} {
+  set underline [$spreadsheet style -font [$spreadsheet font -underline]]
+} 3
+
+
+test FormatCellNewStyle-2.4 {New Style} {
+  set red [$spreadsheet style -font [$spreadsheet font -color Red]]
+} 4
+
+test FormatCellNewStyle-2.5 {New Style} {
+  set font9 [$spreadsheet style -font [$spreadsheet font -size 9]]
+} 5
+
+test FormatCellNewStyle-2.6 {New Style} {
+  set font18 [$spreadsheet style -font [$spreadsheet font -size 18]]
+} 6
+
+
+test FormatCellNewStyle-2.7 {New Style} {
+  set rotate90 [$spreadsheet style -rotate 90 -horizontal center]
+} 7
+
+test FormatCellNewStyle-2.8 {New Style} {
+  set rotate45 [$spreadsheet style -rotate 45]
+} 8
+
+
+test FormatCellNewStyle-2.9 {New Style} {
+  set left [$spreadsheet style -horizontal left]
+} 9
+
+test FormatCellNewStyle-2.10 {New Style} {
+  set center [$spreadsheet style -horizontal center]
+} 10
+
+test FormatCellNewStyle-2.11 {New Style} {
+  set right [$spreadsheet style -horizontal right]
+} 11
+
+test FormatCellNewStyle-2.12 {New Style} {
+  set top [$spreadsheet style -vertical top]
+} 12
+
+test FormatCellNewStyle-2.13 {New Style} {
+  set vcenter [$spreadsheet style -vertical center]
+} 13
+
+test FormatCellNewStyle-2.14 {New Style} {
+  set bottom [$spreadsheet style -vertical bottom]
+} 14
+
+test FormatCellNewStyle-2.15 {New Style} {
+  set hvcenter [$spreadsheet style -horizontal center -vertical center]
+} 15
+
+
+test FormatCellNewStyle-2.16 {New Style} {
+  set yellow [$spreadsheet style -fill [$spreadsheet fill -fgcolor FFFFFF00 -bgcolor 64 -patterntype solid]]
+} 16
+
+
+test FormatCellNewStyle-2.17 {New Style} {
+  set bLeft [$spreadsheet style -border [$spreadsheet border -leftstyle thin]]
+} 17
+
+test FormatCellNewStyle-2.18 {New Style} {
+  set bBottom [$spreadsheet style -border [$spreadsheet border -bottomstyle thin]]
+} 18
+
+test FormatCellNewStyle-2.19 {New Style} {
+  set bBottom2 [$spreadsheet style -border [$spreadsheet border -bottomstyle double]]
+} 19
+
+test FormatCellNewStyle-2.20 {New Style} {
+  set bBottomB [$spreadsheet style -border [$spreadsheet border -bottomstyle medium]]
+} 20
+
+test FormatCellNewStyle-2.21 {New Style} {
+  set bBottomD [$spreadsheet style -border [$spreadsheet border -bottomstyle dashed]]
+} 21
+
+test FormatCellNewStyle-2.22 {New Style} {
+  set bDiagonal [$spreadsheet style -border [$spreadsheet border -diagonalstyle medium -diagonaldirection up]]
+} 22
+
+
+test FormatCellNewStyle-2.23 {New Style} {
+  set dec2 [$spreadsheet style -numfmt [$spreadsheet numberformat -decimal]]
+} 23
+
+test FormatCellNewStyle-2.24 {New Style} {
+  set dec2t [$spreadsheet style -numfmt [$spreadsheet numberformat -decimal -separator]]
+} 24
+
+test FormatCellNewStyle-2.25 {New Style} {
+  set dec3 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {#,##0.000}]]
+} 25
+
+test FormatCellNewStyle-2.26 {New Style} {
+  set dec3t [$spreadsheet style -numfmt [$spreadsheet numberformat -format {#,##0.000_ ;[Red]\-#,##0.000\ }]]
+} 26
+
+test FormatCellNewStyle-2.27 {New Style} {
+  set currency [$spreadsheet style -numfmt [$spreadsheet numberformat -format {#,##0.00\ "€"}]]
+} 27
+
+test FormatCellNewStyle-2.28 {New Style} {
+  set iso8601 [$spreadsheet style -numfmt [$spreadsheet numberformat -iso8601]]
+} 28
+
+test FormatCellNewStyle-2.29 {New Style} {
+  set date [$spreadsheet style -numfmt [$spreadsheet numberformat -date]]
+} 29
+
+test FormatCellNewStyle-2.30 {New Style} {
+  set date2 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {[$-F800]dddd\,\ mmmm\ dd\,\ yyyy}]]
+} 30
+
+test FormatCellNewStyle-2.31 {New Style} {
+  set date3 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {[$-407]d/\ mmmm\ yyyy;@}]]
+} 31
+
+test FormatCellNewStyle-2.32 {New Style} {
+  set date4 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {d/m/yy\ h:mm;@}]]
+} 32
+
+test FormatCellNewStyle-2.33 {New Style} {
+  set time [$spreadsheet style -numfmt [$spreadsheet numberformat -time]]
+} 33
+
+test FormatCellNewStyle-2.34 {New Style} {
+  set time2 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {[$-F400]h:mm:ss\ AM/PM}]]
+} 34
+
+test FormatCellNewStyle-2.35 {New Style} {
+  set percent [$spreadsheet style -numfmt [$spreadsheet numberformat -percent]]
+} 35
+
+test FormatCellNewStyle-2.36 {New Style} {
+  set percent2 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {0.00%}]]
+} 36
+
+test FormatCellNewStyle-2.37 {New Style} {
+  set scientific [$spreadsheet style -numfmt [$spreadsheet numberformat -scientific]]
+} 37
+
+test FormatCellNewStyle-2.38 {New Style} {
+  set fraction [$spreadsheet style -numfmt [$spreadsheet numberformat -fraction]]
+} 38
+
+test FormatCellNewStyle-2.39 {New Style} {
+  set fraction2 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {# ??/??}]]
+} 39
+
+test FormatCellNewStyle-2.40 {New Style} {
+  set text [$spreadsheet style -numfmt [$spreadsheet numberformat -string]]
+} 40
+
+
+test FormatCellNewStyle-2.41 {New Style} {
+  set wrap [$spreadsheet style -wrap]
+} 41
+
+
+test FormatCellColumn-3.1 {Column Setting} {
+  $spreadsheet column $sheet -index 0 -width 17.33203125 -bestfit
+} 0
+
+test FormatCellColumn-3.2 {Column Setting} {
+  $spreadsheet column $sheet -index 1 -width 20.5 -bestfit
+} 1
+
+test FormatCellColumn-3.3 {Column Setting} {
+  $spreadsheet column $sheet -index 4 -width 31.1640625 -bestfit
+} 4
+
+test FormatCellColumn-3.4 {Column Setting} {
+  $spreadsheet column $sheet -index 7 -width 11.1640625 -bestfit ;# -style 19
+} 7
+
+test FormatCellColumn-3.5 {Column Setting} {
+  $spreadsheet column $sheet -index 8 ;# -style 15
+} 8
+
+
+test FormatCell-4.1 {Set Cell} {
+  $spreadsheet cell $sheet Standard -index 0,0 -string
+} 0,0
+
+test FormatCell-4.2 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 0,1
+} 0,1
+
+test FormatCell-4.3 {Set Cell} {
+  $spreadsheet cell $sheet 1 -index 0,8 ;# -style 15
+} 0,8
+
+
+test FormatCell-4.4 {Set Cell} {
+  $spreadsheet cell $sheet Standard -index 1,0 -string
+} 1,0
+
+test FormatCell-4.5 {Set Cell} {
+  $spreadsheet cell $sheet Text -index 1,1 -string
+} 1,1
+
+
+test FormatCell-4.6 {Set Cell} {
+  $spreadsheet cell $sheet {Zahl 2} -index 2,0 -string
+} 2,0
+
+test FormatCell-4.7 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 2,1 -style $dec2
+} 2,1
+
+test FormatCell-4.8 {Set Cell} {
+  $spreadsheet cell $sheet 1 -index 2,2
+} 2,2
+
+test FormatCell-4.9 {Set Cell} {
+  $spreadsheet cell $sheet 2 -index 2,3
+} 2,3
+
+test FormatCell-4.10 {Set Cell} {
+  $spreadsheet cell $sheet 0.00 -index 2,4 -string ;# -style 15
+} 2,4
+
+
+test FormatCell-4.11 {Set Cell} {
+  $spreadsheet cell $sheet {Zahl 2 T} -index 3,0 -string
+} 3,0
+
+test FormatCell-4.12 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 3,1 -style $dec2t
+} 3,1
+
+test FormatCell-4.13 {Set Cell} {
+  $spreadsheet cell $sheet 2 -index 3,2
+} 3,2
+
+test FormatCell-4.14 {Set Cell} {
+  $spreadsheet cell $sheet 4 -index 3,3
+} 3,3
+
+test FormatCell-4.15 {Set Cell} {
+  $spreadsheet cell $sheet #,##0.00 -index 3,4 -string
+} 3,4
+
+test FormatCell-4.16 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 3,7 -style $date4
+} 3,7
+
+
+test FormatCell-4.17 {Set Cell} {
+  $spreadsheet cell $sheet {Zahl 3} -index 4,0 -string
+} 4,0
+
+test FormatCell-4.18 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 4,1 -style $dec3
+} 4,1
+
+test FormatCell-4.19 {Set Cell} {
+  $spreadsheet cell $sheet 17 -index 4,2
+} 4,2
+
+test FormatCell-4.20 {Set Cell} {
+  $spreadsheet cell $sheet 174 -index 4,3
+} 4,3
+
+test FormatCell-4.21 {Set Cell} {
+  $spreadsheet cell $sheet #,##0.000 -index 4,4 -string
+} 4,4
+
+
+test FormatCell-4.22 {Set Cell} {
+  $spreadsheet cell $sheet {Zahl 3 C} -index 5,0 -string
+} 5,0
+
+test FormatCell-4.23 {Set Cell} {
+  $spreadsheet cell $sheet -3.1415 -index 5,1 -style $dec3t
+} 5,1
+
+test FormatCell-4.24 {Set Cell} {
+  $spreadsheet cell $sheet 16 -index 5,2
+} 5,2
+
+test FormatCell-4.25 {Set Cell} {
+  $spreadsheet cell $sheet 173 -index 5,3
+} 5,3
+
+test FormatCell-4.26 {Set Cell} {
+  $spreadsheet cell $sheet {#,##0.000_ ;[Red]\-#,##0.000\ } -index 5,4 -string
+} 5,4
+
+
+test FormatCell-4.27 {Set Cell} {
+  $spreadsheet cell $sheet Währung -index 6,0 -string
+} 6,0
+
+test FormatCell-4.28 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 6,1 -style $currency
+} 6,1
+
+test FormatCell-4.29 {Set Cell} {
+  $spreadsheet cell $sheet 3 -index 6,2
+} 6,2
+
+test FormatCell-4.30 {Set Cell} {
+  $spreadsheet cell $sheet 166 -index 6,3
+} 6,3
+
+test FormatCell-4.31 {Set Cell} {
+  $spreadsheet cell $sheet {#,##0.00\ "€"} -index 6,4 -string
+} 6,4
+
+
+test FormatCell-4.32 {Set Cell} {
+  $spreadsheet cell $sheet tt.mm.jj -index 7,0 -string
+} 7,0
+
+test FormatCell-4.33 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 7,1 -style $date
+} 7,1
+
+test FormatCell-4.34 {Set Cell} {
+  $spreadsheet cell $sheet 4 -index 7,2
+} 7,2
+
+test FormatCell-4.35 {Set Cell} {
+  $spreadsheet cell $sheet 14 -index 7,3
+} 7,3
+
+test FormatCell-4.36 {Set Cell} {
+  $spreadsheet cell $sheet mm-dd-yy -index 7,4 -string
+} 7,4
+
+
+test FormatCell-4.37 {Set Cell} {
+  $spreadsheet cell $sheet {tttt, t.mmmm.jj} -index 8,0 -string
+} 8,0
+
+test FormatCell-4.38 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 8,1 -style $date2
+} 8,1
+
+test FormatCell-4.39 {Set Cell} {
+  $spreadsheet cell $sheet 5 -index 8,2
+} 8,2
+
+test FormatCell-4.40 {Set Cell} {
+  $spreadsheet cell $sheet 167 -index 8,3
+} 8,3
+
+test FormatCell-4.41 {Set Cell} {
+  $spreadsheet cell $sheet {[$-F800]dddd\,\ mmmm\ dd\,\ yyyy} -index 8,4 -string
+} 8,4
+
+
+test FormatCell-4.42 {Set Cell} {
+  $spreadsheet cell $sheet t.mmmm.jjjj -index 9,0 -string
+} 9,0
+
+test FormatCell-4.43 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 9,1 -style $date3
+} 9,1
+
+test FormatCell-4.44 {Set Cell} {
+  $spreadsheet cell $sheet 6 -index 9,2
+} 9,2
+
+test FormatCell-4.45 {Set Cell} {
+  $spreadsheet cell $sheet 168 -index 9,3
+} 9,3
+
+test FormatCell-4.46 {Set Cell} {
+  $spreadsheet cell $sheet {[$-407]d/\ mmmm\ yyyy;@} -index 9,4 -string
+} 9,4
+
+
+test FormatCell-4.47 {Set Cell} {
+  $spreadsheet cell $sheet hh:mm:ss -index 10,0 -string
+} 10,0
+
+test FormatCell-4.48 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 10,1 -style $time2
+} 10,1
+
+test FormatCell-4.49 {Set Cell} {
+  $spreadsheet cell $sheet 7 -index 10,2
+} 10,2
+
+test FormatCell-4.50 {Set Cell} {
+  $spreadsheet cell $sheet 169 -index 10,3
+} 10,3
+
+test FormatCell-4.51 {Set Cell} {
+  $spreadsheet cell $sheet {[$-F400]h:mm:ss\ AM/PM} -index 10,4 -string
+} 10,4
+
+
+test FormatCell-4.52 {Set Cell} {
+  $spreadsheet cell $sheet hh:mm -index 11,0 -string
+} 11,0
+
+test FormatCell-4.53 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 11,1 -style $time
+} 11,1
+
+test FormatCell-4.54 {Set Cell} {
+  $spreadsheet cell $sheet 8 -index 11,2
+} 11,2
+
+test FormatCell-4.55 {Set Cell} {
+  $spreadsheet cell $sheet 170 -index 11,3
+} 11,3
+
+test FormatCell-4.56 {Set Cell} {
+  $spreadsheet cell $sheet {h:mm;@} -index 11,4 -string
+} 11,4
+
+
+test FormatCell-4.57 {Set Cell} {
+  $spreadsheet cell $sheet {jjjj-mm-tt hh:mm:ss} -index 12,0 -string
+} 12,0
+
+test FormatCell-4.58 {Set Cell} {
+  $spreadsheet cell $sheet {2018-02-09 16:17:00} -index 12,1 -style $iso8601
+} 12,1
+
+test FormatCell-4.59 {Set Cell} {
+  $spreadsheet cell $sheet 9 -index 12,2
+} 12,2
+
+test FormatCell-4.60 {Set Cell} {
+  $spreadsheet cell $sheet 171 -index 12,3
+} 12,3
+
+test FormatCell-4.61 {Set Cell} {
+  $spreadsheet cell $sheet {yyyy\-mm\-dd\ hh:mm:ss;@} -index 12,4 -string
+} 12,4
+
+
+test FormatCell-4.62 {Set Cell} {
+  $spreadsheet cell $sheet {Prozent 2} -index 13,0 -string
+} 13,0
+
+test FormatCell-4.63 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 13,1 -style $percent2
+} 13,1
+
+test FormatCell-4.64 {Set Cell} {
+  $spreadsheet cell $sheet 10 -index 13,2
+} 13,2
+
+test FormatCell-4.65 {Set Cell} {
+  $spreadsheet cell $sheet 10 -index 13,3
+} 13,3
+
+test FormatCell-4.66 {Set Cell} {
+  $spreadsheet cell $sheet 0.00% -index 13,4 -string
+} 13,4
+
+
+test FormatCell-4.67 {Set Cell} {
+  $spreadsheet cell $sheet {Bruch 1} -index 14,0 -string
+} 14,0
+
+test FormatCell-4.68 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 14,1 -style $fraction
+} 14,1
+
+test FormatCell-4.69 {Set Cell} {
+  $spreadsheet cell $sheet 12 -index 14,2
+} 14,2
+
+test FormatCell-4.70 {Set Cell} {
+  $spreadsheet cell $sheet 12 -index 14,3
+} 14,3
+
+test FormatCell-4.71 {Set Cell} {
+  $spreadsheet cell $sheet {# ?/?} -index 14,4 -string
+} 14,4
+
+
+test FormatCell-4.72 {Set Cell} {
+  $spreadsheet cell $sheet {Bruch 2} -index 15,0 -string
+} 15,0
+
+test FormatCell-4.73 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 15,1 -style $fraction2
+} 15,1
+
+test FormatCell-4.74 {Set Cell} {
+  $spreadsheet cell $sheet 13 -index 15,2
+} 15,2
+
+test FormatCell-4.75 {Set Cell} {
+  $spreadsheet cell $sheet 13 -index 15,3
+} 15,3
+
+test FormatCell-4.76 {Set Cell} {
+  $spreadsheet cell $sheet {# ??/??} -index 15,4 -string
+} 15,4
+
+
+test FormatCell-4.77 {Set Cell} {
+  $spreadsheet cell $sheet {Wissenschaftl. 2} -index 16,0 -string
+} 16,0
+
+test FormatCell-4.78 {Set Cell} {
+  $spreadsheet cell $sheet 3.1415 -index 16,1 -style $scientific
+} 16,1
+
+test FormatCell-4.79 {Set Cell} {
+  $spreadsheet cell $sheet 14 -index 16,2
+} 16,2
+
+test FormatCell-4.80 {Set Cell} {
+  $spreadsheet cell $sheet 11 -index 16,3
+} 16,3
+
+test FormatCell-4.81 {Set Cell} {
+  $spreadsheet cell $sheet 0.00E+00 -index 16,4 -string
+} 16,4
+
+
+test FormatCell-4.82 {Set Cell} {
+  $spreadsheet cell $sheet Text -index 17,0 -string
+} 17,0
+
+test FormatCell-4.83 {Set Cell} {
+  $spreadsheet cell $sheet 3,1415 -index 17,1 -string -style $text
+} 17,1
+
+test FormatCell-4.84 {Set Cell} {
+  $spreadsheet cell $sheet 15 -index 17,2
+} 17,2
+
+test FormatCell-4.85 {Set Cell} {
+  $spreadsheet cell $sheet 49 -index 17,3
+} 17,3
+
+test FormatCell-4.86 {Set Cell} {
+  $spreadsheet cell $sheet @ -index 17,4 -string
+} 17,4
+
+
+test FormatCell-4.87 {Set Cell} {
+  $spreadsheet cell $sheet {Filter A} -index 19,5 -string ;# -style 19
+} 19,5
+
+test FormatCell-4.88 {Set Cell} {
+  $spreadsheet cell $sheet {Filter B} -index 19,6 -string ;# -style 15
+} 19,6
+
+
+test FormatCell-4.89 {Set Cell} {
+  $spreadsheet cell $sheet unten -index 20,0 -string
+} 20,0
+
+test FormatCell-4.90 {Set Cell} {
+  $spreadsheet cell $sheet {} -index 20,1 -style $bBottom
+} 20,1
+
+
+test FormatCell-4.91 {Set Cell} {
+  $spreadsheet cell $sheet links -index 21,0 -string
+} 21,0
+
+test FormatCell-4.92 {Set Cell} {
+  $spreadsheet cell $sheet {} -index 21,1 -style $bLeft
+} 21,1
+
+test FormatCell-4.93 {Set Cell} {
+  $spreadsheet cell $sheet fett -index 21,4 -string -style $bold
+} 21,4
+
+
+test FormatCell-4.94 {Set Cell} {
+  $spreadsheet cell $sheet {unten doppelt} -index 22,0 -string
+} 22,0
+
+test FormatCell-4.95 {Set Cell} {
+  $spreadsheet cell $sheet {} -index 22,1 -style $bBottom2
+} 22,1
+
+test FormatCell-4.96 {Set Cell} {
+  $spreadsheet cell $sheet kursiv -index 22,4 -string -style $italic
+} 22,4
+
+
+test FormatCell-4.97 {Set Cell} {
+  $spreadsheet cell $sheet {unten mittel} -index 23,0 -string
+} 23,0
+
+test FormatCell-4.98 {Set Cell} {
+  $spreadsheet cell $sheet {} -index 23,1 -style $bBottomB
+} 23,1
+
+test FormatCell-4.99 {Set Cell} {
+  $spreadsheet cell $sheet unterstrichen -index 23,4 -string -style $underline
+} 23,4
+
+
+test FormatCell-4.100 {Set Cell} {
+  $spreadsheet cell $sheet {diagonal mittel} -index 24,0 -string
+} 24,0
+
+test FormatCell-4.101 {Set Cell} {
+  $spreadsheet cell $sheet {} -index 24,1 -style $bDiagonal
+} 24,1
+
+
+test FormatCell-4.102 {Set Cell} {
+  $spreadsheet cell $sheet {unten gestrichelt} -index 25,0 -string
+} 25,0
+
+test FormatCell-4.103 {Set Cell} {
+  $spreadsheet cell $sheet {} -index 25,1 -style $bBottomD
+} 25,1
+
+
+test FormatCell-4.104 {Set Cell} {
+  $spreadsheet cell $sheet {vorne rot} -index 27,0 -string
+} 27,0
+
+test FormatCell-4.105 {Set Cell} {
+  $spreadsheet cell $sheet rot -index 27,1 -string -style $red
+} 27,1
+
+
+test FormatCell-4.106 {Set Cell} {
+  $spreadsheet cell $sheet {hinten gelb} -index 28,0 -string
+} 28,0
+
+test FormatCell-4.107 {Set Cell} {
+  $spreadsheet cell $sheet gelb -index 28,1 -string -style $yellow
+} 28,1
+
+
+test FormatCell-4.108 {Set Cell} {
+  $spreadsheet cell $sheet links -index 30,0 -string
+} 30,0
+
+test FormatCell-4.109 {Set Cell} {
+  $spreadsheet cell $sheet links -index 30,1 -string -style $left
+} 30,1
+
+
+test FormatCell-4.110 {Set Cell} {
+  $spreadsheet cell $sheet mitte -index 31,0 -string
+} 31,0
+
+test FormatCell-4.111 {Set Cell} {
+  $spreadsheet cell $sheet mitte -index 31,1 -string -style $center
+} 31,1
+
+
+test FormatCell-4.112 {Set Cell} {
+  $spreadsheet cell $sheet rechts -index 32,0 -string
+} 32,0
+
+test FormatCell-4.113 {Set Cell} {
+  $spreadsheet cell $sheet rechts -index 32,1 -string -style $right
+} 32,1
+
+
+test FormatCell-4.114 {Set Cell} {
+  $spreadsheet cell $sheet oben -index 33,0 -string
+} 33,0
+
+test FormatCell-4.115 {Set Cell} {
+  $spreadsheet cell $sheet oben -index 33,1 -string -style $top
+} 33,1
+
+
+test FormatCell-4.116 {Set Cell} {
+  $spreadsheet cell $sheet mitte -index 34,0 -string
+} 34,0
+
+test FormatCell-4.117 {Set Cell} {
+  $spreadsheet cell $sheet mitte -index 34,1 -string -style $vcenter
+} 34,1
+
+test FormatCell-4.118 {Set Cell} {
+  $spreadsheet cell $sheet {Calibri 9} -index 34,4 -string -style $font9
+} 34,4
+
+
+test FormatCell-4.119 {Set Cell} {
+  $spreadsheet cell $sheet unten -index 35,0 -string
+} 35,0
+
+test FormatCell-4.120 {Set Cell} {
+  $spreadsheet cell $sheet unten -index 35,1 -string -style $bottom
+} 35,1
+
+
+test FormatCell-4.121 {Set Cell} {
+  $spreadsheet cell $sheet {Text 90} -index 38,0 -string -style $rotate90
+} 38,0
+
+test FormatCell-4.122 {Set Cell} {
+  $spreadsheet cell $sheet {Text 45} -index 38,1 -string -style $rotate45
+} 38,1
+
+test FormatCell-4.123 {Set Cell} {
+  $spreadsheet cell $sheet {Calibri 18} -index 38,4 -string -style $font18
+} 38,4
+
+
+test FormatCell-4.124 {Set Cell} {
+  $spreadsheet cell $sheet {12 Zellen} -index 39,3 -string -style $hvcenter
+} 39,3
+
+
+test FormatCell-4.125 {Set Cell} {
+  $spreadsheet cell $sheet {3 Spalten} -index 40,0 -string
+} 40,0
+
+test FormatCell-4.126 {Set Cell} {
+  $spreadsheet cell $sheet {3 Zeilen} -index 41,1 -string
+} 41,1
+
+test FormatCell-4.127 {Set Cell} {
+  $spreadsheet cell $sheet {this text will be automatically wrapped by excel} -index H27 -style $wrap
+} 26,7
+
+
+test FormatCell-4.128 {Set Cell} {
+  $spreadsheet cell $sheet a -index F21 -style $center
+} 20,5
+
+test FormatCell-4.129 {Set Cell} {
+  $spreadsheet cell $sheet a -index F22 -style $center
+} 21,5
+
+test FormatCell-4.130 {Set Cell} {
+  $spreadsheet cell $sheet b -index F23 -style $center
+} 22,5
+
+test FormatCell-4.130 {Set Cell} {
+  $spreadsheet cell $sheet 1 -index G21 -style $center
+} 20,6
+
+test FormatCell-4.131 {Set Cell} {
+  $spreadsheet cell $sheet 2 -index G22 -style $center
+} 21,6
+
+test FormatCell-4.132 {Set Cell} {
+  $spreadsheet cell $sheet 2 -index G23 -style $center
+} 22,6
+
+
+test FormatCell-4.133 {Set Row} {
+  $spreadsheet row $sheet -index 10
+} 10
+
+test FormatCell-4.134 {Set Cell} {
+  $spreadsheet cell $sheet 3 -index G
+} 10,6
+
+test FormatCell-4.135 {Set Cell} {
+  $spreadsheet cell $sheet 5
+} 10,7
+
+test FormatCell-4.136 {Set Cell} {
+  $spreadsheet cell $sheet {} -formula G11+H11
+} 10,8
+
+
+test FormatCellFreeze-5.1 {Freeze} {
+  $spreadsheet freeze $sheet 20,5
+} 0
+
+test FormatCellAutoFilter-5.2 {Auto Filter} {
+  $spreadsheet autofilter $sheet 19,5 19,6
+} 0
+
+
+test FormatCellRowHeight-6.1 {Row Height} {
+  $spreadsheet rowheight $sheet 33 20
+} 33
+
+test FormatCellRowHeight-6.1 {Row Height} {
+  $spreadsheet rowheight $sheet 34 20
+} 34
+
+test FormatCellRowHeight-6.1 {Row Height} {
+  $spreadsheet rowheight $sheet 35 20
+} 35
+
+
+test FormatCellMerge-7.1 {Merge} {
+  $spreadsheet merge $sheet 40,0 40,2
+} 0
+
+test FormatCellMerge-7.1 {Merge} {
+  $spreadsheet merge $sheet 41,1 43,1
+} 0
+
+test FormatCellMerge-7.1 {Merge} {
+  $spreadsheet merge $sheet 39,3 42,5
+} 0
+
+
+test FormatCellWriteSpreatsheet-8.1 {Write Spreatsheet} {
+  $spreadsheet write formatcell.xlsx
+} 0
+
+test FormatCellDestroySpreatsheet-8.2 {Destroy Spreatsheet} {
+  $spreadsheet destroy
+} 0
+
+
+#catch {vfs::zip::Mount formatcell.xlsx xlsx} mnt
+#vfs::zip::Unmount $mnt xlsx
+
+file delete -force formatcell.xlsx
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+

@@ -496,12 +496,14 @@ namespace eval ::ooxml {
 #   +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #
 # From tcllib / zipfile::mkzip      
+
 proc ::ooxml::timet_to_dos {time_t} {
   set s [clock format $time_t -format {%Y %m %e %k %M %S}]
   scan $s {%d %d %d %d %d %d} year month day hour min sec
   expr {(($year-1980) << 25) | ($month << 21) | ($day << 16) 
         | ($hour << 11) | ($min << 5) | ($sec >> 1)}
 }
+
 
 # ooxml::add_str_to_archive --
 #
@@ -512,7 +514,8 @@ proc ::ooxml::timet_to_dos {time_t} {
 #        the zip archive.
 #
 # Derived from tcllib / zipfile::mkzip::add_file_to_archive
-proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
+
+proc ::ooxml::add_str_to_archive {zipchan path data {comment {}}} {
   set mtime [timet_to_dos [clock seconds]]
   set utfpath [encoding convertto utf-8 $path]
   set utfcomment [encoding convertto utf-8 $comment]
@@ -520,7 +523,7 @@ proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
   set method 0               ;# store 0, deflate 8
   set attr 0                 ;# text or binary (default binary)
   set version 20             ;# minumum version req'd to extract
-  set extra ""
+  set extra {}
   set crc 0
   set size 0
   set csize 0
@@ -531,9 +534,7 @@ proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
   set size [string length $utfdata]
   
   set offset [tell $zipchan]
-  set local [binary format a4sssiiiiss PK\03\04 \
-                 $version $flags $method $mtime $crc $csize $size \
-                 [string length $utfpath] [string length $extra]]
+  set local [binary format a4sssiiiiss PK\03\04 $version $flags $method $mtime $crc $csize $size [string length $utfpath] [string length $extra]]
   append local $utfpath $extra
   puts -nonewline $zipchan $local
   
@@ -547,20 +548,17 @@ proc ::ooxml::add_str_to_archive {zipchan path data {comment ""}} {
   puts -nonewline $zipchan $utfdata
 
   # update the header
-  set local [binary format a4sssiiii PK\03\04 \
-                 $version $flags $method $mtime $crc $csize $size]
+  set local [binary format a4sssiiii PK\03\04 $version $flags $method $mtime $crc $csize $size]
   set current [tell $zipchan]
   seek $zipchan $offset
   puts -nonewline $zipchan $local
   seek $zipchan $current
   
-  set hdr [binary format a4ssssiiiisssssii PK\01\02 0x0317 \
-               $version $flags $method $mtime $crc $csize $size \
-               [string length $utfpath] [string length $extra]\
-               [string length $utfcomment] 0 $attr $attrex $offset]
+  set hdr [binary format a4ssssiiiisssssii PK\01\02 0x0317 $version $flags $method $mtime $crc $csize $size [string length $utfpath] [string length $extra] [string length $utfcomment] 0 $attr $attrex $offset]
   append hdr $utfpath $extra $utfcomment
   return $hdr
 }
+
 
 proc ::ooxml::Default { name value } {
   variable defaults
@@ -1368,9 +1366,7 @@ proc ::ooxml::xl_read { file args } {
 proc ooxml::Dom2zip {zf node path cd count} {
   upvar $cd mycd
   upvar $count mycount
-  append mycd [::ooxml::add_str_to_archive $zf $path \
-                   [$node asXML -indent none -xmlDeclaration 1 \
-                        -encString "UTF-8"]]
+  append mycd [::ooxml::add_str_to_archive $zf $path [$node asXML -indent none -xmlDeclaration 1 -encString "UTF-8"]]
   incr mycount
 }
 
@@ -2527,15 +2523,12 @@ oo::class create ooxml::xl_write {
     if {[file extension $file] ne {.xlsx}} {
       append file {.xlsx}
     }
-    if {[catch {set zf [open $file w]}]} {
-      error "Unable to write $file"
+    if {[catch {open $file w} zf]} {
+      error "cannot open file $file for writing"
     }
-    fconfigure $zf \
-        -encoding    binary \
-        -translation binary \
-        -eofchar     {}
+    fconfigure $zf -encoding binary -translation binary -eofchar {}
     set count 0
-    set cd ""
+    set cd {}
     
     foreach {n v} [array get cells] {
       if {[dict exists $v t] && [dict get $v t] eq {s} && [dict exists $v v] && [dict get $v v] ne {}} {
@@ -3316,8 +3309,7 @@ oo::class create ooxml::xl_write {
 
     # Finalize zip.
     set cdoffset [tell $zf]
-    set endrec [binary format a4ssssiis PK\05\06 0 0 \
-                    $count $count [string length $cd] $cdoffset 0]
+    set endrec [binary format a4ssssiis PK\05\06 0 0 $count $count [string length $cd] $cdoffset 0]
     puts -nonewline $zf $cd
     puts -nonewline $zf $endrec
     close $zf

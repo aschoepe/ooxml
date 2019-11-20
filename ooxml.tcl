@@ -2503,7 +2503,7 @@ oo::class create ooxml::xl_write {
     }
   }
 
-  method write { file args } {
+  method write { file } {
     my variable obj
     my variable cells
     my variable sharedStrings
@@ -2515,23 +2515,6 @@ oo::class create ooxml::xl_write {
     my variable cols
 
     upvar #0 ::ooxml::xmlns xmlns
-
-    array set opts {
-      holdcontainerdirectory 0
-    }
-
-    set len [llength $args]
-    set idx 0
-    for {set idx 0} {$idx < $len} {incr idx} {
-      switch -- [set opt [lindex $args $idx]] {
-        -holdcontainerdirectory {
-	  set opts([string range $opt 1 end]) 1
-        }
-        default {
-          error "unknown option \"$opt\", should be: -holdcontainerdirectory"
-        }
-      }
-    }
 
     ooxml::InitNodeCommands
     namespace import ::ooxml::Tag_* ::ooxml::Text

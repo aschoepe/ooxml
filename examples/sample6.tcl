@@ -56,6 +56,7 @@ if {[set sheet [$spreadsheet worksheet {Blatt 1}]] > -1} {
   set fraction [$spreadsheet style -numfmt [$spreadsheet numberformat -fraction]]
   set fraction2 [$spreadsheet style -numfmt [$spreadsheet numberformat -format {# ??/??}]]
   set text [$spreadsheet style -numfmt [$spreadsheet numberformat -string]]
+  set wrap [$spreadsheet style -wrap]
 
   $spreadsheet column $sheet -index 0 -width 17.33203125 -bestfit
   $spreadsheet column $sheet -index 1 -width 20.5 -bestfit
@@ -224,6 +225,20 @@ if {[set sheet [$spreadsheet worksheet {Blatt 1}]] > -1} {
 
   $spreadsheet cell $sheet {3 Spalten} -index 40,0 -string
   $spreadsheet cell $sheet {3 Zeilen} -index 41,1 -string
+
+  $spreadsheet cell $sheet {this text will be automatically wrapped by excel} -index H27 -style $wrap
+
+  $spreadsheet cell $sheet a -index F21 -style $center
+  $spreadsheet cell $sheet a -index F22 -style $center
+  $spreadsheet cell $sheet b -index F23 -style $center
+  $spreadsheet cell $sheet 1 -index G21 -style $center
+  $spreadsheet cell $sheet 2 -index G22 -style $center
+  $spreadsheet cell $sheet 2 -index G23 -style $center
+
+  $spreadsheet row $sheet -index 10
+  $spreadsheet cell $sheet 3 -index G
+  $spreadsheet cell $sheet 5
+  $spreadsheet cell $sheet {} -formula G11+H11
 
   $spreadsheet freeze $sheet 20,5
 

@@ -1,6 +1,7 @@
-C merged\sfrom\stcltest
-D 2019-11-22T14:16:21.819
+C added\sREADME
+D 2019-11-22T14:37:29.875
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
+F README c7e2a89529d7641a7c3a9b073c1fcd678ab23e6135ad037c1d767dc2522b78d2
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
@@ -57,8 +58,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 88bbab26e4f7606bde6da525a45aa359b4529fbd7d2025e225de089976a56d59 266ee51947f6a638ded2ab5715ba81fa783e1beab0b7b6472e0954c0f1e44c01
-R bd1105d420da25d411dd650bf775b7c3
+P 044590818031dfc29a12c7c10eca1dff929d71e7057110a73e17172a27e63d84
+R f4cbd865d4f5b02acb297fb4d29d20aa
 U alex
-Z 8975fa65f6a66dbde9aef10f26d7ef8d
+Z 28a9bb487a4068ca69f19c281e8c7c7d
 # Remove this line to create a well-formed Fossil manifest.

@@ -794,7 +794,7 @@ proc ::ooxml::xl_sheets { file } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
-      set relsroot [$rdoc documentElement]
+      $rdoc documentElement relsRoot
       $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
     close $fd
@@ -803,7 +803,7 @@ proc ::ooxml::xl_sheets { file } {
   if {![catch {open xlsx/xl/workbook.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
-      set root [$doc documentElement]
+      $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
       foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
@@ -811,7 +811,7 @@ proc ::ooxml::xl_sheets { file } {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
 	  set rid [$node getAttributeNS $xmlns(r) id]
-	  foreach node [$relsroot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+	  foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
 	    }
@@ -889,7 +889,7 @@ proc ::ooxml::xl_read { file args } {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
-      set relsroot [$rdoc documentElement]
+      $rdoc documentElement relsRoot
       $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
     close $fd
@@ -898,7 +898,7 @@ proc ::ooxml::xl_read { file args } {
   if {![catch {open xlsx/xl/workbook.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
-      set root [$doc documentElement]
+      $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
       foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
@@ -906,7 +906,7 @@ proc ::ooxml::xl_read { file args } {
 	  set sheetId [$node @sheetId]
 	  set name [$node @name]
 	  set rid [$node getAttributeNS $xmlns(r) id]
-	  foreach node [$relsroot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+	  foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
 	    if {[$node hasAttribute Target]} {
 	      lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
 	    }
@@ -925,7 +925,7 @@ proc ::ooxml::xl_read { file args } {
   if {![catch {open xlsx/xl/sharedStrings.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
-      set root [$doc documentElement]
+      $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
       foreach shared [$root selectNodes /M:sst/M:si] {
@@ -946,7 +946,7 @@ proc ::ooxml::xl_read { file args } {
   if {![catch {open xlsx/xl/styles.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
-      set root [$doc documentElement]
+      $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
       foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
@@ -1210,7 +1210,7 @@ proc ::ooxml::xl_read { file args } {
     if {![catch {open [file join xlsx/xl $target] r} fd]} {
       fconfigure $fd -encoding utf-8
       if {![catch {dom parse [read $fd]} doc]} {
-	set root [$doc documentElement]
+	$doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
 	set idx -1
 	foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
@@ -2563,8 +2563,8 @@ oo::class create ooxml::xl_write {
     # set doc [dom createDocumentNS $xmlns(PR) Relationships]
     # set root [$doc documentElement]
 
-    set doc [dom createDocument Relationships]
-    set root [$doc documentElement]
+    dom createDocument Relationships doc
+    $doc documentElement root
 
     $root setAttribute xmlns $xmlns(PR)
 
@@ -2586,8 +2586,8 @@ oo::class create ooxml::xl_write {
     # set doc [dom createDocumentNS $xmlns(CT) Types]
     # set root [$doc documentElement]
 
-    set doc [dom createDocument Types]
-    set root [$doc documentElement]
+    dom createDocument Types doc
+    $doc documentElement root
 
     $root setAttribute xmlns $xmlns(CT)
 
@@ -2617,12 +2617,12 @@ oo::class create ooxml::xl_write {
     # In the commented out part, serialization is done with namespaces set correctly, but this takes a few milliseconds more time.
     # Since we may process large amounts of data and do not use the same tag names in different namespaces and do not search in
     # the DOM during serialization, we only set the namespaces as attributes, which leads to the same result in the serialized XML.
-    # set doc [set obj(doc,) [dom createDocumentNS $xmlns(EP) Properties]]
+    # set doc [dom createDocumentNS $xmlns(EP) Properties]
     # set root [$doc documentElement]
     # $root setAttributeNS {} xmlns:vt $xmlns(vt)
 
-    set doc [set obj(doc,) [dom createDocument Properties]]
-    set root [$doc documentElement]
+    dom createDocument Properties doc
+    $doc documentElement root
 
     $root setAttribute xmlns $xmlns(EP)
     $root setAttribute xmlns:vt $xmlns(vt)
@@ -2671,8 +2671,8 @@ oo::class create ooxml::xl_write {
     # $root setAttributeNS {} xmlns:dcmitype $xmlns(dcmitype)
     # $root setAttributeNS {} xmlns:xsi $xmlns(xsi)
 
-    set doc [dom createDocument cp:coreProperties]
-    set root [$doc documentElement]
+    dom createDocument cp:coreProperties doc
+    $doc documentElement root
 
     $root setAttribute xmlns:cp $xmlns(cp)
     $root setAttribute xmlns:dc $xmlns(dc)
@@ -2697,8 +2697,8 @@ oo::class create ooxml::xl_write {
     # set doc [dom createDocumentNS $xmlns(PR) Relationships]
     # set root [$doc documentElement]
 
-    set doc [dom createDocument Relationships]
-    set root [$doc documentElement]
+    dom createDocument Relationships doc
+    $doc documentElement root
 
     $root setAttribute xmlns $xmlns(PR)
 
@@ -2729,8 +2729,8 @@ oo::class create ooxml::xl_write {
     # set root [$doc documentElement]
 
     if {$obj(sharedStrings) > 0} {
-      set doc [dom createDocument sst]
-      set root [$doc documentElement]
+      dom createDocument sst doc
+      $doc documentElement root
 
       $root setAttribute xmlns $xmlns(M)
 
@@ -2760,8 +2760,8 @@ oo::class create ooxml::xl_write {
     # set root [$doc documentElement]
 
     if {$obj(calcChain)} {
-      set doc [dom createDocument calcChain]
-      set root [$doc documentElement]
+      dom createDocument calcChain doc
+      $doc documentElement root
 
       $root setAttribute xmlns $xmlns(M)
 
@@ -2784,8 +2784,8 @@ oo::class create ooxml::xl_write {
     # $root setAttributeNS {} xmlns:mc $xmlns(mc)
     # $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
 
-    set doc [dom createDocument styleSheet]
-    set root [$doc documentElement]
+    dom createDocument styleSheet doc
+    $doc documentElement root
 
     $root setAttribute xmlns $xmlns(M)
     $root setAttribute xmlns:mc $xmlns(mc)
@@ -2930,8 +2930,8 @@ oo::class create ooxml::xl_write {
     set doc [dom createDocumentNS $xmlns(a) a:theme]
     set root [$doc documentElement]
 
-    set doc [dom createDocument a:theme]
-    set root [$doc documentElement]
+    dom createDocument a:theme doc
+    $doc documentElement root
 
     $root setAttribute xmlns:a $xmlns(a)
 
@@ -3271,8 +3271,8 @@ oo::class create ooxml::xl_write {
     # set root [$doc documentElement]
     # $root setAttributeNS {} xmlns:r $xmlns(r)
 
-    set doc [dom createDocument workbook]
-    set root [$doc documentElement]
+    dom createDocument workbook doc
+    $doc documentElement root
 
     $root setAttribute xmlns $xmlns(M)
     $root setAttribute xmlns:r $xmlns(r)
@@ -3313,8 +3313,8 @@ oo::class create ooxml::xl_write {
     # $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) ac $xmlns(x14ac)]
 
     for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-      set doc [dom createDocument worksheet]
-      set root [$doc documentElement]
+      dom createDocument worksheet doc
+      $doc documentElement root
 
       $root setAttribute xmlns $xmlns(M)
       $root setAttribute xmlns:r $xmlns(r)

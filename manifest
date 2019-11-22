@@ -1,5 +1,5 @@
-C dismantling:\sremove\sdirect\ssetting\sof\snamespaces\sto\ssave\sspeed\swith\slarge\samounts\sof\sdata.\sthe\scorresponding\splaces\sremain\scommented\sout\sin\sthe\scode\sas\san\sexample.
-D 2019-11-22T10:22:32.037
+C use\sof\sa\sshorter\ssyntax\sfor\screateDocument\sand\sdocumentElement
+D 2019-11-22T11:21:00.805
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure.ac eb189b3c851a7b456545c3ee4b06176645f707bb6b7304d1613bd0d557736f52
@@ -17,7 +17,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 28b8c95cc9ee680be511fb8a45d3c41faa99fdd6996519b07c80288dc3d25eb0 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
-F ooxml.tcl 2d4276a9e47ed1a2c81d428bd098e98db8e57f0e7bd867c3f2d934667ef8e723
+F ooxml.tcl 26ae3d292a3b21447e5ce7dda1cbdd0414ae28153af998e5c9fa60aa58910cea
 F pkgIndex.tcl b9a7ac3d3e4f68fe2d75bfefeabf3a9cb21e1561a1475d9b60c584da1e2df649
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -56,11 +56,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P b4f165d97cdb5f7c94b73af1efa9c88bb8ab3ff877c8dc4791758f1a1742b51d
-R 27f263dc96c24f64c6ad15340dd50a56
-T *branch * namespaces
-T *sym-namespaces *
-T -sym-trunk *
+P aa55d9742424161d9df135fef8ab6ca39ca4f9f2d18376ed42535b8aa84f4782
+R 06c6f0142ffd834708827fd18deb1bd1
 U alex
-Z edf4a00b87e5b9f1bfcc09f54c07fda8
+Z 26ec56e322e3ae1ca41c61e6cb3d4960
 # Remove this line to create a well-formed Fossil manifest.

@@ -13,6 +13,6 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
   $spreadsheet defaultdatestyle $date
   # 2018-03-02 17:39 -> 43161.73542
   $spreadsheet cell $sheet "2018-03-02 17:39" -index 0,0
-  $spreadsheet write export5.xlsx
 }
+$spreadsheet write export5.xlsx
 $spreadsheet destroy

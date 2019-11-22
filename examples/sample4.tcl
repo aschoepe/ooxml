@@ -15,7 +15,6 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
   $spreadsheet cell $sheet 3
   $spreadsheet cell $sheet 5
   $spreadsheet cell $sheet {} -formula A1+B1
-
-  $spreadsheet write export4.xlsx
 }
+$spreadsheet write export4.xlsx
 $spreadsheet destroy

@@ -1,3 +1,4 @@
+if 0 {
 if {[catch {
     package require ooxml
 } errMsg]} {
@@ -8,6 +9,8 @@ if {[catch {
         error $errMsg
     }
 }
+}
+source ../ooxml.tcl
 
 proc doit {rows cols} {
     set spreadsheet [::ooxml::xl_write new -creator "ich"]
@@ -26,10 +29,10 @@ proc doit {rows cols} {
     $spreadsheet destroy
 }
 
+#    10 10
+#    100 10
+#    500 10
 foreach {rows cols} {
-    10 10
-    100 10
-    500 10
     1000 10
     3000 10
     5000 10

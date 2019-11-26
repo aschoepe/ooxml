@@ -843,7 +843,7 @@ test FormatCellMerge-7.1 {Merge} {
 
 
 foreach item {obj cells fonts numFmts styles fills borders cols} {
-  array set $item [array get ${spreadsheet}::$item]
+  array set w_$item [array get ${spreadsheet}::$item]
 }
 
 
@@ -854,6 +854,117 @@ test FormatCellWriteSpreatsheet-8.1 {Write Spreatsheet} {
 test FormatCellDestroySpreatsheet-8.2 {Destroy Spreatsheet} {
   $spreadsheet destroy
 } 0
+
+
+test FormatCellReadWorkbook-9.1 {Read Workbook} {
+  array set workbook [ooxml::xl_read formatcell.xlsx]
+  return [llength $workbook(sheets)]
+} 1
+
+test FormatCellCheckBorders-9.2 {Check Borders} {
+  set rc 1
+  return $rc
+  for {set i 0} {$i < $w_obj(borders)} {incr i} {
+    array set w $w_borders($i)
+    array set r $workbook(s,borders,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+	puts stderr "borders $n '$v' exists [info exists r($n)]"
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFills-9.3 {Check Fills} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(fills)} {incr i} {
+    array set w $w_fills($i)
+    array set r $workbook(s,fills,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFonts-9.4 {Check Fonts} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(fonts)} {incr i} {
+    array set w $w_fonts($i)
+    array set r $workbook(s,fonts,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckNumFmts-9.5 {Check NumFmts} {
+  set rc 1
+  for {set i 166} {$i < $w_obj(numFmts)} {incr i} {
+    if {![info exists workbook(s,numFmts,$i)] || $workbook(s,numFmts,$i) ne $w_numFmts($i)} {
+      set rc 0
+    }
+  }
+  return $rc
+} 1
+
+test FormatCellCheckStyles-9.6 {Check Styles} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(styles)} {incr i} {
+    array set w $w_styles($i)
+    array set r $workbook(s,styles,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+
+test FormatCellCheckColumns-10.1 {Check Worksheet Columns} {
+  set rc 1
+  return $rc
+  for {set i 0} {$i < $w_obj(1,cols)} {incr i} {
+    array set w $w_cols(1,$i)
+    array set r $workbook(0,col,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFilter-10.2 {Check Worksheet Filter} {
+  set rc 1
+  if {![info exists workbook(0,filter)] || $workbook(0,filter) ne $w_obj(autofilter,1)} {
+    set rc 0
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFreeze-10.3 {Check Worksheet Freeze} {
+  set rc 1
+  if {![info exists workbook(0,freeze)] || $workbook(0,freeze) ne $w_obj(freeze,1)} {
+    set rc 0
+  }
+  return $rc
+} 1
 
 
 #catch {vfs::zip::Mount formatcell.xlsx xlsx} mnt

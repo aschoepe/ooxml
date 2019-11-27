@@ -936,8 +936,11 @@ test FormatCellCheckStyles-9.6 {Check Styles} {
 
 test FormatCellCheckColumns-10.1 {Check Worksheet Columns} {
   set rc 1
-  return $rc
-  for {set i 0} {$i < $w_obj(1,cols)} {incr i} {
+  set idxList {}
+  foreach n [array names w_cols 1,*] {
+    lappend idxList [lindex [split $n ,] end]
+  }
+  foreach i $idxList {
     array set w $w_cols(1,$i)
     array set r $workbook(0,col,$i)
     foreach {n v} [array get w] {

@@ -1213,21 +1213,23 @@ proc ::ooxml::xl_read { file args } {
 	set idx -1
 	foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
 	  incr idx
+	  set cols {}
 	  foreach item {min max width style bestFit customWidth} {
 	    if {[$col hasAttribute $item]} {
 	      switch -- $item {
 	        min - max {
-		  lappend wb($sheet,col,$idx) [string tolower $item] [expr {[$col @$item] - 1}]
+		  lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
 		}
 		default {
-		  lappend wb($sheet,col,$idx) [string tolower $item] [$col @$item]
+		  lappend cols [string tolower $item] [$col @$item]
 		}
 	      }
 	    } else {
-	      lappend wb($sheet,col,$idx) [string tolower $item] 0
+	      lappend cols [string tolower $item] 0
 	    }
 	  }
-	  lappend wb($sheet,col,$idx) string 0 nozero 0 calcfit 0
+	  lappend cols string 0 nozero 0 calcfit 0
+	  set wb($sheet,col,[dict get $cols min]) $cols
 	}
 	set wb($sheet,cols) [incr idx]
 	foreach cell [$root selectNodes /M:worksheet/M:sheetData/M:row/M:c] {

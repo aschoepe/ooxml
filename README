@@ -1,0 +1,58 @@
+
+    ooxml ECMA-376 Office Open XML File Formats
+
+
+    This directory contains a freely distributable pure tcl extension called ooxml.
+
+
+SYSNOPSIS
+
+    Read and Write Office Open XML "XLSX" since Excel 2007
+
+    This package contains several commands to edit Excel files. The three most important
+    are the following three:
+
+        Importing Excel files into a Tcl array with ::ooxml::xl_read,
+        export Tcl data to an Excel file with ::ooxml::xl_write and
+        export Tcl tablelist to an Excel file with ::ooxml::tablelist_to_xl.
+
+    For information on how to use these commands, see the examples and the man-page
+    at https://tcl.sowaswie.de/repos/fossil/ooxml.
+    
+
+DEPENDENCIES
+
+    Tcl >= 8.6.7
+    tclvfs::zip >= 1.4.2
+    tdom >= 0.9.0
+
+
+GETTING THE CODE
+
+    The development repository is hosted at https://tcl.sowaswie.de/repos/fossil/ooxml
+    You are encouraged to use trunk.
+
+
+INSTALLING
+
+    Simply extract the download ooxml-<version>.zip into your Tcl library path.
+    
+    Since ooxml is TEA-compatible you should be able to do
+
+        ../configure
+        make test
+        make install
+
+
+REPORTING BUGS
+
+    Please head to https://tcl.sowaswie.de/repos/fossil/ooxml/ticket and
+    click on "New Ticket". Log in as anonymous and report your findings.
+    If you prefer to have an individual login write Alex a mail.
+
+
+HISTORY
+
+    ooxml was started by Alexander Schoepe (alx.tcl@sowaswie.de)
+    and improved with contributions by Rolf Ade (rolf@pointsman.de).
+

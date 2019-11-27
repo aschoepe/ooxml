@@ -2115,7 +2115,7 @@ oo::class create ooxml::xl_write {
       index {}
       to {}
       width {}
-      style {}
+      style 0
       bestfit 0
       customwidth 0
       string 0

@@ -1119,9 +1119,9 @@ proc ::ooxml::xl_read { file args } {
 	  }
 	}
 	if {[$node hasAttribute diagonalUp]} {
-	  dict set d diagonal direction up
+	  dict set d diagonal direction diagonalUp
 	} elseif {[$node hasAttribute diagonalDown]} {
-	  dict set d diagonal direction down
+	  dict set d diagonal direction diagonalDown
 	}
 	set wb(s,borders,$idx) $d
       }

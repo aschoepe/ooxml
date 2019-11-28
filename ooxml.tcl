@@ -1119,9 +1119,9 @@ proc ::ooxml::xl_read { file args } {
 	  }
 	}
 	if {[$node hasAttribute diagonalUp]} {
-	  dict set d diagonal direction up
+	  dict set d diagonal direction diagonalUp
 	} elseif {[$node hasAttribute diagonalDown]} {
-	  dict set d diagonal direction down
+	  dict set d diagonal direction diagonalDown
 	}
 	set wb(s,borders,$idx) $d
       }
@@ -1240,6 +1240,13 @@ proc ::ooxml::xl_read { file args } {
 	  }
 	  set value {}
 	  set datetime {}
+
+	  if {[$cell hasAttribute r]} {
+	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
+	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
+	    }
+	  }
+
 	  switch -- $type {
 	    n - b - d - str {
 	      # number (default), boolean, iso-date, formula string
@@ -1306,11 +1313,9 @@ proc ::ooxml::xl_read { file args } {
 	    if {!$opts(valuesonly) && $datetime ne {}} {
 	      set wb($sheet,d,[StringToRowColumn [$cell @r]]) $datetime
 	    }
-	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
-	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
-	    }
 	  }
 	}
+
 	if {!$opts(valuesonly)} {
 	  foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
 	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
@@ -2115,7 +2120,7 @@ oo::class create ooxml::xl_write {
       index {}
       to {}
       width {}
-      style {}
+      style 0
       bestfit 0
       customwidth 0
       string 0
@@ -2442,7 +2447,8 @@ oo::class create ooxml::xl_write {
     }
 
     foreach sheet $a(sheets) {
-      for {set idx 0} {$idx < $a($sheet,cols)} {incr idx} {
+      foreach item [array names a $sheet,col,*] {
+	set idx [lindex [split $item ,] end]
 	if {[info exists a($sheet,col,$idx)]} {
 	  set cols([expr {$sheet + 1}],$idx) $a($sheet,col,$idx)
 	}

@@ -17,7 +17,6 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 
 
 package require ooxml
-package require vfs::zip
 
 
 test FormatCellNewSpreatsheet-1.1 {Create New Spreadsheet} -body {
@@ -843,7 +842,7 @@ test FormatCellMerge-7.1 {Merge} {
 
 
 foreach item {obj cells fonts numFmts styles fills borders cols} {
-  array set $item [array get ${spreadsheet}::$item]
+  array set w_$item [array get ${spreadsheet}::$item]
 }
 
 
@@ -856,8 +855,177 @@ test FormatCellDestroySpreatsheet-8.2 {Destroy Spreatsheet} {
 } 0
 
 
-#catch {vfs::zip::Mount formatcell.xlsx xlsx} mnt
-#vfs::zip::Unmount $mnt xlsx
+test FormatCellReadWorkbook-9.1 {Read Workbook} {
+  array set workbook [ooxml::xl_read formatcell.xlsx]
+  return [llength $workbook(sheets)]
+} 1
+
+test FormatCellCheckBorders-9.2 {Check Borders} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(borders)} {incr i} {
+    set dw $w_borders($i)
+    set dr $workbook(s,borders,$i)
+    foreach key {left right top bottom diagonal} {
+      array set w [dict get $dw $key]
+      array set r [dict get $dr $key]
+      foreach {n v} [array get w] {
+	if {![info exists r($n)] || $r($n) ne $v} {
+	  set rc 0
+	}
+      }
+      unset -nocomplain w r
+    }
+    unset -nocomplain dw dr
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFills-9.3 {Check Fills} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(fills)} {incr i} {
+    array set w $w_fills($i)
+    array set r $workbook(s,fills,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFonts-9.4 {Check Fonts} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(fonts)} {incr i} {
+    array set w $w_fonts($i)
+    array set r $workbook(s,fonts,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckNumFmts-9.5 {Check NumFmts} {
+  set rc 1
+  for {set i 166} {$i < $w_obj(numFmts)} {incr i} {
+    if {![info exists workbook(s,numFmts,$i)] || $workbook(s,numFmts,$i) ne $w_numFmts($i)} {
+      set rc 0
+    }
+  }
+  return $rc
+} 1
+
+test FormatCellCheckStyles-9.6 {Check Styles} {
+  set rc 1
+  for {set i 0} {$i < $w_obj(styles)} {incr i} {
+    array set w $w_styles($i)
+    array set r $workbook(s,styles,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+
+test FormatCellCheckColumns-10.1 {Check Worksheet Columns} {
+  set rc 1
+  set idxList {}
+  foreach n [array names w_cols 1,*] {
+    lappend idxList [lindex [split $n ,] end]
+  }
+  foreach i $idxList {
+    array set w $w_cols(1,$i)
+    array set r $workbook(0,col,$i)
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+        set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFilter-10.2 {Check Worksheet Filter} {
+  set rc 1
+  if {![info exists workbook(0,filter)] || $workbook(0,filter) ne $w_obj(autofilter,1)} {
+    set rc 0
+  }
+  return $rc
+} 1
+
+test FormatCellCheckFreeze-10.3 {Check Worksheet Freeze} {
+  set rc 1
+  if {![info exists workbook(0,freeze)] || $workbook(0,freeze) ne $w_obj(freeze,1)} {
+    set rc 0
+  }
+  return $rc
+} 1
+
+test FormatCellCheckMerge-10.4 {Check Worksheet Merge} {
+  set rc 1
+  if {![info exists workbook(0,merge)]} {
+    set rc 0
+  } else {
+    foreach item $workbook(0,merge) {
+      if {$item ni $w_obj(merge,1)} {
+	set rc 0
+      }
+    }
+  }
+  return $rc
+} 1
+
+test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
+  set rc 1
+  array set w $w_obj(rowHeight,1)
+  array set r $workbook(0,rowheight)
+  foreach {n v} [array get w] {
+    if {![info exists r($n)] || $r($n) ne $v} {
+      set rc 0
+    }
+  }
+  unset -nocomplain w r
+  return $rc
+} 1
+
+
+test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
+  set rc 1
+  foreach item [lsort -dictionary [array names w_cells 1,*,*]] {
+    lassign [split $item ,] sheet row col
+    incr sheet -1
+    array set w $w_cells($item)
+    array unset w t
+    array set r {}
+    foreach tag {f s t v d} {
+      if {[info exists workbook($sheet,$tag,$row,$col)]} {
+	if {$tag eq {d}} {
+	  # overwrite datetime string with ole date
+	  array set r [list v $workbook($sheet,$tag,$row,$col)]
+	} else {
+	  array set r [list $tag $workbook($sheet,$tag,$row,$col)]
+	}
+      }
+    }
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+	set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
 
 file delete -force formatcell.xlsx
 

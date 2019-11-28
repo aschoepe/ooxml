@@ -59,7 +59,6 @@ test Benchmark-1.1 {benchmark cell generating} {
   return $rc
 } 1
 
-
 file delete -force 500-10.xlsx 1000-10.xlsx 3000-10.xlsx 5000-10.xlsx
 
 

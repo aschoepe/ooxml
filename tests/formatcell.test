@@ -17,7 +17,6 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 
 
 package require ooxml
-package require vfs::zip
 
 
 test FormatCellNewSpreatsheet-1.1 {Create New Spreadsheet} -body {
@@ -989,7 +988,7 @@ test FormatCellCheckMerge-10.4 {Check Worksheet Merge} {
 test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
   set rc 1
   array set w $w_obj(rowHeight,1)
-  array set r $workbook(0,rowHeight)
+  array set r $workbook(0,rowheight)
   foreach {n v} [array get w] {
     if {![info exists r($n)] || $r($n) ne $v} {
       set rc 0
@@ -1000,8 +999,33 @@ test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
 } 1
 
 
-#catch {vfs::zip::Mount formatcell.xlsx xlsx} mnt
-#vfs::zip::Unmount $mnt xlsx
+test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
+  set rc 1
+  foreach item [lsort -dictionary [array names w_cells 1,*,*]] {
+    lassign [split $item ,] sheet row col
+    incr sheet -1
+    array set w $w_cells($item)
+    array unset w t
+    array set r {}
+    foreach tag {f s t v d} {
+      if {[info exists workbook($sheet,$tag,$row,$col)]} {
+	if {$tag eq {d}} {
+	  # overwrite datetime string with ole date
+	  array set r [list v $workbook($sheet,$tag,$row,$col)]
+	} else {
+	  array set r [list $tag $workbook($sheet,$tag,$row,$col)]
+	}
+      }
+    }
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+	set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+} 1
 
 file delete -force formatcell.xlsx
 

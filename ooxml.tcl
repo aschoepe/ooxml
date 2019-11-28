@@ -2442,7 +2442,8 @@ oo::class create ooxml::xl_write {
     }
 
     foreach sheet $a(sheets) {
-      for {set idx 0} {$idx < $a($sheet,cols)} {incr idx} {
+      foreach item [array names a $sheet,col,*] {
+	set idx [lindex [split $item ,] end]
 	if {[info exists a($sheet,col,$idx)]} {
 	  set cols([expr {$sheet + 1}],$idx) $a($sheet,col,$idx)
 	}

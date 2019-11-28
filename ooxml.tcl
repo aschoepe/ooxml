@@ -1240,6 +1240,13 @@ proc ::ooxml::xl_read { file args } {
 	  }
 	  set value {}
 	  set datetime {}
+
+	  if {[$cell hasAttribute r]} {
+	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
+	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
+	    }
+	  }
+
 	  switch -- $type {
 	    n - b - d - str {
 	      # number (default), boolean, iso-date, formula string
@@ -1306,11 +1313,9 @@ proc ::ooxml::xl_read { file args } {
 	    if {!$opts(valuesonly) && $datetime ne {}} {
 	      set wb($sheet,d,[StringToRowColumn [$cell @r]]) $datetime
 	    }
-	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
-	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
-	    }
 	  }
 	}
+
 	if {!$opts(valuesonly)} {
 	  foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
 	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {

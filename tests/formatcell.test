@@ -972,6 +972,33 @@ test FormatCellCheckFreeze-10.3 {Check Worksheet Freeze} {
   return $rc
 } 1
 
+test FormatCellCheckMerge-10.4 {Check Worksheet Merge} {
+  set rc 1
+  if {![info exists workbook(0,merge)]} {
+    set rc 0
+  } else {
+    foreach item $workbook(0,merge) {
+      if {$item ni $w_obj(merge,1)} {
+	set rc 0
+      }
+    }
+  }
+  return $rc
+} 1
+
+test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
+  set rc 1
+  array set w $w_obj(rowHeight,1)
+  array set r $workbook(0,rowHeight)
+  foreach {n v} [array get w] {
+    if {![info exists r($n)] || $r($n) ne $v} {
+      set rc 0
+    }
+  }
+  unset -nocomplain w r
+  return $rc
+} 1
+
 
 #catch {vfs::zip::Mount formatcell.xlsx xlsx} mnt
 #vfs::zip::Unmount $mnt xlsx

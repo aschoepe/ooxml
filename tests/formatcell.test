@@ -863,17 +863,20 @@ test FormatCellReadWorkbook-9.1 {Read Workbook} {
 
 test FormatCellCheckBorders-9.2 {Check Borders} {
   set rc 1
-  return $rc
   for {set i 0} {$i < $w_obj(borders)} {incr i} {
-    array set w $w_borders($i)
-    array set r $workbook(s,borders,$i)
-    foreach {n v} [array get w] {
-      if {![info exists r($n)] || $r($n) ne $v} {
-	puts stderr "borders $n '$v' exists [info exists r($n)]"
-        set rc 0
+    set dw $w_borders($i)
+    set dr $workbook(s,borders,$i)
+    foreach key {left right top bottom diagonal} {
+      array set w [dict get $dw $key]
+      array set r [dict get $dr $key]
+      foreach {n v} [array get w] {
+	if {![info exists r($n)] || $r($n) ne $v} {
+	  set rc 0
+	}
       }
+      unset -nocomplain w r
     }
-    unset -nocomplain w r
+    unset -nocomplain dw dr
   }
   return $rc
 } 1

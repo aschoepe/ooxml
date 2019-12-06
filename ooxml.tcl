@@ -2649,8 +2649,8 @@ oo::class create ooxml::xl_write {
       }
       Tag_TitlesOfParts {
 	Tag_vt:vector size $obj(sheets) baseType lpstr {
-	  Tag_vt:lpstr {
-	    for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+	  for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+	    Tag_vt:lpstr {
 	      Text [msgcat::mc Sheet]$ws
 	    }
 	  }

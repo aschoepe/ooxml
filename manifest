@@ -1,5 +1,5 @@
-C fixed\serror\sreported\sby\sSteve\sLanders\s[c59ca15507]
-D 2019-12-06T22:05:48.212
+C activeTab\sset\sto\s0
+D 2019-12-08T20:51:53.695
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 1401c590f2d47c09a35f80f6877831725c8d987743cc194dd2fc6f0cc26b7b2d
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
@@ -18,7 +18,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms 5d88db25333acdc7acc73146a763171cad25bdd5d124125f4e1f7e19e940bc83
-F ooxml.tcl d327015e7a0a8c7c9e8593aa9c73719558a5893a5c6c062d6c7f23b9602dec41
+F ooxml.tcl 4435785c30996cdd95d94830c81af4838bda236d78735d57f32276466dc2987e
 F pkgIndex.tcl dc332494022cd9d274fa838665ce192d8337fa3373dc4b866ec1393e1f656011
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -59,8 +59,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 2c30d300df1691fb40d2ab2c2d62898e8f43af41b692be5cf8ee9780e035a814
-R a45ab37dd8bf01c09f36a750b0aaabf1
+P 9d6b3a014934db266321ea323d1e716797dcfe2668409cba5234107ca4e1c589
+R 0fd99e331e7649594aeed7549013d981
+T *branch * bookview
+T *sym-bookview *
+T -sym-trunk *
 U alex
-Z d74824184ed8a3253fa06a52bede1277
+Z 19b5f43cf7865c88edcb76190922d799
 # Remove this line to create a well-formed Fossil manifest.

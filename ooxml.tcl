@@ -1489,6 +1489,7 @@ oo::class create ooxml::xl_write {
     my variable fills
     my variable borders
     my variable cols
+    my variable view
 
     array set opts {
       creator {unknown}
@@ -1581,6 +1582,8 @@ oo::class create ooxml::xl_write {
     set obj(defaultdatestyle) 0
 
     array set cells {}
+
+    set view {activetab 0}
 
     return 0
   }
@@ -2523,6 +2526,7 @@ oo::class create ooxml::xl_write {
     my variable fills
     my variable borders
     my variable cols
+    my variable view
 
     upvar #0 ::ooxml::xmlns xmlns
 
@@ -3287,7 +3291,7 @@ oo::class create ooxml::xl_write {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
       Tag_workbookPr showInkAnnotation 0 autoCompressPictures 0 {}
       Tag_bookViews {
-	Tag_workbookView activeTab 1 {}
+	Tag_workbookView activeTab [dict get $view activetab] {}
       }
       Tag_sheets {
 	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {

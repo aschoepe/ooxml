@@ -152,6 +152,9 @@
 #
 #   method presetsheets
 #
+#   method view args
+#     -avtivetab TAB -list
+#
 #   method write filename
 # 
 #
@@ -911,6 +914,11 @@ proc ::ooxml::xl_read { file args } {
 	  }
 	}
       }
+      foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
+        if {[$node hasAttribute activeTab]} {
+	  lappend wb(view) activetab [$node @activeTab]
+	}
+      }
       $doc delete
     }
     close $fd
@@ -1583,7 +1591,7 @@ oo::class create ooxml::xl_write {
 
     array set cells {}
 
-    set view {activetab 0}
+    array set view {activetab 0}
 
     return 0
   }
@@ -2505,6 +2513,51 @@ oo::class create ooxml::xl_write {
 	}
       }
     }
+
+    if {[info exists a(view)]} {
+      foreach item {activetab} {
+        if {[dict exists $a(view) $item]} {
+	  my view -$item [dict get $a(view) $item]
+	}
+      }
+    }
+  }
+
+  method view { args } {
+    my variable view
+
+    array set opts {
+      list 0
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -activetab {
+	  incr idx
+          if {$idx < $len} {
+	    if {[string is integer -strict [lindex $args $idx]] && [lindex $args $idx] > -1} {
+	      set view([string range $opt 1 end]) [lindex $args $idx]
+	    } else {
+	      error "option '$opt': must be a positive integer"
+	    }
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -list {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option \"$opt\", should be: -activetab or -list"
+        }
+      }
+    }
+
+    if {$opts(list)} {
+      return [array get view]
+    }
   }
 
   method debug { args } {
@@ -3291,7 +3344,7 @@ oo::class create ooxml::xl_write {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
       Tag_workbookPr showInkAnnotation 0 autoCompressPictures 0 {}
       Tag_bookViews {
-	Tag_workbookView activeTab [dict get $view activetab] {}
+	Tag_workbookView activeTab $view(activetab) {}
       }
       Tag_sheets {
 	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {

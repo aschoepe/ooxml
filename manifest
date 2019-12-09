@@ -1,8 +1,9 @@
-C renumber\ssome\stests
-D 2019-12-09T16:40:18.105
+C added\sthe\sconfigure\sfile
+D 2019-12-09T16:41:15.844
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 1401c590f2d47c09a35f80f6877831725c8d987743cc194dd2fc6f0cc26b7b2d
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
+F configure 33b05357e9b970a81dfb345e51de9b682ad28a51cc8cc75a67daf550e48f1fcd x
 F configure.ac 7117bdd606c3bd78f2bc0f7854c43dc160973f808f7afb4a2c4c0e5a34852de0
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
@@ -59,8 +60,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 96bb2a2b4e85ff2a1cd9b05f08173d2542d7a7f5a1d73eb8828e6116544ba653
-R 4d81cd943e6f5747604e4838236c4916
+P b330c7df2eab9db30d6296d6c9afbdbea7b89a5586d5f43f07938a092785849b
+R 2d78b87cc73992bce2cd901f636a5140
 U alex
-Z 80c0ae35d72688981ef8290e5d8d6a8e
+Z f88305a89d5c915c8300989709e6baa6
 # Remove this line to create a well-formed Fossil manifest.

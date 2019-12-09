@@ -153,7 +153,7 @@
 #   method presetsheets
 #
 #   method view args
-#     -avtivetab TAB -list
+#     -avtivetab TAB -x TWIPS -y TWIPS -height TWIPS -width TWIPS -list
 #
 #   method write filename
 # 
@@ -917,6 +917,18 @@ proc ::ooxml::xl_read { file args } {
       foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
         if {[$node hasAttribute activeTab]} {
 	  lappend wb(view) activetab [$node @activeTab]
+	}
+        if {[$node hasAttribute xWindow]} {
+	  lappend wb(view) x [$node @xWindow]
+	}
+        if {[$node hasAttribute yWindow]} {
+	  lappend wb(view) y [$node @yWindow]
+	}
+        if {[$node hasAttribute windowHeight]} {
+	  lappend wb(view) height [$node @windowHeight]
+	}
+        if {[$node hasAttribute windowWidth]} {
+	  lappend wb(view) width [$node @windowWidth]
 	}
       }
       $doc delete
@@ -2534,7 +2546,7 @@ oo::class create ooxml::xl_write {
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
-        -activetab {
+        -activetab - -x - -y - -height - -width {
 	  incr idx
           if {$idx < $len} {
 	    if {[string is integer -strict [lindex $args $idx]] && [lindex $args $idx] > -1} {
@@ -2550,7 +2562,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option \"$opt\", should be: -activetab or -list"
+          error "unknown option \"$opt\", should be: -activetab, -x, -y, -height, -width or -list"
         }
       }
     }
@@ -3344,7 +3356,32 @@ oo::class create ooxml::xl_write {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
       Tag_workbookPr showInkAnnotation 0 autoCompressPictures 0 {}
       Tag_bookViews {
-	Tag_workbookView activeTab $view(activetab) {}
+	set attr {}
+	foreach {n v} [array get view] {
+	  switch -- $n {
+	    activetab {
+	      if {$v ni $obj(sheets)} {
+	        set v 0
+	      }
+	      lappend attr activeTab $v
+	    }
+	    x {
+	      lappend attr xWindow $v
+	    }
+	    y {
+	      lappend attr yWindow $v
+	    }
+	    height {
+	      lappend attr windowHeight $v
+	    }
+	    width {
+	      lappend attr windowWidth $v
+	    }
+	    default {
+	    }
+	  }
+	}
+	Tag_workbookView {*}$attr {}
       }
       Tag_sheets {
 	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {

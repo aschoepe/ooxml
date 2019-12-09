@@ -841,7 +841,7 @@ test FormatCellMerge-7.1 {Merge} {
 } 0
 
 
-foreach item {obj cells fonts numFmts styles fills borders cols} {
+foreach item {obj cells fonts numFmts styles fills borders cols view} {
   array set w_$item [array get ${spreadsheet}::$item]
 }
 
@@ -1024,6 +1024,20 @@ test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
     }
     unset -nocomplain w r
   }
+  return $rc
+} 1
+
+
+test FormatCellCheckView-11.1 {Check View} {
+  set rc 1
+  array set w [array get w_view]
+  array set r $workbook(view)
+  foreach {n v} [array get w] {
+    if {![info exists r($n)] || $r($n) ne $v} {
+      set rc 0
+    }
+  }
+  unset -nocomplain w r
   return $rc
 } 1
 

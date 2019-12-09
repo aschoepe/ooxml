@@ -27,6 +27,10 @@ test FormatCellNewWorksheet-1.2 {Create New Worksheet} {
   set sheet [$spreadsheet worksheet {Blatt 1}]
 } 1
 
+test FormatCellView-1.3 {Set View} {
+  $spreadsheet view -activetab 0 -x 2200 -y 2760 -height 8140 -width 15140
+} {}
+
 test FormatCellNewStyle-2.1 {New Style} {
   set bold [$spreadsheet style -font [$spreadsheet font -bold]]
 } 1
@@ -841,7 +845,7 @@ test FormatCellMerge-7.1 {Merge} {
 } 0
 
 
-foreach item {obj cells fonts numFmts styles fills borders cols} {
+foreach item {obj cells fonts numFmts styles fills borders cols view} {
   array set w_$item [array get ${spreadsheet}::$item]
 }
 
@@ -1027,8 +1031,22 @@ test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
   return $rc
 } 1
 
-file delete -force formatcell.xlsx
 
+test FormatCellCheckView-11.1 {Check View} {
+  set rc 1
+  array set w [array get w_view]
+  array set r $workbook(view)
+  foreach {n v} [array get w] {
+    if {![info exists r($n)] || $r($n) ne $v} {
+      set rc 0
+    }
+  }
+  unset -nocomplain w r
+  return $rc
+} 1
+
+
+file delete -force formatcell.xlsx
 
 # cleanup
 ::tcltest::cleanupTests

@@ -823,11 +823,11 @@ test FormatCellRowHeight-6.1 {Row Height} {
   $spreadsheet rowheight $sheet 33 20
 } 33
 
-test FormatCellRowHeight-6.1 {Row Height} {
+test FormatCellRowHeight-6.2 {Row Height} {
   $spreadsheet rowheight $sheet 34 20
 } 34
 
-test FormatCellRowHeight-6.1 {Row Height} {
+test FormatCellRowHeight-6.3 {Row Height} {
   $spreadsheet rowheight $sheet 35 20
 } 35
 
@@ -836,11 +836,11 @@ test FormatCellMerge-7.1 {Merge} {
   $spreadsheet merge $sheet 40,0 40,2
 } 0
 
-test FormatCellMerge-7.1 {Merge} {
+test FormatCellMerge-7.2 {Merge} {
   $spreadsheet merge $sheet 41,1 43,1
 } 0
 
-test FormatCellMerge-7.1 {Merge} {
+test FormatCellMerge-7.3 {Merge} {
   $spreadsheet merge $sheet 39,3 42,5
 } 0
 
@@ -1003,7 +1003,7 @@ test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
 } 1
 
 
-test FormatCellCheckRowHeight-10.5 {Check Worksheet RowHeight} {
+test FormatCellCheckCells-10.6 {Check Cells} {
   set rc 1
   foreach item [lsort -dictionary [array names w_cells 1,*,*]] {
     lassign [split $item ,] sheet row col

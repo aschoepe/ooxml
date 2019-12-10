@@ -3687,7 +3687,7 @@ proc ::ooxml::tablelist_to_xl_callback { spreadsheet sheet maxcol column title w
   }
 }
 
-package provide ooxml 1.4
+package provide ooxml 1.5
 
 # Local Variables:
 # tcl-indent-level: 2

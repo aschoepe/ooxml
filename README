@@ -39,7 +39,7 @@ INSTALLING
     
     Since ooxml is TEA-compatible you should be able to do
 
-        ../configure
+        ./configure
         make test
         make install
 

@@ -1,0 +1,20 @@
+package require tdom 0.9.0-
+set encoding utf-8
+dom createNodeCmd -tagName Relationship elementNode Tag_Relationship
+set doc [dom createDocument Relationships]
+set root [$doc documentElement]
+$root setAttribute xmlns http://schemas.openxmlformats.org/package/2006/relationships
+$root appendFromScript {
+  Tag_Relationship Id rId3 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/webSettings Target webSettings.xml {
+  }
+  Tag_Relationship Id rId2 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings Target settings.xml {
+  }
+  Tag_Relationship Id rId1 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles Target styles.xml {
+  }
+  Tag_Relationship Id rId5 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme Target theme/theme1.xml {
+  }
+  Tag_Relationship Id rId4 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable Target fontTable.xml {
+  }
+}
+fconfigure stdout -encoding $encoding
+puts [$root asXML -indent 2 -xmlDeclaration 1 -encString [string toupper $encoding]]

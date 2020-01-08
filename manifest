@@ -1,10 +1,20 @@
-C change\sREADME
-D 2020-01-08T21:06:37.132
+C scripts\sto\sbuild\sbase\sstructure\sof\sword-processing\sdocument\sdocx
+D 2020-01-08T21:19:57.716
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 072260ea1b5201f8b1b0482df16f8026b057d1b310f68c8076ee0fbac9f35d66 x
 F configure.ac ce8d706d0c5fe107973e35e638c4b4448b775f11e96fb1a09c48eda5701bdc02
+F docx/Content_Types.tcl 7e127e8bee5702b98097df0db8aa7c8da00b7780c8a2dffb25f2f9d895d7dac3
+F docx/docProps/app.tcl fcc65ffc770fbfdd7ca45b8a408487ea17440ddf2c4a239f986e39350f3b1c72
+F docx/docProps/core.tcl 9f73933069c5e8295413f4b1b6757c800b2ca6d4decf6f5401e0176252ea338b
+F docx/word/document.tcl f6d837bc37f59f7bc80671f84283f50155d4b63638016687815c94ebab458e71
+F docx/word/fontTable.tcl b9a63869b6cae27167a638aecd6539b10a28b302ee9a8765fbdf8a26ae9b4d60
+F docx/word/rels/document.xml.rels,tcl a373bf6b1a624d565ef0b56328d6b1fb61b4a8a25e9f26ed96909e4629927ef8
+F docx/word/settings.tcl e3789d02fda08b9e1a11aec7b57672259e88fc261a7e48f797a2579fffe57bb7
+F docx/word/styles.tcl c7833e4847ceee6fca702109ce5be9185a874d7da6d2fa200409124c9ce4d98d
+F docx/word/theme/theme1.tcl b249db0eb481d45921dd351d16f7817337ea2d10102d8739d9e279fcb42891df
+F docx/word/webSettings.tcl 90deca6928b6179b9f7db8805e507514766bf2cd4a32fbc29a3ae426c8a12327
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -60,8 +70,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 46021f6e6bab0dd38e46d3dfeab5def4d340d11829e97ca0a558fd9a8f2969d6
-R 127df56e56fb12a86b7e76ff515c95cc
+P a827a9d83ccc5aedd4ebae63c8d26614b660ef122be5f848a21d1b135637ef3a
+R e30ea3411ddcc195d97b54258bff0c10
+T *branch * docx
+T *sym-docx *
+T -sym-trunk *
 U alex
-Z f7d4d2bb16db4d4d7bc57db26a9a57d1
+Z 3539198e6744995875c8a98ba3f1098f
 # Remove this line to create a well-formed Fossil manifest.

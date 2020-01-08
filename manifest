@@ -1,7 +1,7 @@
-C Version-1.5
-D 2019-12-10T06:53:59.748
+C change\sREADME
+D 2020-01-08T21:06:37.132
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
-F README 1401c590f2d47c09a35f80f6877831725c8d987743cc194dd2fc6f0cc26b7b2d
+F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 072260ea1b5201f8b1b0482df16f8026b057d1b310f68c8076ee0fbac9f35d66 x
 F configure.ac ce8d706d0c5fe107973e35e638c4b4448b775f11e96fb1a09c48eda5701bdc02
@@ -18,8 +18,8 @@ F examples/sample6.tcl 32f09644ff0f8e4c2eccbb859b194ec58dba8594a070c0124b156725b
 F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba30de5d6 x
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
-F license.terms 5d88db25333acdc7acc73146a763171cad25bdd5d124125f4e1f7e19e940bc83
-F ooxml.tcl 376d4a3aad08992ff4bc8bdfad7023091561c42ce815775acbdce192928e383e
+F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
+F ooxml.tcl 5d1bccfa8fc62f663ce62577e4a5e9228c68cac5b60a76ab83ea2b8e47d4ffba
 F pkgIndex.tcl 55ed6220c525376848a60bb3ba5bd46db91b86b8b3a5df2808ee8ffb9edf40a4
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -60,11 +60,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 4cb1725e7addaceca4cb9382c9f378abdb36bb32f14d4fe6195d7bef37cf4ec6
-R 4fc0917eee86867a4499c52055b2ae5b
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.5 *
+P 46021f6e6bab0dd38e46d3dfeab5def4d340d11829e97ca0a558fd9a8f2969d6
+R 127df56e56fb12a86b7e76ff515c95cc
 U alex
-Z f1a6e5f95a6c2dde0bcda5d92fa84078
+Z f7d4d2bb16db4d4d7bc57db26a9a57d1
 # Remove this line to create a well-formed Fossil manifest.

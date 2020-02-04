@@ -2712,7 +2712,7 @@ oo::class create ooxml::xl_write {
 	    Tag_vt:lpstr { Text [msgcat::mc Worksheets] }
 	  }
 	  Tag_vt:variant {
-	    Tag_vt:i4 { Text 3 }
+	    Tag_vt:i4 { Text $obj(sheets) }
 	  }
 	}
       }

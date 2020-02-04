@@ -79,6 +79,11 @@ test DocPropsApp-3.2 {Check Application -application} appCheck {
   $doc selectNodes string(/x:Properties/x:Application)
 } {Tcl Test}
  
+test DocPropsApp-3.3 {Check Sheet Counter} appCheck {
+  $doc selectNodesNamespaces $appXmlNs
+  $doc selectNodes string(/x:Properties/x:HeadingPairs/vt:vector/vt:variant/vt:i4)
+} $sheet
+ 
 
 $doc delete
 

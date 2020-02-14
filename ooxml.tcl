@@ -140,7 +140,7 @@
 #     return row
 # 
 #   method cell sheet {data {}} args
-#     -index INDEX -style STYLEID -formula FORMULA -string -nozero -globalstyle -height HEIGHT
+#     -index INDEX -style STYLEID -formula FORMULA -string -nozero -height HEIGHT
 #     autoincrement of column if INDEX not applied
 #     return row,column
 # 
@@ -159,7 +159,7 @@
 # 
 #
 # ::ooxml::tablelist_to_xl lb args
-#   -callback CALLBACK -path PATH -file FILENAME -creator CREATOR -name NAME -rootonly -addtimestamp -globalstyle
+#   -callback CALLBACK -path PATH -file FILENAME -creator CREATOR -name NAME -rootonly -addtimestamp
 #   Callback arguments
 #     spreadsheet sheet maxcol column title width align sortmode hide
 #
@@ -2273,11 +2273,11 @@ oo::class create ooxml::xl_write {
 
     array set opts {
       index {}
-      style 0
+      style -1
       formula {}
-      string 0
-      nozero 0
-      globalstyle 0
+      string -1
+      nozero -1
+      globalstyle {}
       height {}
     }
 
@@ -2297,7 +2297,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string, -nozero or -globalstyle"
+          error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string or -nozero"
         }
       }
     }
@@ -2322,16 +2322,26 @@ oo::class create ooxml::xl_write {
       return -1
     }
 
-    if {$opts(globalstyle) && [string is integer -strict $opts(style)] && $opts(style) < 1} {
-      if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) style] >= 0} {
+    if {[string is integer -strict $opts(style)] && $opts(style) == -1} {
+      if {[info exists cols($sheet,$obj(col,$sheet)) style] && [dict get $cols($sheet,$obj(col,$sheet)) style] >= 0} {
         set opts(style) [dict get $cols($sheet,$obj(col,$sheet)) style]
+      } elseif {$opts(style) == -1} {
+	set opts(style) 0
       }
     }
-    if {$opts(string) == 0 && [info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) string] == 1} {
-      set opts(string) 1
+    if {[string is integer -strict $opts(string)] && $opts(string) == -1} {
+      if {[info exists cols($sheet,$obj(col,$sheet)) string] && [dict get $cols($sheet,$obj(col,$sheet)) string] == 1} {
+	set opts(string) 1
+      } elseif {$opts(string) == -1} {
+	set opts(string) 0
+      }
     }
-    if {$opts(nozero) == 0 && [info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) nozero] == 1} {
-      set opts(nozero) 1
+    if {[string is integer -strict $opts(nozero)] && $opts(nozero) == -1} {
+      if {[info exists cols($sheet,$obj(col,$sheet)) nozero] && [dict get $cols($sheet,$obj(col,$sheet)) nozero] == 1} {
+	set opts(nozero) 1
+      } elseif {$opts(nozero) == -1} {
+	set opts(nozero) 0
+      }
     }
 
     set cell ${sheet},$obj(row,$sheet),$obj(col,$sheet)

@@ -1510,6 +1510,7 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
     my variable view
+    my variable tags
 
     array set opts {
       creator {unknown}
@@ -1518,6 +1519,8 @@ oo::class create ooxml::xl_write {
       modified {}
       application {}
     }
+
+    array set tags {}
 
     set len [llength $args]
     set idx 0
@@ -1750,7 +1753,11 @@ oo::class create ooxml::xl_write {
 
   method defaultdatestyle { style } {
     my variable obj
+    my variable tags
 
+    if {![string is integer -strict $style] && [info exists tags(styles,$style)]} {
+      set style $tags(styles,$style)]
+    }
     set obj(defaultdatestyle) $style
   }
 
@@ -2022,6 +2029,7 @@ oo::class create ooxml::xl_write {
   method style { args } {
     my variable obj
     my variable styles
+    my variable tags
 
     array set opts {
       list 0
@@ -2034,6 +2042,7 @@ oo::class create ooxml::xl_write {
       vertical {}
       rotate {}
       wrap 0
+      tag {}
     }
 
     set len [llength $args]
@@ -2051,8 +2060,21 @@ oo::class create ooxml::xl_write {
         -list - -wrap {
 	  set opts([string range $opt 1 end]) 1
         }
+        -tag {
+	  incr idx
+          if {$idx < $len} {
+	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+	      error "option '$opt': should not be an integer value"
+	    } else {
+	      set opts([string range $opt 1 end]) $tag
+	    } 
+	    unset tag
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
         default {
-          error "unknown option \"$opt\", should be: -numfmt, -font, -fill, -border, -xf, -horizontal, -vertical, -rotate, -list or -wrap"
+          error "unknown option \"$opt\", should be: -numfmt, -font, -fill, -border, -xf, -horizontal, -vertical, -rotate, -list, -wrap or -tag"
         }
       }
     }
@@ -2101,6 +2123,9 @@ oo::class create ooxml::xl_write {
 	}
       }
       if {$found} {
+	if {$opts(tag) ne {}} {
+	  set tags(styles,$opts(tag)) $idx
+	}
         return $idx
       }
     }
@@ -2111,6 +2136,9 @@ oo::class create ooxml::xl_write {
     }
     set idx $obj(styles)
     incr obj(styles)
+    if {$opts(tag) ne {}} {
+      set tags(styles,$opts(tag)) $idx
+    }
     return $idx
   }
 
@@ -2138,6 +2166,7 @@ oo::class create ooxml::xl_write {
   method column { sheet args } {
     my variable obj
     my variable cols
+    my variable tags
 
     array set opts {
       index {}
@@ -2170,6 +2199,10 @@ oo::class create ooxml::xl_write {
           error "unknown option \"$opt\", should be: -index, -to, -width, -style, -bestfit, -customwidth, -string, -nozero or -calcfit"
         }
       }
+    }
+
+    if {![string is integer -strict $opts(style)] && [info exists tags(styles,$opts(style))]} {
+      set opts(style) $tags(styles,$opts(style))
     }
 
     if {[regexp {^\d+$} $opts(index)] && $opts(index) > -1} {
@@ -2270,6 +2303,7 @@ oo::class create ooxml::xl_write {
     my variable obj
     my variable cells
     my variable cols
+    my variable tags
 
     array set opts {
       index {}
@@ -2302,6 +2336,10 @@ oo::class create ooxml::xl_write {
           error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string, nostring, -zero or -nozero"
         }
       }
+    }
+
+    if {![string is integer -strict $opts(style)] && [info exists tags(styles,$opts(style))]} {
+      set opts(style) $tags(styles,$opts(style))
     }
 
     if {$opts(nostring) == 1} {

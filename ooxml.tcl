@@ -2276,6 +2276,8 @@ oo::class create ooxml::xl_write {
       style -1
       formula {}
       string -1
+      nostring -1
+      zero -1
       nozero -1
       globalstyle {}
       height {}
@@ -2293,13 +2295,20 @@ oo::class create ooxml::xl_write {
             error "option '$opt': missing argument"
           }            
         }
-        -string - -nozero - -globalstyle {
+        -string - -nostring - -zero - -nozero - -globalstyle {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string or -nozero"
+          error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string, nostring, -zero or -nozero"
         }
       }
+    }
+
+    if {$opts(nostring) == 1} {
+      set opts(string) 0
+    }
+    if {$opts(zero) == 1} {
+      set opts(nozero) 0
     }
 
     if {!$obj(callRow,$obj(sheets))} {
@@ -2323,21 +2332,21 @@ oo::class create ooxml::xl_write {
     }
 
     if {[string is integer -strict $opts(style)] && $opts(style) == -1} {
-      if {[info exists cols($sheet,$obj(col,$sheet)) style] && [dict get $cols($sheet,$obj(col,$sheet)) style] >= 0} {
+      if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) style] >= 0} {
         set opts(style) [dict get $cols($sheet,$obj(col,$sheet)) style]
       } elseif {$opts(style) == -1} {
 	set opts(style) 0
       }
     }
     if {[string is integer -strict $opts(string)] && $opts(string) == -1} {
-      if {[info exists cols($sheet,$obj(col,$sheet)) string] && [dict get $cols($sheet,$obj(col,$sheet)) string] == 1} {
+      if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) string] == 1} {
 	set opts(string) 1
       } elseif {$opts(string) == -1} {
 	set opts(string) 0
       }
     }
     if {[string is integer -strict $opts(nozero)] && $opts(nozero) == -1} {
-      if {[info exists cols($sheet,$obj(col,$sheet)) nozero] && [dict get $cols($sheet,$obj(col,$sheet)) nozero] == 1} {
+      if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) nozero] == 1} {
 	set opts(nozero) 1
       } elseif {$opts(nozero) == -1} {
 	set opts(nozero) 0

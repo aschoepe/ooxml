@@ -1,5 +1,5 @@
-C First\sversion\sto\sremove\s"-globalstyle"\sfrom\smethod\s"cell".\sInstead,\sthe\soptions\sof\smethod\s"column"\sare\staken\sas\slong\sas\sno\slocal\soptions\sfor\s"-style",\s"-string"\sand/or\s"-nozero"\sare\sspecified\sfor\s"cell".
-D 2020-02-14T18:59:08.990
+C added\s"-zero"\sand\s"-nostring"\sto\sreset\sglobally\sset\soptions\s"-nozero"\sand\s"-string"\swith\smethod\s"column"\sfor\sa\ssingle\scell\swith\smethod\s"cell"
+D 2020-03-05T19:28:05.497
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
@@ -19,7 +19,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 745905991261abec4580b469e1f81e472a837808f1566cecc63f1a13dd986713
+F ooxml.tcl 0a4d0c59f176b292e03b78d599cb6369da67b3cbc2a55fcea7873cb895eb9f5a
 F pkgIndex.tcl 55ed6220c525376848a60bb3ba5bd46db91b86b8b3a5df2808ee8ffb9edf40a4
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -60,11 +60,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 32d36274998554881e669520358d85b5d22f683cda4718ea58a7d269fd98814b
-R 09f1ba09f1b3d79137ac00ff61c9e6ea
-T *branch * coldefs
-T *sym-coldefs *
-T -sym-trunk *
+P 85d6ea0ef6c17dbd7191dd085dcc24f9c1c0d9152bc8573901e7d1196b53f08f
+R 839c5a2b1a1d7d4037468f5f677fe83c
 U alex
-Z 42d85af005c3a4029af4c0a82cafb1c7
+Z 0e535976f65686acbf6c8c1ae822ddf8
 # Remove this line to create a well-formed Fossil manifest.

@@ -1932,12 +1932,14 @@ oo::class create ooxml::xl_write {
   method fill { args } {
     my variable obj
     my variable fills
+    my variable tags
 
     array set opts {
       list 0
       patterntype none
       fgcolor {}
       bgcolor {}
+      tag {}
     }
 
     set len [llength $args]
@@ -1955,8 +1957,21 @@ oo::class create ooxml::xl_write {
         -list {
 	  set opts([string range $opt 1 end]) 1
         }
+        -tag {
+	  incr idx
+          if {$idx < $len} {
+	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+	      error "option '$opt': should not be an integer value"
+	    } else {
+	      set opts([string range $opt 1 end]) $tag
+	    } 
+	    unset tag
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
         default {
-          error "unknown option \"$opt\", should be: -patterntype, -fgcolor, -bgcolor or -list"
+          error "unknown option \"$opt\", should be: -patterntype, -fgcolor, -bgcolor, -list or -tag"
         }
       }
     }
@@ -1983,6 +1998,9 @@ oo::class create ooxml::xl_write {
 	}
       }
       if {$found} {
+	if {$opts(tag) ne {}} {
+	  set tags(fills,$opts(tag)) $idx
+	}
         return $idx
       }
     }
@@ -1994,6 +2012,9 @@ oo::class create ooxml::xl_write {
     set idx $obj(fills)
     incr obj(fills)
     
+    if {$opts(tag) ne {}} {
+      set tags(fills,$opts(tag)) $idx
+    }
     return $idx
   }
 
@@ -2174,6 +2195,9 @@ oo::class create ooxml::xl_write {
     }
     if {![string is integer -strict $opts(font)] && [info exists tags(fonts,$opts(font))]} {
       set opts(font) $tags(fonts,$opts(font))
+    }
+    if {![string is integer -strict $opts(fill)] && [info exists tags(fills,$opts(fill))]} {
+      set opts(fill) $tags(fills,$opts(fill))
     }
 
     set obj(blockPreset) 1

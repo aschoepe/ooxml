@@ -1,5 +1,5 @@
-C added\s"-tag"\sto\sthe\smethod\s"font".\swith\sthis\syou\scan\sgive\sa\sstyle\sa\sname.\sin\sthe\smethod\s"style"\sas\sFONTID\syou\scan\salso\spass\sthe\sgiven\sname.
-D 2020-03-06T07:52:11.980
+C added\s"-tag"\sto\sthe\smethod\s"fill".\swith\sthis\syou\scan\sgive\sa\sstyle\sa\sname.\sin\sthe\smethod\s"style"\sas\sFILLID\syou\scan\salso\spass\sthe\sgiven\sname.
+D 2020-03-06T07:55:17.650
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
@@ -19,7 +19,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 8244cf6804401ea97684d974adbf5276190d1d59c60026dc0dabec7a16bf1786
+F ooxml.tcl 68c38a76261f90ab546c309c228d2cbabc618e885ea11c64057afb1f3d7910d5
 F pkgIndex.tcl 55ed6220c525376848a60bb3ba5bd46db91b86b8b3a5df2808ee8ffb9edf40a4
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -60,8 +60,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P c894d762dd4c44f2c6bffa761a77e7021a73cddc6cab3c9f54d245b8d08fbb08
-R 510eadcb7e9e94167a4c6873ed0f61be
+P 2e0fa3b0bdd3e703c723438fa65ed86f75b5ae9f28e057a11461e8aaeb840676
+R 89d6007dd59de2cb8a84a47487599cb1
 U alex
-Z ffd27f62c1207be30722495cc2d94e42
+Z 35e0ca5629b0e73c55915c5ff2d4b1a5
 # Remove this line to create a well-formed Fossil manifest.

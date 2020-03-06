@@ -2021,6 +2021,7 @@ oo::class create ooxml::xl_write {
   method border { args } {
     my variable obj
     my variable borders
+    my variable tags
 
     array set opts {
       list 0
@@ -2035,6 +2036,7 @@ oo::class create ooxml::xl_write {
       diagonalstyle {}
       diagonalcolor {}
       diagonaldirection {}
+      tag {}
     }
 
     set len [llength $args]
@@ -2052,8 +2054,21 @@ oo::class create ooxml::xl_write {
         -list {
 	  set opts([string range $opt 1 end]) 1
         }
+        -tag {
+	  incr idx
+          if {$idx < $len} {
+	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+	      error "option '$opt': should not be an integer value"
+	    } else {
+	      set opts([string range $opt 1 end]) $tag
+	    } 
+	    unset tag
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
         default {
-          error "unknown option \"$opt\", should be: -leftstyle, -leftcolor, -rightstyle, -rightcolor, -topstyle, -topcolor, -bottomstyle, -bottomcolor, -diagonalstyle, -diagonalcolor, -diagonaldirection or -list"
+          error "unknown option \"$opt\", should be: -leftstyle, -leftcolor, -rightstyle, -rightcolor, -topstyle, -topcolor, -bottomstyle, -bottomcolor, -diagonalstyle, -diagonalcolor, -diagonaldirection, -list or -tag"
         }
       }
     }
@@ -2122,6 +2137,9 @@ oo::class create ooxml::xl_write {
 	}
       }
       if {$found} {
+	if {$opts(tag) ne {}} {
+	  set tags(borders,$opts(tag)) $idx
+	}
         return $idx
       }
     }
@@ -2130,6 +2148,9 @@ oo::class create ooxml::xl_write {
     set idx $obj(borders)
     incr obj(borders)
     
+    if {$opts(tag) ne {}} {
+      set tags(borders,$opts(tag)) $idx
+    }
     return $idx
   }
 
@@ -2198,6 +2219,9 @@ oo::class create ooxml::xl_write {
     }
     if {![string is integer -strict $opts(fill)] && [info exists tags(fills,$opts(fill))]} {
       set opts(fill) $tags(fills,$opts(fill))
+    }
+    if {![string is integer -strict $opts(border)] && [info exists tags(borders,$opts(border))]} {
+      set opts(border) $tags(borders,$opts(border))
     }
 
     set obj(blockPreset) 1

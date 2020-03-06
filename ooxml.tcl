@@ -1618,6 +1618,7 @@ oo::class create ooxml::xl_write {
   method numberformat { args } {
     my variable obj
     my variable numFmts
+    my variable tags
 
     array set opts {
       list 0
@@ -1653,8 +1654,21 @@ oo::class create ooxml::xl_write {
         -list - -general - -date - -time - -datetime - -iso8601 - -number - -decimal - -red - -separator - -fraction - -scientific - -percent - -string - -text {
 	  set opts([string range $opt 1 end]) 1
         }
+        -tag {
+	  incr idx
+          if {$idx < $len} {
+	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+	      error "option '$opt': should not be an integer value"
+	    } else {
+	      set opts([string range $opt 1 end]) $tag
+	    } 
+	    unset tag
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
         default {
-          error "unknown option \"$opt\", should be: -format, -list, -general, -date, -time, -datetime, -iso8601, -number, -decimal, -red, -separator, -fraction, -scientific, -percent, -string or -text"
+          error "unknown option \"$opt\", should be: -format, -list, -general, -date, -time, -datetime, -iso8601, -number, -decimal, -red, -separator, -fraction, -scientific, -percent, -string, -text or tag"
         }
       }
     }
@@ -1668,57 +1682,99 @@ oo::class create ooxml::xl_write {
     set obj(blockPreset) 1
 
     if {$opts(general)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 0
+      }
       return 0
     }
     if {$opts(date)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 14
+      }
       return 14
     }
     if {$opts(time)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 20
+      }
       return 20
     }
     if {$opts(number)} {
       if {$opts(separator)} {
 	if {$opts(red)} {
+	  if {$opts(tag) ne {}} {
+	    set tags(numFmts,$opts(tag)) 38
+	  }
 	  return 38
 	} else {
+	  if {$opts(tag) ne {}} {
+	    set tags(numFmts,$opts(tag)) 3
+	  }
 	  return 3
 	}
       } else {
 	if {$opts(red)} {
 	  return -1
 	} else {
+	  if {$opts(tag) ne {}} {
+	    set tags(numFmts,$opts(tag)) 1
+	  }
 	  return 1
 	}
       }
     }
     if {$opts(decimal)} {
       if {$opts(percent)} {
+	if {$opts(tag) ne {}} {
+	  set tags(numFmts,$opts(tag)) 10
+	}
         return 10
       }
       if {$opts(separator)} {
 	if {$opts(red)} {
+	  if {$opts(tag) ne {}} {
+	    set tags(numFmts,$opts(tag)) 40
+	  }
 	  return 40
 	} else {
+	  if {$opts(tag) ne {}} {
+	    set tags(numFmts,$opts(tag)) 4
+	  }
 	  return 4
 	}
       } else {
 	if {$opts(red)} {
 	  return -1
 	} else {
+	  if {$opts(tag) ne {}} {
+	    set tags(numFmts,$opts(tag)) 2
+	  }
 	  return 2
 	}
       }
     }
     if {$opts(fraction)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 12
+      }
       return 12
     }
     if {$opts(scientific)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 11
+      }
       return 11
     }
     if {$opts(percent)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 9
+      }
       return 9
     }
     if {$opts(text) || $opts(string)} {
+      if {$opts(tag) ne {}} {
+	set tags(numFmts,$opts(tag)) 49
+      }
       return 49
     }
 
@@ -1731,11 +1787,17 @@ oo::class create ooxml::xl_write {
 
     foreach idx [array names ::ooxml::predefNumFmts] {
       if {[dict get $::ooxml::predefNumFmts($idx) fmt] eq $opts(format)} {
+	if {$opts(tag) ne {}} {
+	  set tags(numFmts,$opts(tag)) $idx
+	}
         return $idx
       }
     }
     foreach idx [array names numFmts] {
       if {$numFmts($idx) eq $opts(format)} {
+	if {$opts(tag) ne {}} {
+	  set tags(numFmts,$opts(tag)) $idx
+	}
         return $idx
       }
     }
@@ -1748,6 +1810,9 @@ oo::class create ooxml::xl_write {
     set numFmts($idx) $opts(format)
     incr obj(numFmts)
 
+    if {$opts(tag) ne {}} {
+      set tags(numFmts,$opts(tag)) $idx
+    }
     return $idx
   }
 
@@ -2081,6 +2146,10 @@ oo::class create ooxml::xl_write {
 
     if {$opts(list)} {
       return [array get styles]
+    }
+
+    if {![string is integer -strict $opts(numfmt)] && [info exists tags(numFmts,$opts(numfmt))]} {
+      set opts(numfmt) $tags(numFmts,$opts(numfmt))
     }
 
     set obj(blockPreset) 1

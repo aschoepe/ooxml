@@ -1,5 +1,5 @@
-C added\s"-tag"\sto\sthe\smethod\s"border".\swith\sthis\syou\scan\sgive\sa\sstyle\sa\sname.\sin\sthe\smethod\s"style"\sas\sBORDERID\syou\scan\salso\spass\sthe\sgiven\sname.
-D 2020-03-06T07:58:15.536
+C bug\sfix;\sadded\stest\sfor\s"named\sformats"
+D 2020-03-07T08:11:05.707
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
@@ -19,7 +19,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 048d7dfef141bba71bc55716faa27f5e33b6bcf669a18cfcd6efb5ba843cd95e
+F ooxml.tcl 807457956cedb243fac232204d24147c4a831aa436237a7721cce1c332816a44
 F pkgIndex.tcl 55ed6220c525376848a60bb3ba5bd46db91b86b8b3a5df2808ee8ffb9edf40a4
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -30,6 +30,7 @@ F tests/all.tcl c56ee198de4934d07e36af2c28a9f3e33fb1a08db94411aaaf499a14ab72cf13
 F tests/benchmark.test ad9ac56279c418f73e420b5d56da568a526322786e263f2717ad3752916ea90b
 F tests/formatcell.test 7955a0569a05d0d6eff32f05766eb3638eab70d289f756cb9739bee49e0e1aa4
 F tests/misc.test 579b69dd6996ebfcffe9c992d48fdb2bbd9fbf06fc39d8239cfbd2cd1aefe4aa
+F tests/namedfmts.test 4209a120742334384769956cbfb9f657b1b5250a62dd6eeb2e973eb57aefa7d1
 F tests/simple.test 8311da90257a255132bb06d49c6638d4caecda4fc11c48d927282e3d97b578fb
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -60,8 +61,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P ce8bfc62d76f7dda6c8561b03794b7cf6d6e21ec3e3c7c06a3944c228abb828e
-R aaf804705a9a58da7a43a28f52b46b94
+P 401fec584237a0d9dc99c5bfb4f15ba826aa656c68e3a407a2820f42513d9e04
+R a95a30c88df80d838fde9dc75deaa8ae
 U alex
-Z 56af72abe6079f0b4be1b0ceefde2091
+Z 8e6d1df747e646680d99293af4366d70
 # Remove this line to create a well-formed Fossil manifest.

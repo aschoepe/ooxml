@@ -1,0 +1,174 @@
+#
+# Commands covered: simple excel sheet
+#
+
+#
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+package require vfs::zip
+
+test NamedFormats-1.1 {Write a Simple Excel Sheet} {
+  set cDT {2020-03-07 07:12:23}
+  set mCT $cDT
+
+  set spreadsheet [::ooxml::xl_write new -creator {User A} -created $cDT -modifiedby {User B} -modified $mCT -application {Tcl Test}]
+  if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
+    return 1
+  }
+  return 0
+} 1
+
+
+test NamedFormats-2.1 {numberformat dec2t} {
+  $spreadsheet numberformat -decimal -separator -tag dec2t
+} 4
+
+test NamedFormats-2.2 {numberformat dec2t} {
+  upvar #0 ${spreadsheet}::tags tags
+  info exists tags(numFmts,dec2t)
+} 1
+
+test NamedFormats-2.2 {numberformat dec2t} {
+  upvar #0 ${spreadsheet}::tags tags
+  return $tags(numFmts,dec2t)
+} 4
+
+test NamedFormats-2.3 {style numberformat dec2t} {
+  $spreadsheet style -numfmt dec2t -tag dec2t
+} 1
+
+test NamedFormats-2.4 {style numberformat dec2t} {
+  upvar #0 ${spreadsheet}::tags tags
+  if {[info exists tags(styles,dec2t)]} {
+    return $tags(styles,dec2t)
+  }
+  return -1
+} 1
+
+
+test NamedFormats-3.1 {numberformat fraction2} {
+  $spreadsheet numberformat -format {# ??/??} -tag fraction2
+} 166
+
+test NamedFormats-3.2 {numberformat fraction2} {
+  upvar #0 ${spreadsheet}::tags tags
+  info exists tags(numFmts,fraction2)
+} 1
+
+test NamedFormats-3.2 {numberformat fraction2} {
+  upvar #0 ${spreadsheet}::tags tags
+  return $tags(numFmts,fraction2)
+} 166
+
+test NamedFormats-3.3 {style numberformat fraction2} {
+  $spreadsheet style -numfmt fraction2 -tag fraction2
+} 2
+
+test NamedFormats-3.4 {style numberformat fraction2} {
+  upvar #0 ${spreadsheet}::tags tags
+  if {[info exists tags(styles,fraction2)]} {
+    return $tags(styles,fraction2)
+  }
+  return -1
+} 2
+
+
+test NamedFormats-4.1 {font font9} {
+  $spreadsheet font -size 9 -tag font9
+} 1
+
+test NamedFormats-4.2 {font font9} {
+  upvar #0 ${spreadsheet}::tags tags
+  info exists tags(fonts,font9)
+} 1
+
+test NamedFormats-4.2 {font font9} {
+  upvar #0 ${spreadsheet}::tags tags
+  return $tags(fonts,font9)
+} 1
+
+test NamedFormats-4.3 {style font font9} {
+  $spreadsheet style -font font9 -tag font9
+} 3
+
+test NamedFormats-4.4 {style font font9} {
+  upvar #0 ${spreadsheet}::tags tags
+  if {[info exists tags(styles,font9)]} {
+    return $tags(styles,font9)
+  }
+  return -1
+} 3
+
+
+test NamedFormats-5.1 {fill yellow} {
+  $spreadsheet fill -fgcolor FFFFFF00 -bgcolor 64 -patterntype solid -tag yellow
+} 2
+
+test NamedFormats-5.2 {fill yellow} {
+  upvar #0 ${spreadsheet}::tags tags
+  info exists tags(fills,yellow)
+} 1
+
+test NamedFormats-5.2 {fill yellow} {
+  upvar #0 ${spreadsheet}::tags tags
+  return $tags(fills,yellow)
+} 2
+
+test NamedFormats-5.3 {style fill yellow} {
+  $spreadsheet style -fill yellow -tag yellow
+} 4
+
+test NamedFormats-5.4 {style fill yellow} {
+  upvar #0 ${spreadsheet}::tags tags
+  if {[info exists tags(styles,yellow)]} {
+    return $tags(styles,yellow)
+  }
+  return -1
+} 4
+
+
+test NamedFormats-6.1 {border bDiagonal} {
+  $spreadsheet border -diagonalstyle medium -diagonaldirection up -tag bDiagonal
+} 1
+
+test NamedFormats-6.2 {border bDiagonal} {
+  upvar #0 ${spreadsheet}::tags tags
+  info exists tags(borders,bDiagonal)
+} 1
+
+test NamedFormats-6.2 {border bDiagonal} {
+  upvar #0 ${spreadsheet}::tags tags
+  return $tags(borders,bDiagonal)
+} 1
+
+test NamedFormats-6.3 {style border bDiagonal} {
+  $spreadsheet style -border bDiagonal -tag bDiagonal
+} 5
+
+test NamedFormats-6.4 {style border bDiagonal} {
+  upvar #0 ${spreadsheet}::tags tags
+  if {[info exists tags(styles,bDiagonal)]} {
+    return $tags(styles,bDiagonal)
+  }
+  return -1
+} 5
+
+
+$spreadsheet destroy
+
+# cleanup
+::tcltest::cleanupTests
+return
+

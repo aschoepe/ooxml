@@ -1637,6 +1637,7 @@ oo::class create ooxml::xl_write {
       percent 0
       string 0
       text 0
+      tag {}
     }
 
     set len [llength $args]

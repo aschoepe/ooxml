@@ -105,25 +105,28 @@
 # 
 #   method numberformat args
 #     -format FORMAT -general -date -time -datetime -iso8601 -number -decimal -red -separator -fraction -scientific -percent -text -string
+#     -tag NAME
 #     return NUMFMTID
 #
 #   method defaultdatestyle STYLEID
 # 
 #   method font args
-#     -list -name NAME -family FAMILY -size SIZE -color COLOR -scheme SCHEME -bold -italic -underline -color COLOR
+#     -list -name NAME -family FAMILY -size SIZE -color COLOR -scheme SCHEME -bold -italic -underline -color COLOR -tag NAME
 #     return FONTID
 # 
 #   method fill args
-#     -list -patterntype PATTERNTYPE -fgcolor COLOR -bgcolor COLOR
+#     -list -patterntype PATTERNTYPE -fgcolor COLOR -bgcolor COLOR -tag NAME
 #     return FILLID
 # 
 #   method border args
 #     -list -leftstyle BORDERLINESTYLE -leftcolor COLOR -rightstyle BORDERLINESTYLE -rightcolor COLOR -topstyle BORDERLINESTYLE -topcolor COLOR
 #     -bottomstyle BORDERLINESTYLE -bottomcolor COLOR -diagonalstyle BORDERLINESTYLE -diagonalcolor COLOR -diagonaldirection DIAGONALDIRECTION
+#     -tag NAME
 #     return BORDERID
 # 
 #   method style args
 #     -list -numfmt NUMFMTID -font FONTID -fill FILLID -border BORDERID -xf XFID -horizontal HORIZONTAL -vertical VERTICAL -rotate DEGREE -wrap
+#     -tag NAME
 #     return STYLEID
 # 
 #   method worksheet name

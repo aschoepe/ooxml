@@ -2596,6 +2596,83 @@ oo::class create ooxml::xl_write {
     return $obj(row,$sheet),$obj(col,$sheet)
   }
 
+  method cells { sheet {data {}} args } {
+    my variable obj
+    my variable cells
+    my variable cols
+    my variable tags
+
+    array set opts {
+      index {}
+      style -1
+      string -1
+      nostring -1
+      zero -1
+      nozero -1
+      height {}
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -index - -style - -height {
+	  incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        -string - -nostring - -zero - -nozero {
+	  set opts([string range $opt 1 end]) 1
+        }
+        default {
+          error "unknown option \"$opt\", should be: -index, -style, -height, -string, nostring, -zero or -nozero"
+        }
+      }
+    }
+
+    if {!$obj(callRow,$obj(sheets))} {
+      set obj(callRow,$obj(sheets)) 1
+      incr obj(row,$sheet)
+    }
+
+    if {[regexp {^\d+$} $opts(index)] && $opts(index) > -1} {
+      set obj(col,$sheet) $opts(index)
+    } elseif {[regexp {^[A-Z]+$} $opts(index)]} {
+      set obj(col,$sheet) [lindex [split [::ooxml::StringToRowColumn $opts(index)] ,] end]
+    } elseif {[regexp {^(\d+),(\d+)$} $opts(index)]} {
+      lassign [split $opts(index) ,] obj(row,$sheet) obj(col,$sheet)
+    } elseif {[regexp {^[A-Z]+\d+$} $opts(index)]} {
+      lassign [split [::ooxml::StringToRowColumn $opts(index)] ,] obj(row,$sheet) obj(col,$sheet)
+    } elseif {[string trim $opts(index)] eq {}} {
+      incr obj(col,$sheet)
+    }
+    if {$obj(row,$sheet) < 0 || $obj(col,$sheet) < 0} {
+      return -1
+    }
+
+    set args {-index}
+    lappend args $obj(row,$sheet),$obj(col,$sheet)
+    foreach item {style string nostring zero nozero} {
+      if {$opts($item) ne {} && $opts($item) != -1} {
+	lappend args -$item $opts($item)
+      }
+    }
+    if {$opts(height) ne {}} {
+      lappend args -height $opts(height)
+    }
+
+    foreach cell $data {
+      if {[string trim $cell] ne {}} {
+	my cell $sheet $cell {*}$args
+      }
+    }
+    
+    return $obj(row,$sheet)
+  }
+
   method autofilter { sheet indexFrom indexTo } {
     my variable obj
 

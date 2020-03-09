@@ -1,5 +1,5 @@
-C short\sdoc\supdate
-D 2020-03-08T06:58:40.062
+C new\smethod\scells\s=\spass\sa\sline\sas\slist
+D 2020-03-09T12:53:41.661
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
@@ -19,7 +19,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 358d2caf3eedfb1bb19dea7754cd78ba37464070d056eeddb64f527efff5de34
+F ooxml.tcl 0d2b9cd86b67f77986005924aeaa830c57863f78f210646f269504dbd5162950
 F pkgIndex.tcl 55ed6220c525376848a60bb3ba5bd46db91b86b8b3a5df2808ee8ffb9edf40a4
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -61,8 +61,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P ea03e767f5ee4e37eca7b8f3d97889314003cbff05fcf5879dc6fd1c7b21aedc
-R 2b79df79eb9b2c03e376768bbfbce964
+P 38e545bbb29234bd9fa20e84cda1a340a7f5f1cfdecf9ad209a4477716ea26c1
+R 0a51d71cb4a36d0de7629fcb8b5a7e24
+T *branch * cells
+T *sym-cells *
+T -sym-trunk *
 U alex
-Z f7f5b061142f6d162758860c204f854b
+Z 482013a12d16d5870cd92e9ca43b2773
 # Remove this line to create a well-formed Fossil manifest.

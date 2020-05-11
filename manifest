@@ -1,5 +1,6 @@
-C short\sdoc\supdate
-D 2020-03-08T06:58:40.062
+C mirror\sfossil\sto\sgithub
+D 2020-05-11T08:28:23.460
+F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
@@ -61,8 +62,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P ea03e767f5ee4e37eca7b8f3d97889314003cbff05fcf5879dc6fd1c7b21aedc
-R 2b79df79eb9b2c03e376768bbfbce964
+P 38e545bbb29234bd9fa20e84cda1a340a7f5f1cfdecf9ad209a4477716ea26c1
+R ab3c4431863b69477a224e4da2b4b346
 U alex
-Z f7f5b061142f6d162758860c204f854b
+Z c7cf426f57839c425c3370f147cb930d
 # Remove this line to create a well-formed Fossil manifest.

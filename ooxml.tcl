@@ -143,7 +143,7 @@
 #     return row
 # 
 #   method cell sheet {data {}} args
-#     -index INDEX -style STYLEID -formula FORMULA -string -nozero -height HEIGHT
+#     -index INDEX -style STYLEID -formula FORMULA -fshare INDEX:INDEX -string -nozero -height HEIGHT
 #     autoincrement of column if INDEX not applied
 #     return row,column
 # 
@@ -1266,7 +1266,14 @@ proc ::ooxml::xl_read { file args } {
 
 	  if {[$cell hasAttribute r]} {
 	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f/text()]] ne {}} {
-	      set wb($sheet,f,[StringToRowColumn [$cell @r]]) [$node nodeValue]
+	      set rowcol [StringToRowColumn [$cell @r]]
+	      if {[set formula [string trim [$node nodeValue]]] ne {}} {
+		set wb($sheet,f,$rowcol) [list f $formula]
+		set node [$cell selectNodes M:f]
+		if {[$node hasAttribute t] && [$node @t] eq {shared} && [$node hasAttribute ref]} {
+		  lappend wb($sheet,f,$rowcol) t [$node @t] ref [$node @ref]
+		}
+	      }
 	    }
 	  }
 
@@ -2454,6 +2461,7 @@ oo::class create ooxml::xl_write {
       index {}
       style -1
       formula {}
+      fshare {}
       string -1
       nostring -1
       zero -1
@@ -2466,7 +2474,7 @@ oo::class create ooxml::xl_write {
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
-        -index - -style - -formula - -height  {
+        -index - -style - -formula - -fshare - -height  {
 	  incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
@@ -2478,7 +2486,7 @@ oo::class create ooxml::xl_write {
 	  set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option \"$opt\", should be: -index, -style, -formula, -height, -string, nostring, -zero or -nozero"
+          error "unknown option \"$opt\", should be: -index, -style, -formula, -fshare, -height, -string, nostring, -zero or -nozero"
         }
       }
     }
@@ -2572,6 +2580,9 @@ oo::class create ooxml::xl_write {
     if {[string trim $opts(formula)] ne {}} {
       lappend cells($cell) t $type
       lappend cells($cell) f $opts(formula)
+      if {[string trim $opts(fshare)] ne {}} {
+	lappend cells($cell) fs $opts(fshare)
+      }
     } else {
       lappend cells($cell) v $data t $type
     }
@@ -2696,7 +2707,12 @@ oo::class create ooxml::xl_write {
 	    lassign [split $item ,] sheet tag row col
 	    set options [list -index $row,$col]
 	    if {[info exists a($sheet,f,$row,$col)]} {
-	      lappend options -formula $a($sheet,f,$row,$col)
+	      if {[dict exists $a($sheet,f,$row,$col) f]} {
+		lappend options -formula [dict get $a($sheet,f,$row,$col) f]
+		if {[dict exists $a($sheet,f,$row,$col) ref]} {
+		  lappend options -fshare [dict get $a($sheet,f,$row,$col) ref]
+		}
+	      }
 	    }
 	    if {[info exists a($sheet,t,$row,$col)] && $a($sheet,t,$row,$col) eq {s}} {
 	      lappend options -string
@@ -3667,7 +3683,12 @@ oo::class create ooxml::xl_write {
 		      Tag_v { Text [dict get $cells($idx) v] }
 		    }
 		    if {[dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}} {
-		      Tag_f { Text [dict get $cells($idx) f] }
+		      ## FORMULA ##
+		      if {[dict exists $cells($idx) fs] && [dict get $cells($idx) fs] ne {}} {
+			Tag_f t shared ref [dict get $cells($idx) fs] si 0 { Text [dict get $cells($idx) f] }
+		      } else {
+			Tag_f { Text [dict get $cells($idx) f] }
+		      }
 		    }
 		  }
 		} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {

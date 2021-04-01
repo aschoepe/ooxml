@@ -2584,7 +2584,6 @@ oo::class create ooxml::xl_write {
     if {[string is integer -strict $opts(style)] && $opts(style) > 0} {
       lappend cells($cell) s $opts(style)
     }
-puts stderr "method cell [array get opts]"
     ## FORMULA ##
     if {[string trim $opts(formula)] ne {} || [string is integer -strict $opts(formulaidx)]} {
       lappend cells($cell) t $type
@@ -2615,7 +2614,6 @@ puts stderr "method cell [array get opts]"
 	set obj(dmaxcol,$sheet) $obj(col,$sheet)
       }
     }
-puts stderr "> cells $cell $cells($cell)"
     
     return $obj(row,$sheet),$obj(col,$sheet)
   }
@@ -2726,6 +2724,9 @@ puts stderr "> cells $cell $cells($cell)"
 		if {[dict exists $a($sheet,f,$row,$col) r]} {
 		  lappend options -formularef [dict get $a($sheet,f,$row,$col) r]
 		}
+	      }
+	      if {[dict exists $a($sheet,f,$row,$col) i]} {
+		lappend options -formulaidx [dict get $a($sheet,f,$row,$col) i]
 	      }
 	    }
 	    if {[info exists a($sheet,t,$row,$col)] && $a($sheet,t,$row,$col) eq {s}} {
@@ -3696,7 +3697,6 @@ puts stderr "> cells $cell $cells($cell)"
 		    if {[dict exists $cells($idx) v] && [dict get $cells($idx) v] ne {}} {
 		      Tag_v { Text [dict get $cells($idx) v] }
 		    }
-puts stderr "? 'cell $idx $cells($idx)' (dict exists cells f = [dict exists $cells($idx) f] ) || dict exists cells fsi = [dict exists $cells($idx) fsi]"
 		    if {([dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}) || [dict exists $cells($idx) fsi]} {
 		      ## FORMULA ##
 		      set attr {}
@@ -3709,7 +3709,6 @@ puts stderr "? 'cell $idx $cells($idx)' (dict exists cells f = [dict exists $cel
 		      if {[dict exists $cells($idx) fsi] && [dict get $cells($idx) fsi] > -1} {
 			lappend attr si [dict get $cells($idx) fsi]
 		      }
-puts stderr "attr = $attr"
 		      Tag_f {*}$attr { 
 			if {[dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}} {
 			  Text [dict get $cells($idx) f]

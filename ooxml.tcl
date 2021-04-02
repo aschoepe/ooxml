@@ -2592,7 +2592,22 @@ oo::class create ooxml::xl_write {
 	lappend cells($cell) fsi $opts(formulaidx)
       }
       if {[string trim $opts(formularef)] ne {}} {
-	lappend cells($cell) fsr $opts(formularef)
+        set lref [split [string trim $opts(formularef)] :]
+	if {[llength $lref] == 2} {
+	  set fref {}
+	  if {[regexp {^(\d+),(\d+)$} [lindex $lref 0]]} {
+	    append fref [::ooxml::IndexToString [lindex $lref 0]]
+	  } else {
+	    append fref [lindex $lref 0]
+	  }
+	  append fref :
+	  if {[regexp {^(\d+),(\d+)$} [lindex $lref 1]]} {
+	    append fref [::ooxml::IndexToString [lindex $lref 1]]
+	  } else {
+	    append fref [lindex $lref 1]
+	  }
+	  lappend cells($cell) fsr $fref
+	}
       }
     } else {
       lappend cells($cell) v $data t $type

@@ -1,0 +1,85 @@
+#
+# Commands covered: simple excel sheet
+#
+
+#
+# (c) 2021 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+package require vfs::zip
+
+test Formula-1.1 {Write a Simple Excel Sheet} {
+  set cDT {2020-03-07 07:12:23}
+  set mCT $cDT
+
+  set spreadsheet [::ooxml::xl_write new -creator {User A} -created $cDT -modifiedby {User B} -modified $mCT -application {Tcl Test}]
+  if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {
+    return 1
+  }
+  return 0
+} 1
+
+
+test Formula-2.1 {single fomula C1} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index 0,2 -formula {A1+B1}]
+  return $cells(1,$cell)
+} {t s f A1+B1}
+
+
+test FormulaVertical-3.1 {vertical shared formula C3} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index 2,2 -formula {A3+B3} -formularef C3:C5 -formulaidx 0]
+  return $cells(1,$cell)
+} {t s f A3+B3 fsi 0 fsr C3:C5}
+
+test FormulaVertical-3.2 {vertical shared formula C4} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index 3,2 -formulaidx 0]
+  return $cells(1,$cell)
+} {t s f {} fsi 0}
+
+test FormulaVertical-3.3 {vertical shared formula C5} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index C5 -formulaidx 0]
+  return $cells(1,$cell)
+} {t s f {} fsi 0}
+
+
+test FormulaVertical-4.1 {horizontal shared formula A9} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index A9 -formula {A7+A8} -formularef 8,0:8,2 -formulaidx 1]
+  return $cells(1,$cell)
+} {t s f A7+A8 fsi 1 fsr A9:C9}
+
+test FormulaVertical-4.2 {horizontal shared formula B9} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index 8,1 -formulaidx 1]
+  return $cells(1,$cell)
+} {t s f {} fsi 1}
+
+test FormulaVertical-4.3 {horizontal shared formula C9} {
+  upvar #0 ${spreadsheet}::cells cells
+  set cell [$spreadsheet cell $sheet {} -index C9 -formulaidx 1]
+  return $cells(1,$cell)
+} {t s f {} fsi 1}
+
+
+$spreadsheet destroy
+
+# cleanup
+::tcltest::cleanupTests
+return
+
+

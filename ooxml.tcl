@@ -2,7 +2,7 @@
 #  ooxml ECMA-376 Office Open XML File Formats
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
-#  Copyright (C) 2018-2020 Alexander Schoepe, Bochum, DE, <schoepe@users.sourceforge.net>
+#  Copyright (C) 2018-2021 Alexander Schoepe, Bochum, DE, <schoepe@users.sourceforge.net>
 #  Copyright (C) 2019 Rolf Ade, DE
 #  All rights reserved.
 #
@@ -3950,7 +3950,7 @@ proc ::ooxml::tablelist_to_xl_callback { spreadsheet sheet maxcol column title w
   }
 }
 
-package provide ooxml 1.5
+package provide ooxml 1.6
 
 # Local Variables:
 # tcl-indent-level: 2

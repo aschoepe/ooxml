@@ -2,7 +2,7 @@
 #  ooxml ECMA-376 Office Open XML File Formats
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
-#  Copyright (C) 2018-2021 Alexander Schoepe, Bochum, DE, <schoepe@users.sourceforge.net>
+#  Copyright (C) 2018-2021 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
 #  Copyright (C) 2019 Rolf Ade, DE
 #  All rights reserved.
 #

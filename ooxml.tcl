@@ -1290,7 +1290,7 @@ proc ::ooxml::xl_read { file args } {
 		set value [$node nodeValue]
 		if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
 		  set idx [$cell @s]
-		  if {[dict exists $cellXfs($idx) nfi]} {
+		  if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
 		    set numFmtId [dict get $cellXfs($idx) nfi]
 		    if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
 		      set datetime $value

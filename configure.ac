@@ -13,7 +13,7 @@ dnl     to configure the system for the local environment.
 # so that we create the export library with the dll.
 #-----------------------------------------------------------------------
 
-AC_INIT([ooxml], [1.6])
+AC_INIT([ooxml], [1.6.1])
 
 #--------------------------------------------------------------------
 # Call TEA_INIT as the first TEA_ macro to set up initial vars.

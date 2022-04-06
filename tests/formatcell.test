@@ -1022,7 +1022,12 @@ test FormatCellCheckCells-10.6 {Check Cells} {
       }
     }
     foreach {n v} [array get w] {
+      if {$n eq {f}} {
+	# Workaround since shared formular (check-in: b2b25733c6) $n = 'f', $v = 'G11+H11', $r($n) = 'f G11+H11'
+        set v "f $v"
+      }
       if {![info exists r($n)] || $r($n) ne $v} {
+	puts stderr "err [info exists r($n)] w 'r($n)' '$v' / r '$r($n)'"
 	set rc 0
       }
     }

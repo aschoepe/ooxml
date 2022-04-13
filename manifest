@@ -1,5 +1,5 @@
-C Version-1.6.1
-D 2022-04-06T21:17:10.167
+C workaround\stest\sFormatCellCheckCells-10.6\scheck-in\s[bb4dae9cbec7169d]\sresolved
+D 2022-04-13T02:11:16.206
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
@@ -29,7 +29,7 @@ F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b3
 F tclconfig/tcl.m4 7de697d033555b0ebe1fa64dd3143db0a2e0c306d15b038ff49e5e9bdd8ab033
 F tests/all.tcl c56ee198de4934d07e36af2c28a9f3e33fb1a08db94411aaaf499a14ab72cf13
 F tests/benchmark.test ad9ac56279c418f73e420b5d56da568a526322786e263f2717ad3752916ea90b
-F tests/formatcell.test 885e88f9f174580e5a57947bede5738dbc71072eb8d2d15c86f607acce415f4a
+F tests/formatcell.test 1dc13b6b212af7e68e214692a09b9d22d0cb5db697efe74dad5532d97056a364
 F tests/formula.test 19a0812bb3914869e58627c8ea94a1d2a247cc61dbf9ac5a94ff692b6ba36f80
 F tests/misc.test 579b69dd6996ebfcffe9c992d48fdb2bbd9fbf06fc39d8239cfbd2cd1aefe4aa
 F tests/namedfmts.test 4209a120742334384769956cbfb9f657b1b5250a62dd6eeb2e973eb57aefa7d1
@@ -63,11 +63,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P bb4dae9cbec7169df3d56cdc3becf8ecced46c6a677a6ada83065cfc82a35a74
-R ff98530468f1c404417ab9b3b039fe02
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.6.1 *
+P a29ff2b24b48311bdb898f91ebffd4434df4b0bd93589340d683669005bb3111
+R 7ef1fab90ee89c9eb8792b4ee2b45371
 U alex
-Z 33c8dd9f01eb09d42f1e288202c6b3a8
+Z 55360a2ba168e9230a1afc79336dd48c
 # Remove this line to create a well-formed Fossil manifest.

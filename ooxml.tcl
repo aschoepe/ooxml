@@ -1255,19 +1255,34 @@ proc ::ooxml::xl_read { file args } {
 	  set wb($sheet,col,[dict get $cols min]) $cols
 	}
 	set wb($sheet,cols) [incr idx]
-	foreach cell [$root selectNodes /M:worksheet/M:sheetData/M:row/M:c] {
-	  if {[$cell hasAttribute t]} {
-	    set type [$cell @t]
-	  } else {
-	    set type n
-	  }
-	  set value {}
-	  set datetime {}
+	set rowindex -1
+	foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+	  incr rowindex
+	  set cellindex -1
+	  foreach cell [$row selectNodes M:c] {
+	    incr cellindex
+	    # Get cell position
+	    # if r exists, it contains the cell position like "A1".
+	    # Otherwise, use the counter values
+	    # The cell may omit positions so, set the counters if explicit
+	    # cell position is given
+	    if {[$cell hasAttribute r]} {
+	      set rowcol [StringToRowColumn [$cell @r]]
+	      # Correct the current counters
+	      scan $rowcol %d,%d rowindex cellindex
+	    } else {
+	      set rowcol $rowindex,$cellindex
+	    }
+	    if {[$cell hasAttribute t]} {
+	      set type [$cell @t]
+	    } else {
+	      set type n
+	    }
+	    set value {}
+	    set datetime {}
 
-	  if {[$cell hasAttribute r]} {
 	    ## FORMULA ##
 	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
-	      set rowcol [StringToRowColumn [$cell @r]]
 	      set wb($sheet,f,$rowcol) {}
 	      if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
 		lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
@@ -1281,73 +1296,71 @@ proc ::ooxml::xl_read { file args } {
 		}
 	      }
 	    }
-	  }
 
-	  switch -- $type {
-	    n - b - d - str {
-	      # number (default), boolean, iso-date, formula string
-	      if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-		set value [$node nodeValue]
-		if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
-		  set idx [$cell @s]
-		  if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
-		    set numFmtId [dict get $cellXfs($idx) nfi]
-		    if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
-		      set datetime $value
-		      catch {clock format [expr {int(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
+	    switch -- $type {
+	     n - b - d - str {
+		# number (default), boolean, iso-date, formula string
+		if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+		  set value [$node nodeValue]
+		  if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
+		    set idx [$cell @s]
+		    if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
+		      set numFmtId [dict get $cellXfs($idx) nfi]
+		      if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
+			set datetime $value
+			catch {clock format [expr {int(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
+		      }
 		    }
+		  } 
+		} else {
+		  if {![$cell hasAttribute s]} continue
+		}
+	      }
+	       s {
+		# shared string
+		if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+		  set index [$node nodeValue]
+		  if {[info exists sharedStrings($index)]} {
+		    set value $sharedStrings($index)
 		  }
-		} 
-	      } else {
-		if {![$cell hasAttribute s]} continue
+		} else {
+		  if {![$cell hasAttribute s]} continue
+		}
+	      }
+	       inlineStr {
+		# inline string
+		if {[set string [$cell selectNodes M:is]] ne {}} {
+		  foreach node [$string selectNodes M:t/text()] {
+		    append value [$node nodeValue]
+		  }
+		  foreach node [$string selectNodes */M:t/text()] {
+		    append value [$node nodeValue]
+		  }
+		} else {
+		  if {![$cell hasAttribute s]} continue
+		}
+	      }
+	       e {
+		# error
 	      }
 	    }
-	    s {
-	      # shared string
-	      if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-		set index [$node nodeValue]
-		if {[info exists sharedStrings($index)]} {
-		  set value $sharedStrings($index)
-		}
-	      } else {
-		if {![$cell hasAttribute s]} continue
-	      }
-	    }
-	    inlineStr {
-	      # inline string
-	      if {[set string [$cell selectNodes M:is]] ne {}} {
-		foreach node [$string selectNodes M:t/text()] {
-		  append value [$node nodeValue]
-		}
-		foreach node [$string selectNodes */M:t/text()] {
-		  append value [$node nodeValue]
-		}
-	      } else {
-		if {![$cell hasAttribute s]} continue
-	      }
-	    }
-	    e {
-	      # error
-	    }
-	  }
 
-	  if {[$cell hasAttribute r]} {
 	    if {!$opts(valuesonly)} {
-	      set wb($sheet,c,[StringToRowColumn [$cell @r]]) [$cell @r]
+	      set wb($sheet,c,$rowcol) [$cell @r]
 	    }
 	    if {!$opts(valuesonly)} {
 	      if {[$cell hasAttribute s]} {
-		set wb($sheet,s,[StringToRowColumn [$cell @r]]) [$cell @s]
+		set wb($sheet,s,$rowcol) [$cell @s]
 	      }
 	    }
 	    if {!$opts(valuesonly)} {
 	      if {[$cell hasAttribute t]} {
-		set wb($sheet,t,[StringToRowColumn [$cell @r]]) [$cell @t]
+		set wb($sheet,t,$rowcol) [$cell @t]
 	      }
 	    }
-	    set wb($sheet,v,[StringToRowColumn [$cell @r]]) $value
+	    set wb($sheet,v,$rowcol) $value
 	    if {!$opts(valuesonly) && $datetime ne {}} {
-	      set wb($sheet,d,[StringToRowColumn [$cell @r]]) $datetime
+	      set wb($sheet,d,$rowcol) $datetime
 	    }
 	  }
 	}

@@ -1,5 +1,5 @@
-C workaround\stest\sFormatCellCheckCells-10.6\scheck-in\s[bb4dae9cbec7169d]\sresolved
-D 2022-04-13T02:11:16.206
+C Ticket\s[f9b36e63f1]\sno\sr\sattribute:\sreplace\sloop\sover\scells\sby\snested\sloop\srow/cell,\sadd\srow/cell\scounters\sand\suse\sthem,\sif\sno\sr\sattribute
+D 2023-09-21T07:35:38.564
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
@@ -20,7 +20,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl a8dc623e015f381752a41a8925a1f430a70becee96c5f3214b3127aa02afd5cc
+F ooxml.tcl f2b1b242b3ee720faa67ff21d0c2f2c0a3a8b8509a301f9c20aa9959de7bd44e
 F pkgIndex.tcl 47b618e7ac2c6954d03930cfeb86d5fb1d34445a4a4c45ed07919376b734ec20
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -63,8 +63,11 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P a29ff2b24b48311bdb898f91ebffd4434df4b0bd93589340d683669005bb3111
-R 7ef1fab90ee89c9eb8792b4ee2b45371
-U alex
-Z 55360a2ba168e9230a1afc79336dd48c
+P 1da5d9c73d38f8ed5824e35fc68e5c75d3b727912cff39d314566b26293435fd
+R 7e8baa490be7571731f06d8390b85c2e
+T *branch * no-r-ticket-f9b36e63f1
+T *sym-no-r-ticket-f9b36e63f1 *
+T -sym-trunk *
+U oehhar
+Z 9a2025af9b4128aba104a86d66621cbb
 # Remove this line to create a well-formed Fossil manifest.

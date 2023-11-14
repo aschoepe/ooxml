@@ -17,7 +17,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 
 
 package require ooxml
-package require vfs::zip
+#package require vfs::zip
 
 test NamedFormats-1.1 {Write a Simple Excel Sheet} {
   set cDT {2020-03-07 07:12:23}

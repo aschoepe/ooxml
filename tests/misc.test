@@ -44,9 +44,14 @@ test Column-1.3 {Column 33} {
   ::ooxml::Column 33
 } AH
 
+if {[package vsatisfies [package present Tcl] 9]} {
+    set result "can't use non-numeric string \"A\" as operand of \"%\""
+} else {
+    set result "can't use non-numeric string as operand of \"%\""
+}
 test Column-1.4 {Column A} -body {
   ::ooxml::Column A
-} -returnCodes error -result "can't use non-numeric string as operand of \"%\""
+} -returnCodes error -result $result
 
 
 test RowColumnToString-1.1 {RowColumnToString takes args} -body {

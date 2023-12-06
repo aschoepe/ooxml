@@ -51,6 +51,9 @@ test:
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) \
 	  -load "package ifneeded ${PACKAGE_NAME} ${PACKAGE_VERSION} [list source [file join `@CYGPATH@ $(srcdir)` $(PACKAGE_NAME).tcl]]"
 
+archive:
+	sh tools/archive.sh @PACKAGE_NAME@ @PACKAGE_VERSION@ $(PKG_TCL_SOURCES)
+	
 clean:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 	-rm -rf doc

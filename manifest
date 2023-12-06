@@ -1,6 +1,6 @@
-C Version-1.7\sworks\swith\sTcl\s8.6\sand\sTcl\s9
-D 2023-12-06T13:20:19.206
-F .fossil-settings/ignore-glob 9904dd8ef9d1aedd93acc285215b96286245134b49ebcf8b79b9752e9f73c183
+C version\snumber\sto\s1.7
+D 2023-12-06T15:30:19.878
+F .fossil-settings/ignore-glob df5de4a09ac9d7288d6e9f52b5d437e9475fef48e3062b4c9f245ba3b4d49668
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 84ca91e843fd11c28232c23a6ca30b1ea5d3b88edc7890c200a8158bd1f37f48
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
@@ -21,7 +21,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 2d87fe90fffd98fbb9c962c2f94bb8b745617af52e0e75e888f6da3a631a781d
+F ooxml.tcl b73a2194a742d30f5b61ebbb53ba6ff3d8c13233bfd4541772e6b49afd762235
 F pkgIndex.tcl 01b8176b2f4620eb5d2f7a9d2df780d609fd2826874e4cc3c7550c47d1f6411a
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -64,11 +64,8 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
-P 37991435b8d4c3a007ef65d5790ac882525a9f3b588c3c80b62cdafaa877e0af
-R 6387432807f2c87fe70b27e19503b32c
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.7 *
+P a7b266fe4afd277ce69fbc970f5a4ca41de3a5bbb3dbd0556c6a324e275419c8
+R 0609ee92108bf123204c33c72cc80ffc
 U alex
-Z 75567b0e5ed9333c2612e2e31c4d2548
+Z dc9de396a35f9ea456a3aae4ed431e69
 # Remove this line to create a well-formed Fossil manifest.

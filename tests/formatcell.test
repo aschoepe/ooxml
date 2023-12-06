@@ -1059,3 +1059,6 @@ file delete -force formatcell.xlsx
 ::tcltest::cleanupTests
 return
 
+# Local Variables:
+# tcl-indent-level: 2
+# End:

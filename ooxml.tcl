@@ -175,6 +175,15 @@ package require msgcat
 
 
 namespace eval ::ooxml {
+  
+  if {[package vsatisfies [package present Tcl] 9]} {
+    variable Tcl9 true
+    variable zipfs "//zipfs:/"
+  } else {
+    variable Tcl9 false
+    variable zipfs ""
+  }
+  
   namespace export xl_sheets xl_read xl_write
 
   variable defaults
@@ -787,15 +796,20 @@ proc ::ooxml::Color { color } {
 
 proc ::ooxml::xl_sheets { file } {
   variable xmlns
-
-  package require vfs::zip
-
+  variable Tcl9
+  variable zipfs
+  
   set sheets {}
 
-  set mnt [vfs::zip::Mount $file xlsx]
+  if {$Tcl9} {
+    set mnt [zipfs mount $file xlsx]
+  } else {
+    package require vfs::zip
+    set mnt [vfs::zip::Mount $file xlsx]
+  }
 
   set rels 0
-  if {![catch {open xlsx/xl/_rels/workbook.xml.rels r} fd]} {
+  if {![catch {open ${zipfs}xlsx/xl/_rels/workbook.xml.rels r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
@@ -805,7 +819,7 @@ proc ::ooxml::xl_sheets { file } {
     close $fd
   }
 
-  if {![catch {open xlsx/xl/workbook.xml r} fd]} {
+  if {![catch {open ${zipfs}xlsx/xl/workbook.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       $doc documentElement root
@@ -832,7 +846,11 @@ proc ::ooxml::xl_sheets { file } {
     $rdoc delete
   }
 
-  vfs::zip::Unmount $mnt xlsx
+  if {$Tcl9} {
+    zipfs unmount $mnt
+  } else {
+    vfs::zip::Unmount $mnt xlsx
+  }
 
   return $sheets
 }
@@ -844,10 +862,14 @@ proc ::ooxml::xl_sheets { file } {
 
 proc ::ooxml::xl_read { file args } {
   variable xmlns
-
+  variable Tcl9
+  variable zipfs
+  
   variable predefNumFmts
 
-  package require vfs::zip
+  if {!$Tcl9} {
+    package require vfs::zip
+  }
 
   array set cellXfs {}
   array set numFmts [array get predefNumFmts]
@@ -887,10 +909,14 @@ proc ::ooxml::xl_read { file args } {
     set opts(sheetnames) *
   }
 
-  set mnt [vfs::zip::Mount $file xlsx]
+  if {$Tcl9} {
+    set mnt [zipfs mount $file xlsx]
+  } else {
+    set mnt [vfs::zip::Mount $file xlsx]
+  }
 
   set rels 0
-  if {![catch {open xlsx/xl/_rels/workbook.xml.rels r} fd]} {
+  if {![catch {open ${zipfs}xlsx/xl/_rels/workbook.xml.rels r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} rdoc]} {
       set rels 1
@@ -900,7 +926,7 @@ proc ::ooxml::xl_read { file args } {
     close $fd
   }
 
-  if {![catch {open xlsx/xl/workbook.xml r} fd]} {
+  if {![catch {open ${zipfs}xlsx/xl/workbook.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       $doc documentElement root
@@ -944,7 +970,7 @@ proc ::ooxml::xl_read { file args } {
     $rdoc delete
   }
 
-  if {![catch {open xlsx/xl/sharedStrings.xml r} fd]} {
+  if {![catch {open ${zipfs}xlsx/xl/sharedStrings.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       $doc documentElement root
@@ -965,7 +991,7 @@ proc ::ooxml::xl_read { file args } {
   }
 
 
-  if {![catch {open xlsx/xl/styles.xml r} fd]} {
+  if {![catch {open ${zipfs}xlsx/xl/styles.xml r} fd]} {
     fconfigure $fd -encoding utf-8
     if {![catch {dom parse [read $fd]} doc]} {
       $doc documentElement root
@@ -1229,7 +1255,7 @@ proc ::ooxml::xl_read { file args } {
     set wb($sheet,max_row) -1
     set wb($sheet,max_column) -1
 
-    if {![catch {open [file join xlsx/xl $target] r} fd]} {
+    if {![catch {open [file join ${zipfs}xlsx/xl $target] r} fd]} {
       fconfigure $fd -encoding utf-8
       if {![catch {dom parse [read $fd]} doc]} {
 	$doc documentElement root
@@ -1400,8 +1426,12 @@ proc ::ooxml::xl_read { file args } {
     }
   }
 
-  vfs::zip::Unmount $mnt xlsx
-
+  if {$Tcl9} {
+    zipfs unmount $mnt
+  } else {
+    vfs::zip::Unmount $mnt xlsx
+  }
+  
   foreach cell [lsort -dictionary [array names wb *,v,*]] {
     lassign [split $cell ,] sheet tag row column
     if {$opts(keylist)} {

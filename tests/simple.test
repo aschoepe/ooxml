@@ -17,7 +17,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 
 
 package require ooxml
-package require vfs::zip
+#package require vfs::zip
 
 test SimpleExcelWrite-1.1 {Write a Simple Excel Sheet} {
   set cDT {2019-10-31 15:10:23}
@@ -53,13 +53,20 @@ test SimpleExcelRead-1.4 {Read a Simple Excel Sheet2 B2} {
 } B2
 
 
-test MountXLSX-2.1 {Mount XLSX File} {
-  catch {vfs::zip::Mount simple.xlsx xlsx} mnt
-} 0
-
+if {[package vsatisfies [package present Tcl] 9]} {
+  test MountXLSX-2.1 {Mount XLSX File} {
+    catch {zipfs  mount simple.xlsx xlsx} mnt
+  } 0
+  variable zipfs "//zipfs:/"
+} else {
+  test MountXLSX-2.1 {Mount XLSX File} {
+    catch {vfs::zip::Mount simple.xlsx xlsx} mnt
+  } 0
+  variable zipfs ""
+}
 
 test DocPropsApp-3.1 {Parse xlsx/docProps/app.xml} {
-  set fd [open xlsx/docProps/app.xml r]
+  set fd [open ${zipfs}xlsx/docProps/app.xml r]
   fconfigure $fd -encoding utf-8
   set doc [dom parse [read $fd]]
   close $fd
@@ -89,7 +96,7 @@ $doc delete
 
 
 test DocPropsCore-4.1 {Parse xlsx/docProps/core.xml} {
-  set fd [open xlsx/docProps/core.xml r]
+  set fd [open ${zipfs}xlsx/docProps/core.xml r]
   fconfigure $fd -encoding utf-8
   set doc [dom parse [read $fd]]
   close $fd
@@ -129,7 +136,11 @@ test DocPropsCore-4.5 {Check Modified By -modified} coreCheck {
 $doc delete
 
 
-vfs::zip::Unmount $mnt xlsx
+if {[package vsatisfies [package present Tcl] 9]} {
+  zipfs unmount $mnt
+} else {
+  vfs::zip::Unmount $mnt xlsx
+}
 file delete -force simple.xlsx
 
 
@@ -137,3 +148,6 @@ file delete -force simple.xlsx
 ::tcltest::cleanupTests
 return
 
+# Local Variables:
+# tcl-indent-level: 2
+# End:

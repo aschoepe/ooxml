@@ -17,7 +17,9 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 
 
 package require ooxml
-package require vfs::zip
+if {![package vsatisfies [package present Tcl] 9]} {
+    package require vfs::zip
+}
 
 test Formula-1.1 {Write a Simple Excel Sheet} {
   set cDT {2020-03-07 07:12:23}

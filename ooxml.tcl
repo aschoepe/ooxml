@@ -751,6 +751,64 @@ proc ::ooxml::CalcColumnWidth { numberOfCharacters {maximumDigitWidth 7} {pixelP
 }
 
 
+proc ::ooxml::arrayDeleteSheet { array sheetId args } {
+  upvar $array a
+  parray a
+  puts +
+
+  array set opts {
+    sheetname 0
+  }
+
+  set len [llength $args]
+  set idx 0
+  for {set idx 0} {$idx < $len} {incr idx} {
+    switch -- [set opt [lindex $args $idx]] {
+      -sheetname {
+        set opts([string range $opt 1 end]) 1
+      }
+      default {
+        error "unknown option \"$opt\", should be: -sheetname"
+      }
+    }
+  }
+
+  if {$opts(sheetname)} {
+    foreach sheet $a(sheets) {
+      if {$a($sheet,n) eq $sheetId} {
+        set removeSheet $sheet
+        break
+      }
+    }
+  } else {
+    set removeSheet $sheetId
+  }
+
+  if {[llength $a(sheets)] > 1} {
+    set removed false
+    foreach sheet [lsort -integer $a(sheets)] {
+      if {!$removed && $sheet == $removeSheet} {
+        array unset a $sheet,*
+        set removed true
+        continue
+      }
+      if {$removed} {
+        set new [expr {$sheet - 1}]
+        foreach src [array names a $sheet,*] {
+          set dst [join [list $new {*}[lrange [split $src ,] 1 end]] ,]
+          puts "src $src dst $dst"
+          set a($dst) $a($src)
+        }
+        array unset a $sheet,*
+      }
+    }
+    if {$removed} {
+      set a(sheets) [lrange $a(sheets) 0 end-1]
+    }
+  }
+}
+
+
 # Seite 3947
 # <xsd:complexType name="CT_Color">
 #   <xsd:attribute name="auto" type="xsd:boolean" use="optional"/>

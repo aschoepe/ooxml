@@ -1225,6 +1225,24 @@ proc ::ooxml::xl_read { file args } {
     close $fd
   }
 
+  ### HYPERLINKS ###
+
+  foreach {sheet sid name rid target} $sheets {
+    if {![catch {open ${zipfs}xlsx/xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels r} fd]} {
+      fconfigure $fd -encoding utf-8
+      if {![catch {dom parse [read $fd]} doc]} {
+        $doc documentElement root
+        $doc selectNodesNamespaces [list M $xmlns(PR)]
+        foreach hlink [$root selectNodes /M:Relationships/M:Relationship] {
+          if {[$hlink hasAttribute Id] && [$hlink hasAttribute Target]} {
+            set hl($sheet,[$hlink @Id]) [$hlink @Target]
+          }
+        }
+        $doc delete
+      }
+      close $fd
+    }
+  }
 
   ### SHEET AND DATA ###
 
@@ -1393,9 +1411,25 @@ proc ::ooxml::xl_read { file args } {
         }
 
         if {!$opts(valuesonly)} {
+          foreach hlink [$root selectNodes /M:worksheet/M:hyperlinks/M:hyperlink] {
+            if {[$hlink hasAttribute ref] && [$hlink hasAttribute r:id]} {
+              set idx [::ooxml::StringToRowColumn [$hlink @ref]]
+              if {[info exists hl($sheet,[$hlink @r:id])]} {
+                if {[$hlink hasAttribute tooltip]} {
+                  set tt [$hlink @tooltip]
+                } else {
+                  set tt {}
+                }
+                set wb($sheet,l,$idx) [list u $hl($sheet,[$hlink @r:id]) t $tt]
+              }
+            }
+          }
+        }
+
+        if {!$opts(valuesonly)} {
           foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
             if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
-              dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
+              set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
             }
           }
         }

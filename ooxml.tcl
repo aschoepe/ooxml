@@ -753,8 +753,6 @@ proc ::ooxml::CalcColumnWidth { numberOfCharacters {maximumDigitWidth 7} {pixelP
 
 proc ::ooxml::arrayDeleteSheet { array sheetId args } {
   upvar $array a
-  parray a
-  puts +
 
   array set opts {
     sheetname 0
@@ -796,7 +794,6 @@ proc ::ooxml::arrayDeleteSheet { array sheetId args } {
         set new [expr {$sheet - 1}]
         foreach src [array names a $sheet,*] {
           set dst [join [list $new {*}[lrange [split $src ,] 1 end]] ,]
-          puts "src $src dst $dst"
           set a($dst) $a($src)
         }
         array unset a $sheet,*

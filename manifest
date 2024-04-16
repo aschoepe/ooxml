@@ -1,5 +1,5 @@
-C remove\ssheet\sfrom\sarray
-D 2024-04-16T18:02:51.676
+C removed\sdebug\sinfo
+D 2024-04-16T18:50:46.219
 F .fossil-settings/ignore-glob df5de4a09ac9d7288d6e9f52b5d437e9475fef48e3062b4c9f245ba3b4d49668
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 50c44a5b465ac0a798aa56c3d6468a77b02d611130a21efbbb200a3dfee3bb7d
@@ -21,7 +21,7 @@ F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 96cf4e4bc5fc846c7ec3285a4e109c7531c4e5dedf3a4dbbba96def3cf7ac477
+F ooxml.tcl 2325799b8b37124fc06c4ca93d2f99754ab44894062a19e43c5e0759f9a85d75
 F pkgIndex.tcl 01b8176b2f4620eb5d2f7a9d2df780d609fd2826874e4cc3c7550c47d1f6411a
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -67,11 +67,8 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 254374fc3f8e8bcd21484576d28becec0a865029fd908d9f53574d92eda50426
-R f1ca178e5ebf07be701ba77c21bfb85a
-T *branch * removesheet
-T *sym-removesheet *
-T -sym-trunk *
+P 94522cfdbba3305caed6ec5d6cd572570cee3882a14cf6764f3d24d8682e2212
+R fa68a371ac32dfadedf11148189f6bb7
 U alex
-Z 1d2e181030d590bfa479f53ff8b3e5f2
+Z 35f8278cb49d9d178a21d1d2486ee99e
 # Remove this line to create a well-formed Fossil manifest.

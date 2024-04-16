@@ -2,7 +2,7 @@
 #  ooxml ECMA-376 Office Open XML File Formats
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
-#  Copyright (C) 2018-2023 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
+#  Copyright (C) 2018-2024 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
 #  Copyright (C) 2019-2023 Rolf Ade, DE
 #  Copyright (C) 2023 Harald Oehlmann, DE
 #  All rights reserved.
@@ -1474,7 +1474,7 @@ proc ooxml::InitNodeCommands {} {
     HeadingPairs HyperlinksChanged
     LinksUpToDate
     Override
-    Relationship
+    Relationship Relationships
     ScaleCrop SharedDoc
     TitlesOfParts
     a:accent1 a:accent2 a:accent3 a:accent4 a:accent5 a:accent6 a:alpha a:bevelT a:bgFillStyleLst a:bodyPr a:camera
@@ -1491,6 +1491,7 @@ proc ooxml::InitNodeCommands {} {
     dcterms:created dcterms:modified
     definedName definedNames diagonal dimension dxfs
     f family fgColor fileVersion fill fills font fonts
+    hyperlink hyperlinks 
     i
     left
     mergeCell mergeCells
@@ -1571,6 +1572,7 @@ oo::class create ooxml::xl_write {
     my variable cols
     my variable view
     my variable tags
+    my variable hlinks
 
     array set opts {
       creator {unknown}
@@ -1665,6 +1667,7 @@ oo::class create ooxml::xl_write {
     set obj(defaultdatestyle) 0
 
     array set cells {}
+    array set hlinks {}
 
     array set view {activetab 0}
 
@@ -2506,6 +2509,7 @@ oo::class create ooxml::xl_write {
     my variable cells
     my variable cols
     my variable tags
+    my variable hlinks
 
     array set opts {
       index {}
@@ -2519,13 +2523,17 @@ oo::class create ooxml::xl_write {
       nozero -1
       globalstyle {}
       height {}
+      hyperlink {}
+      tooltip {}
     }
+
+    set hyperlink 0
 
     set len [llength $args]
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
-        -index - -style - -formula - -formulaidx - -formularef - -height  {
+        -index - -style - -formula - -formulaidx - -formularef - -height - -hyperlink - -tooltip  {
           incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
@@ -2537,7 +2545,7 @@ oo::class create ooxml::xl_write {
           set opts([string range $opt 1 end]) 1
         }
         default {
-          error "unknown option \"$opt\", should be: -index, -style, -formula, -formulaidx, -formularef, -height, -string, nostring, -zero or -nozero"
+          error "unknown option \"$opt\", should be: -index, -style, -formula, -formulaidx, -formularef, -height, -hyperlink, -string, -nostring, -tooltip -zero or -nozero"
         }
       }
     }
@@ -2607,6 +2615,17 @@ oo::class create ooxml::xl_write {
       set data {}
     }
 
+    if {[string trim $opts(hyperlink)] ne {}} {
+      set hyperlink 1
+      set hlinks($cell) [list l [string trim $opts(hyperlink)]]
+      if {$data eq {}} {
+        set data [dict get $hlinks($cell) l]
+      }
+      if {[string trim $opts(tooltip)] ne {}} {
+        lappend hlinks($cell) t [string trim $opts(tooltip)]
+      }
+    }
+
     if {$opts(string)} {
       set type s
     } elseif {[set datetime [::ooxml::ScanDateTime $data]] ne {}} {
@@ -2629,7 +2648,7 @@ oo::class create ooxml::xl_write {
       lappend cells($cell) s $opts(style)
     }
     ## FORMULA ##
-    if {[string trim $opts(formula)] ne {} || [string is integer -strict $opts(formulaidx)]} {
+    if {!$hyperlink && ([string trim $opts(formula)] ne {} || [string is integer -strict $opts(formulaidx)])} {
       lappend cells($cell) t $type
       lappend cells($cell) f $opts(formula)
       if {[string trim $opts(formulaidx)] ne {}} {
@@ -2884,6 +2903,7 @@ oo::class create ooxml::xl_write {
     my variable borders
     my variable cols
     my variable view
+    my variable hlinks
 
     upvar #0 ::ooxml::xmlns xmlns
 
@@ -3692,6 +3712,41 @@ oo::class create ooxml::xl_write {
     $doc delete
 
 
+    # ------------------------------ xl/worksheets/_rels/sheet1.xml.rels SHEET ------------------------------
+
+    # In the commented out part, serialization is done with namespaces set correctly, but this takes a few milliseconds more time.
+    # Since we may process large amounts of data and do not use the same tag names in different namespaces and do not search in
+    # the DOM during serialization, we only set the namespaces as attributes, which leads to the same result in the serialized XML.
+    # set doc [dom createDocumentNS $xmlns(PR) Relationships]
+    # set root [$doc documentElement]
+
+    for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+      if {[array names hlinks $ws,*,*] ne {}} {
+        dom createDocument Relationships doc
+        $doc documentElement root
+
+        $root setAttribute xmlns $xmlns(PR)
+
+        set hrefId 0
+        array unset rows
+        foreach idx [lsort -dictionary [array names hlinks $ws,*,*]] {
+          lassign [split $idx ,] sheet row col
+          lappend rows($row) $col
+        }
+        foreach row [lsort -integer [array names rows]] {
+          $root appendFromScript {
+            foreach col $rows($row) {
+              set idx "$ws,$row,$col"
+              Tag_Relationship Id rId[incr hrefId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink Target [dict get $hlinks($idx) l] TargetMode External {}
+            }
+          }
+        }
+
+        ::ooxml::Dom2zip $zf $root "xl/worksheets/_rels/sheet$ws.xml.rels" cd count
+        $doc delete
+      }
+    }
+
     # ------------------------------ xl/worksheets/sheet1.xml SHEET ------------------------------
 
     # In the commented out part, serialization is done with namespaces set correctly, but this takes a few milliseconds more time.
@@ -3791,6 +3846,28 @@ oo::class create ooxml::xl_write {
           Tag_mergeCells count [llength $obj(merge,$ws)] {
             foreach item $obj(merge,$ws) {
               Tag_mergeCell ref $item {}
+            }
+          }
+        }
+        # hyperlinks
+        if {[array names hlinks $ws,*,*] ne {}} {
+          Tag_hyperlinks {
+            set hrefId 0
+            array unset rows
+            foreach idx [lsort -dictionary [array names hlinks $ws,*,*]] {
+              lassign [split $idx ,] sheet row col
+              lappend rows($row) $col
+            }
+            foreach row [lsort -integer [array names rows]] {
+              foreach col $rows($row) {
+                set idx "$ws,$row,$col"
+                if {[dict exists $hlinks($idx) t]} {
+                  set tooltip [list tooltip [dict get $hlinks($idx) t]]
+                } else {
+                  set tooltip {}
+                }
+                Tag_hyperlink ref [::ooxml::RowColumnToString $row,$col] r:id rId[incr hrefId] {*}$tooltip {}
+              }
             }
           }
         }

@@ -2847,6 +2847,12 @@ oo::class create ooxml::xl_write {
             if {[info exists a($sheet,s,$row,$col)]} {
               lappend options -style $a($sheet,s,$row,$col)
             }
+            if {[info exists a($sheet,l,$row,$col)]} {
+              lappend options -hyperlink [dict get $a($sheet,l,$row,$col) u]
+              if {[dict exists $a($sheet,l,$row,$col) t] && [string trim [dict get $a($sheet,l,$row,$col) t]] ne {}} {
+                lappend options -tooltip [dict get $a($sheet,l,$row,$col) t]
+              }
+            }
             my cell $currentSheet $a($item) {*}$options
           }
           if {[info exists a($sheet,rowheight)]} {

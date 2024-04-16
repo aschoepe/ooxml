@@ -1,5 +1,5 @@
-C xl_read\shyperlinks;\scor:\srowheight
-D 2024-04-16T14:57:42.493
+C method\spresetsheets\shyplerlinks
+D 2024-04-16T17:06:17.905
 F .fossil-settings/ignore-glob df5de4a09ac9d7288d6e9f52b5d437e9475fef48e3062b4c9f245ba3b4d49668
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 50c44a5b465ac0a798aa56c3d6468a77b02d611130a21efbbb200a3dfee3bb7d
@@ -22,7 +22,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl bce0c9f1559f35f7ebac423c36ae159ff3a502f69f605edbed26cfc78a9ba88c x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 18d6f32ac12546db8e5df23d0211ee80aa3c3d1e0dcdb8f5cb65f04ae3711a92
+F ooxml.tcl bc6792b8cbe5d4825f3dba0a9684ca6973465c5210780b7834f995d66a65b12f
 F pkgIndex.tcl 01b8176b2f4620eb5d2f7a9d2df780d609fd2826874e4cc3c7550c47d1f6411a
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -68,8 +68,8 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P cbe59968152202db5ad331731c1170a03a59426cec304841ab0189ffc0ce54bb
-R 67ca4d55965d9a9495ec34d3a9a31c26
+P d8b16483fb992d1d51dc1617b969746bcc1834a17b557cc7d2d576e9e8e86920
+R 5e36b7f8ecb747fdeeafcc12897f9c63
 U alex
-Z c36632a624ab526cb91e1f443cdb114e
+Z d11909b26e82a360eb63c4d0cda2a642
 # Remove this line to create a well-formed Fossil manifest.

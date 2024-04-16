@@ -581,7 +581,7 @@ proc ::ooxml::Default { name value } {
     path {
       set defaults($name) [string trim $value]
       if {$value eq {}} {
-	set defaults($name) .
+        set defaults($name) .
       }
     }
     default {
@@ -608,77 +608,77 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
 
     if {[string is integer -strict $y] && $y >= 0 && $y <= 2038} {
       switch -- [string tolower $ml] {
-	jan -
-	ene -
-	gen -
-	tam {set m 1}
-	feb -
-	fev -
-	fév -
-	hel {set m 2}
-	mrz -
-	mar -
-	mär -
-	maa {set m 3}
-	apr -
-	avr -
-	abr -
-	huh {set m 4}
-	mai -
-	may -
-	mei -
-	mag -
-	maj -
-	tou {set m 5}
-	jun -
-	jui -
-	giu -
-	kes {set m 6}
-	jul -
-	jui -
-	lug -
-	hei {set m 7}
-	aug -
-	aou -
-	aoû -
-	ago -
-	elo {set m 8}
-	sep -
-	set -
-	syy {set m 9}
-	okt -
-	oct -
-	out -
-	ott -
-	lok {set m 10}
-	nov -
-	mar {set m 11}
-	dez -
-	dec -
-	déc -
-	dic -
-	des -
-	jou {set m 12}
-	default { set m [string trimleft $m 0] }
+        jan -
+        ene -
+        gen -
+        tam {set m 1}
+        feb -
+        fev -
+        fév -
+        hel {set m 2}
+        mrz -
+        mar -
+        mär -
+        maa {set m 3}
+        apr -
+        avr -
+        abr -
+        huh {set m 4}
+        mai -
+        may -
+        mei -
+        mag -
+        maj -
+        tou {set m 5}
+        jun -
+        jui -
+        giu -
+        kes {set m 6}
+        jul -
+        jui -
+        lug -
+        hei {set m 7}
+        aug -
+        aou -
+        aoû -
+        ago -
+        elo {set m 8}
+        sep -
+        set -
+        syy {set m 9}
+        okt -
+        oct -
+        out -
+        ott -
+        lok {set m 10}
+        nov -
+        mar {set m 11}
+        dez -
+        dec -
+        déc -
+        dic -
+        des -
+        jou {set m 12}
+        default { set m [string trimleft $m 0] }
       }
 
       foreach name {y m d H M S F a b} {
-	upvar 0 $name var
-	set var [string trimleft $var 0]
-	if {![string is integer -strict $var]} {
-	  set var 0
-	}
+        upvar 0 $name var
+        set var [string trimleft $var 0]
+        if {![string is integer -strict $var]} {
+          set var 0
+        }
       }
 
       if {$y < 100} {
-	if {$y < 50} {
-	  incr y 2000
-	} else {
-	  incr y 1900
-	}
+        if {$y < 50} {
+          incr y 2000
+        } else {
+          incr y 1900
+        }
       }
       if {$y < 1900} {
-	return {}
+        return {}
       }
 
       set Y [format %04u $y]
@@ -690,7 +690,7 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
       set S [format %02u $S]
 
       if {$iso8601} {
-	return [list ${Y}-${m}-${d}T${H}:${M}:${S}]
+        return [list ${Y}-${m}-${d}T${H}:${M}:${S}]
       }
       return [set ole [expr {[clock scan ${Y}${m}${d}T${H}${M}${S} -gmt 1] / 86400.0 + 25569}]]
     }
@@ -826,16 +826,16 @@ proc ::ooxml::xl_sheets { file } {
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
       foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
-	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-	  set sheetId [$node @sheetId]
-	  set name [$node @name]
-	  set rid [$node getAttributeNS $xmlns(r) id]
-	  foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
-	    if {[$node hasAttribute Target]} {
-	      lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
-	    }
-	  }
-	}
+        if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
+          set sheetId [$node @sheetId]
+          set name [$node @name]
+          set rid [$node getAttributeNS $xmlns(r) id]
+          foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+            if {[$node hasAttribute Target]} {
+              lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
+            }
+          }
+        }
       }
       $doc delete
     }
@@ -890,18 +890,18 @@ proc ::ooxml::xl_read { file args } {
   for {set idx 0} {$idx < $len} {incr idx} {
     switch -- [set opt [lindex $args $idx]] {
       -sheets - -sheetnames - -datefmt - -as {
-	incr idx
-	if {$idx < $len} {
-	  set opts([string range $opt 1 end]) [lindex $args $idx]
-	} else {
-	  error "option '$opt': missing argument"
-	}            
+        incr idx
+        if {$idx < $len} {
+          set opts([string range $opt 1 end]) [lindex $args $idx]
+        } else {
+          error "option '$opt': missing argument"
+        }            
       }
       -valuesonly - -keylist {
-	set opts([string range $opt 1 end]) 1
+        set opts([string range $opt 1 end]) 1
       }
       default {
-	error "unknown option \"$opt\", should be: -sheets, -sheetnames, -datefmt, -as, -valuesonly or -keylist"
+        error "unknown option \"$opt\", should be: -sheets, -sheetnames, -datefmt, -as, -valuesonly or -keylist"
       }
     }
   }
@@ -933,33 +933,33 @@ proc ::ooxml::xl_read { file args } {
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
       foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
-	if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-	  set sheetId [$node @sheetId]
-	  set name [$node @name]
-	  set rid [$node getAttributeNS $xmlns(r) id]
-	  foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
-	    if {[$node hasAttribute Target]} {
-	      lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
-	    }
-	  }
-	}
+        if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
+          set sheetId [$node @sheetId]
+          set name [$node @name]
+          set rid [$node getAttributeNS $xmlns(r) id]
+          foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+            if {[$node hasAttribute Target]} {
+              lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
+            }
+          }
+        }
       }
       foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
         if {[$node hasAttribute activeTab]} {
-	  lappend wb(view) activetab [$node @activeTab]
-	}
+          lappend wb(view) activetab [$node @activeTab]
+        }
         if {[$node hasAttribute xWindow]} {
-	  lappend wb(view) x [$node @xWindow]
-	}
+          lappend wb(view) x [$node @xWindow]
+        }
         if {[$node hasAttribute yWindow]} {
-	  lappend wb(view) y [$node @yWindow]
-	}
+          lappend wb(view) y [$node @yWindow]
+        }
         if {[$node hasAttribute windowHeight]} {
-	  lappend wb(view) height [$node @windowHeight]
-	}
+          lappend wb(view) height [$node @windowHeight]
+        }
         if {[$node hasAttribute windowWidth]} {
-	  lappend wb(view) width [$node @windowWidth]
-	}
+          lappend wb(view) width [$node @windowWidth]
+        }
       }
       $doc delete
     }
@@ -977,13 +977,13 @@ proc ::ooxml::xl_read { file args } {
       $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
       foreach shared [$root selectNodes /M:sst/M:si] {
-	incr idx
-	foreach node [$shared selectNodes M:t/text()] {
-	  append sharedStrings($idx) [$node nodeValue]
-	}
-	foreach node [$shared selectNodes */M:t/text()] {
-	  append sharedStrings($idx) [$node nodeValue]
-	}
+        incr idx
+        foreach node [$shared selectNodes M:t/text()] {
+          append sharedStrings($idx) [$node nodeValue]
+        }
+        foreach node [$shared selectNodes */M:t/text()] {
+          append sharedStrings($idx) [$node nodeValue]
+        }
       }
       $doc delete
     }
@@ -999,31 +999,31 @@ proc ::ooxml::xl_read { file args } {
       set idx -1
       foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
         incr idx
-	if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
-	  set numFmtId [$node @numFmtId]
-	  set formatCode [$node @formatCode]
-	  set datetime 0
-	  foreach tag {*y* *m* *d* *h* *s*} {
-	    if {[string match -nocase $tag [string map {Black {} Blue {} Cyan {} Green {} Magenta {} Red {} White {} Yellow {}} $formatCode]]} {
-	      set datetime 1
-	      break
-	    }
-	  }
-	  set numFmts($numFmtId) [list dt $datetime fmt $formatCode]
-	}
+        if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
+          set numFmtId [$node @numFmtId]
+          set formatCode [$node @formatCode]
+          set datetime 0
+          foreach tag {*y* *m* *d* *h* *s*} {
+            if {[string match -nocase $tag [string map {Black {} Blue {} Cyan {} Green {} Magenta {} Red {} White {} Yellow {}} $formatCode]]} {
+              set datetime 1
+              break
+            }
+          }
+          set numFmts($numFmtId) [list dt $datetime fmt $formatCode]
+        }
       }
       set idx -1
       foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
         incr idx
-	if {[$node hasAttribute numFmtId]} {
-	  set numFmtId [$node @numFmtId]
-	  if {[$node hasAttribute applyNumberFormat]} {
-	    set applyNumberFormat [$node @applyNumberFormat]
-	  } else {
-	    set applyNumberFormat 0
-	  }
-	  set cellXfs($idx) [list nfi $numFmtId anf $applyNumberFormat]
-	}
+        if {[$node hasAttribute numFmtId]} {
+          set numFmtId [$node @numFmtId]
+          if {[$node hasAttribute applyNumberFormat]} {
+            set applyNumberFormat [$node @applyNumberFormat]
+          } else {
+            set applyNumberFormat 0
+          }
+          set cellXfs($idx) [list nfi $numFmtId anf $applyNumberFormat]
+        }
       }
 
       ### READING KNOWN FORMATS AND STYLES ###
@@ -1035,12 +1035,12 @@ proc ::ooxml::xl_read { file args } {
       set wb(s,numFmtsIds) {}
       foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
         if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
-	  set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
-	  lappend wb(s,numFmtsIds) $idx
-	  if {$idx > $a(max)} {
-	    set a(max) $idx
-	  }
-	}
+          set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
+          lappend wb(s,numFmtsIds) $idx
+          if {$idx > $a(max)} {
+            set a(max) $idx
+          }
+        }
       }
       if {$a(max) < $::ooxml::defaults(numFmts,start)} {
         set a(max) $::ooxml::defaults(numFmts,start)
@@ -1051,53 +1051,53 @@ proc ::ooxml::xl_read { file args } {
       set idx -1
       array unset a *
       foreach node [$root selectNodes /M:styleSheet/M:fonts/M:font] {
-	incr idx
-	array set a {name {} family {} size {} color {} scheme {} bold 0 italic 0 underline 0 color {}}
-	foreach node1 [$node childNodes] {
-	  switch -- [$node1 nodeName] {
-	    b {
-	      set a(bold) 1
-	    }
-	    i {
-	      set a(italic) 1
-	    }
-	    u {
-	      set a(underline) 1
-	    }
-	    sz {
-	      if {[$node1 hasAttribute val]} {
-		set a(size) [$node1 @val]
-	      }
-	    }
-	    color {
-	      if {[$node1 hasAttribute auto]} {
-		set a(color) [list auto [$node1 @auto]]
-	      } elseif {[$node1 hasAttribute rgb]} {
-		set a(color) [list rgb [$node1 @rgb]]
-	      } elseif {[$node1 hasAttribute indexed]} {
-		set a(color) [list indexed [$node1 @indexed]]
-	      } elseif {[$node1 hasAttribute theme]} {
-		set a(color) [list theme [$node1 @theme]]
-	      }
-	    }
-	    name {
-	      if {[$node1 hasAttribute val]} {
-		set a(name) [$node1 @val]
-	      }
-	    }
-	    family {
-	      if {[$node1 hasAttribute val]} {
-		set a(family) [$node1 @val]
-	      }
-	    }
-	    scheme {
-	      if {[$node1 hasAttribute val]} {
-		set a(scheme) [$node1 @val]
-	      }
-	    }
-	  }
-	}
-	set wb(s,fonts,$idx) [array get a]
+        incr idx
+        array set a {name {} family {} size {} color {} scheme {} bold 0 italic 0 underline 0 color {}}
+        foreach node1 [$node childNodes] {
+          switch -- [$node1 nodeName] {
+            b {
+              set a(bold) 1
+            }
+            i {
+              set a(italic) 1
+            }
+            u {
+              set a(underline) 1
+            }
+            sz {
+              if {[$node1 hasAttribute val]} {
+                set a(size) [$node1 @val]
+              }
+            }
+            color {
+              if {[$node1 hasAttribute auto]} {
+                set a(color) [list auto [$node1 @auto]]
+              } elseif {[$node1 hasAttribute rgb]} {
+                set a(color) [list rgb [$node1 @rgb]]
+              } elseif {[$node1 hasAttribute indexed]} {
+                set a(color) [list indexed [$node1 @indexed]]
+              } elseif {[$node1 hasAttribute theme]} {
+                set a(color) [list theme [$node1 @theme]]
+              }
+            }
+            name {
+              if {[$node1 hasAttribute val]} {
+                set a(name) [$node1 @val]
+              }
+            }
+            family {
+              if {[$node1 hasAttribute val]} {
+                set a(family) [$node1 @val]
+              }
+            }
+            scheme {
+              if {[$node1 hasAttribute val]} {
+                set a(scheme) [$node1 @val]
+              }
+            }
+          }
+        }
+        set wb(s,fonts,$idx) [array get a]
       }
       lappend wb(s,@) fonts [incr idx]
 
@@ -1105,31 +1105,31 @@ proc ::ooxml::xl_read { file args } {
       set idx -1
       array unset a *
       foreach node [$root selectNodes /M:styleSheet/M:fills/M:fill] {
-	incr idx
-	array set a {patterntype {} fgcolor {} bgcolor {}}
-	foreach node1 [$node childNodes] {
-	  switch -- [$node1 nodeName] {
-	    patternFill {
-	      if {[$node1 hasAttribute patternType]} {
-		set a(patterntype) [$node1 @patternType]
-	      }
-	      foreach node2 [$node1 childNodes] {
-		if {[$node2 nodeName] in { fgColor bgColor}} {
-		  if {[$node2 hasAttribute auto]} {
-		    set a([string tolower [$node2 nodeName]]) [list auto [$node2 @auto]]
-		  } elseif {[$node2 hasAttribute rgb]} {
-		    set a([string tolower [$node2 nodeName]]) [list rgb [$node2 @rgb]]
-		  } elseif {[$node2 hasAttribute indexed]} {
-		    set a([string tolower [$node2 nodeName]]) [list indexed [$node2 @indexed]]
-		  } elseif {[$node2 hasAttribute theme]} {
-		    set a([string tolower [$node2 nodeName]]) [list theme [$node2 @theme]]
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-	set wb(s,fills,$idx) [array get a]
+        incr idx
+        array set a {patterntype {} fgcolor {} bgcolor {}}
+        foreach node1 [$node childNodes] {
+          switch -- [$node1 nodeName] {
+            patternFill {
+              if {[$node1 hasAttribute patternType]} {
+                set a(patterntype) [$node1 @patternType]
+              }
+              foreach node2 [$node1 childNodes] {
+                if {[$node2 nodeName] in { fgColor bgColor}} {
+                  if {[$node2 hasAttribute auto]} {
+                    set a([string tolower [$node2 nodeName]]) [list auto [$node2 @auto]]
+                  } elseif {[$node2 hasAttribute rgb]} {
+                    set a([string tolower [$node2 nodeName]]) [list rgb [$node2 @rgb]]
+                  } elseif {[$node2 hasAttribute indexed]} {
+                    set a([string tolower [$node2 nodeName]]) [list indexed [$node2 @indexed]]
+                  } elseif {[$node2 hasAttribute theme]} {
+                    set a([string tolower [$node2 nodeName]]) [list theme [$node2 @theme]]
+                  }
+                }
+              }
+            }
+          }
+        }
+        set wb(s,fills,$idx) [array get a]
       }
       lappend wb(s,@) fills [incr idx]
 
@@ -1137,43 +1137,43 @@ proc ::ooxml::xl_read { file args } {
       set idx -1
       unset -nocomplain d
       foreach node [$root selectNodes /M:styleSheet/M:borders/M:border] {
-	incr idx
-	set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
-	foreach node1 [$node childNodes] {
-	  if {[$node1 hasAttribute style]} {
-	    set style [$node1 @style]
-	  } else {
-	    set style {}
-	  }
-	  set color {}
-	  foreach node2 [$node1 childNodes] {
-	    if {[$node2 nodeName] eq {color}} {
-	      if {[$node2 hasAttribute auto]} {
-		set color [list auto [$node2 @auto]]
-	      } elseif {[$node2 hasAttribute rgb]} {
-		set color [list rgb [$node2 @rgb]]
-	      } elseif {[$node2 hasAttribute indexed]} {
-		set color [list indexed [$node2 @indexed]]
-	      } elseif {[$node2 hasAttribute theme]} {
-		set color [list theme [$node2 @theme]]
-	      }
-	    }
-	  }
-	  if {[$node1 nodeName] in {left right top bottom diagonal}} {
-	    if {$style ne {}} {
-	      dict set d [$node1 nodeName] style $style
-	    }
-	    if {$color ne {}} {
-	      dict set d [$node1 nodeName] color $color
-	    }
-	  }
-	}
-	if {[$node hasAttribute diagonalUp]} {
-	  dict set d diagonal direction diagonalUp
-	} elseif {[$node hasAttribute diagonalDown]} {
-	  dict set d diagonal direction diagonalDown
-	}
-	set wb(s,borders,$idx) $d
+        incr idx
+        set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
+        foreach node1 [$node childNodes] {
+          if {[$node1 hasAttribute style]} {
+            set style [$node1 @style]
+          } else {
+            set style {}
+          }
+          set color {}
+          foreach node2 [$node1 childNodes] {
+            if {[$node2 nodeName] eq {color}} {
+              if {[$node2 hasAttribute auto]} {
+                set color [list auto [$node2 @auto]]
+              } elseif {[$node2 hasAttribute rgb]} {
+                set color [list rgb [$node2 @rgb]]
+              } elseif {[$node2 hasAttribute indexed]} {
+                set color [list indexed [$node2 @indexed]]
+              } elseif {[$node2 hasAttribute theme]} {
+                set color [list theme [$node2 @theme]]
+              }
+            }
+          }
+          if {[$node1 nodeName] in {left right top bottom diagonal}} {
+            if {$style ne {}} {
+              dict set d [$node1 nodeName] style $style
+            }
+            if {$color ne {}} {
+              dict set d [$node1 nodeName] color $color
+            }
+          }
+        }
+        if {[$node hasAttribute diagonalUp]} {
+          dict set d diagonal direction diagonalUp
+        } elseif {[$node hasAttribute diagonalDown]} {
+          dict set d diagonal direction diagonalDown
+        }
+        set wb(s,borders,$idx) $d
       }
       lappend wb(s,@) borders [incr idx]
 
@@ -1181,42 +1181,42 @@ proc ::ooxml::xl_read { file args } {
       set idx -1
       array unset a *
       foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
-	incr idx
-	array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
+        incr idx
+        array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
         if {[$node hasAttribute numFmtId]} {
-	  set a(numfmt) [$node @numFmtId]
-	}
+          set a(numfmt) [$node @numFmtId]
+        }
         if {[$node hasAttribute fontId]} {
-	  set a(font) [$node @fontId]
-	}
+          set a(font) [$node @fontId]
+        }
         if {[$node hasAttribute fillId]} {
-	  set a(fill) [$node @fillId]
-	}
+          set a(fill) [$node @fillId]
+        }
         if {[$node hasAttribute borderId]} {
-	  set a(border) [$node @borderId]
-	}
+          set a(border) [$node @borderId]
+        }
         if {[$node hasAttribute xfId]} {
-	  set a(xf) [$node @xfId]
-	}
-	foreach node1 [$node childNodes] {
-	  switch -- [$node1 nodeName] {
-	    alignment {
-	      if {[$node1 hasAttribute horizontal]} {
-		set a(horizontal) [$node1 @horizontal]
-	      }
-	      if {[$node1 hasAttribute vertical]} {
-		set a(vertical) [$node1 @vertical]
-	      }
-	      if {[$node1 hasAttribute textRotation]} {
-		set a(rotate) [$node1 @textRotation]
-	      }
-	      if {[$node1 hasAttribute wrapText]} {
-		set a(wrap) [$node1 @wrapText]
-	      }
-	    }
-	  }
-	}
-	set wb(s,styles,$idx) [array get a]
+          set a(xf) [$node @xfId]
+        }
+        foreach node1 [$node childNodes] {
+          switch -- [$node1 nodeName] {
+            alignment {
+              if {[$node1 hasAttribute horizontal]} {
+                set a(horizontal) [$node1 @horizontal]
+              }
+              if {[$node1 hasAttribute vertical]} {
+                set a(vertical) [$node1 @vertical]
+              }
+              if {[$node1 hasAttribute textRotation]} {
+                set a(rotate) [$node1 @textRotation]
+              }
+              if {[$node1 hasAttribute wrapText]} {
+                set a(wrap) [$node1 @wrapText]
+              }
+            }
+          }
+        }
+        set wb(s,styles,$idx) [array get a]
       }
       lappend wb(s,@) styles [incr idx]
 
@@ -1234,18 +1234,18 @@ proc ::ooxml::xl_read { file args } {
     set read false
     if {$opts(sheets) ne {}} {
       foreach pat $opts(sheets) {
-	if {[string match $pat $sheet]} {
-	  set read true
-	  break
-	}
+        if {[string match $pat $sheet]} {
+          set read true
+          break
+        }
       }
     }
     if {!$read && $opts(sheetnames) ne {}} {
       foreach pat $opts(sheetnames) {
-	if {[string match $pat $name]} {
-	  set read true
-	  break
-	}
+        if {[string match $pat $name]} {
+          set read true
+          break
+        }
       }
     }
     if {!$read} continue
@@ -1258,169 +1258,169 @@ proc ::ooxml::xl_read { file args } {
     if {![catch {open [file join ${zipfs}xlsx/xl $target] r} fd]} {
       fconfigure $fd -encoding utf-8
       if {![catch {dom parse [read $fd]} doc]} {
-	$doc documentElement root
+        $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
-	set idx -1
-	foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
-	  incr idx
-	  set cols {}
-	  foreach item {min max width style bestFit customWidth} {
-	    if {[$col hasAttribute $item]} {
-	      switch -- $item {
-	        min - max {
-		  lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
-		}
-		default {
-		  lappend cols [string tolower $item] [$col @$item]
-		}
-	      }
-	    } else {
-	      lappend cols [string tolower $item] 0
-	    }
-	  }
-	  lappend cols string 0 nozero 0 calcfit 0
-	  set wb($sheet,col,[dict get $cols min]) $cols
-	}
-	set wb($sheet,cols) [incr idx]
-	set rowindex -1
-	foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
-	  incr rowindex
-	  set cellindex -1
-	  foreach cell [$row selectNodes M:c] {
-	    incr cellindex
-	    # Get cell position
-	    # if r exists, it contains the cell position like "A1".
-	    # Otherwise, use the counter values
-	    # The cell may omit positions so, set the counters if explicit
-	    # cell position is given
-	    if {[$cell hasAttribute r]} {
-	      set rowcol [StringToRowColumn [$cell @r]]
-	      # Correct the current counters
-	      scan $rowcol %d,%d rowindex cellindex
-	    } else {
-	      set rowcol $rowindex,$cellindex
-	    }
-	    if {[$cell hasAttribute t]} {
-	      set type [$cell @t]
-	    } else {
-	      set type n
-	    }
-	    set value {}
-	    set datetime {}
+        set idx -1
+        foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
+          incr idx
+          set cols {}
+          foreach item {min max width style bestFit customWidth} {
+            if {[$col hasAttribute $item]} {
+              switch -- $item {
+                min - max {
+                  lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+                }
+                default {
+                  lappend cols [string tolower $item] [$col @$item]
+                }
+              }
+            } else {
+              lappend cols [string tolower $item] 0
+            }
+          }
+          lappend cols string 0 nozero 0 calcfit 0
+          set wb($sheet,col,[dict get $cols min]) $cols
+        }
+        set wb($sheet,cols) [incr idx]
+        set rowindex -1
+        foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+          incr rowindex
+          set cellindex -1
+          foreach cell [$row selectNodes M:c] {
+            incr cellindex
+            # Get cell position
+            # if r exists, it contains the cell position like "A1".
+            # Otherwise, use the counter values
+            # The cell may omit positions so, set the counters if explicit
+            # cell position is given
+            if {[$cell hasAttribute r]} {
+              set rowcol [StringToRowColumn [$cell @r]]
+              # Correct the current counters
+              scan $rowcol %d,%d rowindex cellindex
+            } else {
+              set rowcol $rowindex,$cellindex
+            }
+            if {[$cell hasAttribute t]} {
+              set type [$cell @t]
+            } else {
+              set type n
+            }
+            set value {}
+            set datetime {}
 
-	    ## FORMULA ##
-	    if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
-	      set wb($sheet,f,$rowcol) {}
-	      if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
-		lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
-	      }
-	      if {[$node hasAttribute t] && [$node @t] eq {shared}} {
-	        if {[$node hasAttribute si]} {
-		  lappend wb($sheet,f,$rowcol) i [$node @si]
-		}
-	        if {[$node hasAttribute ref]} {
-		  lappend wb($sheet,f,$rowcol) r [$node @ref]
-		}
-	      }
-	    }
+            ## FORMULA ##
+            if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
+              set wb($sheet,f,$rowcol) {}
+              if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
+                lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
+              }
+              if {[$node hasAttribute t] && [$node @t] eq {shared}} {
+                if {[$node hasAttribute si]} {
+                  lappend wb($sheet,f,$rowcol) i [$node @si]
+                }
+                if {[$node hasAttribute ref]} {
+                  lappend wb($sheet,f,$rowcol) r [$node @ref]
+                }
+              }
+            }
 
-	    switch -- $type {
-	     n - b - d - str {
-		# number (default), boolean, iso-date, formula string
-		if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-		  set value [$node nodeValue]
-		  if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
-		    set idx [$cell @s]
-		    if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
-		      set numFmtId [dict get $cellXfs($idx) nfi]
-		      if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
-			set datetime $value
-			catch {clock format [expr {int(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
-		      }
-		    }
-		  } 
-		} else {
-		  if {![$cell hasAttribute s]} continue
-		}
-	      }
-	       s {
-		# shared string
-		if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-		  set index [$node nodeValue]
-		  if {[info exists sharedStrings($index)]} {
-		    set value $sharedStrings($index)
-		  }
-		} else {
-		  if {![$cell hasAttribute s]} continue
-		}
-	      }
-	       inlineStr {
-		# inline string
-		if {[set string [$cell selectNodes M:is]] ne {}} {
-		  foreach node [$string selectNodes M:t/text()] {
-		    append value [$node nodeValue]
-		  }
-		  foreach node [$string selectNodes */M:t/text()] {
-		    append value [$node nodeValue]
-		  }
-		} else {
-		  if {![$cell hasAttribute s]} continue
-		}
-	      }
-	       e {
-		# error
-	      }
-	    }
+            switch -- $type {
+             n - b - d - str {
+                # number (default), boolean, iso-date, formula string
+                if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+                  set value [$node nodeValue]
+                  if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
+                    set idx [$cell @s]
+                    if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
+                      set numFmtId [dict get $cellXfs($idx) nfi]
+                      if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
+                        set datetime $value
+                        catch {clock format [expr {int(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
+                      }
+                    }
+                  } 
+                } else {
+                  if {![$cell hasAttribute s]} continue
+                }
+              }
+               s {
+                # shared string
+                if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+                  set index [$node nodeValue]
+                  if {[info exists sharedStrings($index)]} {
+                    set value $sharedStrings($index)
+                  }
+                } else {
+                  if {![$cell hasAttribute s]} continue
+                }
+              }
+               inlineStr {
+                # inline string
+                if {[set string [$cell selectNodes M:is]] ne {}} {
+                  foreach node [$string selectNodes M:t/text()] {
+                    append value [$node nodeValue]
+                  }
+                  foreach node [$string selectNodes */M:t/text()] {
+                    append value [$node nodeValue]
+                  }
+                } else {
+                  if {![$cell hasAttribute s]} continue
+                }
+              }
+               e {
+                # error
+              }
+            }
 
-	    if {!$opts(valuesonly)} {
-	      set wb($sheet,c,$rowcol) [$cell @r]
-	    }
-	    if {!$opts(valuesonly)} {
-	      if {[$cell hasAttribute s]} {
-		set wb($sheet,s,$rowcol) [$cell @s]
-	      }
-	    }
-	    if {!$opts(valuesonly)} {
-	      if {[$cell hasAttribute t]} {
-		set wb($sheet,t,$rowcol) [$cell @t]
-	      }
-	    }
-	    set wb($sheet,v,$rowcol) $value
-	    if {!$opts(valuesonly) && $datetime ne {}} {
-	      set wb($sheet,d,$rowcol) $datetime
-	    }
-	  }
-	}
+            if {!$opts(valuesonly)} {
+              set wb($sheet,c,$rowcol) [$cell @r]
+            }
+            if {!$opts(valuesonly)} {
+              if {[$cell hasAttribute s]} {
+                set wb($sheet,s,$rowcol) [$cell @s]
+              }
+            }
+            if {!$opts(valuesonly)} {
+              if {[$cell hasAttribute t]} {
+                set wb($sheet,t,$rowcol) [$cell @t]
+              }
+            }
+            set wb($sheet,v,$rowcol) $value
+            if {!$opts(valuesonly) && $datetime ne {}} {
+              set wb($sheet,d,$rowcol) $datetime
+            }
+          }
+        }
 
-	if {!$opts(valuesonly)} {
-	  foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
-	    if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
-	      dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
-	    }
-	  }
-	}
-	if {!$opts(valuesonly)} {
-	  foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
-	    if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
-	      set wb($sheet,freeze) [$freeze @topLeftCell]
-	    }
-	  }
-	}
-	if {!$opts(valuesonly)} {
-	  foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
-	    if {[$filter hasAttribute ref]} {
-	      lappend wb($sheet,filter) [$filter @ref]
-	    }
-	  }
-	}
-	if {!$opts(valuesonly)} {
-	  foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
-	    if {[$merge hasAttribute ref]} {
-	      lappend wb($sheet,merge) [$merge @ref]
-	    }
-	  }
-	}
-	$doc delete
+        if {!$opts(valuesonly)} {
+          foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+            if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
+              dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
+            }
+          }
+        }
+        if {!$opts(valuesonly)} {
+          foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
+            if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
+              set wb($sheet,freeze) [$freeze @topLeftCell]
+            }
+          }
+        }
+        if {!$opts(valuesonly)} {
+          foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
+            if {[$filter hasAttribute ref]} {
+              lappend wb($sheet,filter) [$filter @ref]
+            }
+          }
+        }
+        if {!$opts(valuesonly)} {
+          foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
+            if {[$merge hasAttribute ref]} {
+              lappend wb($sheet,merge) [$merge @ref]
+            }
+          }
+        }
+        $doc delete
       }
       close $fd
     }
@@ -1587,7 +1587,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -creator - -created - -modifiedby - -modified - -application {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -1705,7 +1705,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -format {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -1713,17 +1713,17 @@ oo::class create ooxml::xl_write {
           }            
         }
         -list - -general - -date - -time - -datetime - -iso8601 - -number - -decimal - -red - -separator - -fraction - -scientific - -percent - -string - -text {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         -tag {
-	  incr idx
+          incr idx
           if {$idx < $len} {
-	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
-	      error "option '$opt': should not be an integer value"
-	    } else {
-	      set opts([string range $opt 1 end]) $tag
-	    } 
-	    unset tag
+            if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+              error "option '$opt': should not be an integer value"
+            } else {
+              set opts([string range $opt 1 end]) $tag
+            } 
+            unset tag
           } else {
             error "option '$opt': missing argument"
           }            
@@ -1744,97 +1744,97 @@ oo::class create ooxml::xl_write {
 
     if {$opts(general)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 0
+        set tags(numFmts,$opts(tag)) 0
       }
       return 0
     }
     if {$opts(date)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 14
+        set tags(numFmts,$opts(tag)) 14
       }
       return 14
     }
     if {$opts(time)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 20
+        set tags(numFmts,$opts(tag)) 20
       }
       return 20
     }
     if {$opts(number)} {
       if {$opts(separator)} {
-	if {$opts(red)} {
-	  if {$opts(tag) ne {}} {
-	    set tags(numFmts,$opts(tag)) 38
-	  }
-	  return 38
-	} else {
-	  if {$opts(tag) ne {}} {
-	    set tags(numFmts,$opts(tag)) 3
-	  }
-	  return 3
-	}
+        if {$opts(red)} {
+          if {$opts(tag) ne {}} {
+            set tags(numFmts,$opts(tag)) 38
+          }
+          return 38
+        } else {
+          if {$opts(tag) ne {}} {
+            set tags(numFmts,$opts(tag)) 3
+          }
+          return 3
+        }
       } else {
-	if {$opts(red)} {
-	  return -1
-	} else {
-	  if {$opts(tag) ne {}} {
-	    set tags(numFmts,$opts(tag)) 1
-	  }
-	  return 1
-	}
+        if {$opts(red)} {
+          return -1
+        } else {
+          if {$opts(tag) ne {}} {
+            set tags(numFmts,$opts(tag)) 1
+          }
+          return 1
+        }
       }
     }
     if {$opts(decimal)} {
       if {$opts(percent)} {
-	if {$opts(tag) ne {}} {
-	  set tags(numFmts,$opts(tag)) 10
-	}
+        if {$opts(tag) ne {}} {
+          set tags(numFmts,$opts(tag)) 10
+        }
         return 10
       }
       if {$opts(separator)} {
-	if {$opts(red)} {
-	  if {$opts(tag) ne {}} {
-	    set tags(numFmts,$opts(tag)) 40
-	  }
-	  return 40
-	} else {
-	  if {$opts(tag) ne {}} {
-	    set tags(numFmts,$opts(tag)) 4
-	  }
-	  return 4
-	}
+        if {$opts(red)} {
+          if {$opts(tag) ne {}} {
+            set tags(numFmts,$opts(tag)) 40
+          }
+          return 40
+        } else {
+          if {$opts(tag) ne {}} {
+            set tags(numFmts,$opts(tag)) 4
+          }
+          return 4
+        }
       } else {
-	if {$opts(red)} {
-	  return -1
-	} else {
-	  if {$opts(tag) ne {}} {
-	    set tags(numFmts,$opts(tag)) 2
-	  }
-	  return 2
-	}
+        if {$opts(red)} {
+          return -1
+        } else {
+          if {$opts(tag) ne {}} {
+            set tags(numFmts,$opts(tag)) 2
+          }
+          return 2
+        }
       }
     }
     if {$opts(fraction)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 12
+        set tags(numFmts,$opts(tag)) 12
       }
       return 12
     }
     if {$opts(scientific)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 11
+        set tags(numFmts,$opts(tag)) 11
       }
       return 11
     }
     if {$opts(percent)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 9
+        set tags(numFmts,$opts(tag)) 9
       }
       return 9
     }
     if {$opts(text) || $opts(string)} {
       if {$opts(tag) ne {}} {
-	set tags(numFmts,$opts(tag)) 49
+        set tags(numFmts,$opts(tag)) 49
       }
       return 49
     }
@@ -1848,17 +1848,17 @@ oo::class create ooxml::xl_write {
 
     foreach idx [array names ::ooxml::predefNumFmts] {
       if {[dict get $::ooxml::predefNumFmts($idx) fmt] eq $opts(format)} {
-	if {$opts(tag) ne {}} {
-	  set tags(numFmts,$opts(tag)) $idx
-	}
+        if {$opts(tag) ne {}} {
+          set tags(numFmts,$opts(tag)) $idx
+        }
         return $idx
       }
     }
     foreach idx [array names numFmts] {
       if {$numFmts($idx) eq $opts(format)} {
-	if {$opts(tag) ne {}} {
-	  set tags(numFmts,$opts(tag)) $idx
-	}
+        if {$opts(tag) ne {}} {
+          set tags(numFmts,$opts(tag)) $idx
+        }
         return $idx
       }
     }
@@ -1912,7 +1912,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -name - -family - -size - -color - -scheme {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -1920,17 +1920,17 @@ oo::class create ooxml::xl_write {
           }            
         }
         -list - -bold - -italic - -underline {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         -tag {
-	  incr idx
+          incr idx
           if {$idx < $len} {
-	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
-	      error "option '$opt': should not be an integer value"
-	    } else {
-	      set opts([string range $opt 1 end]) $tag
-	    } 
-	    unset tag
+            if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+              error "option '$opt': should not be an integer value"
+            } else {
+              set opts([string range $opt 1 end]) $tag
+            } 
+            unset tag
           } else {
             error "option '$opt': missing argument"
           }            
@@ -1966,14 +1966,14 @@ oo::class create ooxml::xl_write {
       set found 1
       foreach name [array names a] {
         if {$a($name) ne $opts($name)} {
-	  set found 0
-	  break
-	}
+          set found 0
+          break
+        }
       }
       if {$found} {
-	if {$opts(tag) ne {}} {
-	  set tags(fonts,$opts(tag)) $idx
-	}
+        if {$opts(tag) ne {}} {
+          set tags(fonts,$opts(tag)) $idx
+        }
         return $idx
       }
     }
@@ -2008,7 +2008,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -patterntype - -fgcolor - -bgcolor {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -2016,17 +2016,17 @@ oo::class create ooxml::xl_write {
           }            
         }
         -list {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         -tag {
-	  incr idx
+          incr idx
           if {$idx < $len} {
-	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
-	      error "option '$opt': should not be an integer value"
-	    } else {
-	      set opts([string range $opt 1 end]) $tag
-	    } 
-	    unset tag
+            if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+              error "option '$opt': should not be an integer value"
+            } else {
+              set opts([string range $opt 1 end]) $tag
+            } 
+            unset tag
           } else {
             error "option '$opt': missing argument"
           }            
@@ -2054,14 +2054,14 @@ oo::class create ooxml::xl_write {
       set found 1
       foreach name [array names a] {
         if {$a($name) ne $opts($name)} {
-	  set found 0
-	  break
-	}
+          set found 0
+          break
+        }
       }
       if {$found} {
-	if {$opts(tag) ne {}} {
-	  set tags(fills,$opts(tag)) $idx
-	}
+        if {$opts(tag) ne {}} {
+          set tags(fills,$opts(tag)) $idx
+        }
         return $idx
       }
     }
@@ -2104,8 +2104,8 @@ oo::class create ooxml::xl_write {
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
-	-leftstyle - -leftcolor - -rightstyle - -rightcolor - -topstyle - -topcolor - -bottomstyle - -bottomcolor - -diagonalstyle - -diagonalcolor - -diagonaldirection {
-	  incr idx
+        -leftstyle - -leftcolor - -rightstyle - -rightcolor - -topstyle - -topcolor - -bottomstyle - -bottomcolor - -diagonalstyle - -diagonalcolor - -diagonaldirection {
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -2113,17 +2113,17 @@ oo::class create ooxml::xl_write {
           }            
         }
         -list {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         -tag {
-	  incr idx
+          incr idx
           if {$idx < $len} {
-	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
-	      error "option '$opt': should not be an integer value"
-	    } else {
-	      set opts([string range $opt 1 end]) $tag
-	    } 
-	    unset tag
+            if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+              error "option '$opt': should not be an integer value"
+            } else {
+              set opts([string range $opt 1 end]) $tag
+            } 
+            unset tag
           } else {
             error "option '$opt': missing argument"
           }            
@@ -2165,13 +2165,13 @@ oo::class create ooxml::xl_write {
     }
     switch -- $opts(diagonaldirection) {
       up {
-	set opts(diagonaldirection) diagonalUp
+        set opts(diagonaldirection) diagonalUp
       }
       down {
-	set opts(diagonaldirection) diagonalDown
+        set opts(diagonaldirection) diagonalDown
       }
       default {
-	set opts(diagonaldirection) {}
+        set opts(diagonaldirection) {}
       }
     }
 
@@ -2190,17 +2190,17 @@ oo::class create ooxml::xl_write {
     foreach idx [lsort -integer [array names borders]] {
       set found 1
       foreach key [dict keys $tmp] {
-	foreach subkey [dict keys [dict get $tmp $key]] {
-	  if {[dict get $borders($idx) $key $subkey] ne [dict get $tmp $key $subkey]} {
-	    set found 0
-	    break
-	  }
-	}
+        foreach subkey [dict keys [dict get $tmp $key]] {
+          if {[dict get $borders($idx) $key $subkey] ne [dict get $tmp $key $subkey]} {
+            set found 0
+            break
+          }
+        }
       }
       if {$found} {
-	if {$opts(tag) ne {}} {
-	  set tags(borders,$opts(tag)) $idx
-	}
+        if {$opts(tag) ne {}} {
+          set tags(borders,$opts(tag)) $idx
+        }
         return $idx
       }
     }
@@ -2239,7 +2239,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -numfmt - -font - -fill - -border - -xf - -horizontal - -vertical - -rotate {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -2247,17 +2247,17 @@ oo::class create ooxml::xl_write {
           }            
         }
         -list - -wrap {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         -tag {
-	  incr idx
+          incr idx
           if {$idx < $len} {
-	    if {[string is integer -strict [set tag [lindex $args $idx]]]} {
-	      error "option '$opt': should not be an integer value"
-	    } else {
-	      set opts([string range $opt 1 end]) $tag
-	    } 
-	    unset tag
+            if {[string is integer -strict [set tag [lindex $args $idx]]]} {
+              error "option '$opt': should not be an integer value"
+            } else {
+              set opts([string range $opt 1 end]) $tag
+            } 
+            unset tag
           } else {
             error "option '$opt': missing argument"
           }            
@@ -2320,14 +2320,14 @@ oo::class create ooxml::xl_write {
       set found 1
       foreach name [array names a] {
         if {$a($name) ne $opts($name)} {
-	  set found 0
-	  break
-	}
+          set found 0
+          break
+        }
       }
       if {$found} {
-	if {$opts(tag) ne {}} {
-	  set tags(styles,$opts(tag)) $idx
-	}
+        if {$opts(tag) ne {}} {
+          set tags(styles,$opts(tag)) $idx
+        }
         return $idx
       }
     }
@@ -2387,7 +2387,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -index - -to - -width - -style  {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -2395,7 +2395,7 @@ oo::class create ooxml::xl_write {
           }            
         }
         -bestfit - -customwidth - -string - -nozero - -calcfit {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         default {
           error "unknown option \"$opt\", should be: -index, -to, -width, -style, -bestfit, -customwidth, -string, -nozero or -calcfit"
@@ -2453,7 +2453,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -index - -height  {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -2526,7 +2526,7 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -index - -style - -formula - -formulaidx - -formularef - -height  {
-	  incr idx
+          incr idx
           if {$idx < $len} {
             set opts([string range $opt 1 end]) [lindex $args $idx]
           } else {
@@ -2534,7 +2534,7 @@ oo::class create ooxml::xl_write {
           }            
         }
         -string - -nostring - -zero - -nozero - -globalstyle {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         default {
           error "unknown option \"$opt\", should be: -index, -style, -formula, -formulaidx, -formularef, -height, -string, nostring, -zero or -nozero"
@@ -2577,21 +2577,21 @@ oo::class create ooxml::xl_write {
       if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) style] >= 0} {
         set opts(style) [dict get $cols($sheet,$obj(col,$sheet)) style]
       } elseif {$opts(style) == -1} {
-	set opts(style) 0
+        set opts(style) 0
       }
     }
     if {[string is integer -strict $opts(string)] && $opts(string) == -1} {
       if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) string] == 1} {
-	set opts(string) 1
+        set opts(string) 1
       } elseif {$opts(string) == -1} {
-	set opts(string) 0
+        set opts(string) 0
       }
     }
     if {[string is integer -strict $opts(nozero)] && $opts(nozero) == -1} {
       if {[info exists cols($sheet,$obj(col,$sheet))] && [dict get $cols($sheet,$obj(col,$sheet)) nozero] == 1} {
-	set opts(nozero) 1
+        set opts(nozero) 1
       } elseif {$opts(nozero) == -1} {
-	set opts(nozero) 0
+        set opts(nozero) 0
       }
     }
 
@@ -2619,7 +2619,7 @@ oo::class create ooxml::xl_write {
       set type n
       set data [string trim $data]
       if {$data in {Inf infinity NaN -NaN} || $opts(string)} {
-	set type s
+        set type s
       }
     } else {
       set type s
@@ -2633,25 +2633,25 @@ oo::class create ooxml::xl_write {
       lappend cells($cell) t $type
       lappend cells($cell) f $opts(formula)
       if {[string trim $opts(formulaidx)] ne {}} {
-	lappend cells($cell) fsi $opts(formulaidx)
+        lappend cells($cell) fsi $opts(formulaidx)
       }
       if {[string trim $opts(formularef)] ne {}} {
         set lref [split [string trim $opts(formularef)] :]
-	if {[llength $lref] == 2} {
-	  set fref {}
-	  if {[regexp {^(\d+),(\d+)$} [lindex $lref 0]]} {
-	    append fref [::ooxml::IndexToString [lindex $lref 0]]
-	  } else {
-	    append fref [lindex $lref 0]
-	  }
-	  append fref :
-	  if {[regexp {^(\d+),(\d+)$} [lindex $lref 1]]} {
-	    append fref [::ooxml::IndexToString [lindex $lref 1]]
-	  } else {
-	    append fref [lindex $lref 1]
-	  }
-	  lappend cells($cell) fsr $fref
-	}
+        if {[llength $lref] == 2} {
+          set fref {}
+          if {[regexp {^(\d+),(\d+)$} [lindex $lref 0]]} {
+            append fref [::ooxml::IndexToString [lindex $lref 0]]
+          } else {
+            append fref [lindex $lref 0]
+          }
+          append fref :
+          if {[regexp {^(\d+),(\d+)$} [lindex $lref 1]]} {
+            append fref [::ooxml::IndexToString [lindex $lref 1]]
+          } else {
+            append fref [lindex $lref 1]
+          }
+          lappend cells($cell) fsr $fref
+        }
       }
     } else {
       lappend cells($cell) v $data t $type
@@ -2661,16 +2661,16 @@ oo::class create ooxml::xl_write {
       unset -nocomplain cells($cell)
     } else {
       if {$obj(row,$sheet) < $obj(dminrow,$sheet)} {
-	set obj(dminrow,$sheet) $obj(row,$sheet)
+        set obj(dminrow,$sheet) $obj(row,$sheet)
       }
       if {$obj(row,$sheet) > $obj(dmaxrow,$sheet)} {
-	set obj(dmaxrow,$sheet) $obj(row,$sheet)
+        set obj(dmaxrow,$sheet) $obj(row,$sheet)
       }
       if {$obj(col,$sheet) < $obj(dmincol,$sheet)} {
-	set obj(dmincol,$sheet) $obj(col,$sheet)
+        set obj(dmincol,$sheet) $obj(col,$sheet)
       }
       if {$obj(col,$sheet) > $obj(dmaxcol,$sheet)} {
-	set obj(dmaxcol,$sheet) $obj(col,$sheet)
+        set obj(dmaxcol,$sheet) $obj(col,$sheet)
       }
     }
     
@@ -2731,33 +2731,33 @@ oo::class create ooxml::xl_write {
       set obj(blockPreset) 1
 
       if {[dict exists $a(s,@) numFmtId]} {
-	set obj(numFmts) [dict get $a(s,@) numFmtId]
-	foreach idx $a(s,numFmtsIds) {
-	  if {[info exists a(s,numFmts,$idx)]} {
-	    set numFmts($idx) $a(s,numFmts,$idx)
-	  }
-	}
+        set obj(numFmts) [dict get $a(s,@) numFmtId]
+        foreach idx $a(s,numFmtsIds) {
+          if {[info exists a(s,numFmts,$idx)]} {
+            set numFmts($idx) $a(s,numFmts,$idx)
+          }
+        }
       }
 
       foreach item {fonts fills borders styles} {
         if {[dict exists $a(s,@) $item]} {
-	  upvar 0 $item ad
-	  for {set idx 0} {$idx < [dict get $a(s,@) $item]} {incr idx} {
-	    if {[info exists a(s,$item,$idx)]} {
-	      set ad($idx) $a(s,$item,$idx)
-	    }
-	  }
-	  set obj($item) [dict get $a(s,@) $item]
-	}
+          upvar 0 $item ad
+          for {set idx 0} {$idx < [dict get $a(s,@) $item]} {incr idx} {
+            if {[info exists a(s,$item,$idx)]} {
+              set ad($idx) $a(s,$item,$idx)
+            }
+          }
+          set obj($item) [dict get $a(s,@) $item]
+        }
       }
     }
 
     foreach sheet $a(sheets) {
       foreach item [array names a $sheet,col,*] {
-	set idx [lindex [split $item ,] end]
-	if {[info exists a($sheet,col,$idx)]} {
-	  set cols([expr {$sheet + 1}],$idx) $a($sheet,col,$idx)
-	}
+        set idx [lindex [split $item ,] end]
+        if {[info exists a($sheet,col,$idx)]} {
+          set cols([expr {$sheet + 1}],$idx) $a($sheet,col,$idx)
+        }
       }
       set obj([expr {$sheet + 1}],cols) [llength [array names cols]]
     }
@@ -2771,58 +2771,58 @@ oo::class create ooxml::xl_write {
     # [self object] -> my
     if {[info exists a(sheets)]} {
       foreach sheet $a(sheets) {
-	if {[set currentSheet [my worksheet $a($sheet,n)]] > -1} {
-	  dict set a(sheetmap) $sheet $currentSheet
-	  foreach item [lsort -dictionary [array names a $sheet,v,*]] {
-	    lassign [split $item ,] sheet tag row col
-	    set options [list -index $row,$col]
-	    if {[info exists a($sheet,f,$row,$col)]} {
-	      ## FORMULA ##
-	      if {[dict exists $a($sheet,f,$row,$col) f]} {
-		lappend options -formula [dict get $a($sheet,f,$row,$col) f]
-		if {[dict exists $a($sheet,f,$row,$col) r]} {
-		  lappend options -formularef [dict get $a($sheet,f,$row,$col) r]
-		}
-	      }
-	      if {[dict exists $a($sheet,f,$row,$col) i]} {
-		lappend options -formulaidx [dict get $a($sheet,f,$row,$col) i]
-	      }
-	    }
-	    if {[info exists a($sheet,t,$row,$col)] && $a($sheet,t,$row,$col) eq {s}} {
-	      lappend options -string
-	    }
-	    if {[info exists a($sheet,s,$row,$col)]} {
-	      lappend options -style $a($sheet,s,$row,$col)
-	    }
-	    my cell $currentSheet $a($item) {*}$options
-	  }
-	  if {[info exists a($sheet,rowheight)]} {
-	    foreach {row height} $a($sheet,rowheight) {
-	      my rowheight $currentSheet $row $height
-	    }
-	  }
-	  if {[info exists a($sheet,freeze)]} {
-	    my freeze $currentSheet $a($sheet,freeze)
-	  }
-	  if {[info exists a($sheet,filter)]} {
-	    foreach item $a($sheet,filter) {
-	      my autofilter $currentSheet {*}[split $item :]
-	    }
-	  }
-	  if {[info exists a($sheet,merge)]} {
-	    foreach item $a($sheet,merge) {
-	      my merge $currentSheet {*}[split $item :]
-	    }
-	  }
-	}
+        if {[set currentSheet [my worksheet $a($sheet,n)]] > -1} {
+          dict set a(sheetmap) $sheet $currentSheet
+          foreach item [lsort -dictionary [array names a $sheet,v,*]] {
+            lassign [split $item ,] sheet tag row col
+            set options [list -index $row,$col]
+            if {[info exists a($sheet,f,$row,$col)]} {
+              ## FORMULA ##
+              if {[dict exists $a($sheet,f,$row,$col) f]} {
+                lappend options -formula [dict get $a($sheet,f,$row,$col) f]
+                if {[dict exists $a($sheet,f,$row,$col) r]} {
+                  lappend options -formularef [dict get $a($sheet,f,$row,$col) r]
+                }
+              }
+              if {[dict exists $a($sheet,f,$row,$col) i]} {
+                lappend options -formulaidx [dict get $a($sheet,f,$row,$col) i]
+              }
+            }
+            if {[info exists a($sheet,t,$row,$col)] && $a($sheet,t,$row,$col) eq {s}} {
+              lappend options -string
+            }
+            if {[info exists a($sheet,s,$row,$col)]} {
+              lappend options -style $a($sheet,s,$row,$col)
+            }
+            my cell $currentSheet $a($item) {*}$options
+          }
+          if {[info exists a($sheet,rowheight)]} {
+            foreach {row height} $a($sheet,rowheight) {
+              my rowheight $currentSheet $row $height
+            }
+          }
+          if {[info exists a($sheet,freeze)]} {
+            my freeze $currentSheet $a($sheet,freeze)
+          }
+          if {[info exists a($sheet,filter)]} {
+            foreach item $a($sheet,filter) {
+              my autofilter $currentSheet {*}[split $item :]
+            }
+          }
+          if {[info exists a($sheet,merge)]} {
+            foreach item $a($sheet,merge) {
+              my merge $currentSheet {*}[split $item :]
+            }
+          }
+        }
       }
     }
 
     if {[info exists a(view)]} {
       foreach item {activetab} {
         if {[dict exists $a(view) $item]} {
-	  my view -$item [dict get $a(view) $item]
-	}
+          my view -$item [dict get $a(view) $item]
+        }
       }
     }
   }
@@ -2839,19 +2839,19 @@ oo::class create ooxml::xl_write {
     for {set idx 0} {$idx < $len} {incr idx} {
       switch -- [set opt [lindex $args $idx]] {
         -activetab - -x - -y - -height - -width {
-	  incr idx
+          incr idx
           if {$idx < $len} {
-	    if {[string is integer -strict [lindex $args $idx]] && [lindex $args $idx] > -1} {
-	      set view([string range $opt 1 end]) [lindex $args $idx]
-	    } else {
-	      error "option '$opt': must be a positive integer"
-	    }
+            if {[string is integer -strict [lindex $args $idx]] && [lindex $args $idx] > -1} {
+              set view([string range $opt 1 end]) [lindex $args $idx]
+            } else {
+              error "option '$opt': must be a positive integer"
+            }
           } else {
             error "option '$opt': missing argument"
           }            
         }
         -list {
-	  set opts([string range $opt 1 end]) 1
+          set opts([string range $opt 1 end]) 1
         }
         default {
           error "unknown option \"$opt\", should be: -activetab, -x, -y, -height, -width or -list"
@@ -2867,8 +2867,8 @@ oo::class create ooxml::xl_write {
   method debug { args } {
     foreach item $args {
       catch {
-	my variable $item
-	parray $item
+        my variable $item
+        parray $item
       }
     }
   }
@@ -2912,11 +2912,11 @@ oo::class create ooxml::xl_write {
           set pos $lookup($thisv)
         } else {
           set pos [llength $sharedStrings]
-	  lappend sharedStrings $thisv
+          lappend sharedStrings $thisv
           set lookup($thisv) $pos
-	}
+        }
         set obj(sharedStrings) 1
-	dict set cells($n) v $pos
+        dict set cells($n) v $pos
       }
     }
     unset -nocomplain n v
@@ -2964,14 +2964,14 @@ oo::class create ooxml::xl_write {
       Tag_Override PartName /xl/workbook.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml {}
       Tag_Override PartName /xl/worksheets/sheet1.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml {}
       for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	Tag_Override PartName /xl/theme/theme${ws}.xml ContentType application/vnd.openxmlformats-officedocument.theme+xml {}
+        Tag_Override PartName /xl/theme/theme${ws}.xml ContentType application/vnd.openxmlformats-officedocument.theme+xml {}
       }
       Tag_Override PartName /xl/styles.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml {}
       if {$obj(sharedStrings) > 0} {
-	Tag_Override PartName /xl/sharedStrings.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml {}
+        Tag_Override PartName /xl/sharedStrings.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml {}
       }
       if {$obj(calcChain)} {
-	Tag_Override PartName /xl/calcChain.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml {}
+        Tag_Override PartName /xl/calcChain.xml ContentType application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml {}
       }
       Tag_Override PartName /docProps/core.xml ContentType application/vnd.openxmlformats-package.core-properties+xml {}
       Tag_Override PartName /docProps/app.xml ContentType application/vnd.openxmlformats-officedocument.extended-properties+xml {}
@@ -2999,23 +2999,23 @@ oo::class create ooxml::xl_write {
       Tag_DocSecurity { Text 0 }
       Tag_ScaleCrop { Text false }
       Tag_HeadingPairs {
-	Tag_vt:vector size 2 baseType variant {
-	  Tag_vt:variant {
-	    Tag_vt:lpstr { Text [msgcat::mc Worksheets] }
-	  }
-	  Tag_vt:variant {
-	    Tag_vt:i4 { Text $obj(sheets) }
-	  }
-	}
+        Tag_vt:vector size 2 baseType variant {
+          Tag_vt:variant {
+            Tag_vt:lpstr { Text [msgcat::mc Worksheets] }
+          }
+          Tag_vt:variant {
+            Tag_vt:i4 { Text $obj(sheets) }
+          }
+        }
       }
       Tag_TitlesOfParts {
-	Tag_vt:vector size $obj(sheets) baseType lpstr {
-	  for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	    Tag_vt:lpstr {
-	      Text [msgcat::mc Sheet]$ws
-	    }
-	  }
-	}
+        Tag_vt:vector size $obj(sheets) baseType lpstr {
+          for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+            Tag_vt:lpstr {
+              Text [msgcat::mc Sheet]$ws
+            }
+          }
+        }
       }
       Tag_Company {}
       Tag_LinksUpToDate { Text false }
@@ -3071,16 +3071,16 @@ oo::class create ooxml::xl_write {
 
     $root appendFromScript {
       for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	Tag_Relationship Id rId$ws Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet Target worksheets/sheet${ws}.xml {}
+        Tag_Relationship Id rId$ws Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet Target worksheets/sheet${ws}.xml {}
       }
       set rId [incr ws -1]
       Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme Target theme/theme1.xml {}
       Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles Target styles.xml {}
       if {$obj(sharedStrings) > 0} {
-	Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings Target sharedStrings.xml {}
+        Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings Target sharedStrings.xml {}
       }
       if {$obj(calcChain)} {
-	Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain Target calcChain.xml {}
+        Tag_Relationship Id rId[incr rId] Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/calcChain Target calcChain.xml {}
       }
     }
     ::ooxml::Dom2zip $zf $root "xl/_rels/workbook.xml.rels" cd count
@@ -3105,13 +3105,13 @@ oo::class create ooxml::xl_write {
       $root setAttribute uniqueCount [llength $sharedStrings]
 
       $root appendFromScript {
-	foreach string $sharedStrings {
-	  Tag_si {
-	    Tag_t { Text $string }
-	  }
-	}
-	# garbage collection
-	set sharedStrings {}
+        foreach string $sharedStrings {
+          Tag_si {
+            Tag_t { Text $string }
+          }
+        }
+        # garbage collection
+        set sharedStrings {}
       }
       ::ooxml::Dom2zip $zf $root "xl/sharedStrings.xml" cd count
       $doc delete
@@ -3133,8 +3133,8 @@ oo::class create ooxml::xl_write {
       $root setAttribute xmlns $xmlns(M)
 
       $root appendFromScript {
-	Tag_c r C1 i 3 l 1 {}
-	Tag_c r A3 i 2 {}
+        Tag_c r C1 i 3 l 1 {}
+        Tag_c r A3 i 2 {}
       }
       ::ooxml::Dom2zip $zf $root "xl/calcChain.xml" cd count
       $doc delete
@@ -3162,125 +3162,125 @@ oo::class create ooxml::xl_write {
 
     $root appendFromScript {
       if {$obj(numFmts) > $::ooxml::defaults(numFmts,start)} {
-	Tag_numFmts count [llength [array names numFmts]] {
-	  foreach idx [lsort -integer [array names numFmts]] {
-	    Tag_numFmt numFmtId $idx formatCode $numFmts($idx) {}
-	  }
-	}
+        Tag_numFmts count [llength [array names numFmts]] {
+          foreach idx [lsort -integer [array names numFmts]] {
+            Tag_numFmt numFmtId $idx formatCode $numFmts($idx) {}
+          }
+        }
       }
       Tag_fonts count $obj(fonts) x14ac:knownFonts 1 {
-	foreach idx [lsort -integer [array names fonts]] {
-	  Tag_font {
-	    if {[dict get $fonts($idx) color] ne {}} {
-	      Tag_color [lindex [dict get $fonts($idx) color] 0] [lindex [dict get $fonts($idx) color] 1]
-	    }
-	    if {[dict get $fonts($idx) bold] == 1} {
-	      Tag_b {}
-	    }
-	    if {[dict get $fonts($idx) italic] == 1} {
-	      Tag_i {}
-	    }
-	    if {[dict get $fonts($idx) underline] == 1} {
-	      Tag_u {}
-	    }
-	    Tag_sz val [dict get $fonts($idx) size] {}
-	    Tag_name val [dict get $fonts($idx) name] {}
-	    Tag_family val [dict get $fonts($idx) family] {}
-	    Tag_scheme val [dict get $fonts($idx) scheme] {}
-	  }
-	}
+        foreach idx [lsort -integer [array names fonts]] {
+          Tag_font {
+            if {[dict get $fonts($idx) color] ne {}} {
+              Tag_color [lindex [dict get $fonts($idx) color] 0] [lindex [dict get $fonts($idx) color] 1]
+            }
+            if {[dict get $fonts($idx) bold] == 1} {
+              Tag_b {}
+            }
+            if {[dict get $fonts($idx) italic] == 1} {
+              Tag_i {}
+            }
+            if {[dict get $fonts($idx) underline] == 1} {
+              Tag_u {}
+            }
+            Tag_sz val [dict get $fonts($idx) size] {}
+            Tag_name val [dict get $fonts($idx) name] {}
+            Tag_family val [dict get $fonts($idx) family] {}
+            Tag_scheme val [dict get $fonts($idx) scheme] {}
+          }
+        }
       }
       if {$obj(fills) > 0} {
-	Tag_fills count $obj(fills) {
-	  foreach idx [lsort -integer [array names fills]] {
-	    Tag_fill {
-	      Tag_patternFill patternType [dict get $fills($idx) patterntype] {
-		foreach tag {fgColor bgColor} {
-		  set key [string tolower $tag]
-		  if {[dict get $fills($idx) $key] ne {}} {
-		    Tag_$tag [lindex [dict get $fills($idx) $key] 0] [lindex [dict get $fills($idx) $key] 1] {}
-		  }
-		}
-	      }
-	    }
-	  }
-	}
+        Tag_fills count $obj(fills) {
+          foreach idx [lsort -integer [array names fills]] {
+            Tag_fill {
+              Tag_patternFill patternType [dict get $fills($idx) patterntype] {
+                foreach tag {fgColor bgColor} {
+                  set key [string tolower $tag]
+                  if {[dict get $fills($idx) $key] ne {}} {
+                    Tag_$tag [lindex [dict get $fills($idx) $key] 0] [lindex [dict get $fills($idx) $key] 1] {}
+                  }
+                }
+              }
+            }
+          }
+        }
       }
       if {$obj(borders) > 0} {
-	Tag_borders count $obj(borders) {
-	  foreach idx [lsort -integer [array names borders]] {
-	    set attr {}
-	    if {[dict exists $borders($idx) diagonal direction] && [dict get $borders($idx) diagonal direction] ne {}} {
-	      lappend attr [string map {up diagonalUp down diagonalDown} [dict get $borders($idx) diagonal direction]] 1
-	    }
-	    Tag_border {*}$attr {
-	      foreach item {left right top bottom diagonal} {
-		set attr {}
-		if {[dict exists $borders($idx) $item style] && [dict get $borders($idx) $item style] ne {}} {
-		  lappend attr style [dict get $borders($idx) $item style]
-		}
-	        Tag_$item {*}$attr {
-		  if {[dict exists $borders($idx) $item color] && [dict get $borders($idx) $item color] ne {}} {
-		    Tag_color [lindex [dict get $borders($idx) $item color] 0] [lindex [dict get $borders($idx) $item color] 1] {}
-		  }
-		}
-	      }
-	    }
-	  }
-	}
+        Tag_borders count $obj(borders) {
+          foreach idx [lsort -integer [array names borders]] {
+            set attr {}
+            if {[dict exists $borders($idx) diagonal direction] && [dict get $borders($idx) diagonal direction] ne {}} {
+              lappend attr [string map {up diagonalUp down diagonalDown} [dict get $borders($idx) diagonal direction]] 1
+            }
+            Tag_border {*}$attr {
+              foreach item {left right top bottom diagonal} {
+                set attr {}
+                if {[dict exists $borders($idx) $item style] && [dict get $borders($idx) $item style] ne {}} {
+                  lappend attr style [dict get $borders($idx) $item style]
+                }
+                Tag_$item {*}$attr {
+                  if {[dict exists $borders($idx) $item color] && [dict get $borders($idx) $item color] ne {}} {
+                    Tag_color [lindex [dict get $borders($idx) $item color] 0] [lindex [dict get $borders($idx) $item color] 1] {}
+                  }
+                }
+              }
+            }
+          }
+        }
       }
       Tag_cellStyleXfs count 1 {
-	Tag_xf numFmtId 0 fontId 0 fillId 0 borderId 0 {}
+        Tag_xf numFmtId 0 fontId 0 fillId 0 borderId 0 {}
       }
       Tag_cellXfs count $obj(styles) {
-	foreach idx [lsort -integer [array names styles]] {
-	  set attr {}
-	  lappend attr numFmtId [dict get $styles($idx) numfmt]
-	  lappend attr fontId [dict get $styles($idx) font]
-	  lappend attr fillId [dict get $styles($idx) fill]
-	  lappend attr borderId [dict get $styles($idx) border]
-	  lappend attr xfId [dict get $styles($idx) xf]
-	  if {[dict get $styles($idx) numfmt] > 0} {
-	    lappend attr applyNumberFormat 1
-	  }
-	  if {[dict get $styles($idx) font] > 0} {
-	    lappend attr applyFont 1
-	  }
-	  if {[dict get $styles($idx) fill] > 0} {
-	    lappend attr applyFill 1
-	  }
-	  if {[dict get $styles($idx) border] > 0} {
-	    lappend attr applyBorder 1
-	  }
-	  # lappend attr applyProtection 1 quotePrefix 1
-	  if {[dict get $styles($idx) horizontal] ne {} || [dict get $styles($idx) vertical] ne {} || [dict get $styles($idx) rotate] ne {} || [dict get $styles($idx) wrap] ne {}} {
-	    lappend attr applyAlignment 1
-	    set alignment 1
-	  } else {
-	    set alignment 0
-	  }
-	  Tag_xf {*}$attr {
-	    set attr {}
-	    if {$alignment} {
-	      if {[dict get $styles($idx) horizontal] ne {}} {
-		lappend attr horizontal [dict get $styles($idx) horizontal]
-	      }
-	      if {[dict get $styles($idx) vertical] ne {}} {
-		lappend attr vertical [dict get $styles($idx) vertical]
-	      }
-	      if {[dict get $styles($idx) rotate] ne {}} {
-		lappend attr textRotation [dict get $styles($idx) rotate]
-	      }
-	      if {[dict get $styles($idx) wrap] ne {}} {
-		lappend attr wrapText [dict get $styles($idx) wrap]
-	      }
-	      Tag_alignment {*}$attr {}
-	    }
-	  }
-	}
+        foreach idx [lsort -integer [array names styles]] {
+          set attr {}
+          lappend attr numFmtId [dict get $styles($idx) numfmt]
+          lappend attr fontId [dict get $styles($idx) font]
+          lappend attr fillId [dict get $styles($idx) fill]
+          lappend attr borderId [dict get $styles($idx) border]
+          lappend attr xfId [dict get $styles($idx) xf]
+          if {[dict get $styles($idx) numfmt] > 0} {
+            lappend attr applyNumberFormat 1
+          }
+          if {[dict get $styles($idx) font] > 0} {
+            lappend attr applyFont 1
+          }
+          if {[dict get $styles($idx) fill] > 0} {
+            lappend attr applyFill 1
+          }
+          if {[dict get $styles($idx) border] > 0} {
+            lappend attr applyBorder 1
+          }
+          # lappend attr applyProtection 1 quotePrefix 1
+          if {[dict get $styles($idx) horizontal] ne {} || [dict get $styles($idx) vertical] ne {} || [dict get $styles($idx) rotate] ne {} || [dict get $styles($idx) wrap] ne {}} {
+            lappend attr applyAlignment 1
+            set alignment 1
+          } else {
+            set alignment 0
+          }
+          Tag_xf {*}$attr {
+            set attr {}
+            if {$alignment} {
+              if {[dict get $styles($idx) horizontal] ne {}} {
+                lappend attr horizontal [dict get $styles($idx) horizontal]
+              }
+              if {[dict get $styles($idx) vertical] ne {}} {
+                lappend attr vertical [dict get $styles($idx) vertical]
+              }
+              if {[dict get $styles($idx) rotate] ne {}} {
+                lappend attr textRotation [dict get $styles($idx) rotate]
+              }
+              if {[dict get $styles($idx) wrap] ne {}} {
+                lappend attr wrapText [dict get $styles($idx) wrap]
+              }
+              Tag_alignment {*}$attr {}
+            }
+          }
+        }
       }
       Tag_cellStyles count 1 {
-	Tag_cellStyle name Standard xfId 0 builtinId 0 {}
+        Tag_cellStyle name Standard xfId 0 builtinId 0 {}
       }
       Tag_dxfs count 0 {}
       Tag_tableStyles count 0 {}
@@ -3306,322 +3306,322 @@ oo::class create ooxml::xl_write {
 
     $root appendFromScript {
       Tag_a:themeElements {
-	Tag_a:clrScheme name Office {
-	  Tag_a:dk1 {
-	    Tag_a:sysClr val windowText lastClr 000000 {}
-	  }
-	  Tag_a:lt1 {
-	    Tag_a:sysClr val window lastClr FFFFFF {}
-	  }
-	  Tag_a:dk2 {
-	    Tag_a:srgbClr val 1F497D {}
-	  }
-	  Tag_a:lt2 {
-	    Tag_a:srgbClr val EEECE1 {}
-	  }
-	  Tag_a:accent1 {
-	    Tag_a:srgbClr val 4F81BD {}
-	  }
-	  Tag_a:accent2 {
-	    Tag_a:srgbClr val C0504D {}
-	  }
-	  Tag_a:accent3 {
-	    Tag_a:srgbClr val 9BBB59 {}
-	  }
-	  Tag_a:accent4 {
-	    Tag_a:srgbClr val 8064A2 {}
-	  }
-	  Tag_a:accent5 {
-	    Tag_a:srgbClr val 4BACC6 {}
-	  }
-	  Tag_a:accent6 {
-	    Tag_a:srgbClr val F79646 {}
-	  }
-	  Tag_a:hlink {
-	    Tag_a:srgbClr val 0000FF {}
-	  }
-	  Tag_a:folHlink {
-	    Tag_a:srgbClr val 800080 {}
-	  }
-	}
-	Tag_a:fontScheme name Office {
-	  Tag_a:majorFont {
-	    Tag_a:latin typeface Cambria {}
-	    Tag_a:ea typeface {} {}
-	    Tag_a:cs typeface {} {}
-	    Tag_a:font script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF {}
-	    Tag_a:font script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515 {}
-	    Tag_a:font script Hans typeface \u5B8B\u4F53 {}
-	    Tag_a:font script Hant typeface \u65B0\u7D30\u660E\u9AD4 {}
-	    Tag_a:font script Arab typeface {Times New Roman} {}
-	    Tag_a:font script Hebr typeface {Times New Roman} {}
-	    Tag_a:font script Thai typeface Tahoma {}
-	    Tag_a:font script Ethi typeface Nyala {}
-	    Tag_a:font script Beng typeface Vrinda {}
-	    Tag_a:font script Gujr typeface Shruti {}
-	    Tag_a:font script Khmr typeface MoolBoran {}
-	    Tag_a:font script Knda typeface Tunga {}
-	    Tag_a:font script Guru typeface Raavi {}
-	    Tag_a:font script Cans typeface Euphemia {}
-	    Tag_a:font script Cher typeface {Plantagenet Cherokee} {}
-	    Tag_a:font script Yiii typeface {Microsoft Yi Baiti} {}
-	    Tag_a:font script Tibt typeface {Microsoft Himalaya} {}
-	    Tag_a:font script Thaa typeface {MV Boli} {}
-	    Tag_a:font script Deva typeface Mangal {}
-	    Tag_a:font script Telu typeface Gautami {}
-	    Tag_a:font script Taml typeface Latha {}
-	    Tag_a:font script Syrc typeface {Estrangelo Edessa} {}
-	    Tag_a:font script Orya typeface Kalinga {}
-	    Tag_a:font script Mlym typeface Kartika {}
-	    Tag_a:font script Laoo typeface DokChampa {}
-	    Tag_a:font script Sinh typeface {Iskoola Pota} {}
-	    Tag_a:font script Mong typeface {Mongolian Baiti} {}
-	    Tag_a:font script Viet typeface {Times New Roman} {}
-	    Tag_a:font script Uigh typeface {Microsoft Uighur} {}
-	    Tag_a:font script Geor typeface Sylfaen {}
-	  }
-	  Tag_a:minorFont {
-	    Tag_a:latin typeface Calibri {}
-	    Tag_a:ea typeface {} {}
-	    Tag_a:cs typeface {} {}
-	    Tag_a:font script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF {}
-	    Tag_a:font script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515 {}
-	    Tag_a:font script Hans typeface \u5B8B\u4F53 {}
-	    Tag_a:font script Hant typeface \u65B0\u7D30\u660E\u9AD4 {}
-	    Tag_a:font script Arab typeface Arial {}
-	    Tag_a:font script Hebr typeface Arial {}
-	    Tag_a:font script Thai typeface Tahoma {}
-	    Tag_a:font script Ethi typeface Nyala {}
-	    Tag_a:font script Beng typeface Vrinda {}
-	    Tag_a:font script Gujr typeface Shruti {}
-	    Tag_a:font script Khmr typeface DaunPenh {}
-	    Tag_a:font script Knda typeface Tunga {}
-	    Tag_a:font script Guru typeface Raavi {}
-	    Tag_a:font script Cans typeface Euphemia {}
-	    Tag_a:font script Cher typeface {Plantagenet Cherokee} {}
-	    Tag_a:font script Yiii typeface {Microsoft Yi Baiti} {}
-	    Tag_a:font script Tibt typeface {Microsoft Himalaya} {}
-	    Tag_a:font script Thaa typeface {MV Boli} {}
-	    Tag_a:font script Deva typeface Mangal {}
-	    Tag_a:font script Telu typeface Gautami {}
-	    Tag_a:font script Taml typeface Latha {}
-	    Tag_a:font script Syrc typeface {Estrangelo Edessa} {}
-	    Tag_a:font script Orya typeface Kalinga {}
-	    Tag_a:font script Mlym typeface Kartika {}
-	    Tag_a:font script Laoo typeface DokChampa {}
-	    Tag_a:font script Sinh typeface {Iskoola Pota} {}
-	    Tag_a:font script Mong typeface {Mongolian Baiti} {}
-	    Tag_a:font script Viet typeface Arial {}
-	    Tag_a:font script Uigh typeface {Microsoft Uighur} {}
-	    Tag_a:font script Geor typeface Sylfaen {}
-	  }
-	}
-	Tag_a:fmtScheme name Office {
-	  Tag_a:fillStyleLst {
-	    Tag_a:solidFill {
-	      Tag_a:schemeClr val phClr {}
-	    }
-	    Tag_a:gradFill rotWithShape 1 {
-	      Tag_a:gsLst {
-		Tag_a:gs pos 0 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 50000 {}
-		    Tag_a:satMod val 300000 {}
-		  }
-		}
-		Tag_a:gs pos 35000 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 37000 {}
-		    Tag_a:satMod val 300000 {}
-		  }
-		}
-		Tag_a:gs pos 100000 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 15000 {}
-		    Tag_a:satMod val 350000 {}
-		  }
-		}
-	      }
-	      Tag_a:lin ang 16200000 scaled 1 {}
-	    }
-	    Tag_a:gradFill rotWithShape 1 {
-	      Tag_a:gsLst {
-		Tag_a:gs pos 0 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 100000 {}
-		    Tag_a:shade val 100000 {}
-		    Tag_a:satMod val 130000 {}
-		  }
-		}
-		Tag_a:gs pos 100000 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 50000 {}
-		    Tag_a:shade val 100000 {}
-		    Tag_a:satMod val 350000 {}
-		  }
-		}
-	      }
-	      Tag_a:lin ang 16200000 scaled 0 {}
-	    }
-	  }
-	  Tag_a:lnStyleLst {
-	    Tag_a:ln w 9525 cap flat cmpd sng algn ctr {
-	      Tag_a:solidFill {
-		Tag_a:schemeClr val phClr {
-		  Tag_a:shade val 95000 {
-		  }
-		  Tag_a:satMod val 105000 {
-		  }
-		}
-	      }
-	      Tag_a:prstDash val solid {}
-	    }
-	    Tag_a:ln w 25400 cap flat cmpd sng algn ctr {
-	      Tag_a:solidFill {
-		Tag_a:schemeClr val phClr {}
-	      }
-	      Tag_a:prstDash val solid {}
-	    }
-	    Tag_a:ln w 38100 cap flat cmpd sng algn ctr {
-	      Tag_a:solidFill {
-		Tag_a:schemeClr val phClr {}
-	      }
-	      Tag_a:prstDash val solid {}
-	    }
-	  }
-	  Tag_a:effectStyleLst {
-	    Tag_a:effectStyle {
-	      Tag_a:effectLst {
-		Tag_a:outerShdw blurRad 40000 dist 20000 dir 5400000 rotWithShape 0 {
-		  Tag_a:srgbClr val 000000 {
-		    Tag_a:alpha val 38000 {}
-		  }
-		}
-	      }
-	    }
-	    Tag_a:effectStyle {
-	      Tag_a:effectLst {
-		Tag_a:outerShdw blurRad 40000 dist 23000 dir 5400000 rotWithShape 0 {
-		  Tag_a:srgbClr val 000000 {
-		    Tag_a:alpha val 35000 {}
-		  }
-		}
-	      }
-	    }
-	    Tag_a:effectStyle {
-	      Tag_a:effectLst {
-		Tag_a:outerShdw blurRad 40000 dist 23000 dir 5400000 rotWithShape 0 {
-		  Tag_a:srgbClr val 000000 {
-		    Tag_a:alpha val 35000 {}
-		  }
-		}
-	      }
-	      Tag_a:scene3d {
-		Tag_a:camera prst orthographicFront {
-		  Tag_a:rot lat 0 lon 0 rev 0 {
-		  }
-		}
-		Tag_a:lightRig rig threePt dir t {
-		  Tag_a:rot lat 0 lon 0 rev 1200000 {
-		  }
-		}
-	      }
-	      Tag_a:sp3d {
-		Tag_a:bevelT w 63500 h 25400 {}
-	      }
-	    }
-	  }
-	  Tag_a:bgFillStyleLst {
-	    Tag_a:solidFill {
-	      Tag_a:schemeClr val phClr {}
-	    }
-	    Tag_a:gradFill rotWithShape 1 {
-	      Tag_a:gsLst {
-		Tag_a:gs pos 0 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 40000 {}
-		    Tag_a:satMod val 350000 {}
-		  }
-		}
-		Tag_a:gs pos 40000 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 45000 {}
-		    Tag_a:shade val 99000 {}
-		    Tag_a:satMod val 350000 {}
-		  }
-		}
-		Tag_a:gs pos 100000 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:shade val 20000 {}
-		    Tag_a:satMod val 255000 {}
-		  }
-		}
-	      }
-	      Tag_a:path path circle {
-		Tag_a:fillToRect l 50000 t -80000 r 50000 b 180000 {}
-	      }
-	    }
-	    Tag_a:gradFill rotWithShape 1 {
-	      Tag_a:gsLst {
-		Tag_a:gs pos 0 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:tint val 80000 {}
-		    Tag_a:satMod val 300000 {}
-		  }
-		}
-		Tag_a:gs pos 100000 {
-		  Tag_a:schemeClr val phClr {
-		    Tag_a:shade val 30000 {}
-		    Tag_a:satMod val 200000 {}
-		  }
-		}
-	      }
-	      Tag_a:path path circle {
-		Tag_a:fillToRect l 50000 t 50000 r 50000 b 50000 {}
-	      }
-	    }
-	  }
-	}
+        Tag_a:clrScheme name Office {
+          Tag_a:dk1 {
+            Tag_a:sysClr val windowText lastClr 000000 {}
+          }
+          Tag_a:lt1 {
+            Tag_a:sysClr val window lastClr FFFFFF {}
+          }
+          Tag_a:dk2 {
+            Tag_a:srgbClr val 1F497D {}
+          }
+          Tag_a:lt2 {
+            Tag_a:srgbClr val EEECE1 {}
+          }
+          Tag_a:accent1 {
+            Tag_a:srgbClr val 4F81BD {}
+          }
+          Tag_a:accent2 {
+            Tag_a:srgbClr val C0504D {}
+          }
+          Tag_a:accent3 {
+            Tag_a:srgbClr val 9BBB59 {}
+          }
+          Tag_a:accent4 {
+            Tag_a:srgbClr val 8064A2 {}
+          }
+          Tag_a:accent5 {
+            Tag_a:srgbClr val 4BACC6 {}
+          }
+          Tag_a:accent6 {
+            Tag_a:srgbClr val F79646 {}
+          }
+          Tag_a:hlink {
+            Tag_a:srgbClr val 0000FF {}
+          }
+          Tag_a:folHlink {
+            Tag_a:srgbClr val 800080 {}
+          }
+        }
+        Tag_a:fontScheme name Office {
+          Tag_a:majorFont {
+            Tag_a:latin typeface Cambria {}
+            Tag_a:ea typeface {} {}
+            Tag_a:cs typeface {} {}
+            Tag_a:font script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF {}
+            Tag_a:font script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515 {}
+            Tag_a:font script Hans typeface \u5B8B\u4F53 {}
+            Tag_a:font script Hant typeface \u65B0\u7D30\u660E\u9AD4 {}
+            Tag_a:font script Arab typeface {Times New Roman} {}
+            Tag_a:font script Hebr typeface {Times New Roman} {}
+            Tag_a:font script Thai typeface Tahoma {}
+            Tag_a:font script Ethi typeface Nyala {}
+            Tag_a:font script Beng typeface Vrinda {}
+            Tag_a:font script Gujr typeface Shruti {}
+            Tag_a:font script Khmr typeface MoolBoran {}
+            Tag_a:font script Knda typeface Tunga {}
+            Tag_a:font script Guru typeface Raavi {}
+            Tag_a:font script Cans typeface Euphemia {}
+            Tag_a:font script Cher typeface {Plantagenet Cherokee} {}
+            Tag_a:font script Yiii typeface {Microsoft Yi Baiti} {}
+            Tag_a:font script Tibt typeface {Microsoft Himalaya} {}
+            Tag_a:font script Thaa typeface {MV Boli} {}
+            Tag_a:font script Deva typeface Mangal {}
+            Tag_a:font script Telu typeface Gautami {}
+            Tag_a:font script Taml typeface Latha {}
+            Tag_a:font script Syrc typeface {Estrangelo Edessa} {}
+            Tag_a:font script Orya typeface Kalinga {}
+            Tag_a:font script Mlym typeface Kartika {}
+            Tag_a:font script Laoo typeface DokChampa {}
+            Tag_a:font script Sinh typeface {Iskoola Pota} {}
+            Tag_a:font script Mong typeface {Mongolian Baiti} {}
+            Tag_a:font script Viet typeface {Times New Roman} {}
+            Tag_a:font script Uigh typeface {Microsoft Uighur} {}
+            Tag_a:font script Geor typeface Sylfaen {}
+          }
+          Tag_a:minorFont {
+            Tag_a:latin typeface Calibri {}
+            Tag_a:ea typeface {} {}
+            Tag_a:cs typeface {} {}
+            Tag_a:font script Jpan typeface \uFF2D\uFF33\u0020\uFF30\u30B4\u30B7\u30C3\u30AF {}
+            Tag_a:font script Hang typeface \uB9D1\uC740\u0020\uACE0\uB515 {}
+            Tag_a:font script Hans typeface \u5B8B\u4F53 {}
+            Tag_a:font script Hant typeface \u65B0\u7D30\u660E\u9AD4 {}
+            Tag_a:font script Arab typeface Arial {}
+            Tag_a:font script Hebr typeface Arial {}
+            Tag_a:font script Thai typeface Tahoma {}
+            Tag_a:font script Ethi typeface Nyala {}
+            Tag_a:font script Beng typeface Vrinda {}
+            Tag_a:font script Gujr typeface Shruti {}
+            Tag_a:font script Khmr typeface DaunPenh {}
+            Tag_a:font script Knda typeface Tunga {}
+            Tag_a:font script Guru typeface Raavi {}
+            Tag_a:font script Cans typeface Euphemia {}
+            Tag_a:font script Cher typeface {Plantagenet Cherokee} {}
+            Tag_a:font script Yiii typeface {Microsoft Yi Baiti} {}
+            Tag_a:font script Tibt typeface {Microsoft Himalaya} {}
+            Tag_a:font script Thaa typeface {MV Boli} {}
+            Tag_a:font script Deva typeface Mangal {}
+            Tag_a:font script Telu typeface Gautami {}
+            Tag_a:font script Taml typeface Latha {}
+            Tag_a:font script Syrc typeface {Estrangelo Edessa} {}
+            Tag_a:font script Orya typeface Kalinga {}
+            Tag_a:font script Mlym typeface Kartika {}
+            Tag_a:font script Laoo typeface DokChampa {}
+            Tag_a:font script Sinh typeface {Iskoola Pota} {}
+            Tag_a:font script Mong typeface {Mongolian Baiti} {}
+            Tag_a:font script Viet typeface Arial {}
+            Tag_a:font script Uigh typeface {Microsoft Uighur} {}
+            Tag_a:font script Geor typeface Sylfaen {}
+          }
+        }
+        Tag_a:fmtScheme name Office {
+          Tag_a:fillStyleLst {
+            Tag_a:solidFill {
+              Tag_a:schemeClr val phClr {}
+            }
+            Tag_a:gradFill rotWithShape 1 {
+              Tag_a:gsLst {
+                Tag_a:gs pos 0 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 50000 {}
+                    Tag_a:satMod val 300000 {}
+                  }
+                }
+                Tag_a:gs pos 35000 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 37000 {}
+                    Tag_a:satMod val 300000 {}
+                  }
+                }
+                Tag_a:gs pos 100000 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 15000 {}
+                    Tag_a:satMod val 350000 {}
+                  }
+                }
+              }
+              Tag_a:lin ang 16200000 scaled 1 {}
+            }
+            Tag_a:gradFill rotWithShape 1 {
+              Tag_a:gsLst {
+                Tag_a:gs pos 0 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 100000 {}
+                    Tag_a:shade val 100000 {}
+                    Tag_a:satMod val 130000 {}
+                  }
+                }
+                Tag_a:gs pos 100000 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 50000 {}
+                    Tag_a:shade val 100000 {}
+                    Tag_a:satMod val 350000 {}
+                  }
+                }
+              }
+              Tag_a:lin ang 16200000 scaled 0 {}
+            }
+          }
+          Tag_a:lnStyleLst {
+            Tag_a:ln w 9525 cap flat cmpd sng algn ctr {
+              Tag_a:solidFill {
+                Tag_a:schemeClr val phClr {
+                  Tag_a:shade val 95000 {
+                  }
+                  Tag_a:satMod val 105000 {
+                  }
+                }
+              }
+              Tag_a:prstDash val solid {}
+            }
+            Tag_a:ln w 25400 cap flat cmpd sng algn ctr {
+              Tag_a:solidFill {
+                Tag_a:schemeClr val phClr {}
+              }
+              Tag_a:prstDash val solid {}
+            }
+            Tag_a:ln w 38100 cap flat cmpd sng algn ctr {
+              Tag_a:solidFill {
+                Tag_a:schemeClr val phClr {}
+              }
+              Tag_a:prstDash val solid {}
+            }
+          }
+          Tag_a:effectStyleLst {
+            Tag_a:effectStyle {
+              Tag_a:effectLst {
+                Tag_a:outerShdw blurRad 40000 dist 20000 dir 5400000 rotWithShape 0 {
+                  Tag_a:srgbClr val 000000 {
+                    Tag_a:alpha val 38000 {}
+                  }
+                }
+              }
+            }
+            Tag_a:effectStyle {
+              Tag_a:effectLst {
+                Tag_a:outerShdw blurRad 40000 dist 23000 dir 5400000 rotWithShape 0 {
+                  Tag_a:srgbClr val 000000 {
+                    Tag_a:alpha val 35000 {}
+                  }
+                }
+              }
+            }
+            Tag_a:effectStyle {
+              Tag_a:effectLst {
+                Tag_a:outerShdw blurRad 40000 dist 23000 dir 5400000 rotWithShape 0 {
+                  Tag_a:srgbClr val 000000 {
+                    Tag_a:alpha val 35000 {}
+                  }
+                }
+              }
+              Tag_a:scene3d {
+                Tag_a:camera prst orthographicFront {
+                  Tag_a:rot lat 0 lon 0 rev 0 {
+                  }
+                }
+                Tag_a:lightRig rig threePt dir t {
+                  Tag_a:rot lat 0 lon 0 rev 1200000 {
+                  }
+                }
+              }
+              Tag_a:sp3d {
+                Tag_a:bevelT w 63500 h 25400 {}
+              }
+            }
+          }
+          Tag_a:bgFillStyleLst {
+            Tag_a:solidFill {
+              Tag_a:schemeClr val phClr {}
+            }
+            Tag_a:gradFill rotWithShape 1 {
+              Tag_a:gsLst {
+                Tag_a:gs pos 0 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 40000 {}
+                    Tag_a:satMod val 350000 {}
+                  }
+                }
+                Tag_a:gs pos 40000 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 45000 {}
+                    Tag_a:shade val 99000 {}
+                    Tag_a:satMod val 350000 {}
+                  }
+                }
+                Tag_a:gs pos 100000 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:shade val 20000 {}
+                    Tag_a:satMod val 255000 {}
+                  }
+                }
+              }
+              Tag_a:path path circle {
+                Tag_a:fillToRect l 50000 t -80000 r 50000 b 180000 {}
+              }
+            }
+            Tag_a:gradFill rotWithShape 1 {
+              Tag_a:gsLst {
+                Tag_a:gs pos 0 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:tint val 80000 {}
+                    Tag_a:satMod val 300000 {}
+                  }
+                }
+                Tag_a:gs pos 100000 {
+                  Tag_a:schemeClr val phClr {
+                    Tag_a:shade val 30000 {}
+                    Tag_a:satMod val 200000 {}
+                  }
+                }
+              }
+              Tag_a:path path circle {
+                Tag_a:fillToRect l 50000 t 50000 r 50000 b 50000 {}
+              }
+            }
+          }
+        }
       }
       Tag_a:objectDefaults {
-	Tag_a:spDef {
-	  Tag_a:spPr {}
-	  Tag_a:bodyPr {}
-	  Tag_a:lstStyle {}
-	  Tag_a:style {
-	    Tag_a:lnRef idx 1 {
-	      Tag_a:schemeClr val accent1 {}
-	    }
-	    Tag_a:fillRef idx 3 {
-	      Tag_a:schemeClr val accent1 {}
-	    }
-	    Tag_a:effectRef idx 2 {
-	      Tag_a:schemeClr val accent1 {}
-	    }
-	    Tag_a:fontRef idx minor {
-	      Tag_a:schemeClr val lt1 {}
-	    }
-	  }
-	}
-	Tag_a:lnDef {
-	  Tag_a:spPr {}
-	  Tag_a:bodyPr {}
-	  Tag_a:lstStyle {}
-	  Tag_a:style {
-	    Tag_a:lnRef idx 2 {
-	      Tag_a:schemeClr val accent1 {}
-	    }
-	    Tag_a:fillRef idx 0 {
-	      Tag_a:schemeClr val accent1 {}
-	    }
-	    Tag_a:effectRef idx 1 {
-	      Tag_a:schemeClr val accent1 {}
-	    }
-	    Tag_a:fontRef idx minor {
-	      Tag_a:schemeClr val tx1 {}
-	    }
-	  }
-	}
+        Tag_a:spDef {
+          Tag_a:spPr {}
+          Tag_a:bodyPr {}
+          Tag_a:lstStyle {}
+          Tag_a:style {
+            Tag_a:lnRef idx 1 {
+              Tag_a:schemeClr val accent1 {}
+            }
+            Tag_a:fillRef idx 3 {
+              Tag_a:schemeClr val accent1 {}
+            }
+            Tag_a:effectRef idx 2 {
+              Tag_a:schemeClr val accent1 {}
+            }
+            Tag_a:fontRef idx minor {
+              Tag_a:schemeClr val lt1 {}
+            }
+          }
+        }
+        Tag_a:lnDef {
+          Tag_a:spPr {}
+          Tag_a:bodyPr {}
+          Tag_a:lstStyle {}
+          Tag_a:style {
+            Tag_a:lnRef idx 2 {
+              Tag_a:schemeClr val accent1 {}
+            }
+            Tag_a:fillRef idx 0 {
+              Tag_a:schemeClr val accent1 {}
+            }
+            Tag_a:effectRef idx 1 {
+              Tag_a:schemeClr val accent1 {}
+            }
+            Tag_a:fontRef idx minor {
+              Tag_a:schemeClr val tx1 {}
+            }
+          }
+        }
       }
       Tag_a:extraClrSchemeLst {}
     }
@@ -3648,42 +3648,42 @@ oo::class create ooxml::xl_write {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
       Tag_workbookPr showInkAnnotation 0 autoCompressPictures 0 {}
       Tag_bookViews {
-	set attr {}
-	foreach {n v} [array get view] {
-	  switch -- $n {
-	    activetab {
-	      if {$v ni $obj(sheets)} {
-	        set v 0
-	      }
-	      lappend attr activeTab $v
-	    }
-	    x {
-	      lappend attr xWindow $v
-	    }
-	    y {
-	      lappend attr yWindow $v
-	    }
-	    height {
-	      lappend attr windowHeight $v
-	    }
-	    width {
-	      lappend attr windowWidth $v
-	    }
-	    default {
-	    }
-	  }
-	}
-	Tag_workbookView {*}$attr {}
+        set attr {}
+        foreach {n v} [array get view] {
+          switch -- $n {
+            activetab {
+              if {$v ni $obj(sheets)} {
+                set v 0
+              }
+              lappend attr activeTab $v
+            }
+            x {
+              lappend attr xWindow $v
+            }
+            y {
+              lappend attr yWindow $v
+            }
+            height {
+              lappend attr windowHeight $v
+            }
+            width {
+              lappend attr windowWidth $v
+            }
+            default {
+            }
+          }
+        }
+        Tag_workbookView {*}$attr {}
       }
       Tag_sheets {
-	for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
-	  Tag_sheet name $obj(sheet,$ws) sheetId $ws r:id rId$ws {}
-	}
+        for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+          Tag_sheet name $obj(sheet,$ws) sheetId $ws r:id rId$ws {}
+        }
       }
       if {0} {
-	Tag_definedNames {
-	  Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
-	}
+        Tag_definedNames {
+          Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
+        }
       }
       Tag_calcPr calcId 140000 concurrentCalc 0 {}
       # fullCalcOnLoad 1
@@ -3716,112 +3716,112 @@ oo::class create ooxml::xl_write {
       $root setAttribute mc:Ignorable x14ac
 
       $root appendFromScript {
-	Tag_dimension ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)] {}
-	Tag_sheetViews {
-	  Tag_sheetView workbookViewId 0 {
-	    if {$obj(freeze,$ws) ne {}} {
-	      lassign [split [::ooxml::StringToRowColumn $obj(freeze,$ws)] ,] row col
-	      Tag_pane xSplit $col ySplit $row topLeftCell $obj(freeze,$ws) state frozen {}
-	    }
-	  }
-	}
-	Tag_sheetFormatPr baseColWidth 10 defaultRowHeight 16 x14ac:dyDescent 0.2 {}
-	if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
-	  Tag_cols {}
-	}
-	Tag_sheetData {
-	  array unset rows
-	  foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
-	    lassign [split $idx ,] sheet row col
+        Tag_dimension ref [::ooxml::RowColumnToString $obj(dminrow,$ws),$obj(dmincol,$ws)]:[::ooxml::RowColumnToString $obj(dmaxrow,$ws),$obj(dmaxcol,$ws)] {}
+        Tag_sheetViews {
+          Tag_sheetView workbookViewId 0 {
+            if {$obj(freeze,$ws) ne {}} {
+              lassign [split [::ooxml::StringToRowColumn $obj(freeze,$ws)] ,] row col
+              Tag_pane xSplit $col ySplit $row topLeftCell $obj(freeze,$ws) state frozen {}
+            }
+          }
+        }
+        Tag_sheetFormatPr baseColWidth 10 defaultRowHeight 16 x14ac:dyDescent 0.2 {}
+        if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
+          Tag_cols {}
+        }
+        Tag_sheetData {
+          array unset rows
+          foreach idx [lsort -dictionary [array names cells $ws,*,*]] {
+            lassign [split $idx ,] sheet row col
             lappend rows($row) $col
-	  }
-	  foreach row [lsort -integer [array names rows]] {
-	    set attr {}
-	    if {[dict exists $obj(rowHeight,$ws) $row]} {
-	      lappend attr ht [dict get $obj(rowHeight,$ws) $row] customHeight 1
-	    }
-	    # lappend attr spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
-	    Tag_row r [expr {$row + 1}] {*}$attr {
+          }
+          foreach row [lsort -integer [array names rows]] {
+            set attr {}
+            if {[dict exists $obj(rowHeight,$ws) $row]} {
+              lappend attr ht [dict get $obj(rowHeight,$ws) $row] customHeight 1
+            }
+            # lappend attr spans [expr {$minCol + 1}]:[expr {$maxCol + 1}]
+            Tag_row r [expr {$row + 1}] {*}$attr {
               foreach col $rows($row) {
                 set idx "$ws,$row,$col"
-		if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {}) || [dict exists $cells($idx) fsi]} {
-		  set attr {}
-		  if {[dict exists $cells($idx) s] && [dict get $cells($idx) s] > 0} {
-		    lappend attr s [dict get $cells($idx) s]
-		  }
-		  if {[dict exists $cells($idx) t] && [dict get $cells($idx) t] ne {n}} {
-		    lappend attr t [dict get $cells($idx) t]
-		  }
-		  Tag_c r [::ooxml::RowColumnToString $row,$col] {*}$attr {
-		    if {[dict exists $cells($idx) v] && [dict get $cells($idx) v] ne {}} {
-		      Tag_v { Text [dict get $cells($idx) v] }
-		    }
-		    if {([dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}) || [dict exists $cells($idx) fsi]} {
-		      ## FORMULA ##
-		      set attr {}
-		      if {[dict exists $cells($idx) fsi] && [dict get $cells($idx) fsi] > -1} {
-			lappend attr t shared
-		      }
-		      if {[dict exists $cells($idx) fsr] && [dict get $cells($idx) fsr] ne {}} {
-			lappend attr ref [dict get $cells($idx) fsr]
-		      }
-		      if {[dict exists $cells($idx) fsi] && [dict get $cells($idx) fsi] > -1} {
-			lappend attr si [dict get $cells($idx) fsi]
-		      }
-		      Tag_f {*}$attr { 
-			if {[dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}} {
-			  Text [dict get $cells($idx) f]
-			}
-		      }
-		    }
-		  }
-		} elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
-		  Tag_c r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
-		}
-		# garbage collection
-	        unset -nocomplain cells($idx)
-	      }
-	    }
-	  }
-	}
-	if {$obj(autofilter,$ws) ne {}} {
-	  Tag_autoFilter ref $obj(autofilter,$ws) {}
-	}
-	if {[info exists obj(merge,$ws)] && $obj(merge,$ws) ne {}} {
-	  Tag_mergeCells count [llength $obj(merge,$ws)] {
-	    foreach item $obj(merge,$ws) {
-	      Tag_mergeCell ref $item {}
-	    }
-	  }
-	}
-	Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
+                if {([dict exists $cells($idx) v] && [string trim [dict get $cells($idx) v]] ne {}) || ([dict exists $cells($idx) f] && [string trim [dict get $cells($idx) f]] ne {}) || [dict exists $cells($idx) fsi]} {
+                  set attr {}
+                  if {[dict exists $cells($idx) s] && [dict get $cells($idx) s] > 0} {
+                    lappend attr s [dict get $cells($idx) s]
+                  }
+                  if {[dict exists $cells($idx) t] && [dict get $cells($idx) t] ne {n}} {
+                    lappend attr t [dict get $cells($idx) t]
+                  }
+                  Tag_c r [::ooxml::RowColumnToString $row,$col] {*}$attr {
+                    if {[dict exists $cells($idx) v] && [dict get $cells($idx) v] ne {}} {
+                      Tag_v { Text [dict get $cells($idx) v] }
+                    }
+                    if {([dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}) || [dict exists $cells($idx) fsi]} {
+                      ## FORMULA ##
+                      set attr {}
+                      if {[dict exists $cells($idx) fsi] && [dict get $cells($idx) fsi] > -1} {
+                        lappend attr t shared
+                      }
+                      if {[dict exists $cells($idx) fsr] && [dict get $cells($idx) fsr] ne {}} {
+                        lappend attr ref [dict get $cells($idx) fsr]
+                      }
+                      if {[dict exists $cells($idx) fsi] && [dict get $cells($idx) fsi] > -1} {
+                        lappend attr si [dict get $cells($idx) fsi]
+                      }
+                      Tag_f {*}$attr { 
+                        if {[dict exists $cells($idx) f] && [dict get $cells($idx) f] ne {}} {
+                          Text [dict get $cells($idx) f]
+                        }
+                      }
+                    }
+                  }
+                } elseif {[dict exists $cells($idx) s] && [string is integer -strict [dict get $cells($idx) s]] && [dict get $cells($idx) s] > 0} {
+                  Tag_c r [::ooxml::RowColumnToString $row,$col] s [dict get $cells($idx) s] {}
+                }
+                # garbage collection
+                unset -nocomplain cells($idx)
+              }
+            }
+          }
+        }
+        if {$obj(autofilter,$ws) ne {}} {
+          Tag_autoFilter ref $obj(autofilter,$ws) {}
+        }
+        if {[info exists obj(merge,$ws)] && $obj(merge,$ws) ne {}} {
+          Tag_mergeCells count [llength $obj(merge,$ws)] {
+            foreach item $obj(merge,$ws) {
+              Tag_mergeCell ref $item {}
+            }
+          }
+        }
+        Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
       }
 
       if {[set colsNode [$root selectNodes /worksheet/cols]] ne {}} {
-	if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
-	  $colsNode appendFromScript {
-	    foreach idx [lsort -dictionary [array names cols $ws,*]] {
-	      set attr {}
-	      lappend attr min [expr {[dict get $cols($idx) min] + 1}] max [expr {[dict get $cols($idx) max] + 1}]
-	      if {[dict get $cols($idx) width] ne {}} {
-		lappend attr width [dict get $cols($idx) width]
-		if {[dict get $cols($idx) width] != $::ooxml::defaults(cols,width)} {
-		  dict set $cols($idx) customwidth 1
-		}
-	      }
-	      if {[dict get $cols($idx) style] ne {} && [dict get $cols($idx) style] > 0} {
-		lappend attr style [dict get $cols($idx) style]
-	      }
-	      if {[dict get $cols($idx) bestfit] == 1} {
-		lappend attr bestFit [dict get $cols($idx) bestfit]
-	      }
-	      if {[dict get $cols($idx) customwidth] == 1} {
-		lappend attr customWidth [dict get $cols($idx) customwidth]
-	      }
-	      Tag_col {*}$attr {}
-	    }
-	  }
-	}
+        if {[info exists obj($ws,cols)] && $obj($ws,cols) > 0} {
+          $colsNode appendFromScript {
+            foreach idx [lsort -dictionary [array names cols $ws,*]] {
+              set attr {}
+              lappend attr min [expr {[dict get $cols($idx) min] + 1}] max [expr {[dict get $cols($idx) max] + 1}]
+              if {[dict get $cols($idx) width] ne {}} {
+                lappend attr width [dict get $cols($idx) width]
+                if {[dict get $cols($idx) width] != $::ooxml::defaults(cols,width)} {
+                  dict set $cols($idx) customwidth 1
+                }
+              }
+              if {[dict get $cols($idx) style] ne {} && [dict get $cols($idx) style] > 0} {
+                lappend attr style [dict get $cols($idx) style]
+              }
+              if {[dict get $cols($idx) bestfit] == 1} {
+                lappend attr bestFit [dict get $cols($idx) bestfit]
+              }
+              if {[dict get $cols($idx) customwidth] == 1} {
+                lappend attr customWidth [dict get $cols($idx) customwidth]
+              }
+              Tag_col {*}$attr {}
+            }
+          }
+        }
       }
       ::ooxml::Dom2zip $zf $root "xl/worksheets/sheet$ws.xml" cd count
       $doc delete
@@ -3866,18 +3866,18 @@ proc ::ooxml::tablelist_to_xl { lb args } {
   for {set idx 0} {$idx < $len} {incr idx} {
     switch -- [set opt [lindex $args $idx]] {
       -callback - -path - -file - -creator - -name {
-	incr idx
-	if {$idx < $len} {
-	  set opts([string range $opt 1 end]) [lindex $args $idx]
-	} else {
-	  error "option '$opt': missing argument"
-	}            
+        incr idx
+        if {$idx < $len} {
+          set opts([string range $opt 1 end]) [lindex $args $idx]
+        } else {
+          error "option '$opt': missing argument"
+        }            
       }
       -rootonly - -addtimestamp - -globalstyle {
-	set opts([string range $opt 1 end]) 1
+        set opts([string range $opt 1 end]) 1
       }
       default {
-	error "unknown option \"$opt\", should be: -callback, -path, -file, -creator, -name, -rootonly, -addtimestamp or -globalstyle"
+        error "unknown option \"$opt\", should be: -callback, -path, -file, -creator, -name, -rootonly, -addtimestamp or -globalstyle"
       }
     }
   }
@@ -3943,25 +3943,25 @@ proc ::ooxml::tablelist_to_xl { lb args } {
 
     if {$opts(rootonly)} {
       foreach row [$lb get [$lb childkeys root]] {
-	$spreadsheet row $sheet
-	set idx 0
-	foreach col $row {
-	  if {[string trim $col] ne {}} {
-	    $spreadsheet cell $sheet $col -index $idx {*}$globalstyle
-	  }
-	  incr idx
-	}
+        $spreadsheet row $sheet
+        set idx 0
+        foreach col $row {
+          if {[string trim $col] ne {}} {
+            $spreadsheet cell $sheet $col -index $idx {*}$globalstyle
+          }
+          incr idx
+        }
       }
     } else {
       foreach row [$lb get 0 end] {
-	$spreadsheet row $sheet
-	set idx 0
-	foreach col $row {
-	  if {[string trim $col] ne {}} {
-	    $spreadsheet cell $sheet $col -index $idx {*}$globalstyle
-	  }
-	  incr idx
-	}
+        $spreadsheet row $sheet
+        set idx 0
+        foreach col $row {
+          if {[string trim $col] ne {}} {
+            $spreadsheet cell $sheet $col -index $idx {*}$globalstyle
+          }
+          incr idx
+        }
       }
     }
 

@@ -47,7 +47,7 @@ build-info.tcl: manifest manifest.uuid tools/mkversion.tcl
 
 all: build-info.tcl
 
-install:
+install: all
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/helper.tcl` cp $(PKG_TCL_SOURCES) pkgIndex.tcl $(pkglibdir)
 
 test:

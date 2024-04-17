@@ -1,11 +1,11 @@
-C build-info\ssupport\sTIP\s599
-D 2024-04-17T15:00:01.083
+C updated\stclconfig/tcl.m4\s381985d331\s2023-12-11\s10:37:17
+D 2024-04-17T15:03:47.366
 F .fossil-settings/ignore-glob f4da92f118368452a68f324bb606191774b791ae446557243fbf0636deb9a0b1
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in ef18a25521f2ddbb96221066b0c2684dc7d7ce2d68d3d0856ad7bf5a9e5a66f7
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
-F configure 0d3fe1dc5b53ba226228ed29a8d2f2113137b0738066c34d333de13dbc805e1f x
+F configure 8d46d3075476b6c6d1bc0f1df6c1399989ce6e54a9904db8500b89a0026d1da5 x
 F configure.ac 09b3d3f7a34d2b22906d6d38b4a5556c4852cb50b3affd56f577d31b5ebcd8b8
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
@@ -27,7 +27,7 @@ F pkgIndex.tcl.in b93774f6039d152fc4c93c533d2065456c4a2e96ef89226fc2b2a2a0086c3e
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
 F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b34d1d4f8 x
-F tclconfig/tcl.m4 7de697d033555b0ebe1fa64dd3143db0a2e0c306d15b038ff49e5e9bdd8ab033
+F tclconfig/tcl.m4 24841be70516af95124d989e9b9a9fb07879fdc9cf2248c4ce6fc7aa3a5ae72b
 F tests/all.tcl 5f87ca6b7d1e5bf0aa6e3a7fa4408f629ab2a224cc20910fb12ea6928f1aecbd
 F tests/benchmark.test ad9ac56279c418f73e420b5d56da568a526322786e263f2717ad3752916ea90b
 F tests/formatcell.test 58a1bab47e5217ca7d65dbfe1ba12f8d03cba176662a2aa2f129b56c3e1d873d
@@ -69,11 +69,8 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P b3e502f1e7b5f895fc097067627b712e793a7cb2fc724fda83bc021702e8d666
-R 5dbca98d288e833261d38b7a1dcffd1a
-T *branch * build_info_tip599
-T *sym-build_info_tip599 *
-T -sym-trunk *
+P 52f8940a6a50bc1230a6af0396c92e0cbc71ef580070c5b930497017206fdddd
+R 944d8b7ed2517ec19f925e016498332f
 U alex
-Z 1a3722f78879d2e97558a18f21bbae26
+Z 9b16072544793a44b24ccf1f05192825
 # Remove this line to create a well-formed Fossil manifest.

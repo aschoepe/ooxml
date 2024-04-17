@@ -33,16 +33,19 @@ CYGPATH		= @CYGPATH@
 
 TCLSH_PROG	= @TCLSH_PROG@
 
-PKG_TCL_SOURCES	= @PKG_TCL_SOURCES@
+PKG_TCL_SOURCES	= @PKG_TCL_SOURCES@ build-info.tcl
 
-CONFIG_CLEAN_FILES = Makefile pkgIndex.tcl
+CONFIG_CLEAN_FILES = Makefile pkgIndex.tcl build-info.tcl
 CLEANFILES	= @CLEANFILES@
 
 #========================================================================
 # Start of user-definable TARGETS section
 #========================================================================
 
-all:
+build-info.tcl: manifest manifest.uuid tools/mkversion.tcl
+	$(TCLSH_PROG) tools/mkversion.tcl @PACKAGE_NAME@ > $@
+
+all: build-info.tcl
 
 install:
 	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/helper.tcl` cp $(PKG_TCL_SOURCES) pkgIndex.tcl $(pkglibdir)

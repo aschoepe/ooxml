@@ -3,4 +3,6 @@ config.log
 config.status
 configure~
 Makefile
+pkgIndex.tcl
 uv
+build-info.tcl

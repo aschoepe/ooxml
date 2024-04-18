@@ -6,3 +6,4 @@ Makefile
 pkgIndex.tcl
 uv
 build-info.tcl
+manifest.txt

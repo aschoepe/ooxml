@@ -195,6 +195,7 @@ namespace eval ::ooxml {
   variable predefBorderLineStyles
   variable predefPatternType
   variable xmlns
+  variable pkgPath
 
   set defaults(path) {.}
 
@@ -4166,7 +4167,50 @@ proc ::ooxml::tablelist_to_xl_callback { spreadsheet sheet maxcol column title w
   }
 }
 
+proc ::ooxml::build-info { {cmd {}} } {
+  variable pkgPath
+
+  # TIP 599: Extended build information
+  # https://core.tcl-lang.org/tips/doc/trunk/tip/599.md
+
+  set file [file join $pkgPath manifest.txt]
+
+  if {[file readable $file] && ![catch {open $file r} fd]} {
+    set manifest [read $fd]
+    close $fd
+
+    set uuid [dict get $manifest MANIFEST_UUID]
+    set checkin [string map {[ {} ] {}} [dict get $manifest MANIFEST_VERSION]]
+    set build [dict get $manifest FOSSIL_BUILD_HASH]
+    set datetime [string map {{ } T} [dict get $manifest MANIFEST_DATE]]Z
+    set version [dict get $manifest RELEASE_VERSION]
+    set compiler {tcl.noarch}
+
+    switch -- $cmd {
+      commit {
+        return $uuid
+      }
+      version - patchlevel {
+        return $version
+      }
+      compiler {
+        return $compiler
+      }
+      path {
+        return $pkgPath
+      }
+      default {
+        return ${version}+${checkin}.${datetime}.${compiler}
+      }
+    }
+  } else {
+    return {?.manifest_not_found}
+  }
+}
+
 package provide ooxml 1.7
+
+set ::ooxml::pkgPath [file dirname [info script]]
 
 # Local Variables:
 # tcl-indent-level: 2

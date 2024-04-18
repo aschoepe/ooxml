@@ -107,17 +107,28 @@ if {![catch {open configure.ac r} fd]} {
   puts stderr "can't open file manifest"
 }
 
-set template {namespace eval ::PKG {
+if {0} {
+#
+# Build Info Example Procedure
+#
+
+proc ::pkgname::build-info { {cmd {}} } {
+  variable pkgPath
 
   # TIP 599: Extended build information
   # https://core.tcl-lang.org/tips/doc/trunk/tip/599.md
 
-  proc build-info { {cmd {}} } {
-    set uuid MANIFEST_UUID
-    set checkin [string map {[ {} ] {}} {MANIFEST_VERSION}]
-    set build FOSSIL_BUILD_HASH
-    set datetime [string map {{ } T} {MANIFEST_DATE}]Z
-    set version RELEASE_VERSION
+  set file [file join $pkgPath manifest.txt]
+
+  if {[file readable $file] && ![catch {open $file r} fd]} {
+    set manifest [read $fd]
+    close $fd
+
+    set uuid [dict get $manifest MANIFEST_UUID]
+    set checkin [string map {[ {} ] {}} [dict get $manifest MANIFEST_VERSION]]
+    set build [dict get $manifest FOSSIL_BUILD_HASH]
+    set datetime [string map {{ } T} [dict get $manifest MANIFEST_DATE]]Z
+    set version [dict get $manifest RELEASE_VERSION]
     set compiler {tcl.noarch}
 
     switch -- $cmd {
@@ -130,20 +141,27 @@ set template {namespace eval ::PKG {
       compiler {
         return $compiler
       }
+      path {
+        return $pkgPath
+      }
       default {
         return ${version}+${checkin}.${datetime}.${compiler}
       }
     }
+  } else {
+    return {?.manifest_not_found}
   }
-}}
+}
 
-if {[llength $argv] == 1} {
-  set pkgName [lindex $argv 0]
-  lappend manifest PKG $pkgName
-  puts [string map $manifest $template]
+package provide 1.0
 
-} else {
-  foreach {n v} $manifest {
-    puts [list $n $v]
-  }
+# info script ?filename?
+# If a Tcl script file is currently being evaluated (i.e. there is a call to Tcl_EvalFile active or there is an active invocation of the source command),
+# then this command returns the name of the innermost file being processed. If filename is specified, then the return value of this command will be modified
+# for the duration of the active invocation to return that name. This is useful in virtual file system applications. Otherwise the command returns an empty string.
+set ::pkgname::pkgPath [file dirname [info script]]
+}
+
+foreach {n v} $manifest {
+  puts [list $n $v]
 }

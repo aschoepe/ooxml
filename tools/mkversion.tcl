@@ -104,7 +104,7 @@ if {![catch {open configure.ac r} fd]} {
   }
   close $fd
 } else {
-  puts stderr "can't open file manifest"
+  puts stderr "can't open file configure.ac"
 }
 
 if {0} {

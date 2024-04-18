@@ -43,7 +43,7 @@ CLEANFILES	= @CLEANFILES@
 #========================================================================
 
 manifest.txt: manifest manifest.uuid tools/mkversion.tcl
-	$(TCLSH_PROG) tools/mkversion.tcl @PACKAGE_NAME@ > $@
+	$(TCLSH_PROG) tools/mkversion.tcl > $@
 
 all: manifest.txt
 

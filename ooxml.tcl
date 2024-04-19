@@ -1485,7 +1485,7 @@ proc ::ooxml::xl_read { file args } {
         if {!$opts(valuesonly)} {
           foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
             if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
-              set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
+              dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
             }
           }
         }

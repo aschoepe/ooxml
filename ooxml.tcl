@@ -1476,7 +1476,7 @@ proc ::ooxml::xl_read { file args } {
                 } else {
                   set tt {}
                 }
-                set wb($sheet,l,$idx) [list u $hl($sheet,[$hlink @r:id]) t $tt]
+                set wb($sheet,l,$idx) [list l $hl($sheet,[$hlink @r:id]) t $tt]
               }
             }
           }

@@ -1476,7 +1476,7 @@ proc ::ooxml::xl_read { file args } {
                 } else {
                   set tt {}
                 }
-                set wb($sheet,l,$idx) [list u $hl($sheet,[$hlink @r:id]) t $tt]
+                set wb($sheet,l,$idx) [list l $hl($sheet,[$hlink @r:id]) t $tt]
               }
             }
           }
@@ -1485,7 +1485,7 @@ proc ::ooxml::xl_read { file args } {
         if {!$opts(valuesonly)} {
           foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
             if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
-              set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
+              dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
             }
           }
         }

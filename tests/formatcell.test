@@ -810,6 +810,11 @@ test FormatCell-4.136 {Set Cell} {
 } 10,8
 
 
+test FormatCell-4.137 {Hyperlink} {
+  $spreadsheet cell $sheet {homepage} -index 45,0 -hyperlink {https://fossil.sowaswie.de/ooxml} -tooltip {weblink}
+} 45,0
+
+
 test FormatCellFreeze-5.1 {Freeze} {
   $spreadsheet freeze $sheet 20,5
 } 0
@@ -845,7 +850,7 @@ test FormatCellMerge-7.3 {Merge} {
 } 0
 
 
-foreach item {obj cells fonts numFmts styles fills borders cols view} {
+foreach item {obj cells fonts numFmts styles fills borders cols view hlinks} {
   array set w_$item [array get ${spreadsheet}::$item]
 }
 
@@ -1036,6 +1041,39 @@ test FormatCellCheckCells-10.6 {Check Cells} {
     unset -nocomplain w r
   }
   return $rc
+} 1
+
+
+test FormatCellCheckCells-10.7 {Check Hyperlinks} {
+  set rc 1
+  foreach item [lsort -dictionary [array names w_hlinks 1,*,*]] {
+    lassign [split $item ,] sheet row col
+    incr sheet -1
+    array unset w r
+    array set w $w_hlinks($item)
+    array set r {}
+    foreach tag {l} {
+      if {[info exists workbook($sheet,$tag,$row,$col)]} {
+        foreach key {l t} {
+	  if {[dict exists $workbook($sheet,$tag,$row,$col) $key]} {
+	    array set r [list $key [dict get $workbook($sheet,$tag,$row,$col) $key]]
+	  } else {
+	    array set r [list $key {}]
+	  }
+	}
+      }
+    }
+    foreach {n v} [array get w] {
+      if {![info exists r($n)] || $r($n) ne $v} {
+	puts stderr "err [info exists r($n)] w 'r($n)' '$v' / r '$r($n)'"
+	set rc 0
+      }
+    }
+    unset -nocomplain w r
+  }
+  return $rc
+  #w_hlinks(1,45,0) = l https://fossil.sowaswie.de/ooxml t weblink
+  #workbook(0,l,45,0) = l https://fossil.sowaswie.de/ooxml t weblink
 } 1
 
 

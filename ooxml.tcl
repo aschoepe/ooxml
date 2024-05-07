@@ -1082,199 +1082,201 @@ proc ::ooxml::xl_read { file args } {
         }
       }
 
-      ### READING KNOWN FORMATS AND STYLES ###
+      if {!$opts(valuesonly)} {
+        ### READING KNOWN FORMATS AND STYLES ###
 
-      set wb(s,@) {}
+        set wb(s,@) {}
 
-      array unset a *
-      set a(max) 0
-      set wb(s,numFmtsIds) {}
-      foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
-        if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
-          set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
-          lappend wb(s,numFmtsIds) $idx
-          if {$idx > $a(max)} {
-            set a(max) $idx
-          }
-        }
-      }
-      if {$a(max) < $::ooxml::defaults(numFmts,start)} {
-        set a(max) $::ooxml::defaults(numFmts,start)
-      }
-      lappend wb(s,@) numFmtId [incr a(max)]
-
-
-      set idx -1
-      array unset a *
-      foreach node [$root selectNodes /M:styleSheet/M:fonts/M:font] {
-        incr idx
-        array set a {name {} family {} size {} color {} scheme {} bold 0 italic 0 underline 0 color {}}
-        foreach node1 [$node childNodes] {
-          switch -- [$node1 nodeName] {
-            b {
-              set a(bold) 1
-            }
-            i {
-              set a(italic) 1
-            }
-            u {
-              set a(underline) 1
-            }
-            sz {
-              if {[$node1 hasAttribute val]} {
-                set a(size) [$node1 @val]
-              }
-            }
-            color {
-              if {[$node1 hasAttribute auto]} {
-                set a(color) [list auto [$node1 @auto]]
-              } elseif {[$node1 hasAttribute rgb]} {
-                set a(color) [list rgb [$node1 @rgb]]
-              } elseif {[$node1 hasAttribute indexed]} {
-                set a(color) [list indexed [$node1 @indexed]]
-              } elseif {[$node1 hasAttribute theme]} {
-                set a(color) [list theme [$node1 @theme]]
-              }
-            }
-            name {
-              if {[$node1 hasAttribute val]} {
-                set a(name) [$node1 @val]
-              }
-            }
-            family {
-              if {[$node1 hasAttribute val]} {
-                set a(family) [$node1 @val]
-              }
-            }
-            scheme {
-              if {[$node1 hasAttribute val]} {
-                set a(scheme) [$node1 @val]
-              }
+        array unset a *
+        set a(max) 0
+        set wb(s,numFmtsIds) {}
+        foreach node [$root selectNodes /M:styleSheet/M:numFmts/M:numFmt] {
+          if {[$node hasAttribute numFmtId] && [$node hasAttribute formatCode]} {
+            set wb(s,numFmts,[set idx [$node @numFmtId]]) [$node @formatCode]
+            lappend wb(s,numFmtsIds) $idx
+            if {$idx > $a(max)} {
+              set a(max) $idx
             }
           }
         }
-        set wb(s,fonts,$idx) [array get a]
-      }
-      lappend wb(s,@) fonts [incr idx]
+        if {$a(max) < $::ooxml::defaults(numFmts,start)} {
+          set a(max) $::ooxml::defaults(numFmts,start)
+        }
+        lappend wb(s,@) numFmtId [incr a(max)]
 
 
-      set idx -1
-      array unset a *
-      foreach node [$root selectNodes /M:styleSheet/M:fills/M:fill] {
-        incr idx
-        array set a {patterntype {} fgcolor {} bgcolor {}}
-        foreach node1 [$node childNodes] {
-          switch -- [$node1 nodeName] {
-            patternFill {
-              if {[$node1 hasAttribute patternType]} {
-                set a(patterntype) [$node1 @patternType]
+        set idx -1
+        array unset a *
+        foreach node [$root selectNodes /M:styleSheet/M:fonts/M:font] {
+          incr idx
+          array set a {name {} family {} size {} color {} scheme {} bold 0 italic 0 underline 0 color {}}
+          foreach node1 [$node childNodes] {
+            switch -- [$node1 nodeName] {
+              b {
+                set a(bold) 1
               }
-              foreach node2 [$node1 childNodes] {
-                if {[$node2 nodeName] in { fgColor bgColor}} {
-                  if {[$node2 hasAttribute auto]} {
-                    set a([string tolower [$node2 nodeName]]) [list auto [$node2 @auto]]
-                  } elseif {[$node2 hasAttribute rgb]} {
-                    set a([string tolower [$node2 nodeName]]) [list rgb [$node2 @rgb]]
-                  } elseif {[$node2 hasAttribute indexed]} {
-                    set a([string tolower [$node2 nodeName]]) [list indexed [$node2 @indexed]]
-                  } elseif {[$node2 hasAttribute theme]} {
-                    set a([string tolower [$node2 nodeName]]) [list theme [$node2 @theme]]
+              i {
+                set a(italic) 1
+              }
+              u {
+                set a(underline) 1
+              }
+              sz {
+                if {[$node1 hasAttribute val]} {
+                  set a(size) [$node1 @val]
+                }
+              }
+              color {
+                if {[$node1 hasAttribute auto]} {
+                  set a(color) [list auto [$node1 @auto]]
+                } elseif {[$node1 hasAttribute rgb]} {
+                  set a(color) [list rgb [$node1 @rgb]]
+                } elseif {[$node1 hasAttribute indexed]} {
+                  set a(color) [list indexed [$node1 @indexed]]
+                } elseif {[$node1 hasAttribute theme]} {
+                  set a(color) [list theme [$node1 @theme]]
+                }
+              }
+              name {
+                if {[$node1 hasAttribute val]} {
+                  set a(name) [$node1 @val]
+                }
+              }
+              family {
+                if {[$node1 hasAttribute val]} {
+                  set a(family) [$node1 @val]
+                }
+              }
+              scheme {
+                if {[$node1 hasAttribute val]} {
+                  set a(scheme) [$node1 @val]
+                }
+              }
+            }
+          }
+          set wb(s,fonts,$idx) [array get a]
+        }
+        lappend wb(s,@) fonts [incr idx]
+
+
+        set idx -1
+        array unset a *
+        foreach node [$root selectNodes /M:styleSheet/M:fills/M:fill] {
+          incr idx
+          array set a {patterntype {} fgcolor {} bgcolor {}}
+          foreach node1 [$node childNodes] {
+            switch -- [$node1 nodeName] {
+              patternFill {
+                if {[$node1 hasAttribute patternType]} {
+                  set a(patterntype) [$node1 @patternType]
+                }
+                foreach node2 [$node1 childNodes] {
+                  if {[$node2 nodeName] in { fgColor bgColor}} {
+                    if {[$node2 hasAttribute auto]} {
+                      set a([string tolower [$node2 nodeName]]) [list auto [$node2 @auto]]
+                    } elseif {[$node2 hasAttribute rgb]} {
+                      set a([string tolower [$node2 nodeName]]) [list rgb [$node2 @rgb]]
+                    } elseif {[$node2 hasAttribute indexed]} {
+                      set a([string tolower [$node2 nodeName]]) [list indexed [$node2 @indexed]]
+                    } elseif {[$node2 hasAttribute theme]} {
+                      set a([string tolower [$node2 nodeName]]) [list theme [$node2 @theme]]
+                    }
                   }
                 }
               }
             }
           }
+          set wb(s,fills,$idx) [array get a]
         }
-        set wb(s,fills,$idx) [array get a]
+        lappend wb(s,@) fills [incr idx]
+
+
+        set idx -1
+        unset -nocomplain d
+        foreach node [$root selectNodes /M:styleSheet/M:borders/M:border] {
+          incr idx
+          set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
+          foreach node1 [$node childNodes] {
+            if {[$node1 hasAttribute style]} {
+              set style [$node1 @style]
+            } else {
+              set style {}
+            }
+            set color {}
+            foreach node2 [$node1 childNodes] {
+              if {[$node2 nodeName] eq {color}} {
+                if {[$node2 hasAttribute auto]} {
+                  set color [list auto [$node2 @auto]]
+                } elseif {[$node2 hasAttribute rgb]} {
+                  set color [list rgb [$node2 @rgb]]
+                } elseif {[$node2 hasAttribute indexed]} {
+                  set color [list indexed [$node2 @indexed]]
+                } elseif {[$node2 hasAttribute theme]} {
+                  set color [list theme [$node2 @theme]]
+                }
+              }
+            }
+            if {[$node1 nodeName] in {left right top bottom diagonal}} {
+              if {$style ne {}} {
+                dict set d [$node1 nodeName] style $style
+              }
+              if {$color ne {}} {
+                dict set d [$node1 nodeName] color $color
+              }
+            }
+          }
+          if {[$node hasAttribute diagonalUp]} {
+            dict set d diagonal direction diagonalUp
+          } elseif {[$node hasAttribute diagonalDown]} {
+            dict set d diagonal direction diagonalDown
+          }
+          set wb(s,borders,$idx) $d
+        }
+        lappend wb(s,@) borders [incr idx]
+
+
+        set idx -1
+        array unset a *
+        foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
+          incr idx
+          array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
+          if {[$node hasAttribute numFmtId]} {
+            set a(numfmt) [$node @numFmtId]
+          }
+          if {[$node hasAttribute fontId]} {
+            set a(font) [$node @fontId]
+          }
+          if {[$node hasAttribute fillId]} {
+            set a(fill) [$node @fillId]
+          }
+          if {[$node hasAttribute borderId]} {
+            set a(border) [$node @borderId]
+          }
+          if {[$node hasAttribute xfId]} {
+            set a(xf) [$node @xfId]
+          }
+          foreach node1 [$node childNodes] {
+            switch -- [$node1 nodeName] {
+              alignment {
+                if {[$node1 hasAttribute horizontal]} {
+                  set a(horizontal) [$node1 @horizontal]
+                }
+                if {[$node1 hasAttribute vertical]} {
+                  set a(vertical) [$node1 @vertical]
+                }
+                if {[$node1 hasAttribute textRotation]} {
+                  set a(rotate) [$node1 @textRotation]
+                }
+                if {[$node1 hasAttribute wrapText]} {
+                  set a(wrap) [$node1 @wrapText]
+                }
+              }
+            }
+          }
+          set wb(s,styles,$idx) [array get a]
+        }
+        lappend wb(s,@) styles [incr idx]
       }
-      lappend wb(s,@) fills [incr idx]
-
-
-      set idx -1
-      unset -nocomplain d
-      foreach node [$root selectNodes /M:styleSheet/M:borders/M:border] {
-        incr idx
-        set d {left {style {} color {}} right {style {} color {}} top {style {} color {}} bottom {style {} color {}} diagonal {style {} color {} direction {}}}
-        foreach node1 [$node childNodes] {
-          if {[$node1 hasAttribute style]} {
-            set style [$node1 @style]
-          } else {
-            set style {}
-          }
-          set color {}
-          foreach node2 [$node1 childNodes] {
-            if {[$node2 nodeName] eq {color}} {
-              if {[$node2 hasAttribute auto]} {
-                set color [list auto [$node2 @auto]]
-              } elseif {[$node2 hasAttribute rgb]} {
-                set color [list rgb [$node2 @rgb]]
-              } elseif {[$node2 hasAttribute indexed]} {
-                set color [list indexed [$node2 @indexed]]
-              } elseif {[$node2 hasAttribute theme]} {
-                set color [list theme [$node2 @theme]]
-              }
-            }
-          }
-          if {[$node1 nodeName] in {left right top bottom diagonal}} {
-            if {$style ne {}} {
-              dict set d [$node1 nodeName] style $style
-            }
-            if {$color ne {}} {
-              dict set d [$node1 nodeName] color $color
-            }
-          }
-        }
-        if {[$node hasAttribute diagonalUp]} {
-          dict set d diagonal direction diagonalUp
-        } elseif {[$node hasAttribute diagonalDown]} {
-          dict set d diagonal direction diagonalDown
-        }
-        set wb(s,borders,$idx) $d
-      }
-      lappend wb(s,@) borders [incr idx]
-
-
-      set idx -1
-      array unset a *
-      foreach node [$root selectNodes /M:styleSheet/M:cellXfs/M:xf] {
-        incr idx
-        array set a {numfmt 0 font 0 fill 0 border 0 xf 0 horizontal {} vertical {} rotate {} wrap {}}
-        if {[$node hasAttribute numFmtId]} {
-          set a(numfmt) [$node @numFmtId]
-        }
-        if {[$node hasAttribute fontId]} {
-          set a(font) [$node @fontId]
-        }
-        if {[$node hasAttribute fillId]} {
-          set a(fill) [$node @fillId]
-        }
-        if {[$node hasAttribute borderId]} {
-          set a(border) [$node @borderId]
-        }
-        if {[$node hasAttribute xfId]} {
-          set a(xf) [$node @xfId]
-        }
-        foreach node1 [$node childNodes] {
-          switch -- [$node1 nodeName] {
-            alignment {
-              if {[$node1 hasAttribute horizontal]} {
-                set a(horizontal) [$node1 @horizontal]
-              }
-              if {[$node1 hasAttribute vertical]} {
-                set a(vertical) [$node1 @vertical]
-              }
-              if {[$node1 hasAttribute textRotation]} {
-                set a(rotate) [$node1 @textRotation]
-              }
-              if {[$node1 hasAttribute wrapText]} {
-                set a(wrap) [$node1 @wrapText]
-              }
-            }
-          }
-        }
-        set wb(s,styles,$idx) [array get a]
-      }
-      lappend wb(s,@) styles [incr idx]
 
       $doc delete
     }
@@ -1334,28 +1336,30 @@ proc ::ooxml::xl_read { file args } {
       if {![catch {dom parse [read $fd]} doc]} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
-        set idx -1
-        foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
-          incr idx
-          set cols {}
-          foreach item {min max width style bestFit customWidth} {
-            if {[$col hasAttribute $item]} {
-              switch -- $item {
-                min - max {
-                  lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+        if {!$opts(valuesonly)} {
+          set idx -1
+          foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
+            incr idx
+            set cols {}
+            foreach item {min max width style bestFit customWidth} {
+              if {[$col hasAttribute $item]} {
+                switch -- $item {
+                  min - max {
+                    lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+                  }
+                  default {
+                    lappend cols [string tolower $item] [$col @$item]
+                  }
                 }
-                default {
-                  lappend cols [string tolower $item] [$col @$item]
-                }
+              } else {
+                lappend cols [string tolower $item] 0
               }
-            } else {
-              lappend cols [string tolower $item] 0
             }
+            lappend cols string 0 nozero 0 calcfit 0
+            set wb($sheet,col,[dict get $cols min]) $cols
           }
-          lappend cols string 0 nozero 0 calcfit 0
-          set wb($sheet,col,[dict get $cols min]) $cols
+          set wb($sheet,cols) [incr idx]
         }
-        set wb($sheet,cols) [incr idx]
         set rowindex -1
         foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
           incr rowindex

@@ -1413,7 +1413,7 @@ proc ::ooxml::xl_read { file args } {
                       set numFmtId [dict get $cellXfs($idx) nfi]
                       if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
                         set datetime $value
-                        catch {clock format [expr {int(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
+                        catch {clock format [expr {round(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
                       }
                     }
                   } 

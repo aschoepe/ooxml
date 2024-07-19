@@ -4,7 +4,7 @@ exec tclsh "$0" "$@"
 
 # Copyright (C) 2019 Alexander Schoepe, Bochum, DE
 
-package require Tcl 8.6
+package require Tcl 8.6-
 
 switch -- [set cmd [lindex $argv 0]] {
   cp {

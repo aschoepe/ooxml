@@ -1,5 +1,5 @@
-C Ticket\s[a29b546f66862d9e]\sint()\swordSize\sproblem\schange\sto\sround()
-D 2024-07-19T06:49:37.057
+C Fixed\sfall-out\sof\sTIP\s699.
+D 2024-07-28T21:02:12.927
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 994e473b1d764dd7686406730b01896ec2971352092749045c04b4d6e4a65f2d
@@ -22,7 +22,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 4e02addec932ba9ae3fcb3d1aec9bd8e72ac958470c3cd79eac7e03647389cb6
+F ooxml.tcl d804d8623b43332263c8806a9d7be0c59fd24e940476de20851e314109d221a4
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -69,8 +69,8 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P adf7d29b3fdd0661ccac97716a2162a380d6213bf6d6b22de7fffeef0df642d2
-R b44f62eb998a66780f63b75b26aad766
-U alex
-Z ef2c9e5156539d6265a368fcc9747477
+P 8bc7ded832391d29e7d2ce98905de5820b59f942436b600a534a14c0d6b80a37
+R c6655548904b9300b859f4fbad9220f1
+U rolf
+Z 1b81c9e3839e3c32f25dcdc7740039ac
 # Remove this line to create a well-formed Fossil manifest.

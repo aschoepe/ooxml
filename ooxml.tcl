@@ -3021,7 +3021,7 @@ oo::class create ooxml::xl_write {
     if {[catch {open $file w} zf]} {
       error "cannot open file $file for writing"
     }
-    fconfigure $zf -encoding binary -translation binary -eofchar {}
+    fconfigure $zf -translation binary -eofchar {}
     set count 0
     set cd {}
     

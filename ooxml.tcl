@@ -3,7 +3,7 @@
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
 #  Copyright (C) 2018-2024 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
-#  Copyright (C) 2019-2023 Rolf Ade, DE
+#  Copyright (C) 2019-2024 Rolf Ade, DE
 #  Copyright (C) 2023 Harald Oehlmann, DE
 #  All rights reserved.
 #
@@ -4212,7 +4212,7 @@ proc ::ooxml::build-info { {cmd {}} } {
   }
 }
 
-package provide ooxml 1.8
+package provide ooxml 1.8.1
 
 set ::ooxml::pkgPath [file dirname [info script]]
 

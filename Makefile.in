@@ -25,13 +25,30 @@ bindir		= @bindir@
 
 DESTDIR		=
 pkglibdir	= $(libdir)/@PACKAGE_NAME@@PACKAGE_VERSION@
-top_builddir	= .
+top_builddir	= @abs_top_builddir@
 
 PACKAGE_NAME	= @PACKAGE_NAME@
 PACKAGE_VERSION	= @PACKAGE_VERSION@
 CYGPATH		= @CYGPATH@
 
+#========================================================================
+# TCLLIBPATH seeds the auto_path in Tcl's init.tcl so we can test our
+# package without installing.  The other environment variables allow us
+# to test against an uninstalled Tcl.  Add special env vars that you
+# require for testing here (like TCLX_LIBRARY).
+#========================================================================
+
+TCL_BIN_DIR	= @TCL_BIN_DIR@
+TCL_SRC_DIR	= @TCL_SRC_DIR@
+EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR)
+TCLLIBPATH	= $(top_builddir)
+TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library`
+PKG_ENV		= LD_LIBRARY_PATH="$(EXTRA_PATH):$(@LD_LIBRARY_PATH_VAR@)" \
+		  PATH="$(EXTRA_PATH):$(PATH)" \
+		  TCLLIBPATH="$(TCLLIBPATH)"
+
 TCLSH_PROG	= @TCLSH_PROG@
+TCLSH   	= $(PKG_ENV) $(TCLSH_ENV) $(TCLSH_PROG)
 
 PKG_TCL_SOURCES	= @PKG_TCL_SOURCES@ manifest.txt
 
@@ -43,15 +60,15 @@ CLEANFILES	= @CLEANFILES@
 #========================================================================
 
 manifest.txt: manifest manifest.uuid tools/mkversion.tcl
-	$(TCLSH_PROG) tools/mkversion.tcl > $@
+	$(TCLSH) tools/mkversion.tcl > $@
 
 all: manifest.txt
 
 install: all
-	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/helper.tcl` cp $(PKG_TCL_SOURCES) pkgIndex.tcl $(pkglibdir)
+	$(TCLSH) `@CYGPATH@ $(srcdir)/helper.tcl` cp $(PKG_TCL_SOURCES) pkgIndex.tcl $(pkglibdir)
 
 test:
-	$(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) \
+	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) \
 	  -load "package ifneeded ${PACKAGE_NAME} ${PACKAGE_VERSION} [list source [file join `@CYGPATH@ $(srcdir)` $(PACKAGE_NAME).tcl]]"
 
 archive:

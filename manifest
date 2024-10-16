@@ -1,8 +1,8 @@
-C Version-1.8.1
-D 2024-08-10T06:42:08.601
+C Test\ssuite\stweaks\sfor\sTcl\s9:\sFor\sone\stest\sthe\serror\smessage\sprovided\sby\sthe\score\schanged\swith\sTcl\s9.\sAnother\stest\ssuffered\sfrom\sdifferences\sin\sthe\sfree\sform\sclock\sscan.\sChanges\sin\sMakefile.in\sby\sPaul\sObermeier.
+D 2024-10-16T22:07:16.104
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
-F Makefile.in 994e473b1d764dd7686406730b01896ec2971352092749045c04b4d6e4a65f2d
+F Makefile.in 9ed5cf3fdb4090bcc3e6843eb4cac6008ff51e157095522eff86cd324056a9a0
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 6222c13c02c30cda7a38a18943ff17307148755c58e1827808c79170b4d378f8 x
@@ -32,9 +32,9 @@ F tests/all.tcl 5f87ca6b7d1e5bf0aa6e3a7fa4408f629ab2a224cc20910fb12ea6928f1aecbd
 F tests/benchmark.test ad9ac56279c418f73e420b5d56da568a526322786e263f2717ad3752916ea90b
 F tests/formatcell.test 7ead8446d6571370a66c5f50a55e78be2dd57674edb7868be527a2a7bc4a66ef
 F tests/formula.test 8f5624d8f324bb9c26040373a201bbcb9d2565c0734c32c7c77142b4c75ce7a8
-F tests/misc.test c1664c84e0a2a8adb8afbb573fd209ece34aa2ac2501c6fc684f372e2cc2d817
+F tests/misc.test b166df102f2f39a696ab003509e709e1b456ddbda76a72c73484225dd844fc02
 F tests/namedfmts.test a256cebeef32996f0280a3071b941a961d7dbca9e709945394b4edd448655c47
-F tests/simple.test d3b7ed57c1816aa44ff91ae7cbf489746d207ae8a3b383bf96b05679e63a1c7a
+F tests/simple.test 349a174590a43403891e1fab909c9cb96763df3fcb57b39411c3af6c5832cc7d
 F tools/archive.sh ebbde269fc01ae00183bb4b4ca3669f537c11aa13d93860c852f6221f2d0e3c1 x
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -69,11 +69,8 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P b19e87d857bf250b2646c9a5212f1b3596052049c9470fc73d6a9a24e6cc70ab
-R 94a0a490fbbe021f8817ae64b884f25e
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.8.1 *
-U alex
-Z 3a1922ac3e799625abd2e8310323fe6c
+P 5e7687341b04bb5d1c5ad7fb0cd99fd967412ea16567b5622c421b8defc55330
+R d92f9fd70bcaa33bedb106f146b9112a
+U rolf
+Z a993be3a1e48f1ae2727a65fea2a5372
 # Remove this line to create a well-formed Fossil manifest.

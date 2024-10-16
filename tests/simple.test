@@ -21,7 +21,7 @@ package require ooxml
 
 test SimpleExcelWrite-1.1 {Write a Simple Excel Sheet} {
   set cDT {2019-10-31 15:10:23}
-  set mCT [clock scan {2019-10-31 17:20:45}]
+  set mCT {2019-10-31 17:20:45}
 
   set spreadsheet [::ooxml::xl_write new -creator {User A} -created $cDT -modifiedby {User B} -modified $mCT -application {Tcl Test}]
   if {[set sheet [$spreadsheet worksheet {Sheet 1}]] > -1} {

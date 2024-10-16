@@ -45,7 +45,7 @@ test Column-1.3 {Column 33} {
 } AH
 
 if {[package vsatisfies [package present Tcl] 9]} {
-    set result "can't use non-numeric string \"A\" as operand of \"%\""
+    set result "cannot use non-numeric string \"A\" as left operand of \"%\""
 } else {
     set result "can't use non-numeric string as operand of \"%\""
 }

@@ -1590,7 +1590,7 @@ proc ooxml::InitNodeCommands {} {
     left
     mergeCell mergeCells
     name numFmt numFmts
-    pageMargins pane patternFill
+    pageMargins pageSetup pane patternFill
     right row
     scheme sheet sheetData sheetFormatPr sheetView sheetViews sheets si sz
     t tableStyles top
@@ -1667,7 +1667,8 @@ oo::class create ooxml::xl_write {
     my variable view
     my variable tags
     my variable hlinks
-
+    my variable pageSetups
+    
     array set opts {
       creator {unknown}
       created {}
@@ -2983,6 +2984,45 @@ oo::class create ooxml::xl_write {
     }
   }
 
+  method pageSetup { sheet args } {
+    my variable pageSetups
+
+    if {[info exists pageSetups($sheet)]} {
+      array set opts $pageSetups($sheet)
+    } else {
+      array set opts {
+        orientation portrait
+        scale 100
+      }
+    }
+
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $args $idx]] {
+        -orientation - -scale  {
+          incr idx
+          if {$idx < $len} {
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        default {
+          error "unknown option \"$opt\", should be: -index or -height"
+        }
+      }
+    }
+
+    if {$opts(orientation) ni {landscape portrait}} {
+      error "invalid value for the -orientation option: should be portrait or landscape"
+    }
+    if {![string is double -strict $opts(scale)] || !($opts(scale) > 0)} {
+      error "invalid value for the -scale option: should be an integer > 0
+    }
+    set pageSetups($sheet) [array get opts]
+  }
+
   method debug { args } {
     foreach item $args {
       catch {
@@ -3004,6 +3044,7 @@ oo::class create ooxml::xl_write {
     my variable cols
     my variable view
     my variable hlinks
+    my variable pageSetups
 
     upvar #0 ::ooxml::xmlns xmlns
 
@@ -3972,6 +4013,10 @@ oo::class create ooxml::xl_write {
           }
         }
         Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
+        # Page Setup
+        if {[info exists pageSetups($ws)]} {
+          Tag_pageSetup {*}$pageSetups($ws)
+        }
       }
 
       if {[set colsNode [$root selectNodes /worksheet/cols]] ne {}} {
@@ -3999,7 +4044,7 @@ oo::class create ooxml::xl_write {
             }
           }
         }
-      }
+     }
       ::ooxml::Dom2zip $zf $root "xl/worksheets/sheet$ws.xml" cd count
       $doc delete
     }

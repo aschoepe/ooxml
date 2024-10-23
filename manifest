@@ -1,6 +1,8 @@
-C Test\ssuite\stweaks\sfor\sTcl\s9:\sFor\sone\stest\sthe\serror\smessage\sprovided\sby\sthe\score\schanged\swith\sTcl\s9.\sAnother\stest\ssuffered\sfrom\sdifferences\sin\sthe\sfree\sform\sclock\sscan.\sChanges\sin\sMakefile.in\sby\sPaul\sObermeier.
-D 2024-10-16T22:07:16.104
+C Added\sfossil\ssettings\sto\sensure\sthat\sthe\sfossil\smanifest\sis\spresent\s(which\sis\sneeded\sfor\sthe\smake\starget\sinstall.)
+D 2024-10-23T21:42:53.573
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
+F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
+F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 9ed5cf3fdb4090bcc3e6843eb4cac6008ff51e157095522eff86cd324056a9a0
 F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
@@ -69,8 +71,9 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 5e7687341b04bb5d1c5ad7fb0cd99fd967412ea16567b5622c421b8defc55330
-R d92f9fd70bcaa33bedb106f146b9112a
+P 84d6fa3c80af05d2f386d2b6202abd7eea2e3a689ebec3e0bc8210c603cc5d34
+Q +869e9ca7cfe46c14cea2caddb37b434b3f2887c97fec5204fb650838276992a0
+R 6ebf9f5b1a6b8da4f3bf31693fb3a887
 U rolf
-Z a993be3a1e48f1ae2727a65fea2a5372
+Z 2e0e80f4e69367aafaab587a60f97440
 # Remove this line to create a well-formed Fossil manifest.

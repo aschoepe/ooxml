@@ -1673,6 +1673,8 @@ oo::class create ooxml::xl_write {
     my variable tags
     my variable hlinks
     my variable pageSetups
+    my variable pageMargins
+    my variable pageMarginsDefault
     
     array set opts {
       creator {unknown}
@@ -1684,6 +1686,15 @@ oo::class create ooxml::xl_write {
 
     array set tags {}
 
+    array set pageMarginsDefault {
+      left 0.75
+      right 0.75
+      top 1
+      bottom 1
+      header 0.5
+      footer 0.5
+    }
+    
     set len [llength $args]
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
@@ -1986,8 +1997,8 @@ oo::class create ooxml::xl_write {
 
     if {![string is integer -strict $style] && [info exists tags(styles,$style)]} {
       set style $tags(styles,$style)]
-    }
-    set obj(defaultdatestyle) $style
+  }
+  set obj(defaultdatestyle) $style
   }
 
   method font { args } {
@@ -3028,6 +3039,9 @@ oo::class create ooxml::xl_write {
     set pageSetups($sheet) [array get opts]
   }
 
+method pageMarginsDefault { args } {
+
+}
   method debug { args } {
     foreach item $args {
       catch {

@@ -147,7 +147,12 @@
 #     -index INDEX -style STYLEID -formula FORMULA -formulaidx SHARE -formularef INDEX:INDEX -string -nozero -height HEIGHT
 #     autoincrement of column if INDEX not applied
 #     return row,column
-# 
+#   
+#   method pageSetup sheet args
+#     -orientation (landscape|portrait)
+#     -scale Print scaling. The standard say this attribute is restricted
+#      to values ranging from 10 to 400. Enforced is a positiv integer.
+#
 #   method autofilter sheet indexFrom indexTo
 # 
 #   method freeze sheet index
@@ -3017,7 +3022,7 @@ oo::class create ooxml::xl_write {
     if {$opts(orientation) ni {landscape portrait}} {
       error "invalid value for the -orientation option: should be portrait or landscape"
     }
-    if {![string is double -strict $opts(scale)] || !($opts(scale) > 0)} {
+    if {![string is integer -strict $opts(scale)] || !($opts(scale) > 0)} {
       error "invalid value for the -scale option: should be an integer > 0
     }
     set pageSetups($sheet) [array get opts]

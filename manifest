@@ -1,5 +1,5 @@
-C Removed\sobviosly\sdangling\s].
-D 2024-10-23T22:59:55.234
+C Added\sTcl\shelper\sscript\swhich\sunpacks\san\s.xlsx\sfile\s(acctually\severy\szip\sarchive)\sto\sa\sdirectory\sand\srewrites\sthe\sxml\sfiles\sinto\sa\s"pretty-print"\sway\sto\smake\sit\smore\sconvenient\sto\sstudy\sthe\sXML.\sRequires\stcllib\sand\sTcl\s9\s(because\sof\szipfs).
+D 2024-10-24T11:51:10.473
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -67,12 +67,13 @@ F tools/languages/工作簿1-chinesisch-zh.xlsx ffecda35303c5ebcd3fe8debb0e5da22
 F tools/languages/통합\s문서1-koreanisch-ko.xlsx 6bfc4d052b7fc16445c92809b5fdfabb02ee331d2d2b60f8e34192eaf320d38a
 F tools/mkversion.c 6bd67f53bfadf182e380ad077fc3e2c8a101d4080a891449e10a9b7e43e3956b
 F tools/mkversion.tcl 242008aee762d470379e473e8c186d33c6754e2f5cd4757c7339675d09b1b0f7
+F tools/pp.tcl 627884178da4a24f9d0ec52e1a4630c2ff973e6d40d26a3fd027bbeca9209eed
 F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6bb46f9 x
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P a0ea75f1d3f25b6c3b74cc67c6498088d20d91a74730b6d0070f799e7ff19984
-R 3bcccb7d9f87e0bf0328788d92cbbe0b
+P 752baae01050c7738e2309f7ace2a96e19c5bd023f19742c453ec2653fac6485
+R f5a9eebf6af6da6a88177abae5e320b9
 U rolf
-Z 7549d3ffa439d7f413b780888934bb8a
+Z e07ff346f08443742ed52614557acba3
 # Remove this line to create a well-formed Fossil manifest.

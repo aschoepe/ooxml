@@ -1,5 +1,5 @@
-C Move\sto\sown\sbranch.
-D 2024-10-24T10:56:41.791
+C Move\sto\sown\sbranch\sfinished.
+D 2024-10-24T10:57:58.536
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -24,7 +24,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 6596c73db0540f77c8eb3d8ac8788e72e7c5300727af37b4f666267e849a0a12
+F ooxml.tcl 4300b9cde75f71a86dca550ac638b1f08a4251a73cdb3ea05f15cc748a24dff0
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -71,12 +71,9 @@ F tools/xmltotdom.tcl e49625e8c7ce9a6dd5503ff9e55b0f3153f16574b523e069c2437322d6
 F tools/xmltotdomnodecmd.tcl 30ab5bcf7c12039c92231ff7ca673de28ff1c4a699d2484e5de9f2f79d55c357 x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 752baae01050c7738e2309f7ace2a96e19c5bd023f19742c453ec2653fac6485
-Q +3384127ad9d28eec97a7363321c98cba5e48f0b70f0ca094528703caa9979ef1
-R e27546917be4a526f20797074be52a02
-T *branch * pageMargins
-T *sym-pageMargins *
-T -sym-trunk *
+P fd6c7e082ccbdda738ca42da1de13b4fac54380fe8b5a62c9dce8570c5785b8a
+Q +b380b51288fc653d94bfdebe44d2a75d20fa04a5c631e9d498328ed9d1bbb517
+R 48f7b8676c2cec9b5b66287b088d5c57
 U rolf
-Z 3fda6005011b2863a7937fb7e08d231a
+Z f1ad17c30d911a9fa820a5c7306e8c33
 # Remove this line to create a well-formed Fossil manifest.

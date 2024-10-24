@@ -2510,6 +2510,8 @@ oo::class create ooxml::xl_write {
       set obj(gCol,$sheet) [lindex [split [::ooxml::StringToRowColumn $opts(index)] ,] end]
     } elseif {[string trim $opts(index)] eq {}} {
       incr obj(gCol,$sheet)
+    } else {
+      error "invalid -index value '$opts(index)'"
     }
     set opts(index) $obj(gCol,$sheet)
 
@@ -2670,6 +2672,8 @@ oo::class create ooxml::xl_write {
       lassign [split [::ooxml::StringToRowColumn $opts(index)] ,] obj(row,$sheet) obj(col,$sheet)
     } elseif {[string trim $opts(index)] eq {}} {
       incr obj(col,$sheet)
+    } else {
+      error "invalid -index value '$opts(index)'"
     }
     if {$obj(row,$sheet) < 0 || $obj(col,$sheet) < 0} {
       return -1

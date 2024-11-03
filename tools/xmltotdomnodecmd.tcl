@@ -36,7 +36,7 @@ exec tclsh8.6 "$0" "$@"
 
 package require tdom 0.9.1-
 
-set file $argv
+set file [lindex $argv 0]
 set cmds {}
 
 if {[catch {open $file r} fd]} {

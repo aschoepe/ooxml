@@ -1,5 +1,5 @@
-C Remvoed\sdisturbing\snewline.
-D 2024-11-07T00:07:09.478
+C Started\sa\smarkdown\sdocumentation\sfile\s(following\sthe\sprobably\supcomming\sTcl\score\sexample).\sLong\sway\sto\sgo.
+D 2024-11-07T01:03:17.697
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -9,6 +9,7 @@ F README 9584314820201cc14e1c3ba76213866bd361ea9ac5c011a663c001be2f984c85
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 6222c13c02c30cda7a38a18943ff17307148755c58e1827808c79170b4d378f8 x
 F configure.ac 0a2efd9d4922083eb1a0f04cff89e171c4091e361f6bba738260556fdee7fdfc
+F doc/ooxml.md 0ae136ef905b93bc90bbe2b55f14920c36c773f6ed3b98476d80103c5a33728a
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -72,8 +73,11 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P d4441e88568a7121d57ca0897a7a4ad62ba1b042760b265ee082d2e99319b168
-R f9f55e311eebf80e2fc9471daf66a459
+P 7a6970fd76fc8f205324990a6dec29b8f99c99831e181555c947426d7715354f
+R 91b62fe565803a1569fa74de5603898d
+T *branch * md-doc
+T *sym-md-doc *
+T -sym-trunk *
 U rolf
-Z a194935a901f26df3eb4e92d7221108b
+Z a4c7e457911be236919b570d9f0ac516
 # Remove this line to create a well-formed Fossil manifest.

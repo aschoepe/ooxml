@@ -1,4 +1,3 @@
-
 #!/bin/sh
 #\
 exec tclsh8.6 "$0" "$@"

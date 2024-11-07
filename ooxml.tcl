@@ -2994,36 +2994,106 @@ oo::class create ooxml::xl_write {
 
     if {[info exists pageSetups($sheet)]} {
       array set opts $pageSetups($sheet)
-    } else {
-      array set opts {
-        orientation portrait
-        scale 100
-      }
     }
 
     set len [llength $args]
+    set validOptions {
+      -blackAndWhite
+      -cellComments
+      -copies
+      -draft
+      -errors
+      -firstPageNumber
+      -fitToHeight
+      -fitToWidth
+      -horziontalDpi
+      -orientation
+      -pageOrder
+      -paperHeight
+      -paperSize
+      -paperWide
+      -scale
+      -useFirstPageNumber
+      -verticalDpi
+    }
+    set len [llength $args]
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
-      switch -- [set opt [lindex $args $idx]] {
-        -orientation - -scale  {
-          incr idx
-          if {$idx < $len} {
-            set opts([string range $opt 1 end]) [lindex $args $idx]
-          } else {
-            error "option '$opt': missing argument"
-          }            
-        }
-        default {
-          error "unknown option \"$opt\", should be: -index or -height"
-        }
+      set opt [lindex $args $idx]
+      if {$opt in $validOptions} {
+        incr idx
+        if {$idx < $len} {
+          set value [lindex $args $idx]
+          switch -- $opt {
+            -blackAndWhite -
+            -draft -
+            -useFirstPageNumber -
+            -usePrinterDefaults {
+              # xsd boolean value
+              if {$value ni {true false 0 1}} {
+                error "invalid value '$value' for the $opt option:\
+                       must be an XSD boolean (true, false, 0 or 1)"
+              }
+            }
+            -cellComments {
+              if {$value ni {none asDisplayed atEnd}} {
+                error "invalid value '$value' for the -cellComments option:\
+                       must be none, asDisplayed or atEnd"
+              }
+            }
+            -copies -
+            -firstPageNumber -
+            -fitToHeight -
+            -fitToWidth -
+            -horziontalDpi -
+            -scale -
+            -verticalDpi {
+              # xsd unsignedInt
+              if {![string is integer -strict $value] || $value < 0} {
+                error "invalid value '$value' for the $opt option:\
+                       must be an XSD unsignedInt"
+              }
+            }
+            -errors {
+              if {$value ni {displayed blank dash NA}} {
+                error "invalid value '$value' for the -errors option:\
+                       must be displayed blank dash or NA"
+              }
+            }
+            -orientation {
+              if {$value ni {portrait landscape}} {
+                error "invalid value '$value' for the -orientation option:\
+                       must be portrait or landscape"
+              }
+            }
+            -pageOrder {
+              if {$value ni {downThenOver overThenDown}} {
+                error "invalid value '$value' for the -pageOrder option:\
+                       must be downThenOver or overThenDown"
+              }
+            }
+            -paperHeight -
+            -paperWide {
+              if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+                error "invalid value '$value' for the $opt option:\
+                       must match the regular expresion \[0-9\]+(\\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"      
+              }
+            }
+            -paperSize {
+              if {![string is integer -strict $value] || $value < 1 || $value > 118} {
+                error "invalid value '$value' for the -paperSize option:\
+                       must be an integer from 1 to 118. See the user documentation\
+                       for what paper size each number stand ( 1 = Letter, 9 = A4)"
+              }
+            }
+          }
+          set opts([string range $opt 1 end]) $value
+        } else {
+          error "option '$opt': missing argument"
+        }            
+      } else {
+        error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
       }
-    }
-
-    if {$opts(orientation) ni {landscape portrait}} {
-      error "invalid value for the -orientation option: should be portrait or landscape"
-    }
-    if {![string is integer -strict $opts(scale)] || !($opts(scale) > 0)} {
-      error "invalid value for the -scale option: should be an integer > 0
     }
     set pageSetups($sheet) [array get opts]
   }

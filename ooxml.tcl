@@ -2996,7 +2996,6 @@ oo::class create ooxml::xl_write {
       array set opts $pageSetups($sheet)
     }
 
-    set len [llength $args]
     set validOptions {
       -blackAndWhite
       -cellComments

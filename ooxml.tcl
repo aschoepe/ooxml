@@ -1985,7 +1985,7 @@ oo::class create ooxml::xl_write {
     my variable tags
 
     if {![string is integer -strict $style] && [info exists tags(styles,$style)]} {
-      set style $tags(styles,$style)]
+      set style $tags(styles,$style)
     }
     set obj(defaultdatestyle) $style
   }

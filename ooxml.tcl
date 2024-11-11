@@ -3060,9 +3060,9 @@ oo::class create ooxml::xl_write {
               }
             }
             -orientation {
-              if {$value ni {portrait landscape}} {
+              if {$value ni {default portrait landscape}} {
                 error "invalid value '$value' for the -orientation option:\
-                       must be portrait or landscape"
+                       must be default, portrait or landscape"
               }
             }
             -pageOrder {

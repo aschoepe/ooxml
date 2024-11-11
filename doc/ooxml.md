@@ -112,53 +112,66 @@ following methods:
 
 **pageSetup** *sheet* *args*
 
-:   This method sets the page setup of the worksheet. The currently
-    supported arguments are:
+:   This method sets the page setup of the worksheet. 
+    
+    **Caveat**: If for a sheet no page setup propertiers at all are
+    set at least some applications use defaults derivated from other
+    sources. But if at least one page setup propertier is explicitly
+    set with this method some other propertiers not set will get the
+    default value from the specification, which may be another value
+    than without any page property setting. For example if you just
+    set only the **-orientation** of a sheet then this may also result
+    in another page size setting (because the application page size
+    default may be differ from the default recommended by the
+    specification (which would in this case Letter pape).
+    
+    The currently supported arguments are:
      
     **-blackAndWhite** *xsd boolean*
      
-    :   Print black and white.
+    :   Print black and white. Default: false
      
     **-cellComments** *(none|asDisplayed|atEnd)*
     
-    :   How to print cell comments.
+    :   How to print cell comments. Default: none
     
     **-copies** *integer*
     
-    :   Number of copies to print.
+    :   Number of copies to print. Default: 1
     
     **-draft** *xsd boolean*
     
-    :   Print without graphics.
+    :   Print without graphics. Default: false
     
     **-errors** *(displayed|blank|dash|NA)*
     
     :   Specifies how to print cell values for cells with errors.
+        Default: displayed
     
     **-firstPageNumber** *integer*
     
     :   Page number for first printed page. If no value is specified,
-        then 'automatic' is assumed.
+        then 'automatic' is assumed. Default: 1
   
     **-fitToHeight** *integer*
     
-    :   Number of vertical pages to fit on.
+    :   Number of vertical pages to fit on. Default: 1
     
     **-fitToWidth** *integer*
     
-    :   Number of horizontal pages to fit on.
+    :   Number of horizontal pages to fit on. Default: 1
     
     **-horziontalDpi** *integer*
     
-    :   Horizontal print resolution of the device.
+    :   Horizontal print resolution of the device. Default: 600
     
-    **-orientation** *(portrait|landscape)*
+    **-orientation** *(default|portrait|landscape)*
     
-    :   Orientation of the page.
+    :   Orientation of the page. Default: default
     
     **-pageOrder** *(downThenOver|overThenDown)*
     
-    :   Order of printed pages.
+    :   Order of printed pages. Default: downThenOver
     
     **-paperHeight** *height*
     
@@ -168,6 +181,8 @@ following methods:
         The specification say that when the *-paperHeight* and
         *-paperWidth* are specified, the application used to render
         shall ignore *-paperSize*.
+        
+        No default. 
         
      **-paperSize** *paperSizeID*
      
@@ -179,6 +194,8 @@ following methods:
         The specification say that when the *-paperHeight* and
         *-paperWidth* are specified, the application used to render
         shall ignore *-paperSize*.
+        
+        Default: 1 (which is Letter Size)
 
         The possible *paperSizeID*s and their meaning are:
         
@@ -309,6 +326,8 @@ following methods:
         The specification say that when the *-paperHeight* and
         *-paperWidth* are specified, the application used to render
         shall ignore *-paperSize*.
+        
+        No default.
          
      **-scale** *integer*
      
@@ -318,14 +337,16 @@ following methods:
         This setting is overridden when *-fitToWidth* and/or
         *-fitToHeight* are in use.
         
+        Default: 100
+        
      **-useFirstPageNumber** *xsd boolean*
      
      :  Use *-firstPageNumber* value for first page number, and do not
-        auto number the pages.
+        auto number the pages. Default: false
         
      **-verticalDpi** *integer*
      
-     :  Vertical print resolution of the device.
+     :  Vertical print resolution of the device. Default: 600
 
 
 **write** *filename*

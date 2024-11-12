@@ -1,3 +1,4 @@
+% ooxml(n) | ooxml user documentation
 # NAME
 
 ::ooxml::xl_sheets, ::ooxml::read, ::ooxml::write - Read and create
@@ -19,6 +20,10 @@ three are:
     ::ooxml::xl\_read - imports a .xlsx spreadsheet files into a Tcl array
     ::ooxml::xl\_write - creates spreadsheet object command
     ::ooxml::tablelist_to_xl - export a Tcl tablelist to a .xlsx spreadsheet
+
+During this documentation the term workbook means a whole spreadsheet
+with all its tables. The term worksheet means a specific table out of
+to worksheet it consits to.
 
 To create a spreadsheet from scratch use the ::ooxml::xl\_write to
 create a spreadsheet object command:
@@ -52,15 +57,109 @@ following methods:
 
 **numberformat** *args*
 
-:
+:   Defines an number format for the current workbook and
+    returns an ID to refer that style.
+    
+    The following options are currently supported:
+    
+    :   -format FORMAT
+    
+        FORMAT can be any Excel format-string 
+        
+    :   -general
 
-**defaultdatestyle** *STYLEID*
-
-:
+         Excel general-format
+         
+    :   -date
+    
+        Date format
+        
+    :   -time
+    
+        Time format 
+        
+    :   -datetime
+    
+        Date/Time format 
+        
+    :   -iso8601
+    
+        Date/Time in ISO8601 notation 
+        
+    :   -number
+    
+        Integer
+    
+    :   -decimal
+    
+        Decimal number with 2 decimal places 
+    :   -red
+    
+        Color red on negative values (can be combined with number and
+        decimal) 
+        
+    :   -separator
+    
+        Thousand separators (can be combined with number and decimal)
+        
+    :   -fraction
+    
+        Fractions 
+        
+    :   -scientific
+    
+        Scientific numbers 
+        
+    :   -percent
+    
+        Percentage 
+        
+    :   -text | -string
+    
+        Text
+        
+    :   -tag TAGNAME
+    
+        This option gives the format a name. This name may be used
+        instead of the returned ID. 
 
 **font** *args*
 
-:
+:   Defines a font for the current workbook and returns an ID to refer
+    that style.
+    
+    The following options are currently supported:
+    
+
+    : -list
+      Returns the list of currently defined fonts, in stead of an ID.
+      
+    : -name NAME
+    
+      (default = "Calibri")
+      
+    : -family FAMILY
+
+      (defauft = 2) 
+      
+    : -size SIZE
+    
+      (default = 12)
+      
+    : -color COLOR
+    
+      (default = "theme 1")
+      
+    : -scheme SCHEME
+    
+      (default = "minor") 
+    : -bold
+    : -italic
+    : -underline
+    : -tag TAGNAME
+    
+      This option gives the font a name. This name may be used instead
+      of the returned ID.
 
 **fill** *args*
 
@@ -71,6 +170,10 @@ following methods:
 :
 
 **style** *args*
+
+:
+
+**defaultdatestyle** *STYLEID*
 
 :
 
@@ -114,6 +217,22 @@ following methods:
     
 :    Writes the spreadsheet to the file *filename*.
 
+
+# COLOR
+
+Serveral method options expect a *COLOR* argument. There are several
+kinds of valid values.
+
+The value may be *auto* or *none*. 
+
+If not, the value may be an integer between 0 and 65 (including). See
+the list below. 
+
+If not, the value may be the name of a predefined color. Case is
+ignored. See the list below.
+
+If not, the value may be a 6 digit hexadecimal number, which is then
+used as RGB value.
 
 
 # DEPENDENCIES

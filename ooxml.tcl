@@ -1333,7 +1333,11 @@ proc ::ooxml::xl_read { file args } {
 
     if {![catch {open [file join ${zipfs}xlsx/xl $target] r} fd]} {
       fconfigure $fd -encoding utf-8
-      if {![catch {dom parse [read $fd]} doc]} {
+      if {[catch {dom parse [read $fd]} doc]} {
+        # Bug f5f40603: empty data was read for big data resulting in parse
+        # failure: error out below after cleanup
+        set errmsg "zip decompression error on 'xl/$target'"
+      } else {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
         if {!$opts(valuesonly)} {
@@ -1524,6 +1528,9 @@ proc ::ooxml::xl_read { file args } {
     zipfs unmount $mnt
   } else {
     vfs::zip::Unmount $mnt xlsx
+  }
+  if {[info exists errmsg]} {
+    error $errmsg
   }
   
   foreach cell [lsort -dictionary [array names wb *,v,*]] {

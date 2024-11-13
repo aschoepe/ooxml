@@ -68,7 +68,7 @@ doc/ooxml.html: doc/ooxml.md
 doc/ooxml.n: doc/ooxml.md
 	pandoc --standalone -f markdown -t man doc/ooxml.md -o doc/ooxml.n
 
-doc: doc/ooxml.html doc/ooxml.man
+doc: doc/ooxml.html doc/ooxml.n
 
 all: manifest.txt doc/ooxml.html doc/ooxml.n
 

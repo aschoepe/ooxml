@@ -176,14 +176,6 @@ package require msgcat
 
 namespace eval ::ooxml {
   
-  if {[package vsatisfies [package present Tcl] 9]} {
-    variable Tcl9 true
-    variable zipfs "//zipfs:/"
-  } else {
-    variable Tcl9 false
-    variable zipfs ""
-  }
-  
   namespace export xl_sheets xl_read xl_write
 
   variable defaults
@@ -845,39 +837,119 @@ proc ::ooxml::Color { color } {
   return {}
 }
 
+#
+# ooxml::zip_open
+#
+# Helper to open a zip file for reading.
+#
+proc ::ooxml::zip_open {file} {
+  if {[package vsatisfies [package present Tcl] 9]} {
+    variable zipaccessmethod tcl9
+    variable zipfs [zipfs root]
+    variable mnt [zipfs mount $file xlsx]
+  } elseif {![catch {package require zipfile::decode}]} {
+    variable zipaccessmethod tcllib
+    ::zipfile::decode::open $file
+    variable zipdesc [::zipfile::decode::archive]
+  } else {
+    variable zipaccessmethod vfs
+    variable zipfs ""
+    # As Version 1.0.3 has serious bugs like returning empty data, require
+    # 1.0.4 and further
+    package require vfs::zip 1.0.4-
+    variable mnt [vfs::zip::Mount $file xlsx]
+  }
+}
+
+#
+# ooxml::zip_read
+#
+# Read the data of a zip file wether by vfs or tcllib
+# Return the file data
+# Return the empty string, if file not found, file empty or error
+proc ::ooxml::zip_read {file} {
+  variable zipaccessmethod
+  switch -exact -- $zipaccessmethod {
+    tcllib {
+      # Use tcllib
+      variable zipdesc
+      if {![catch {::zipfile::decode::getfile $zipdesc $file} filedata]} {
+        return $filedata
+      }
+    }
+    default {
+      # Use virtual file system
+      variable zipfs
+      try {
+        set fd [open ${zipfs}xlsx/$file r]
+        fconfigure $fd -encoding utf-8
+        # Specially catch read, as it may fire utf-8 translation errors on Tcl9
+        set filedata [read $fd]
+        return $filedata
+      } on error {} {
+        # Return below on any error, even file not found
+      } finally {
+        if {[info exists fd]} {
+          close $fd
+        }
+      }
+    }
+  }
+  # file not found or error
+  return
+}
+
+#
+# ooxml::zip_close
+#
+# Close the zip file
+#
+proc ::ooxml::zip_close {} {
+  variable zipaccessmethod
+  switch -exact -- $zipaccessmethod {
+    tcl9 {
+      variable mnt
+      zipfs unmount $mnt
+      unset mnt
+    }
+    vfs {
+      variable mnt
+      vfs::zip::Unmount $mnt xlsx
+      unset mnt
+    }
+    tcllib {
+      ::zipfile::decode::close
+      # Clear zip metadata
+      variable zipdesc
+      unset zipdesc
+    }
+  }
+}
 
 #
 # ooxml::xl_sheets
 #
 
-proc ::ooxml::xl_sheets { file } {
+proc ::ooxml::xl_sheets { file args} {
   variable xmlns
-  variable Tcl9
-  variable zipfs
   
   set sheets {}
 
-  if {$Tcl9} {
-    set mnt [zipfs mount $file xlsx]
-  } else {
-    package require vfs::zip
-    set mnt [vfs::zip::Mount $file xlsx]
-  }
+  zip_open $file
 
   set rels 0
-  if {![catch {open ${zipfs}xlsx/xl/_rels/workbook.xml.rels r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} rdoc]} {
+  set filedata [zip_read "xl/_rels/workbook.xml.rels"]
+  if {$filedata ne ""} {
+    if {![catch {dom parse $filedata} rdoc]} {
       set rels 1
       $rdoc documentElement relsRoot
       $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
-    close $fd
   }
 
-  if {![catch {open ${zipfs}xlsx/xl/workbook.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
+  set filedata [zip_read "xl/workbook.xml"]
+  if {$filedata ne ""} {
+    if {![catch {dom parse $filedata} doc]} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
@@ -895,18 +967,13 @@ proc ::ooxml::xl_sheets { file } {
       }
       $doc delete
     }
-    close $fd
   }
 
   if {$rels} {
     $rdoc delete
   }
 
-  if {$Tcl9} {
-    zipfs unmount $mnt
-  } else {
-    vfs::zip::Unmount $mnt xlsx
-  }
+  zip_close
 
   return $sheets
 }
@@ -918,14 +985,8 @@ proc ::ooxml::xl_sheets { file } {
 
 proc ::ooxml::xl_read { file args } {
   variable xmlns
-  variable Tcl9
-  variable zipfs
   
   variable predefNumFmts
-
-  if {!$Tcl9} {
-    package require vfs::zip
-  }
 
   array set cellXfs {}
   array set numFmts [array get predefNumFmts]
@@ -965,26 +1026,21 @@ proc ::ooxml::xl_read { file args } {
     set opts(sheetnames) *
   }
 
-  if {$Tcl9} {
-    set mnt [zipfs mount $file xlsx]
-  } else {
-    set mnt [vfs::zip::Mount $file xlsx]
-  }
+  zip_open $file
 
   set rels 0
-  if {![catch {open ${zipfs}xlsx/xl/_rels/workbook.xml.rels r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} rdoc]} {
+  set filedata [zip_read "xl/_rels/workbook.xml.rels"]
+  if {"" ne $filedata} {
+    if {![catch {dom parse $filedata} rdoc]} {
       set rels 1
       $rdoc documentElement relsRoot
       $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
     }
-    close $fd
   }
 
-  if {![catch {open ${zipfs}xlsx/xl/workbook.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
+  set filedata [zip_read "xl/workbook.xml"]
+  if {$filedata ne ""} {
+    if {![catch {dom parse $filedata} doc]} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
@@ -1019,16 +1075,15 @@ proc ::ooxml::xl_read { file args } {
       }
       $doc delete
     }
-    close $fd
   }
 
   if {$rels} {
     $rdoc delete
   }
 
-  if {![catch {open ${zipfs}xlsx/xl/sharedStrings.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
+  set filedata [zip_read "xl/sharedStrings.xml"]
+  if {$filedata ne ""} {
+    if {![catch {dom parse $filedata} doc]} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
@@ -1043,13 +1098,12 @@ proc ::ooxml::xl_read { file args } {
       }
       $doc delete
     }
-    close $fd
   }
 
 
-  if {![catch {open ${zipfs}xlsx/xl/styles.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
+  set filedata [zip_read "xl/styles.xml"]
+  if {$filedata ne ""} {
+    if {![catch {dom parse $filedata} doc]} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
@@ -1280,15 +1334,14 @@ proc ::ooxml::xl_read { file args } {
 
       $doc delete
     }
-    close $fd
   }
 
   ### HYPERLINKS ###
 
   foreach {sheet sid name rid target} $sheets {
-    if {![catch {open ${zipfs}xlsx/xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels r} fd]} {
-      fconfigure $fd -encoding utf-8
-      if {![catch {dom parse [read $fd]} doc]} {
+    set filedata [zip_read "xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels"]
+    if {$filedata ne ""} {
+      if {![catch {dom parse $filedata} doc]} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(PR)]
         foreach hlink [$root selectNodes /M:Relationships/M:Relationship] {
@@ -1298,7 +1351,6 @@ proc ::ooxml::xl_read { file args } {
         }
         $doc delete
       }
-      close $fd
     }
   }
 
@@ -1331,9 +1383,9 @@ proc ::ooxml::xl_read { file args } {
     set wb($sheet,max_row) -1
     set wb($sheet,max_column) -1
 
-    if {![catch {open [file join ${zipfs}xlsx/xl $target] r} fd]} {
-      fconfigure $fd -encoding utf-8
-      if {![catch {dom parse [read $fd]} doc]} {
+    set filedata [zip_read "xl/$target"]
+    if {$filedata ne ""} {
+      if {![catch {dom parse $filedata} doc]} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
         if {!$opts(valuesonly)} {
@@ -1516,15 +1568,10 @@ proc ::ooxml::xl_read { file args } {
         }
         $doc delete
       }
-      close $fd
     }
   }
 
-  if {$Tcl9} {
-    zipfs unmount $mnt
-  } else {
-    vfs::zip::Unmount $mnt xlsx
-  }
+  zip_close
   
   foreach cell [lsort -dictionary [array names wb *,v,*]] {
     lassign [split $cell ,] sheet tag row column
@@ -4212,7 +4259,7 @@ proc ::ooxml::build-info { {cmd {}} } {
   }
 }
 
-package provide ooxml 1.8.1
+package provide ooxml 1.9
 
 set ::ooxml::pkgPath [file dirname [info script]]
 

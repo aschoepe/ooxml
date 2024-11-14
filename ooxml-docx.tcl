@@ -38,7 +38,35 @@ namespace eval ::ooxml {
 
     namespace export docx_write
 
+    variable xmlns
+
+    array set xmlns {
+        o urn:schemas-microsoft-com:office:office
+        v urn:schemas-microsoft-com:vml
+        w http://schemas.openxmlformats.org/wordprocessingml/2006/main
+        w10 urn:schemas-microsoft-com:office:word
+        wp http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing
+        wps http://schemas.microsoft.com/office/word/2010/wordprocessingShape
+        wpg http://schemas.microsoft.com/office/word/2010/wordprocessingGroup
+        mc http://schemas.openxmlformats.org/markup-compatibility/2006
+        wp14 http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing
+        w14 http://schemas.microsoft.com/office/word/2010/wordml
+    }
+    
 }
+
+proc ooxml::InitDocxNodeCommands {} {
+    set elementNodes {
+        w:body w:p w:pPr w:pStyle w:r w:rPr w:t
+    }
+    namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
+    foreach tag $elementNodes {
+        namespace eval ::ooxml "dom createNodeCmd -tagName $tag elementNode Tag_$tag
+                                namespace export Tag_$tag"
+    }
+    namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
+}
+::ooxml::InitDocxNodeCommands
 
 proc ::ooxml::InitStaticDocx {} {
     if {[info exists ::ooxml::staticDocx]} return
@@ -166,7 +194,7 @@ proc ::ooxml::InitStaticDocx {} {
                         <w:lang w:val="de-DE" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
                     </w:rPr>
                 </w:style>
-                <w:style w:type="paragraph" w:styleId="Berschrift">
+                <w:style w:type="paragraph" w:styleId="Berschrift1">
                     <w:name w:val="Überschrift"/>
                     <w:basedOn w:val="Normal"/>
                     <w:next w:val="Textkrper"/>
@@ -226,32 +254,6 @@ proc ::ooxml::InitStaticDocx {} {
                 </w:style>
             </w:styles>
         }
-        word/document.xml {
-            <w:document xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" mc:Ignorable="w14 wp14">
-                <w:body>
-                    <w:p>
-                        <w:pPr>
-                            <w:pStyle w:val="Normal"/>
-                            <w:bidi w:val="0"/>
-                            <w:jc w:val="start"/>
-                            <w:rPr/>
-                        </w:pPr>
-                        <w:r>
-                            <w:rPr/>
-                            <w:t>foo Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</w:t>
-                        </w:r>
-                    </w:p>
-                    <w:sectPr>
-                        <w:type w:val="nextPage"/>
-                        <w:pgSz w:w="11906" w:h="16838"/>
-                        <w:pgMar w:left="1134" w:right="1134" w:header="0" w:top="1134" w:footer="0" w:bottom="1134" w:gutter="0"/>
-                        <w:pgNumType w:fmt="decimal"/>
-                        <w:formProt w:val="false"/>
-                        <w:textDirection w:val="lrTb"/>
-                    </w:sectPr>
-                </w:body>
-            </w:document>
-        }
     } {
         set ::ooxml::staticDocx($name) [dom parse $xml]
     }
@@ -293,18 +295,105 @@ oo::class create ooxml::docx_write {
     destructor {
     }
 
-    method text {text} {
+    method importStyles {docxfile} {
+
+
+    }
+
+    method text {text args} {
         my variable body
 
+        set len [llength $args]
+        set idx 0
+        for {set idx 0} {$idx < $len} {incr idx} {
+            switch -- [set opt [lindex $args $idx]] {
+                -style {
+                    incr idx
+                    if {!($idx < $len)} {
+                        error "option '$opt': missing argument"
+                    }            
+                }
+                default {
+                    error "unknown option \"$opt\", should be: -style"
+                }
+            }
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+        }
+        
         $body appendFromScript {
             Tag_w:p {
+                if {[info exists opts(style)]} {
+                    Tag_w:pPr {
+                        Tag_w:pStyle w:val $opts(style)
+                        Tag_w:rPr
+                    }
+                }
                 Tag_w:r {
-                    Tag_w:t {Text [dom clearString -replace $text]}
+                    my Wt $text
                 }
             }
         }
     }
 
+    method appendText {text args} {
+        my variable body
+        set len [llength $args]
+        set idx 0
+        for {set idx 0} {$idx < $len} {incr idx} {
+            switch -- [set opt [lindex $args $idx]] {
+                -style {
+                    incr idx
+                    if {!($idx < $len)} {
+                        error "option '$opt': missing argument"
+                    }            
+                }
+                default {
+                    error "unknown option \"$opt\", should be: -style"
+                }
+            }
+            set opts([string range $opt 1 end]) [lindex $args $idx]
+        }
+
+        # Identify the last paragraph
+        set p [$body lastChild]
+        while {$p ne ""} {
+            if {[$p nodeType] ne "ELEMENT_NODE"} {
+                set child [$p previousSibling]
+                continue
+            }
+            if {[$p nodeName] ne "w:p"} {
+                set child [$p previousSibling]
+                continue
+            }
+            break
+        }
+        if {$p eq ""} {
+            error "no paragraph to append to in the document"
+        }
+        $p appendFromScript {
+            Tag_w:r {
+                if {[info exists opts(style)]} {
+                    Tag_w:rPr {
+                        Tag_w:pStyle w:val $opts(style)
+                        Tag_w:rPr
+                    }
+                }
+                my Wt $text
+            }
+        }
+    }
+
+    method Wt {text} {
+        set atts ""
+        if {[string index $text 0] eq " " || [string index $text end] eq " "} {
+            lappend atts xml:space preserve
+        }
+        #Tag_w:pPr
+        Tag_w:t $atts {
+            Text [dom clearString -replace $text]
+        }
+    }
+        
     method write {file} {
         my variable document
         my variable body

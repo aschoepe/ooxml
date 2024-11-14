@@ -873,7 +873,9 @@ proc ::ooxml::zip_read {file} {
     tcllib {
       # Use tcllib
       variable zipdesc
-      if {![catch {::zipfile::decode::getfile $zipdesc $file} filedata]} {
+      if {![catch {
+        encoding convertfrom utf-8 [::zipfile::decode::getfile $zipdesc $file]
+      } filedata]} {
         return $filedata
       }
     }

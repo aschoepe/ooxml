@@ -867,11 +867,12 @@ proc ::ooxml::zip_open {file} {
     } elseif {![catch {package require zipfile::decode}]} {
       set zipaccessmethod tcllib
     } else {
-      set zipaccessmethod vfs
-      variable zipfs ""
       # As Version 1.0.3 has serious bugs like returning empty data, require
       # 1.0.4 and further
       package require vfs::zip 1.0.4-
+      # Package available -> so use it
+      set zipaccessmethod vfs
+      variable zipfs ""
     }
   }
   switch -exact -- $zipaccessmethod {
@@ -889,21 +890,23 @@ proc ::ooxml::zip_open {file} {
 }
 
 #
-# ooxml::zip_read
+# ooxml::zip_read_parse
 #
 # Read the data of a zip file wether by vfs or tcllib
-# Return the file data
-# Return the empty string, if file not found, file empty or error
-proc ::ooxml::zip_read {file} {
+# Return the handle to the tdom object
+# Return the empty string, if file not found
+# Throws errors on file error, decoding error or xml parse error
+proc ::ooxml::zip_read_parse {file} {
   variable zipaccessmethod
   switch -exact -- $zipaccessmethod {
     tcllib {
-      # Use tcllib
       variable zipdesc
-      if {![catch {
-        encoding convertfrom utf-8 [::zipfile::decode::getfile $zipdesc $file]
-      } filedata]} {
-        return $filedata
+      try {
+        set filedata [encoding convertfrom utf-8\
+            [::zipfile::decode::getfile $zipdesc $file]]
+      } trap {ZIP DECODE BAD PATH} {} {
+        # File not found error is ok - return empty string
+        return
       }
     }
     default {
@@ -914,9 +917,9 @@ proc ::ooxml::zip_read {file} {
         fconfigure $fd -encoding utf-8
         # Specially catch read, as it may fire utf-8 translation errors on Tcl9
         set filedata [read $fd]
-        return $filedata
-      } on error {} {
-        # Return below on any error, even file not found
+      } trap {POSIX ENOENT} {} {
+        # File not found error is ok - return empty string
+        return
       } finally {
         if {[info exists fd]} {
           close $fd
@@ -924,8 +927,9 @@ proc ::ooxml::zip_read {file} {
       }
     }
   }
-  # file not found or error
-  return
+  # Parse the file data
+  # This throws an error if parsing fails
+  return [dom parse $filedata]
 }
 
 #
@@ -966,19 +970,20 @@ proc ::ooxml::xl_sheets { file args} {
 
   zip_open $file
 
-  set rels 0
-  set filedata [zip_read "xl/_rels/workbook.xml.rels"]
-  if {$filedata ne ""} {
-    if {![catch {dom parse $filedata} rdoc]} {
-      set rels 1
-      $rdoc documentElement relsRoot
-      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
+  # As zip is open now, open try block to close it for sure
+  try {
+    set rdoc [zip_read_parse "xl/_rels/workbook.xml.rels"]
+    # relsroot is needed below to add sheets.
+    # If it is not present, there will be an error below
+    # better return directly with no sheets
+    # *** or is this a fatal error? ***
+    if {$rdoc eq ""} {
+      return
     }
-  }
-
-  set filedata [zip_read "xl/workbook.xml"]
-  if {$filedata ne ""} {
-    if {![catch {dom parse $filedata} doc]} {
+    $rdoc documentElement relsRoot
+    $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
+    set doc [zip_read_parse "xl/workbook.xml"]
+    if {$doc ne ""} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
@@ -996,15 +1001,13 @@ proc ::ooxml::xl_sheets { file args} {
       }
       $doc delete
     }
-  }
-
-  if {$rels} {
     $rdoc delete
+
+    return $sheets
+
+  } finally {
+    zip_close
   }
-
-  zip_close
-
-  return $sheets
 }
 
 
@@ -1057,19 +1060,22 @@ proc ::ooxml::xl_read { file args } {
 
   zip_open $file
 
-  set rels 0
-  set filedata [zip_read "xl/_rels/workbook.xml.rels"]
-  if {"" ne $filedata} {
-    if {![catch {dom parse $filedata} rdoc]} {
-      set rels 1
-      $rdoc documentElement relsRoot
-      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
-    }
-  }
+  # As zip is open now, open try block to close it for sure
+  try {
 
-  set filedata [zip_read "xl/workbook.xml"]
-  if {$filedata ne ""} {
-    if {![catch {dom parse $filedata} doc]} {
+    set rdoc [zip_read_parse "xl/_rels/workbook.xml.rels"]
+    # relsroot is needed below to add sheets.
+    # If it is not present, there will be an error below
+    # better return directly with no sheets
+    # *** or is this a fatal error? ***
+    if {$rdoc eq ""} {
+      return
+    }
+    $rdoc documentElement relsRoot
+    $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
+
+    set doc [zip_read_parse "xl/workbook.xml"]
+    if {$doc ne ""} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
       set idx -1
@@ -1104,15 +1110,10 @@ proc ::ooxml::xl_read { file args } {
       }
       $doc delete
     }
-  }
-
-  if {$rels} {
     $rdoc delete
-  }
 
-  set filedata [zip_read "xl/sharedStrings.xml"]
-  if {$filedata ne ""} {
-    if {![catch {dom parse $filedata} doc]} {
+    set doc [zip_read_parse "xl/sharedStrings.xml"]
+    if {$doc ne ""} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
@@ -1127,12 +1128,10 @@ proc ::ooxml::xl_read { file args } {
       }
       $doc delete
     }
-  }
 
 
-  set filedata [zip_read "xl/styles.xml"]
-  if {$filedata ne ""} {
-    if {![catch {dom parse $filedata} doc]} {
+    set doc [zip_read_parse "xl/styles.xml"]
+    if {$doc ne ""} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
@@ -1363,14 +1362,12 @@ proc ::ooxml::xl_read { file args } {
 
       $doc delete
     }
-  }
 
-  ### HYPERLINKS ###
+    ### HYPERLINKS ###
 
-  foreach {sheet sid name rid target} $sheets {
-    set filedata [zip_read "xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels"]
-    if {$filedata ne ""} {
-      if {![catch {dom parse $filedata} doc]} {
+    foreach {sheet sid name rid target} $sheets {
+      set doc [zip_read_parse "xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels"]
+      if {$doc ne ""} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(PR)]
         foreach hlink [$root selectNodes /M:Relationships/M:Relationship] {
@@ -1381,40 +1378,38 @@ proc ::ooxml::xl_read { file args } {
         $doc delete
       }
     }
-  }
 
-  ### SHEET AND DATA ###
+    ### SHEET AND DATA ###
 
-  array set wb {}
+    array set wb {}
 
-  foreach {sheet sid name rid target} $sheets {
-    set read false
-    if {$opts(sheets) ne {}} {
-      foreach pat $opts(sheets) {
-        if {[string match $pat $sheet]} {
-          set read true
-          break
+    foreach {sheet sid name rid target} $sheets {
+      set read false
+      if {$opts(sheets) ne {}} {
+        foreach pat $opts(sheets) {
+          if {[string match $pat $sheet]} {
+            set read true
+            break
+          }
         }
       }
-    }
-    if {!$read && $opts(sheetnames) ne {}} {
-      foreach pat $opts(sheetnames) {
-        if {[string match $pat $name]} {
-          set read true
-          break
+      if {!$read && $opts(sheetnames) ne {}} {
+        foreach pat $opts(sheetnames) {
+          if {[string match $pat $name]} {
+            set read true
+            break
+          }
         }
       }
-    }
-    if {!$read} continue
+      if {!$read} continue
+  
+      lappend wb(sheets) $sheet
+      set wb($sheet,n) $name
+      set wb($sheet,max_row) -1
+      set wb($sheet,max_column) -1
 
-    lappend wb(sheets) $sheet
-    set wb($sheet,n) $name
-    set wb($sheet,max_row) -1
-    set wb($sheet,max_column) -1
-
-    set filedata [zip_read "xl/$target"]
-    if {$filedata ne ""} {
-      if {![catch {dom parse $filedata} doc]} {
+      set doc [zip_read_parse "xl/$target"]
+      if {$doc ne ""} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
         if {!$opts(valuesonly)} {
@@ -1598,9 +1593,9 @@ proc ::ooxml::xl_read { file args } {
         $doc delete
       }
     }
+  } finally {
+    zip_close
   }
-
-  zip_close
   
   foreach cell [lsort -dictionary [array names wb *,v,*]] {
     lassign [split $cell ,] sheet tag row column

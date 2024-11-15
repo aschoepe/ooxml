@@ -1,5 +1,5 @@
-C Do\szip\saccess\smethod\sinitialisation\sonly\sonce
-D 2024-11-15T13:11:50.519
+C Add\sfile\sand\sparse\serror\shandling.\sNow\serrors\sout\son\sany\serror.
+D 2024-11-15T14:17:31.067
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -26,7 +26,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 715c4816daadb0bb9a99ae5b4bda1bdd24f160fce178b6f86e50b727e92ba33e
+F ooxml.tcl 3b203119c61f7307d74853553cdff185b7e134f61ffcd5f41fd8dbf90d2f8f6f
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -74,8 +74,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 2a8795a55d2a389b2185518e5af622ff56b4563962c403271e3f56f913da4b87
-R 0d1f2cb84ab538c04a0a7cb0cd28284a
+P 9581ae7375df680afc08f3db6774bd2d5e00b6bded012b546ff665a03f471b88
+R 042db3fd78b84d02aa3c9029faeb1bcf
 U oehhar
-Z 3c5d5946c2790cae72af52c8b4b2d464
+Z b252b186d3bd75e3f209697928d2ac5e
 # Remove this line to create a well-formed Fossil manifest.

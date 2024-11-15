@@ -57,7 +57,8 @@ namespace eval ::ooxml {
 
 proc ooxml::InitDocxNodeCommands {} {
     set elementNodes {
-        w:body w:p w:pPr w:pStyle w:r w:rPr w:t
+        w:b w:bCs w:body w:dstrike w:b w:i w:iCs w:p w:pPr w:pStyle w:r w:rPr
+        w:strike w:rStyle w:t
     }
     namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
     foreach tag $elementNodes {
@@ -272,19 +273,7 @@ oo::class create ooxml::docx_write {
         
         dom createDocument w:document document
         $document documentElement root
-        foreach ns {
-            o
-            r
-            v
-            w
-            w10
-            wp
-            wps
-            wpg
-            mc
-            wp14
-            w14
-        } {
+        foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
             $root setAttribute xmlns:$ns $xmlns($ns)
         }
         $root setAttribute mc:Ignorable "w14 wp14"
@@ -303,29 +292,46 @@ oo::class create ooxml::docx_write {
     method text {text args} {
         my variable body
 
+        set validOptions {
+            -style
+        }
         set len [llength $args]
-        set idx 0
         for {set idx 0} {$idx < $len} {incr idx} {
-            switch -- [set opt [lindex $args $idx]] {
+            set opt [lindex $args $idx]
+            if {$opt ni $validOptions} {
+                error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
+            }
+            incr idx
+            if {$idx >= $len} {
+                error "option '$opt': missing argument"
+            }
+            set value [lindex $args $idx]
+            switch -- $opt {
                 -style {
-                    incr idx
-                    if {!($idx < $len)} {
-                        error "option '$opt': missing argument"
-                    }            
+                    # TODO check value
                 }
                 default {
-                    error "unknown option \"$opt\", should be: -style"
+                    error "internal error: no value check for $opt - please report"
                 }
+
             }
-            set opts([string range $opt 1 end]) [lindex $args $idx]
+            set opts([string range $opt 1 end]) $value
         }
         
         $body appendFromScript {
             Tag_w:p {
-                if {[info exists opts(style)]} {
+                if {[info exists opts]} {
                     Tag_w:pPr {
-                        Tag_w:pStyle w:val $opts(style)
-                        Tag_w:rPr
+                        foreach {opt value} [array get opts] {
+                            switch $opt {
+                                style  {
+                                    Tag_w:pStyle w:val $value
+                                }
+                                default {
+                                    error "internal error: $opt not implemented"
+                                }
+                            }
+                        }
                     }
                 }
                 Tag_w:r {
@@ -337,21 +343,46 @@ oo::class create ooxml::docx_write {
 
     method appendText {text args} {
         my variable body
+
+        set validOptions {
+            -style
+            -bold
+            -italic
+            -strike
+            -dstrike
+        }
         set len [llength $args]
         set idx 0
         for {set idx 0} {$idx < $len} {incr idx} {
-            switch -- [set opt [lindex $args $idx]] {
+            set opt [lindex $args $idx]
+            if {$opt ni $validOptions} {
+                error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
+            }
+            incr idx
+            if {!($idx < $len)} {
+                error "option '$opt': missing argument"
+            }
+            set value [lindex $args $idx]
+            switch -- $opt {
                 -style {
-                    incr idx
-                    if {!($idx < $len)} {
-                        error "option '$opt': missing argument"
-                    }            
+                    # TODO check value
+                }
+                -bold -
+                -italic -
+                -strike -
+                -dstrike {
+                    if {$value ni {on off}} {
+                        error "invalid value '$value' for the $opt option:\
+                        must be an XSD boolean (true, false, 0 or 1) or \"on\"\
+                        or \"off\""
+                    }
                 }
                 default {
-                    error "unknown option \"$opt\", should be: -style"
+                    error "internal error: no value check for $opt - please report
                 }
+
             }
-            set opts([string range $opt 1 end]) [lindex $args $idx]
+            set opts([string range $opt 1 end]) $value
         }
 
         # Identify the last paragraph
@@ -372,10 +403,38 @@ oo::class create ooxml::docx_write {
         }
         $p appendFromScript {
             Tag_w:r {
+                if {[info exists opts]} {
+                    Tag_w:rPr {
+                        foreach {opt value} [array get opts] {
+                            switch $opt {
+                                style  {
+                                    Tag_w:rStyle w:val $value
+                                }
+                                bold {
+                                    Tag_w:b w:val $value
+                                    Tag_w:bCs w:val $value
+                                }
+                                italic {
+                                    Tag_w:i w:val $value
+                                    Tag_w:iCs w:val $value
+                                }
+                                strike {
+                                    Tag_w:strike w:val $value
+                                }
+                                dstrike {
+                                    Tag_w:dstrike w:val $value
+                                }
+                                default {
+                                    error "internal error: $opt not implemented"
+                                }
+                                
+                            }
+                        }
+                    }
+                }
                 if {[info exists opts(style)]} {
                     Tag_w:rPr {
-                        Tag_w:pStyle w:val $opts(style)
-                        Tag_w:rPr
+                        Tag_w:rStyle w:val $opts(style)
                     }
                 }
                 my Wt $text
@@ -388,7 +447,6 @@ oo::class create ooxml::docx_write {
         if {[string index $text 0] eq " " || [string index $text end] eq " "} {
             lappend atts xml:space preserve
         }
-        #Tag_w:pPr
         Tag_w:t $atts {
             Text [dom clearString -replace $text]
         }

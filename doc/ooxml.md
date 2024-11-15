@@ -14,7 +14,7 @@ ECMA-376 Office Open XML Spreadsheets (the .xlsx format)
 # DESCRIPTION
 
 The commands of this package read or create ECMA-376 Office Open XML
-Spreadsheets (libreoffic and Excel ".xlsx" files). The most important
+Spreadsheets (libreoffice and Excel ".xlsx" files). The most important
 three are:
 
     ::ooxml::xl\_read - imports a .xlsx spreadsheet files into a Tcl array
@@ -23,10 +23,10 @@ three are:
 
 During this documentation the term workbook means a whole spreadsheet
 with all its tables. The term worksheet means a specific table out of
-to worksheet it consits to.
+the worksheet it consits to.
 
-To create a spreadsheet from scratch use the ::ooxml::xl\_write to
-create a spreadsheet object command:
+To create a spreadsheet from scratch use the *::ooxml::xl\_write*
+command, which returns a spreadsheet object command:
 
     set spreadsheet [::ooxml::xl_write new ?options?]
     
@@ -62,63 +62,65 @@ following methods:
     
     The following options are currently supported:
     
-    :   -format FORMAT
+    :   **-format** *FORMAT*
     
         FORMAT can be any Excel format-string 
         
-    :   -general
+    :   **-general**
 
          Excel general-format
          
-    :   -date
+    :   **-date**
     
         Date format
         
-    :   -time
+    :   **-time**
     
         Time format 
         
-    :   -datetime
+    :   **-datetime**
     
         Date/Time format 
         
-    :   -iso8601
+    :   **-iso8601**
     
         Date/Time in ISO8601 notation 
         
-    :   -number
+    :   **-number**
     
         Integer
     
-    :   -decimal
+    :   **-decimal**
     
         Decimal number with 2 decimal places 
-    :   -red
+        
+    :   **-red**
     
         Color red on negative values (can be combined with number and
         decimal) 
         
-    :   -separator
+    :   **-separator**
     
         Thousand separators (can be combined with number and decimal)
         
-    :   -fraction
+    :   **-fraction**
     
         Fractions 
         
-    :   -scientific
+    :   **-scientific**
     
         Scientific numbers 
         
-    :   -percent
+    :   **-percent**
     
         Percentage 
         
-    :   -text | -string
+    :   **-text**
+        **-string**
     
         Text
         
-    :   -tag TAGNAME
+    :   **-tag** *TAGNAME*
     
         This option gives the format a name. This name may be used
         instead of the returned ID. 
@@ -131,39 +133,68 @@ following methods:
     The following options are currently supported:
     
 
-    : -list
-      Returns the list of currently defined fonts, in stead of an ID.
+    : **-list**
+    
+      Returns the list of currently defined fonts instead of an ID.
       
-    : -name NAME
+    : **-name** *NAME*
     
       (default = "Calibri")
       
-    : -family FAMILY
+    : **-family** *FAMILY*
 
       (defauft = 2) 
       
-    : -size SIZE
+    : **-size** *SIZE*
     
       (default = 12)
       
-    : -color COLOR
+    : -**color** *COLOR*
     
       See [COLOR](#color) for the valid values.
       
-    : -scheme SCHEME
+    : **-scheme** *SCHEME*
     
       (default = "minor") 
-    : -bold
-    : -italic
-    : -underline
-    : -tag TAGNAME
+      
+    : **-bold**
+
+    : **-italic**
+
+    : **-underline**
+
+    : **-tag** *TAGNAME*
     
       This option gives the font a name. This name may be used instead
       of the returned ID.
 
 **fill** *args*
 
-:
+:   Defines a fill style for the current workbook and returns an ID to refer
+    that style.
+    
+    The following options are currently supported:
+
+    : **-list**
+    
+      Returns the list of currently defined fills, in stead of FILLID.
+      
+    : **-patterntype** *PATTERNTYPE*
+    
+       (default = "none") 
+        
+    : **-fgcolor** *COLOR*
+    
+      See [COLOR](#color) for the valid values.
+    
+    : **-bgcolor** *COLOR*
+
+     See [COLOR](#color) for the valid values.
+
+    : **-tag** *TAGNAME*
+    
+     To give the format a name. This name can also be used as FILLID. 
+
 
 **border** *args*
 

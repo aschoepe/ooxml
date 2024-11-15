@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&family=Montserrat:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&family=Roboto+Condensed:ital,wght@0,300;1,300&family=Roboto+Mono:ital,wght@0,100;0,200;1,100;1,200&family=Roboto:ital,wght@0,100;0,300;0,400;1,100;1,300;1,400&display=swap');
+
+:root {
+    /* Fonts */
+    --font-primary: 'Roboto', sans-serif;
+    --font-secondary: 'Montserrat', sans-serif;
+	--font-tertiary: 'Comfortaa', cursive;
+    --font-mono: 'Roboto Mono', monospace;
+	--font-condensed: 'Roboto Condensed', monospace;
+	
+    /* Primary Color Palette */
+    --primary-color1: #00618a;
+    --primary-color2: #70becf;
+    --primary-color3: #bcbec0;
+
+    /* Secondary Color Palette */
+    --secondary-color1: #414042;
+    --secondary-color2: #bcbec0;
+    --secondary-color3: #bcbec0;
+	
+	--glow: #03E9F4;
+}
+
+body {
+    font-family: var(--font-primary);
+}
+
+h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1 {
+	font-family: var(--font-condensed);
+	color: white;
+	background-color: var(--primary-color1);
+	padding-left: 2rem;
+	border-left: 0.5rem solid var(--primary-color2);
+	font-weight: 400;
+	line-height: 2;
+}
+
+
+p {
+    font-family: var(--font-tertiary);
+    color: var(--secondary-color1);
+}
+
+.hover-effect {
+	transition: 0.3s;
+	position: relative;
+}
+
+.hover-effect::before,
+.hover-effect::after {
+	content: '';
+	position: relative;
+	top: 0;
+	opacity: 0;
+	transition: 0.3s;
+}
+
+.hover-effect::before {
+	content: '[';
+	left: -3px; /* Position the brackets correctly */
+}
+
+.hover-effect::after {
+	content: ']';
+	right: -3px; /* Position the brackets correctly */
+}
+
+.hover-effect:hover::before,
+.hover-effect:hover::after {
+	opacity: 1;
+}
+
+.nav-item {
+	font-family: var(--font-primary);
+	text-transform: uppercase;
+	transition: 0.5s;
+}
+
+.nav-item:hover {
+	color: #fff;
+	text-shadow: 0 0 5px #03e9f4,
+		0 0 25px #03e9f4,
+		0 0 50px #03e9f4,
+		0 0 100px #03e9f4;
+}
+
+
+#searchi {
+	
+}
+
+#searchb {
+	font-family: var(--font-tertiary);
+	text-transform: uppercase;
+}
+
+.btn .btn-border-color {
+    color: var(--primary-color2);
+}
+
+
+.code-container {
+    position: relative;
+}
+
+.copy-button {
+    position: absolute;
+    top: 30px; /* Adjust this value to move the button up/down */
+    right: 10px; /* Adjust this value to move the button left/right */
+    z-index: 1;
+}
+
+
+
+footer {
+	box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
+	box-sizing: border-box;
+	width: 100%;
+	text-align: left;
+	font: bold 16px sans-serif;
+	padding: 55px 50px;
+	margin-top: 80px;
+	bottom: 0;
+	color: #fff;
+}
+
+.footer-navigation a.webmaster {
+	color: #fff;
+	text-decoration: none;
+}
+
+.footer-navigation h3 {
+  margin: 0;
+  font: normal 36px Cookie, cursive;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.footer-navigation p.links a {
+	font-family: var(--font-primary);
+	text-transform: uppercase;
+	transition: 0.5s;
+	color: #fff;
+	text-decoration: none;
+	font-weight: 400;
+}
+
+.footer-navigation a:hover {
+	color: #fff;
+	text-shadow: 0 0 5px var(--glow),
+		0 0 25px var(--glow),
+		0 0 50px var(--glow),
+		0 0 100px var(--glow);
+}
+
+.footer-navigation p.company-name {
+  color: var(--secondary-color3);
+  font-size: 14px;
+  font-weight: normal;
+  margin-top: 40px;
+}
+
+span.new-line-span {
+  display: block;
+  font-weight: normal;
+  display: block;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 2;
+}
+
+.footer-about h4 {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.footer-about p {
+  line-height: 20px;
+  color: #92999f;
+  font-size: 13px;
+  font-weight: normal;
+  margin: 0;
+}
+
+div.social-links {
+  margin-top: 20px;
+  color: #fff;
+}
+
+.social-links a {
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  background-color: #33383b;
+  border-radius: 2px;
+  font-size: 20px;
+  color: #ffffff;
+  text-align: center;
+  line-height: 35px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+
+
+.container ul {
+    list-style: none; /* removes the default bullets */
+}
+
+.container ul li::before {
+    content: '\F270'; /* using a checkmark for bullet points */
+    font-family: "bootstrap-icons"; /* ensure this matches the exact font family of your icon set */
+    display: inline-block; /* necessary to position the pseudo-element */
+    margin-right: 8px; /* space between the bullet and the list item */
+	color: var(--primary-color1);
+}
+
+
+
+/* Style.adp */
+.square {
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+}
+
+#square1 {
+    background-color: var(--primary-color1);
+}
+
+#square2 {
+    background-color: var(--primary-color2);
+}
+
+#square3 {
+    background-color: var(--primary-color3);
+}
+
+#square4 {
+    background-color: var(--secondary-color1);
+}
+
+#square5 {
+    background-color: var(--secondary-color2);
+}
+
+#square6 {
+    background-color: var(--secondary-color3);
+}
+
+#pritext {
+	font-family: var(--font-primary);
+}
+
+#sectext {
+	font-family: var(--font-secondary);
+}
+
+#tertext {
+	font-family: var(--font-tertiary);
+}
+
+#monotext {
+	font-family: var(--font-mono);
+}
+
+#condtext {
+	font-family: var(--font-condensed);
+}

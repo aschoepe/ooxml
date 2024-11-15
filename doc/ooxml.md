@@ -638,5 +638,5 @@ Color ID Name             (A)RGB
 # DEPENDENCIES
 
     Tcl >= 8.6.7
-    tclvfs::zip >= 1.4.2 (or Tcl 9)
+    tclvfs::zip >= 1.0.4 or tcllib::zip::decode or Tcl 9 (only for xlsx reading)
     tdom >= 0.9.0

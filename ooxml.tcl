@@ -975,32 +975,32 @@ proc ::ooxml::xl_sheets { file args} {
     set rdoc [zip_read_parse "xl/_rels/workbook.xml.rels"]
     # relsroot is needed below to add sheets.
     # If it is not present, there will be an error below
-    # better return directly with no sheets
-    # *** or is this a fatal error? ***
     if {$rdoc eq ""} {
-      return
+      return -code error "No valid xlsx file"
     }
     $rdoc documentElement relsRoot
     $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
+
     set doc [zip_read_parse "xl/workbook.xml"]
-    if {$doc ne ""} {
-      $doc documentElement root
-      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
-      set idx -1
-      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
-        if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-          set sheetId [$node @sheetId]
-          set name [$node @name]
-          set rid [$node getAttributeNS $xmlns(r) id]
-          foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
-            if {[$node hasAttribute Target]} {
-              lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
-            }
+    if {$doc eq ""} {
+      return -code error "No valid xlsx file"
+    }
+    $doc documentElement root
+    $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
+    set idx -1
+    foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
+      if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
+        set sheetId [$node @sheetId]
+        set name [$node @name]
+        set rid [$node getAttributeNS $xmlns(r) id]
+        foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+          if {[$node hasAttribute Target]} {
+            lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
           }
         }
       }
-      $doc delete
     }
+    $doc delete
     $rdoc delete
 
     return $sheets
@@ -1066,50 +1066,49 @@ proc ::ooxml::xl_read { file args } {
     set rdoc [zip_read_parse "xl/_rels/workbook.xml.rels"]
     # relsroot is needed below to add sheets.
     # If it is not present, there will be an error below
-    # better return directly with no sheets
-    # *** or is this a fatal error? ***
     if {$rdoc eq ""} {
-      return
+      return -code error "No valid xlsx file"
     }
     $rdoc documentElement relsRoot
     $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
 
     set doc [zip_read_parse "xl/workbook.xml"]
-    if {$doc ne ""} {
-      $doc documentElement root
-      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
-      set idx -1
-      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
-        if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-          set sheetId [$node @sheetId]
-          set name [$node @name]
-          set rid [$node getAttributeNS $xmlns(r) id]
-          foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
-            if {[$node hasAttribute Target]} {
-              lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
-            }
+    if {$doc eq ""} {
+      return -code error "No valid xlsx file"
+    }
+    $doc documentElement root
+    $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
+    set idx -1
+    foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
+      if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
+        set sheetId [$node @sheetId]
+        set name [$node @name]
+        set rid [$node getAttributeNS $xmlns(r) id]
+        foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+          if {[$node hasAttribute Target]} {
+            lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
           }
         }
       }
-      foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
-        if {[$node hasAttribute activeTab]} {
-          lappend wb(view) activetab [$node @activeTab]
-        }
-        if {[$node hasAttribute xWindow]} {
-          lappend wb(view) x [$node @xWindow]
-        }
-        if {[$node hasAttribute yWindow]} {
-          lappend wb(view) y [$node @yWindow]
-        }
-        if {[$node hasAttribute windowHeight]} {
-          lappend wb(view) height [$node @windowHeight]
-        }
-        if {[$node hasAttribute windowWidth]} {
-          lappend wb(view) width [$node @windowWidth]
-        }
-      }
-      $doc delete
     }
+    foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
+      if {[$node hasAttribute activeTab]} {
+        lappend wb(view) activetab [$node @activeTab]
+      }
+      if {[$node hasAttribute xWindow]} {
+        lappend wb(view) x [$node @xWindow]
+      }
+      if {[$node hasAttribute yWindow]} {
+        lappend wb(view) y [$node @yWindow]
+      }
+      if {[$node hasAttribute windowHeight]} {
+        lappend wb(view) height [$node @windowHeight]
+      }
+      if {[$node hasAttribute windowWidth]} {
+        lappend wb(view) width [$node @windowWidth]
+      }
+    }
+    $doc delete
     $rdoc delete
 
     set doc [zip_read_parse "xl/sharedStrings.xml"]

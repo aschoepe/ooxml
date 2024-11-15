@@ -62,7 +62,16 @@ CLEANFILES	= @CLEANFILES@
 manifest.txt: manifest manifest.uuid tools/mkversion.tcl
 	$(TCLSH) tools/mkversion.tcl > $@
 
-all: manifest.txt
+doc/ooxml.html: doc/ooxml.md
+	pandoc --standalone -f markdown -t html doc/ooxml.md \
+		--css main.css -o doc/ooxml.html
+
+doc/ooxml.n: doc/ooxml.md
+	pandoc --standalone -f markdown -t man doc/ooxml.md -o doc/ooxml.n
+
+doc: doc/ooxml.html doc/ooxml.n
+
+all: manifest.txt doc/ooxml.html doc/ooxml.n
 
 install: all
 	$(TCLSH) `@CYGPATH@ $(srcdir)/helper.tcl` cp $(PKG_TCL_SOURCES) pkgIndex.tcl $(pkglibdir)
@@ -73,14 +82,14 @@ test:
 
 archive:
 	sh tools/archive.sh @PACKAGE_NAME@ @PACKAGE_VERSION@ $(PKG_TCL_SOURCES)
-	
+
 clean:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
-	-rm -rf doc
+	-rm -rf doc/ooxml.html doc/ooxml.n
 
 distclean: clean
 	-rm -f $(CONFIG_CLEAN_FILES)
 	-rm -rf autom4te.cache
 	-rm -f config.cache config.log config.status
 
-.PHONY: all install test clean distclean
+.PHONY: install test clean distclean

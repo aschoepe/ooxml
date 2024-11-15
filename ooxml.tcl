@@ -200,6 +200,10 @@ namespace eval ::ooxml {
   variable xmlns
   variable pkgPath
 
+  # Initialize to the empty string to determinate method on first usage of a
+  # zip read function.
+  variable zipaccessmethod ""
+
   set defaults(path) {.}
 
   set defaults(numFmts,start) 166
@@ -852,23 +856,35 @@ proc ::ooxml::Color { color } {
 # ooxml::zip_open
 #
 # Helper to open a zip file for reading.
+# On first call, the zip access method is found and initialized
 #
 proc ::ooxml::zip_open {file} {
-  if {[package vsatisfies [package present Tcl] 9]} {
-    variable zipaccessmethod tcl9
-    variable zipfs [zipfs root]
-    variable mnt [zipfs mount $file xlsx]
-  } elseif {![catch {package require zipfile::decode}]} {
-    variable zipaccessmethod tcllib
-    ::zipfile::decode::open $file
-    variable zipdesc [::zipfile::decode::archive]
-  } else {
-    variable zipaccessmethod vfs
-    variable zipfs ""
-    # As Version 1.0.3 has serious bugs like returning empty data, require
-    # 1.0.4 and further
-    package require vfs::zip 1.0.4-
-    variable mnt [vfs::zip::Mount $file xlsx]
+  variable zipaccessmethod
+  if {$zipaccessmethod eq ""} {
+    if {[package vsatisfies [package present Tcl] 9]} {
+      set zipaccessmethod tcl9
+      variable zipfs [zipfs root]
+    } elseif {![catch {package require zipfile::decode}]} {
+      set zipaccessmethod tcllib
+    } else {
+      set zipaccessmethod vfs
+      variable zipfs ""
+      # As Version 1.0.3 has serious bugs like returning empty data, require
+      # 1.0.4 and further
+      package require vfs::zip 1.0.4-
+    }
+  }
+  switch -exact -- $zipaccessmethod {
+    tcl9 {
+      variable mnt [zipfs mount $file xlsx]
+    }
+    vfs {
+      variable mnt [vfs::zip::Mount $file xlsx]
+    }
+    default {
+      ::zipfile::decode::open $file
+      variable zipdesc [::zipfile::decode::archive]
+    }
   }
 }
 

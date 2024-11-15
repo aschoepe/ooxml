@@ -153,6 +153,12 @@
 #     -scale Print scaling. The standard say this attribute is restricted
 #      to values ranging from 10 to 400. Enforced is a positiv integer.
 #
+#   method pageMarginsDefault args
+#     -left inch -right inch -top inch -bottom inch -header inch -footer inch
+#
+#   method pageMargins sheet args
+#     -left inch -right inch -top inch -bottom inch -header inch -footer inch
+#
 #   method autofilter sheet indexFrom indexTo
 # 
 #   method freeze sheet index
@@ -1672,8 +1678,10 @@ oo::class create ooxml::xl_write {
     my variable view
     my variable tags
     my variable hlinks
+    my variable pageMargins
+    my variable pageMarginsDefault
     my variable pageSetups
-    
+
     array set opts {
       creator {unknown}
       created {}
@@ -1684,6 +1692,15 @@ oo::class create ooxml::xl_write {
 
     array set tags {}
 
+    set pageMarginsDefault {
+      left 0.75
+      right 0.75
+      top 1
+      bottom 1
+      header 0.5
+      footer 0.5
+    }
+    
     set len [llength $args]
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
@@ -1986,8 +2003,8 @@ oo::class create ooxml::xl_write {
 
     if {![string is integer -strict $style] && [info exists tags(styles,$style)]} {
       set style $tags(styles,$style)
-    }
-    set obj(defaultdatestyle) $style
+  }
+  set obj(defaultdatestyle) $style
   }
 
   method font { args } {
@@ -2989,6 +3006,50 @@ oo::class create ooxml::xl_write {
     }
   }
 
+  method processPageMarigns { defaults options } {
+    array set opts $defaults
+
+    set len [llength $options]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $options $idx]] {
+        -left - -right - -top - -bottom - -header - -footer {
+          incr idx
+          if {$idx < $len} {
+            set value [lindex $options $idx]
+            if {![string is double -strict $value]} {
+              error "option '$opt': value must be a double (in inch)"
+            }
+            set opts([string range $opt 1 end]) $value
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        default {
+          error "unknown option \"$opt\", should be: -left -right -top -bottom -header or -footer"
+        }
+      }
+    }
+    return [array get opts]
+  }
+  method pageMarginsDefault { args } {
+    my variable pageMarginsDefault
+
+    set pageMarginsDefault [my processPageMarigns $pageMarginsDefault $args]
+  }
+
+  method pageMargins { sheet args } {
+    my variable pageMargins
+    my variable pageMarginsDefault
+
+    if {[info exists pageMargins($sheet)]} {
+      set defaults $pageMargins($sheet)
+    } else {
+      set defaults $pageMarginsDefault
+    }
+    set pageMarginsDefault [my processPageMarigns $defaults $args]
+  }
+
   method pageSetup { sheet args } {
     my variable pageSetups
 
@@ -3118,6 +3179,8 @@ oo::class create ooxml::xl_write {
     my variable cols
     my variable view
     my variable hlinks
+    my variable pageMargins
+    my variable pageMarginsDefault
     my variable pageSetups
 
     upvar #0 ::ooxml::xmlns xmlns
@@ -4086,7 +4149,11 @@ oo::class create ooxml::xl_write {
             }
           }
         }
-        Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
+        if {[info exists pageMargins($ws)]} {
+          Tag_pageMargins {*}$pageMargins($ws)
+        } else {
+          Tag_pageMargins {*}$pageMarginsDefault
+        }
         # Page Setup
         if {[info exists pageSetups($ws)]} {
           Tag_pageSetup {*}$pageSetups($ws)

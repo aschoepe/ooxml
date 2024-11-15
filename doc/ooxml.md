@@ -213,6 +213,66 @@ following methods:
 
 : 
 
+**pageMargins** *sheet* *args*
+
+:   This method sets the page margins for the worksheet.
+
+    The currently supported arguments are:
+    
+    **-left**
+    
+    **-right**
+    
+    **-top**
+    
+    **-bottom**
+    
+    **-header**
+    
+    **-footer**
+        
+    : This options all expect a floating point in inch as value for
+      the according margin.
+      
+      If some page margins for a worksheet are set with this
+      method all margins for that worksheet are set, either from the
+      options given in the method call or from the current
+      pageMarginsDefault, if a margin was not in the method call.
+      
+**pageMarginsDefault**
+
+:   This method sets the page Margins of all worksheets which have not
+    individual worksheet margin settings.
+    
+    The currently supported arguments are:
+    
+    **-left**
+    
+    **-right**
+    
+    **-top**
+    
+    **-bottom**
+    
+    **-header**
+    
+    **-footer**
+    
+    : This options all expect a floating point in inch as value for
+      the according margin.
+      
+    The default margins are
+    
+    Margin   Inch
+    -------- -------
+    left     0.75
+    right    0.75
+    top      1
+    bottom   1
+    header   0.5
+    footer   0.5
+    
+
 **pageSetup** *sheet* *args*
 
 :   This method sets the page setup of the worksheet. 

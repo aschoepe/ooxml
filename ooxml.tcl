@@ -1408,189 +1408,191 @@ proc ::ooxml::xl_read { file args } {
       set wb($sheet,max_column) -1
 
       set doc [zip_read_parse "xl/$target"]
-      if {$doc ne ""} {
-        $doc documentElement root
-        $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
-        if {!$opts(valuesonly)} {
-          set idx -1
-          foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
-            incr idx
-            set cols {}
-            foreach item {min max width style bestFit customWidth} {
-              if {[$col hasAttribute $item]} {
-                switch -- $item {
-                  min - max {
-                    lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+      # This file must be present
+      if {$doc eq ""} {
+        return -code error "Excel file error: No data for sheet [expr {$sheet+1}]"
+      }
+      $doc documentElement root
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
+      if {!$opts(valuesonly)} {
+        set idx -1
+        foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
+          incr idx
+          set cols {}
+          foreach item {min max width style bestFit customWidth} {
+            if {[$col hasAttribute $item]} {
+              switch -- $item {
+                min - max {
+                  lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+                }
+                default {
+                  lappend cols [string tolower $item] [$col @$item]
+                }
+              }
+            } else {
+              lappend cols [string tolower $item] 0
+            }
+          }
+          lappend cols string 0 nozero 0 calcfit 0
+          set wb($sheet,col,[dict get $cols min]) $cols
+        }
+        set wb($sheet,cols) [incr idx]
+      }
+      set rowindex -1
+      foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+        incr rowindex
+        set cellindex -1
+        foreach cell [$row selectNodes M:c] {
+          incr cellindex
+          # Get cell position
+          # if r exists, it contains the cell position like "A1".
+          # Otherwise, use the counter values
+          # The cell may omit positions so, set the counters if explicit
+          # cell position is given
+          if {[$cell hasAttribute r]} {
+            set rowcol [StringToRowColumn [$cell @r]]
+            # Correct the current counters
+            scan $rowcol %d,%d rowindex cellindex
+          } else {
+            set rowcol $rowindex,$cellindex
+          }
+          if {[$cell hasAttribute t]} {
+            set type [$cell @t]
+          } else {
+            set type n
+          }
+          set value {}
+          set datetime {}
+
+          ## FORMULA ##
+          if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
+            set wb($sheet,f,$rowcol) {}
+            if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
+              lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
+            }
+            if {[$node hasAttribute t] && [$node @t] eq {shared}} {
+              if {[$node hasAttribute si]} {
+                lappend wb($sheet,f,$rowcol) i [$node @si]
+              }
+              if {[$node hasAttribute ref]} {
+                lappend wb($sheet,f,$rowcol) r [$node @ref]
+              }
+            }
+          }
+
+          switch -- $type {
+           n - b - d - str {
+              # number (default), boolean, iso-date, formula string
+              if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+                set value [$node nodeValue]
+                if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
+                  set idx [$cell @s]
+                  if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
+                    set numFmtId [dict get $cellXfs($idx) nfi]
+                    if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
+                      set datetime $value
+                      catch {clock format [expr {round(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
+                    }
                   }
-                  default {
-                    lappend cols [string tolower $item] [$col @$item]
-                  }
+                } 
+              } else {
+                if {![$cell hasAttribute s]} continue
+              }
+            }
+             s {
+              # shared string
+              if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+                set index [$node nodeValue]
+                if {[info exists sharedStrings($index)]} {
+                  set value $sharedStrings($index)
                 }
               } else {
-                lappend cols [string tolower $item] 0
+                if {![$cell hasAttribute s]} continue
               }
             }
-            lappend cols string 0 nozero 0 calcfit 0
-            set wb($sheet,col,[dict get $cols min]) $cols
-          }
-          set wb($sheet,cols) [incr idx]
-        }
-        set rowindex -1
-        foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
-          incr rowindex
-          set cellindex -1
-          foreach cell [$row selectNodes M:c] {
-            incr cellindex
-            # Get cell position
-            # if r exists, it contains the cell position like "A1".
-            # Otherwise, use the counter values
-            # The cell may omit positions so, set the counters if explicit
-            # cell position is given
-            if {[$cell hasAttribute r]} {
-              set rowcol [StringToRowColumn [$cell @r]]
-              # Correct the current counters
-              scan $rowcol %d,%d rowindex cellindex
-            } else {
-              set rowcol $rowindex,$cellindex
+             inlineStr {
+              # inline string
+              if {[set string [$cell selectNodes M:is]] ne {}} {
+                foreach node [$string selectNodes M:t/text()] {
+                  append value [$node nodeValue]
+                }
+                foreach node [$string selectNodes */M:t/text()] {
+                  append value [$node nodeValue]
+                }
+              } else {
+                if {![$cell hasAttribute s]} continue
+              }
             }
+             e {
+              # error
+            }
+          }
+
+          if {!$opts(valuesonly)} {
+            set wb($sheet,c,$rowcol) [$cell @r]
+          }
+          if {!$opts(valuesonly)} {
+            if {[$cell hasAttribute s]} {
+              set wb($sheet,s,$rowcol) [$cell @s]
+            }
+          }
+          if {!$opts(valuesonly)} {
             if {[$cell hasAttribute t]} {
-              set type [$cell @t]
-            } else {
-              set type n
-            }
-            set value {}
-            set datetime {}
-
-            ## FORMULA ##
-            if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
-              set wb($sheet,f,$rowcol) {}
-              if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
-                lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
-              }
-              if {[$node hasAttribute t] && [$node @t] eq {shared}} {
-                if {[$node hasAttribute si]} {
-                  lappend wb($sheet,f,$rowcol) i [$node @si]
-                }
-                if {[$node hasAttribute ref]} {
-                  lappend wb($sheet,f,$rowcol) r [$node @ref]
-                }
-              }
-            }
-
-            switch -- $type {
-             n - b - d - str {
-                # number (default), boolean, iso-date, formula string
-                if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-                  set value [$node nodeValue]
-                  if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
-                    set idx [$cell @s]
-                    if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
-                      set numFmtId [dict get $cellXfs($idx) nfi]
-                      if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
-                        set datetime $value
-                        catch {clock format [expr {round(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
-                      }
-                    }
-                  } 
-                } else {
-                  if {![$cell hasAttribute s]} continue
-                }
-              }
-               s {
-                # shared string
-                if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-                  set index [$node nodeValue]
-                  if {[info exists sharedStrings($index)]} {
-                    set value $sharedStrings($index)
-                  }
-                } else {
-                  if {![$cell hasAttribute s]} continue
-                }
-              }
-               inlineStr {
-                # inline string
-                if {[set string [$cell selectNodes M:is]] ne {}} {
-                  foreach node [$string selectNodes M:t/text()] {
-                    append value [$node nodeValue]
-                  }
-                  foreach node [$string selectNodes */M:t/text()] {
-                    append value [$node nodeValue]
-                  }
-                } else {
-                  if {![$cell hasAttribute s]} continue
-                }
-              }
-               e {
-                # error
-              }
-            }
-
-            if {!$opts(valuesonly)} {
-              set wb($sheet,c,$rowcol) [$cell @r]
-            }
-            if {!$opts(valuesonly)} {
-              if {[$cell hasAttribute s]} {
-                set wb($sheet,s,$rowcol) [$cell @s]
-              }
-            }
-            if {!$opts(valuesonly)} {
-              if {[$cell hasAttribute t]} {
-                set wb($sheet,t,$rowcol) [$cell @t]
-              }
-            }
-            set wb($sheet,v,$rowcol) $value
-            if {!$opts(valuesonly) && $datetime ne {}} {
-              set wb($sheet,d,$rowcol) $datetime
+              set wb($sheet,t,$rowcol) [$cell @t]
             }
           }
-        }
-
-        if {!$opts(valuesonly)} {
-          foreach hlink [$root selectNodes /M:worksheet/M:hyperlinks/M:hyperlink] {
-            if {[$hlink hasAttribute ref] && [$hlink hasAttribute r:id]} {
-              set idx [::ooxml::StringToRowColumn [$hlink @ref]]
-              if {[info exists hl($sheet,[$hlink @r:id])]} {
-                if {[$hlink hasAttribute tooltip]} {
-                  set tt [$hlink @tooltip]
-                } else {
-                  set tt {}
-                }
-                set wb($sheet,l,$idx) [list l $hl($sheet,[$hlink @r:id]) t $tt]
-              }
-            }
+          set wb($sheet,v,$rowcol) $value
+          if {!$opts(valuesonly) && $datetime ne {}} {
+            set wb($sheet,d,$rowcol) $datetime
           }
         }
-
-        if {!$opts(valuesonly)} {
-          foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
-            if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
-              dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
-            }
-          }
-        }
-        if {!$opts(valuesonly)} {
-          foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
-            if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
-              set wb($sheet,freeze) [$freeze @topLeftCell]
-            }
-          }
-        }
-        if {!$opts(valuesonly)} {
-          foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
-            if {[$filter hasAttribute ref]} {
-              lappend wb($sheet,filter) [$filter @ref]
-            }
-          }
-        }
-        if {!$opts(valuesonly)} {
-          foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
-            if {[$merge hasAttribute ref]} {
-              lappend wb($sheet,merge) [$merge @ref]
-            }
-          }
-        }
-        $doc delete
       }
+
+      if {!$opts(valuesonly)} {
+        foreach hlink [$root selectNodes /M:worksheet/M:hyperlinks/M:hyperlink] {
+          if {[$hlink hasAttribute ref] && [$hlink hasAttribute r:id]} {
+            set idx [::ooxml::StringToRowColumn [$hlink @ref]]
+            if {[info exists hl($sheet,[$hlink @r:id])]} {
+              if {[$hlink hasAttribute tooltip]} {
+                set tt [$hlink @tooltip]
+              } else {
+                set tt {}
+              }
+              set wb($sheet,l,$idx) [list l $hl($sheet,[$hlink @r:id]) t $tt]
+            }
+          }
+        }
+      }
+
+      if {!$opts(valuesonly)} {
+        foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+          if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
+            dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
+          if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
+            set wb($sheet,freeze) [$freeze @topLeftCell]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
+          if {[$filter hasAttribute ref]} {
+            lappend wb($sheet,filter) [$filter @ref]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
+          if {[$merge hasAttribute ref]} {
+            lappend wb($sheet,merge) [$merge @ref]
+          }
+        }
+      }
+      $doc delete
     }
   } finally {
     zip_close

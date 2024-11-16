@@ -1,5 +1,5 @@
-C Fixed\stest\ssuite.\sMoved\sinitialization\sof\sooxml::zipaccessmethod\sout\sto\snamespace\sinitializing\stop,\swhich\sis\sIMHO\sbotter.
-D 2024-11-16T00:52:27.084
+C Revert\smove\sof\sread\spackage\srequire\sto\sgeneral\sinit.\sThis\swould\sstop\smaking\sxlsx\swrite\sto\swork\swithout\stclvfs/tcllib::decode.\sAll\stests\spass\swith\sall\sthree\saccess\smethods\sfor\sme\son\sMS-VC.
+D 2024-11-16T18:21:09.311
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -26,7 +26,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl e9b138454c5d83df00dbefd995989a5867d8027a7e1dbee9f0115f9ae316b7ba
+F ooxml.tcl 3706fc5efee1d75839df892245ea54fe44ab884ab78602f21b23c5f20bf42a75
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -74,8 +74,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 3f2609c6b9a035bd39465f756c55ced0571e14f53a52f30d4f11eb586a8dee62
-R b44f396200c740cf3006b0f1577e70bc
-U rolf
-Z 4158bcee1386086650dd922ed2c87da3
+P 628434f50b0650aa9434719b656aaa40e8546b230be7efd5c34ae04fffc3c280
+R b22480abcd168492624b39f7c7b14048
+U oehhar
+Z a3f5b38e3a75e4208555fd0ebea3bb3a
 # Remove this line to create a well-formed Fossil manifest.

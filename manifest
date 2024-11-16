@@ -1,5 +1,5 @@
-C Added\sbuilding\sparagraphs\sup\sin\sparts\swith\s(a\sview)\sdifferent\stext\sproperties.
-D 2024-11-15T00:34:03.691
+C Started\sstyle\sdefinition\s(wip).
+D 2024-11-16T16:04:18.273
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -26,7 +26,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml-docx.tcl a9538a1211e57d5b27020e3ccda8e2a65e4ffd5d3b383390e180b883e5afdcb9
+F ooxml-docx.tcl dd2bf023dadb896054ce950ccaf7744be373a5014b5b9083e16c3f543c2eaefe
 F ooxml.tcl 9ac7cc00c4752cfea5808f071159b6d9f49bc6a7b779c7cfded6ab80ec96bb87
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -75,8 +75,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P f753d4ceaed63c568dde4302d923c13c4e11a94e81e23069159c1099f691bacd
-R 7a0e50d3299847f4a24fa293286f6ef9
+P 1257d1bab3a35684a3e4dc53a720ed54bfce2a8b50ad41848dd726c8efc3d444
+R abffd89d203bd9b2d4f6688a5ae2c2e1
 U rolf
-Z f5a960bb7f26cce06d8f5745a1f9e853
+Z 352214218b0c6b535581b0fede7d4224
 # Remove this line to create a well-formed Fossil manifest.

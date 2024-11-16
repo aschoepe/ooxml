@@ -289,7 +289,7 @@ oo::class create ooxml::docx_write {
 
     }
 
-    method text {text args} {
+    method paragraph {text args} {
         my variable body
 
         set validOptions {
@@ -341,7 +341,7 @@ oo::class create ooxml::docx_write {
         }
     }
 
-    method appendText {text args} {
+    method appendToParagraph {text args} {
         my variable body
 
         set validOptions {
@@ -451,7 +451,54 @@ oo::class create ooxml::docx_write {
             Text [dom clearString -replace $text]
         }
     }
+
+    method style {args} {
+        set validOptions {
+            -id
+            -type 
+            -name
+            -basedOn
+            -color
+            -font
+        }
+        set len [llength $args]
+        set idx 0
+        for {set idx 0} {$idx < $len} {incr idx} {
+            set opt [lindex $args $idx]
+            if {$opt ni $validOptions} {
+                error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
+            }
+            incr idx
+            if {!($idx < $len)} {
+                error "option '$opt': missing argument"
+            }
+            set value [lindex $args $idx]
+            switch -- $opt {
+                -id -
+                -name -
+                -basedOn {
+                    # name check?
+                }
+                -type {
+                    if {$value ni {character numbering paragraph table}} {
+                        error "invalid value '$value' for the $opt option:\
+                        must be character, numbering, paragraph or table"
+                    }
+                }
+                -color -
+                -font {
+                    # TODO value check
+                }
+                default {
+                    error "internal error: no value check for $opt - please report
+                }
+
+            }
+            set opts([string range $opt 1 end]) $value
+        }
         
+    }
+    
     method write {file} {
         my variable document
         my variable body

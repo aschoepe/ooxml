@@ -1,5 +1,5 @@
-C Revert\smove\sof\sread\spackage\srequire\sto\sgeneral\sinit.\sThis\swould\sstop\smaking\sxlsx\swrite\sto\swork\swithout\stclvfs/tcllib::decode.\sAll\stests\spass\swith\sall\sthree\saccess\smethods\sfor\sme\son\sMS-VC.
-D 2024-11-16T18:21:09.311
+C Added\stest\sfiles\sto\sexercice\sall\serror\spaths.
+D 2024-11-16T18:52:58.345
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -38,7 +38,12 @@ F tests/formatcell.test 7ead8446d6571370a66c5f50a55e78be2dd57674edb7868be527a2a7
 F tests/formula.test 8f5624d8f324bb9c26040373a201bbcb9d2565c0734c32c7c77142b4c75ce7a8
 F tests/misc.test b166df102f2f39a696ab003509e709e1b456ddbda76a72c73484225dd844fc02
 F tests/namedfmts.test a256cebeef32996f0280a3071b941a961d7dbca9e709945394b4edd448655c47
+F tests/readerror.test 1103f698e550d347cd98accf1170565cb76b8bb4d045d10668eeec706a5485d2
 F tests/simple.test 467cfd5d42b89c4f28e820483a56cfe64c6776f9d896c0e79ea6592859c92b4b
+F tests/test_sheet1_xml_missing.xlsx 52d9c760f650bc518388b7982ff875cdff401001fd0a7f7ee1813499ab8861f8
+F tests/test_sheet1_xml_no_utf8.xlsx 72b45333998f053a4e5de86408727b76836389550876be819b49ce811faebb9a
+F tests/test_sheet1_xml_no_xml.xlsx 016667d0ed9266be829dea35b8d8c38dea973a552380c333126a6c4c69978c02
+F tests/test_worksheets_xml_missing.xlsx 1ab0ee8183d26ee9a24ff3928d0dcae38dcb12397205c8a6660d97b755cbbdd2
 F tools/archive.sh ebbde269fc01ae00183bb4b4ca3669f537c11aa13d93860c852f6221f2d0e3c1 x
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
@@ -74,8 +79,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 628434f50b0650aa9434719b656aaa40e8546b230be7efd5c34ae04fffc3c280
-R b22480abcd168492624b39f7c7b14048
+P 662e391dfd5b0ac9d9d27bbb54d7f00f047fc3b554ffe078cc29c1e6889ddf0c
+R 020a5465b53519e7e16b6f8c39c5dd8d
 U oehhar
-Z a3f5b38e3a75e4208555fd0ebea3bb3a
+Z 75d3c32ce15ffa3dfdb82a8e63d8dc01
 # Remove this line to create a well-formed Fossil manifest.

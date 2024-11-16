@@ -1,0 +1,45 @@
+#
+# Commands covered: read errorneous excel sheets
+#
+
+#
+# (c) 2019 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+
+package require ooxml
+
+test readerrorxlsx-1 {Error out as the file xl/worksheets.xml is missing} -body {
+ooxml::xl_read [file join [file dir [info script]] test_worksheets_xml_missing.xlsx]
+} -returnCodes error -result "No valid xlsx file"
+
+test readerrorxlsx-2 {Error out as the file xl/worksheets/sheet1.xml is missing} -body {
+ooxml::xl_read [file join [file dir [info script]] test_sheet1_xml_missing.xlsx]
+} -returnCodes error -result "Excel file error: No data for sheet 1"
+
+if {[package vsatisfies [package present Tcl] 9]} {
+test readerrorxlsx-3 {Error out as the file xl/worksheets/sheet1.xml is no utf8} -body {
+ooxml::xl_read [file join [file dir [info script]] test_sheet1_xml_no_utf8.xlsx]
+} -returnCodes error -match glob -result "*invalid or incomplete multibyte or wide character"
+}
+
+test readerrorxlsx-4 {Error out as the file xl/worksheets/sheet1.xml is no xml} -body {
+ooxml::xl_read [file join [file dir [info script]] test_sheet1_xml_no_xml.xlsx]
+} -returnCodes error -match glob -result "error \"syntax error\" at line 1 character 0*"
+
+# cleanup
+::tcltest::cleanupTests
+return
+
+# Local Variables:
+# tcl-indent-level: 2
+# End:

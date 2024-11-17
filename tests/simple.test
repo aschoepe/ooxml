@@ -58,7 +58,7 @@ if {[package vsatisfies [package present Tcl] 9]} {
     catch {zipfs  mount simple.xlsx xlsx} mnt
   } 0
   variable zipfs "//zipfs:/"
-} elseif {$::ooxml::zipaccessmethod eq "tcllib"} {
+} elseif {$::ooxml::zipAccessMethod eq "tcllib"} {
   test MountXLSX-2.1 {Mount XLSX File} {
     catch {
       ::zipfile::decode::open simple.xlsx
@@ -73,7 +73,7 @@ if {[package vsatisfies [package present Tcl] 9]} {
 }
 
 test DocPropsApp-3.1 {Parse xlsx/docProps/app.xml} {
-  if {$::ooxml::zipaccessmethod eq "tcllib"} {
+  if {$::ooxml::zipAccessMethod eq "tcllib"} {
     set doc [dom parse [encoding convertfrom utf-8\
                             [::zipfile::decode::getfile $zipdesc docProps/app.xml]]]
   } else {
@@ -107,7 +107,7 @@ $doc delete
 
 
 test DocPropsCore-4.1 {Parse xlsx/docProps/core.xml} {
-  if {$::ooxml::zipaccessmethod eq "tcllib"} {
+  if {$::ooxml::zipAccessMethod eq "tcllib"} {
     set doc [dom parse [encoding convertfrom utf-8\
                             [::zipfile::decode::getfile $zipdesc docProps/core.xml]]]
   } else {
@@ -154,7 +154,7 @@ $doc delete
 
 if {[package vsatisfies [package present Tcl] 9]} {
   zipfs unmount $mnt
-} elseif {$::ooxml::zipaccessmethod eq "tcllib"} {
+} elseif {$::ooxml::zipAccessMethod eq "tcllib"} {
   ::zipfile::decode::close
 }  else {
   vfs::zip::Unmount $mnt xlsx

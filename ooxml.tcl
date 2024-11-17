@@ -4,7 +4,7 @@
 #
 #  Copyright (C) 2018-2024 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
 #  Copyright (C) 2019-2024 Rolf Ade, DE
-#  Copyright (C) 2023 Harald Oehlmann, DE
+#  Copyright (C) 2023-2024 Harald Oehlmann, DE
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without modification,
@@ -202,7 +202,7 @@ namespace eval ::ooxml {
 
   # Initialize to the empty string to determinate method on first usage of a
   # zip read function.
-  variable zipaccessmethod ""
+  variable zipAccessMethod {}
 
   set defaults(path) {.}
 
@@ -853,29 +853,31 @@ proc ::ooxml::Color { color } {
 }
 
 #
-# ooxml::zip_open
+# ooxml::ZipOpen
 #
 # Helper to open a zip file for reading.
 # On first call, the zip access method is found and initialized
 #
-proc ::ooxml::zip_open {file} {
-  variable zipaccessmethod
-  if {$zipaccessmethod eq ""} {
+
+proc ::ooxml::ZipOpen {file} {
+  variable zipAccessMethod
+
+  if {$zipAccessMethod eq {}} {
     if {[package vsatisfies [package present Tcl] 9]} {
-      set zipaccessmethod tcl9
+      set zipAccessMethod tcl9
       variable zipfs [zipfs root]
     } elseif {![catch {package require zipfile::decode}]} {
-      set zipaccessmethod tcllib
+      set zipAccessMethod tcllib
     } else {
       # As Version 1.0.3 has serious bugs like returning empty data, require
       # 1.0.4 and further
       package require vfs::zip 1.0.4-
       # Package available -> so use it
-      set zipaccessmethod vfs
-      variable zipfs ""
+      set zipAccessMethod vfs
+      variable zipfs {}
     }
   }
-  switch -exact -- $zipaccessmethod {
+  switch -exact -- $zipAccessMethod {
     tcl9 {
       variable mnt [zipfs mount $file xlsx]
     }
@@ -890,15 +892,17 @@ proc ::ooxml::zip_open {file} {
 }
 
 #
-# ooxml::zip_read_parse
+# ooxml::ZipReadParse
 #
 # Read the data of a zip file wether by vfs or tcllib
 # Return the handle to the tdom object
 # Return the empty string, if file not found
 # Throws errors on file error, decoding error or xml parse error
-proc ::ooxml::zip_read_parse {file} {
-  variable zipaccessmethod
-  switch -exact -- $zipaccessmethod {
+
+proc ::ooxml::ZipReadParse {file} {
+  variable zipAccessMethod
+
+  switch -exact -- $zipAccessMethod {
     tcllib {
       variable zipdesc
       try {
@@ -933,13 +937,15 @@ proc ::ooxml::zip_read_parse {file} {
 }
 
 #
-# ooxml::zip_close
+# ooxml::ZipClose
 #
 # Close the zip file
 #
-proc ::ooxml::zip_close {} {
-  variable zipaccessmethod
-  switch -exact -- $zipaccessmethod {
+
+proc ::ooxml::ZipClose {} {
+  variable zipAccessMethod
+
+  switch -exact -- $zipAccessMethod {
     tcl9 {
       variable mnt
       zipfs unmount $mnt
@@ -968,21 +974,21 @@ proc ::ooxml::xl_sheets { file args} {
   
   set sheets {}
 
-  zip_open $file
+  ZipOpen $file
 
   # As zip is open now, open try block to close it for sure
   try {
-    set rdoc [zip_read_parse "xl/_rels/workbook.xml.rels"]
+    set rdoc [ZipReadParse "xl/_rels/workbook.xml.rels"]
     # relsroot is needed below to add sheets.
     # If it is not present, there will be an error below
-    if {$rdoc eq ""} {
+    if {$rdoc eq {}} {
       return -code error "No valid xlsx file"
     }
     $rdoc documentElement relsRoot
     $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
 
-    set doc [zip_read_parse "xl/workbook.xml"]
-    if {$doc eq ""} {
+    set doc [ZipReadParse "xl/workbook.xml"]
+    if {$doc eq {}} {
       return -code error "No valid xlsx file"
     }
     $doc documentElement root
@@ -1006,7 +1012,7 @@ proc ::ooxml::xl_sheets { file args} {
     return $sheets
 
   } finally {
-    zip_close
+    ZipClose
   }
 }
 
@@ -1058,22 +1064,22 @@ proc ::ooxml::xl_read { file args } {
     set opts(sheetnames) *
   }
 
-  zip_open $file
+  ZipOpen $file
 
   # As zip is open now, open try block to close it for sure
   try {
 
-    set rdoc [zip_read_parse "xl/_rels/workbook.xml.rels"]
+    set rdoc [ZipReadParse "xl/_rels/workbook.xml.rels"]
     # relsroot is needed below to add sheets.
     # If it is not present, there will be an error below
-    if {$rdoc eq ""} {
+    if {$rdoc eq {}} {
       return -code error "No valid xlsx file"
     }
     $rdoc documentElement relsRoot
     $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
 
-    set doc [zip_read_parse "xl/workbook.xml"]
-    if {$doc eq ""} {
+    set doc [ZipReadParse "xl/workbook.xml"]
+    if {$doc eq {}} {
       return -code error "No valid xlsx file"
     }
     $doc documentElement root
@@ -1111,8 +1117,8 @@ proc ::ooxml::xl_read { file args } {
     $doc delete
     $rdoc delete
 
-    set doc [zip_read_parse "xl/sharedStrings.xml"]
-    if {$doc ne ""} {
+    set doc [ZipReadParse "xl/sharedStrings.xml"]
+    if {$doc ne {}} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
@@ -1129,8 +1135,8 @@ proc ::ooxml::xl_read { file args } {
     }
 
 
-    set doc [zip_read_parse "xl/styles.xml"]
-    if {$doc ne ""} {
+    set doc [ZipReadParse "xl/styles.xml"]
+    if {$doc ne {}} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
@@ -1365,8 +1371,8 @@ proc ::ooxml::xl_read { file args } {
     ### HYPERLINKS ###
 
     foreach {sheet sid name rid target} $sheets {
-      set doc [zip_read_parse "xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels"]
-      if {$doc ne ""} {
+      set doc [ZipReadParse "xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels"]
+      if {$doc ne {}} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(PR)]
         foreach hlink [$root selectNodes /M:Relationships/M:Relationship] {
@@ -1407,9 +1413,9 @@ proc ::ooxml::xl_read { file args } {
       set wb($sheet,max_row) -1
       set wb($sheet,max_column) -1
 
-      set doc [zip_read_parse "xl/$target"]
+      set doc [ZipReadParse "xl/$target"]
       # This file must be present
-      if {$doc eq ""} {
+      if {$doc eq {}} {
         return -code error "Excel file error: No data for sheet [expr {$sheet+1}]"
       }
       $doc documentElement root
@@ -1595,7 +1601,7 @@ proc ::ooxml::xl_read { file args } {
       $doc delete
     }
   } finally {
-    zip_close
+    ZipClose
   }
   
   foreach cell [lsort -dictionary [array names wb *,v,*]] {

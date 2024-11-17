@@ -30,7 +30,7 @@
 #
 
 package require Tcl 8.6.7-
-package require tdom 0.9.0-
+package require tdom 0.9.5-
 package require msgcat
 package require ooxml
 
@@ -169,7 +169,7 @@ proc ::ooxml::InitStaticDocx {} {
                             <w:kern w:val="2"/>
                             <w:sz w:val="24"/>
                             <w:szCs w:val="24"/>
-                            <w:lang w:val="de-DE" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
+                            <w:lang w:val="en" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
                         </w:rPr>
                     </w:rPrDefault>
                     <w:pPrDefault>
@@ -192,13 +192,13 @@ proc ::ooxml::InitStaticDocx {} {
                         <w:kern w:val="2"/>
                         <w:sz w:val="24"/>
                         <w:szCs w:val="24"/>
-                        <w:lang w:val="de-DE" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
+                        <w:lang w:val="en" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
                     </w:rPr>
                 </w:style>
-                <w:style w:type="paragraph" w:styleId="Berschrift1">
-                    <w:name w:val="Überschrift"/>
+                <w:style w:type="paragraph" w:styleId="Heading">
+                    <w:name w:val="Heading"/>
                     <w:basedOn w:val="Normal"/>
-                    <w:next w:val="Textkrper"/>
+                    <w:next w:val="TextBody"/>
                     <w:qFormat/>
                     <w:pPr>
                         <w:keepNext w:val="true"/>
@@ -210,7 +210,7 @@ proc ::ooxml::InitStaticDocx {} {
                         <w:szCs w:val="28"/>
                     </w:rPr>
                 </w:style>
-                <w:style w:type="paragraph" w:styleId="Textkrper">
+                <w:style w:type="paragraph" w:styleId="TextBody">
                     <w:name w:val="Body Text"/>
                     <w:basedOn w:val="Normal"/>
                     <w:pPr>
@@ -218,15 +218,15 @@ proc ::ooxml::InitStaticDocx {} {
                     </w:pPr>
                     <w:rPr/>
                 </w:style>
-                <w:style w:type="paragraph" w:styleId="Aufzhlung">
+                <w:style w:type="paragraph" w:styleId="List">
                     <w:name w:val="List"/>
-                    <w:basedOn w:val="Textkrper"/>
+                    <w:basedOn w:val="TextBody"/>
                     <w:pPr/>
                     <w:rPr>
                         <w:rFonts w:cs="FreeSans"/>
                     </w:rPr>
                 </w:style>
-                <w:style w:type="paragraph" w:styleId="Beschriftung">
+                <w:style w:type="paragraph" w:styleId="Caption">
                     <w:name w:val="Caption"/>
                     <w:basedOn w:val="Normal"/>
                     <w:qFormat/>
@@ -242,8 +242,8 @@ proc ::ooxml::InitStaticDocx {} {
                         <w:szCs w:val="24"/>
                     </w:rPr>
                 </w:style>
-                <w:style w:type="paragraph" w:styleId="Verzeichnis">
-                    <w:name w:val="Verzeichnis"/>
+                <w:style w:type="paragraph" w:styleId="Index">
+                    <w:name w:val="Index"/>
                     <w:basedOn w:val="Normal"/>
                     <w:qFormat/>
                     <w:pPr>
@@ -254,7 +254,7 @@ proc ::ooxml::InitStaticDocx {} {
                     </w:rPr>
                 </w:style>
             </w:styles>
-        }
+                    }
     } {
         set ::ooxml::staticDocx($name) [dom parse $xml]
     }
@@ -266,6 +266,7 @@ oo::class create ooxml::docx_write {
     constructor { args } {
         my variable document
         my variable body
+        my variable docs
         variable ::ooxml::xmlns
 
         ::ooxml::InitNodeCommands
@@ -284,11 +285,18 @@ oo::class create ooxml::docx_write {
     destructor {
     }
 
-    method importStyles {docxfile} {
-
+    method import {what docxfile} {
 
     }
 
+    method read {what file} {
+
+    }
+
+    method write {what file} {
+
+    }
+    
     method paragraph {text args} {
         my variable body
 
@@ -502,6 +510,7 @@ oo::class create ooxml::docx_write {
     method write {file} {
         my variable document
         my variable body
+        my variable docs
         variable ::ooxml::xmlns
         variable ::ooxml::staticDocx
 
@@ -511,7 +520,7 @@ oo::class create ooxml::docx_write {
         # Initialize zip file
         set file [string trim $file]
         if {$file eq {}} {
-            set file {spreadsheetml.xlsx}
+            set file {document.docx}
         }
         if {[file extension $file] ne {.docx}} {
             append file .docx

@@ -147,7 +147,18 @@
 #     -index INDEX -style STYLEID -formula FORMULA -formulaidx SHARE -formularef INDEX:INDEX -string -nozero -height HEIGHT
 #     autoincrement of column if INDEX not applied
 #     return row,column
-# 
+#   
+#   method pageSetup sheet args
+#     -orientation (landscape|portrait)
+#     -scale Print scaling. The standard say this attribute is restricted
+#      to values ranging from 10 to 400. Enforced is a positiv integer.
+#
+#   method pageMarginsDefault args
+#     -left inch -right inch -top inch -bottom inch -header inch -footer inch
+#
+#   method pageMargins sheet args
+#     -left inch -right inch -top inch -bottom inch -header inch -footer inch
+#
 #   method autofilter sheet indexFrom indexTo
 # 
 #   method freeze sheet index
@@ -1590,7 +1601,7 @@ proc ooxml::InitNodeCommands {} {
     left
     mergeCell mergeCells
     name numFmt numFmts
-    pageMargins pane patternFill
+    pageMargins pageSetup pane patternFill
     right row
     scheme sheet sheetData sheetFormatPr sheetView sheetViews sheets si sz
     t tableStyles top
@@ -1667,6 +1678,9 @@ oo::class create ooxml::xl_write {
     my variable view
     my variable tags
     my variable hlinks
+    my variable pageMargins
+    my variable pageMarginsDefault
+    my variable pageSetups
 
     array set opts {
       creator {unknown}
@@ -1678,6 +1692,15 @@ oo::class create ooxml::xl_write {
 
     array set tags {}
 
+    set pageMarginsDefault {
+      left 0.75
+      right 0.75
+      top 1
+      bottom 1
+      header 0.5
+      footer 0.5
+    }
+    
     set len [llength $args]
     set idx 0
     for {set idx 0} {$idx < $len} {incr idx} {
@@ -1980,8 +2003,8 @@ oo::class create ooxml::xl_write {
 
     if {![string is integer -strict $style] && [info exists tags(styles,$style)]} {
       set style $tags(styles,$style)
-    }
-    set obj(defaultdatestyle) $style
+  }
+  set obj(defaultdatestyle) $style
   }
 
   method font { args } {
@@ -2983,6 +3006,158 @@ oo::class create ooxml::xl_write {
     }
   }
 
+  method processPageMarigns { defaults options } {
+    array set opts $defaults
+
+    set len [llength $options]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      switch -- [set opt [lindex $options $idx]] {
+        -left - -right - -top - -bottom - -header - -footer {
+          incr idx
+          if {$idx < $len} {
+            set value [lindex $options $idx]
+            if {![string is double -strict $value]} {
+              error "option '$opt': value must be a double (in inch)"
+            }
+            set opts([string range $opt 1 end]) $value
+          } else {
+            error "option '$opt': missing argument"
+          }            
+        }
+        default {
+          error "unknown option \"$opt\", should be: -left -right -top -bottom -header or -footer"
+        }
+      }
+    }
+    return [array get opts]
+  }
+  method pageMarginsDefault { args } {
+    my variable pageMarginsDefault
+
+    set pageMarginsDefault [my processPageMarigns $pageMarginsDefault $args]
+  }
+
+  method pageMargins { sheet args } {
+    my variable pageMargins
+    my variable pageMarginsDefault
+
+    if {[info exists pageMargins($sheet)]} {
+      set defaults $pageMargins($sheet)
+    } else {
+      set defaults $pageMarginsDefault
+    }
+    set pageMarginsDefault [my processPageMarigns $defaults $args]
+  }
+
+  method pageSetup { sheet args } {
+    my variable pageSetups
+
+    if {[info exists pageSetups($sheet)]} {
+      array set opts $pageSetups($sheet)
+    }
+
+    set validOptions {
+      -blackAndWhite
+      -cellComments
+      -copies
+      -draft
+      -errors
+      -firstPageNumber
+      -fitToHeight
+      -fitToWidth
+      -horziontalDpi
+      -orientation
+      -pageOrder
+      -paperHeight
+      -paperSize
+      -paperWide
+      -scale
+      -useFirstPageNumber
+      -verticalDpi
+    }
+    set len [llength $args]
+    set idx 0
+    for {set idx 0} {$idx < $len} {incr idx} {
+      set opt [lindex $args $idx]
+      if {$opt in $validOptions} {
+        incr idx
+        if {$idx < $len} {
+          set value [lindex $args $idx]
+          switch -- $opt {
+            -blackAndWhite -
+            -draft -
+            -useFirstPageNumber -
+            -usePrinterDefaults {
+              # xsd boolean value
+              if {$value ni {true false 0 1}} {
+                error "invalid value '$value' for the $opt option:\
+                       must be an XSD boolean (true, false, 0 or 1)"
+              }
+            }
+            -cellComments {
+              if {$value ni {none asDisplayed atEnd}} {
+                error "invalid value '$value' for the -cellComments option:\
+                       must be none, asDisplayed or atEnd"
+              }
+            }
+            -copies -
+            -firstPageNumber -
+            -fitToHeight -
+            -fitToWidth -
+            -horziontalDpi -
+            -scale -
+            -verticalDpi {
+              # xsd unsignedInt
+              if {![string is integer -strict $value] || $value < 0} {
+                error "invalid value '$value' for the $opt option:\
+                       must be an XSD unsignedInt"
+              }
+            }
+            -errors {
+              if {$value ni {displayed blank dash NA}} {
+                error "invalid value '$value' for the -errors option:\
+                       must be displayed blank dash or NA"
+              }
+            }
+            -orientation {
+              if {$value ni {default portrait landscape}} {
+                error "invalid value '$value' for the -orientation option:\
+                       must be default, portrait or landscape"
+              }
+            }
+            -pageOrder {
+              if {$value ni {downThenOver overThenDown}} {
+                error "invalid value '$value' for the -pageOrder option:\
+                       must be downThenOver or overThenDown"
+              }
+            }
+            -paperHeight -
+            -paperWide {
+              if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+                error "invalid value '$value' for the $opt option:\
+                       must match the regular expresion \[0-9\]+(\\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"      
+              }
+            }
+            -paperSize {
+              if {![string is integer -strict $value] || $value < 1 || $value > 118} {
+                error "invalid value '$value' for the -paperSize option:\
+                       must be an integer from 1 to 118. See the user documentation\
+                       for what paper size each number stand ( 1 = Letter, 9 = A4)"
+              }
+            }
+          }
+          set opts([string range $opt 1 end]) $value
+        } else {
+          error "option '$opt': missing argument"
+        }            
+      } else {
+        error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
+      }
+    }
+    set pageSetups($sheet) [array get opts]
+  }
+
   method debug { args } {
     foreach item $args {
       catch {
@@ -3004,6 +3179,9 @@ oo::class create ooxml::xl_write {
     my variable cols
     my variable view
     my variable hlinks
+    my variable pageMargins
+    my variable pageMarginsDefault
+    my variable pageSetups
 
     upvar #0 ::ooxml::xmlns xmlns
 
@@ -3971,7 +4149,15 @@ oo::class create ooxml::xl_write {
             }
           }
         }
-        Tag_pageMargins left 0.75 right 0.75 top 1 bottom 1 header 0.5 footer 0.5 {}
+        if {[info exists pageMargins($ws)]} {
+          Tag_pageMargins {*}$pageMargins($ws)
+        } else {
+          Tag_pageMargins {*}$pageMarginsDefault
+        }
+        # Page Setup
+        if {[info exists pageSetups($ws)]} {
+          Tag_pageSetup {*}$pageSetups($ws)
+        }
       }
 
       if {[set colsNode [$root selectNodes /worksheet/cols]] ne {}} {
@@ -3999,7 +4185,7 @@ oo::class create ooxml::xl_write {
             }
           }
         }
-      }
+     }
       ::ooxml::Dom2zip $zf $root "xl/worksheets/sheet$ws.xml" cd count
       $doc delete
     }

@@ -4,7 +4,7 @@
 #
 #  Copyright (C) 2018-2024 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
 #  Copyright (C) 2019-2024 Rolf Ade, DE
-#  Copyright (C) 2023 Harald Oehlmann, DE
+#  Copyright (C) 2023-2024 Harald Oehlmann, DE
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without modification,
@@ -187,14 +187,6 @@ package require msgcat
 
 namespace eval ::ooxml {
   
-  if {[package vsatisfies [package present Tcl] 9]} {
-    variable Tcl9 true
-    variable zipfs "//zipfs:/"
-  } else {
-    variable Tcl9 false
-    variable zipfs ""
-  }
-  
   namespace export xl_sheets xl_read xl_write
 
   variable defaults
@@ -207,6 +199,10 @@ namespace eval ::ooxml {
   variable predefPatternType
   variable xmlns
   variable pkgPath
+
+  # Initialize to the empty string to determinate method on first usage of a
+  # zip read function.
+  variable zipAccessMethod {}
 
   set defaults(path) {.}
 
@@ -856,70 +852,168 @@ proc ::ooxml::Color { color } {
   return {}
 }
 
+#
+# ooxml::ZipOpen
+#
+# Helper to open a zip file for reading.
+# On first call, the zip access method is found and initialized
+#
+
+proc ::ooxml::ZipOpen {file} {
+  variable zipAccessMethod
+
+  if {$zipAccessMethod eq {}} {
+    if {[package vsatisfies [package present Tcl] 9]} {
+      set zipAccessMethod tcl9
+      variable zipfs [zipfs root]
+    } elseif {![catch {package require zipfile::decode}]} {
+      set zipAccessMethod tcllib
+    } else {
+      # As Version 1.0.3 has serious bugs like returning empty data, require
+      # 1.0.4 and further
+      package require vfs::zip 1.0.4-
+      # Package available -> so use it
+      set zipAccessMethod vfs
+      variable zipfs {}
+    }
+  }
+  switch -exact -- $zipAccessMethod {
+    tcl9 {
+      variable mnt [zipfs mount $file xlsx]
+    }
+    vfs {
+      variable mnt [vfs::zip::Mount $file xlsx]
+    }
+    default {
+      ::zipfile::decode::open $file
+      variable zipdesc [::zipfile::decode::archive]
+    }
+  }
+}
+
+#
+# ooxml::ZipReadParse
+#
+# Read the data of a zip file wether by vfs or tcllib
+# Return the handle to the tdom object
+# Return the empty string, if file not found
+# Throws errors on file error, decoding error or xml parse error
+
+proc ::ooxml::ZipReadParse {file} {
+  variable zipAccessMethod
+
+  switch -exact -- $zipAccessMethod {
+    tcllib {
+      variable zipdesc
+      try {
+        set filedata [encoding convertfrom utf-8\
+            [::zipfile::decode::getfile $zipdesc $file]]
+      } trap {ZIP DECODE BAD PATH} {} {
+        # File not found error is ok - return empty string
+        return
+      }
+    }
+    default {
+      # Use virtual file system
+      variable zipfs
+      try {
+        set fd [open ${zipfs}xlsx/$file r]
+        fconfigure $fd -encoding utf-8
+        # Specially catch read, as it may fire utf-8 translation errors on Tcl9
+        set filedata [read $fd]
+      } trap {POSIX ENOENT} {} {
+        # File not found error is ok - return empty string
+        return
+      } finally {
+        if {[info exists fd]} {
+          close $fd
+        }
+      }
+    }
+  }
+  # Parse the file data
+  # This throws an error if parsing fails
+  return [dom parse $filedata]
+}
+
+#
+# ooxml::ZipClose
+#
+# Close the zip file
+#
+
+proc ::ooxml::ZipClose {} {
+  variable zipAccessMethod
+
+  switch -exact -- $zipAccessMethod {
+    tcl9 {
+      variable mnt
+      zipfs unmount $mnt
+      unset mnt
+    }
+    vfs {
+      variable mnt
+      vfs::zip::Unmount $mnt xlsx
+      unset mnt
+    }
+    tcllib {
+      ::zipfile::decode::close
+      # Clear zip metadata
+      variable zipdesc
+      unset zipdesc
+    }
+  }
+}
 
 #
 # ooxml::xl_sheets
 #
 
-proc ::ooxml::xl_sheets { file } {
+proc ::ooxml::xl_sheets { file args} {
   variable xmlns
-  variable Tcl9
-  variable zipfs
   
   set sheets {}
 
-  if {$Tcl9} {
-    set mnt [zipfs mount $file xlsx]
-  } else {
-    package require vfs::zip
-    set mnt [vfs::zip::Mount $file xlsx]
-  }
+  ZipOpen $file
 
-  set rels 0
-  if {![catch {open ${zipfs}xlsx/xl/_rels/workbook.xml.rels r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} rdoc]} {
-      set rels 1
-      $rdoc documentElement relsRoot
-      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
+  # As zip is open now, open try block to close it for sure
+  try {
+    set rdoc [ZipReadParse "xl/_rels/workbook.xml.rels"]
+    # relsroot is needed below to add sheets.
+    # If it is not present, there will be an error below
+    if {$rdoc eq {}} {
+      return -code error "No valid xlsx file"
     }
-    close $fd
-  }
+    $rdoc documentElement relsRoot
+    $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
 
-  if {![catch {open ${zipfs}xlsx/xl/workbook.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
-      $doc documentElement root
-      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
-      set idx -1
-      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
-        if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-          set sheetId [$node @sheetId]
-          set name [$node @name]
-          set rid [$node getAttributeNS $xmlns(r) id]
-          foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
-            if {[$node hasAttribute Target]} {
-              lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
-            }
+    set doc [ZipReadParse "xl/workbook.xml"]
+    if {$doc eq {}} {
+      return -code error "No valid xlsx file"
+    }
+    $doc documentElement root
+    $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
+    set idx -1
+    foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
+      if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
+        set sheetId [$node @sheetId]
+        set name [$node @name]
+        set rid [$node getAttributeNS $xmlns(r) id]
+        foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+          if {[$node hasAttribute Target]} {
+            lappend sheets [incr idx] [list sheetId $sheetId name $name rId $rid]
           }
         }
       }
-      $doc delete
     }
-    close $fd
-  }
-
-  if {$rels} {
+    $doc delete
     $rdoc delete
-  }
 
-  if {$Tcl9} {
-    zipfs unmount $mnt
-  } else {
-    vfs::zip::Unmount $mnt xlsx
-  }
+    return $sheets
 
-  return $sheets
+  } finally {
+    ZipClose
+  }
 }
 
 
@@ -929,14 +1023,8 @@ proc ::ooxml::xl_sheets { file } {
 
 proc ::ooxml::xl_read { file args } {
   variable xmlns
-  variable Tcl9
-  variable zipfs
   
   variable predefNumFmts
-
-  if {!$Tcl9} {
-    package require vfs::zip
-  }
 
   array set cellXfs {}
   array set numFmts [array get predefNumFmts]
@@ -976,70 +1064,61 @@ proc ::ooxml::xl_read { file args } {
     set opts(sheetnames) *
   }
 
-  if {$Tcl9} {
-    set mnt [zipfs mount $file xlsx]
-  } else {
-    set mnt [vfs::zip::Mount $file xlsx]
-  }
+  ZipOpen $file
 
-  set rels 0
-  if {![catch {open ${zipfs}xlsx/xl/_rels/workbook.xml.rels r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} rdoc]} {
-      set rels 1
-      $rdoc documentElement relsRoot
-      $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
+  # As zip is open now, open try block to close it for sure
+  try {
+
+    set rdoc [ZipReadParse "xl/_rels/workbook.xml.rels"]
+    # relsroot is needed below to add sheets.
+    # If it is not present, there will be an error below
+    if {$rdoc eq {}} {
+      return -code error "No valid xlsx file"
     }
-    close $fd
-  }
+    $rdoc documentElement relsRoot
+    $rdoc selectNodesNamespaces [list PR $xmlns(PR)]
 
-  if {![catch {open ${zipfs}xlsx/xl/workbook.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
-      $doc documentElement root
-      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
-      set idx -1
-      foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
-        if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
-          set sheetId [$node @sheetId]
-          set name [$node @name]
-          set rid [$node getAttributeNS $xmlns(r) id]
-          foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
-            if {[$node hasAttribute Target]} {
-              lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
-            }
+    set doc [ZipReadParse "xl/workbook.xml"]
+    if {$doc eq {}} {
+      return -code error "No valid xlsx file"
+    }
+    $doc documentElement root
+    $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r)]
+    set idx -1
+    foreach node [$root selectNodes /M:workbook/M:sheets/M:sheet] {
+      if {[$node hasAttribute sheetId] && [$node hasAttribute name]} {
+        set sheetId [$node @sheetId]
+        set name [$node @name]
+        set rid [$node getAttributeNS $xmlns(r) id]
+        foreach node [$relsRoot selectNodes {/PR:Relationships/PR:Relationship[@Id=$rid]}] {
+          if {[$node hasAttribute Target]} {
+            lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
           }
         }
       }
-      foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
-        if {[$node hasAttribute activeTab]} {
-          lappend wb(view) activetab [$node @activeTab]
-        }
-        if {[$node hasAttribute xWindow]} {
-          lappend wb(view) x [$node @xWindow]
-        }
-        if {[$node hasAttribute yWindow]} {
-          lappend wb(view) y [$node @yWindow]
-        }
-        if {[$node hasAttribute windowHeight]} {
-          lappend wb(view) height [$node @windowHeight]
-        }
-        if {[$node hasAttribute windowWidth]} {
-          lappend wb(view) width [$node @windowWidth]
-        }
-      }
-      $doc delete
     }
-    close $fd
-  }
-
-  if {$rels} {
+    foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
+      if {[$node hasAttribute activeTab]} {
+        lappend wb(view) activetab [$node @activeTab]
+      }
+      if {[$node hasAttribute xWindow]} {
+        lappend wb(view) x [$node @xWindow]
+      }
+      if {[$node hasAttribute yWindow]} {
+        lappend wb(view) y [$node @yWindow]
+      }
+      if {[$node hasAttribute windowHeight]} {
+        lappend wb(view) height [$node @windowHeight]
+      }
+      if {[$node hasAttribute windowWidth]} {
+        lappend wb(view) width [$node @windowWidth]
+      }
+    }
+    $doc delete
     $rdoc delete
-  }
 
-  if {![catch {open ${zipfs}xlsx/xl/sharedStrings.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
+    set doc [ZipReadParse "xl/sharedStrings.xml"]
+    if {$doc ne {}} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M)]
       set idx -1
@@ -1054,13 +1133,10 @@ proc ::ooxml::xl_read { file args } {
       }
       $doc delete
     }
-    close $fd
-  }
 
 
-  if {![catch {open ${zipfs}xlsx/xl/styles.xml r} fd]} {
-    fconfigure $fd -encoding utf-8
-    if {![catch {dom parse [read $fd]} doc]} {
+    set doc [ZipReadParse "xl/styles.xml"]
+    if {$doc ne {}} {
       $doc documentElement root
       $doc selectNodesNamespaces [list M $xmlns(M) mc $xmlns(mc) x14ac $xmlns(x14ac) x16r2 $xmlns(x16r2)]
       set idx -1
@@ -1291,15 +1367,12 @@ proc ::ooxml::xl_read { file args } {
 
       $doc delete
     }
-    close $fd
-  }
 
-  ### HYPERLINKS ###
+    ### HYPERLINKS ###
 
-  foreach {sheet sid name rid target} $sheets {
-    if {![catch {open ${zipfs}xlsx/xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels r} fd]} {
-      fconfigure $fd -encoding utf-8
-      if {![catch {dom parse [read $fd]} doc]} {
+    foreach {sheet sid name rid target} $sheets {
+      set doc [ZipReadParse "xl/worksheets/_rels/sheet[expr {$sheet + 1}].xml.rels"]
+      if {$doc ne {}} {
         $doc documentElement root
         $doc selectNodesNamespaces [list M $xmlns(PR)]
         foreach hlink [$root selectNodes /M:Relationships/M:Relationship] {
@@ -1309,232 +1382,226 @@ proc ::ooxml::xl_read { file args } {
         }
         $doc delete
       }
-      close $fd
     }
-  }
 
-  ### SHEET AND DATA ###
+    ### SHEET AND DATA ###
 
-  array set wb {}
+    array set wb {}
 
-  foreach {sheet sid name rid target} $sheets {
-    set read false
-    if {$opts(sheets) ne {}} {
-      foreach pat $opts(sheets) {
-        if {[string match $pat $sheet]} {
-          set read true
-          break
+    foreach {sheet sid name rid target} $sheets {
+      set read false
+      if {$opts(sheets) ne {}} {
+        foreach pat $opts(sheets) {
+          if {[string match $pat $sheet]} {
+            set read true
+            break
+          }
         }
       }
-    }
-    if {!$read && $opts(sheetnames) ne {}} {
-      foreach pat $opts(sheetnames) {
-        if {[string match $pat $name]} {
-          set read true
-          break
+      if {!$read && $opts(sheetnames) ne {}} {
+        foreach pat $opts(sheetnames) {
+          if {[string match $pat $name]} {
+            set read true
+            break
+          }
         }
       }
-    }
-    if {!$read} continue
+      if {!$read} continue
+  
+      lappend wb(sheets) $sheet
+      set wb($sheet,n) $name
+      set wb($sheet,max_row) -1
+      set wb($sheet,max_column) -1
 
-    lappend wb(sheets) $sheet
-    set wb($sheet,n) $name
-    set wb($sheet,max_row) -1
-    set wb($sheet,max_column) -1
+      set doc [ZipReadParse "xl/$target"]
+      # This file must be present
+      if {$doc eq {}} {
+        return -code error "Excel file error: No data for sheet [expr {$sheet+1}]"
+      }
+      $doc documentElement root
+      $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
+      if {!$opts(valuesonly)} {
+        set idx -1
+        foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
+          incr idx
+          set cols {}
+          foreach item {min max width style bestFit customWidth} {
+            if {[$col hasAttribute $item]} {
+              switch -- $item {
+                min - max {
+                  lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+                }
+                default {
+                  lappend cols [string tolower $item] [$col @$item]
+                }
+              }
+            } else {
+              lappend cols [string tolower $item] 0
+            }
+          }
+          lappend cols string 0 nozero 0 calcfit 0
+          set wb($sheet,col,[dict get $cols min]) $cols
+        }
+        set wb($sheet,cols) [incr idx]
+      }
+      set rowindex -1
+      foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+        incr rowindex
+        set cellindex -1
+        foreach cell [$row selectNodes M:c] {
+          incr cellindex
+          # Get cell position
+          # if r exists, it contains the cell position like "A1".
+          # Otherwise, use the counter values
+          # The cell may omit positions so, set the counters if explicit
+          # cell position is given
+          if {[$cell hasAttribute r]} {
+            set rowcol [StringToRowColumn [$cell @r]]
+            # Correct the current counters
+            scan $rowcol %d,%d rowindex cellindex
+          } else {
+            set rowcol $rowindex,$cellindex
+          }
+          if {[$cell hasAttribute t]} {
+            set type [$cell @t]
+          } else {
+            set type n
+          }
+          set value {}
+          set datetime {}
 
-    if {![catch {open [file join ${zipfs}xlsx/xl $target] r} fd]} {
-      fconfigure $fd -encoding utf-8
-      if {![catch {dom parse [read $fd]} doc]} {
-        $doc documentElement root
-        $doc selectNodesNamespaces [list M $xmlns(M) r $xmlns(r) mc $xmlns(mc) x14ac $xmlns(x14ac)]
-        if {!$opts(valuesonly)} {
-          set idx -1
-          foreach col [$root selectNodes /M:worksheet/M:cols/M:col] {
-            incr idx
-            set cols {}
-            foreach item {min max width style bestFit customWidth} {
-              if {[$col hasAttribute $item]} {
-                switch -- $item {
-                  min - max {
-                    lappend cols [string tolower $item] [expr {[$col @$item] - 1}]
+          ## FORMULA ##
+          if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
+            set wb($sheet,f,$rowcol) {}
+            if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
+              lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
+            }
+            if {[$node hasAttribute t] && [$node @t] eq {shared}} {
+              if {[$node hasAttribute si]} {
+                lappend wb($sheet,f,$rowcol) i [$node @si]
+              }
+              if {[$node hasAttribute ref]} {
+                lappend wb($sheet,f,$rowcol) r [$node @ref]
+              }
+            }
+          }
+
+          switch -- $type {
+           n - b - d - str {
+              # number (default), boolean, iso-date, formula string
+              if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+                set value [$node nodeValue]
+                if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
+                  set idx [$cell @s]
+                  if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
+                    set numFmtId [dict get $cellXfs($idx) nfi]
+                    if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
+                      set datetime $value
+                      catch {clock format [expr {round(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
+                    }
                   }
-                  default {
-                    lappend cols [string tolower $item] [$col @$item]
-                  }
+                } 
+              } else {
+                if {![$cell hasAttribute s]} continue
+              }
+            }
+             s {
+              # shared string
+              if {[set node [$cell selectNodes M:v/text()]] ne {}} {
+                set index [$node nodeValue]
+                if {[info exists sharedStrings($index)]} {
+                  set value $sharedStrings($index)
                 }
               } else {
-                lappend cols [string tolower $item] 0
+                if {![$cell hasAttribute s]} continue
               }
             }
-            lappend cols string 0 nozero 0 calcfit 0
-            set wb($sheet,col,[dict get $cols min]) $cols
-          }
-          set wb($sheet,cols) [incr idx]
-        }
-        set rowindex -1
-        foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
-          incr rowindex
-          set cellindex -1
-          foreach cell [$row selectNodes M:c] {
-            incr cellindex
-            # Get cell position
-            # if r exists, it contains the cell position like "A1".
-            # Otherwise, use the counter values
-            # The cell may omit positions so, set the counters if explicit
-            # cell position is given
-            if {[$cell hasAttribute r]} {
-              set rowcol [StringToRowColumn [$cell @r]]
-              # Correct the current counters
-              scan $rowcol %d,%d rowindex cellindex
-            } else {
-              set rowcol $rowindex,$cellindex
+             inlineStr {
+              # inline string
+              if {[set string [$cell selectNodes M:is]] ne {}} {
+                foreach node [$string selectNodes M:t/text()] {
+                  append value [$node nodeValue]
+                }
+                foreach node [$string selectNodes */M:t/text()] {
+                  append value [$node nodeValue]
+                }
+              } else {
+                if {![$cell hasAttribute s]} continue
+              }
             }
+             e {
+              # error
+            }
+          }
+
+          if {!$opts(valuesonly)} {
+            set wb($sheet,c,$rowcol) [$cell @r]
+          }
+          if {!$opts(valuesonly)} {
+            if {[$cell hasAttribute s]} {
+              set wb($sheet,s,$rowcol) [$cell @s]
+            }
+          }
+          if {!$opts(valuesonly)} {
             if {[$cell hasAttribute t]} {
-              set type [$cell @t]
-            } else {
-              set type n
-            }
-            set value {}
-            set datetime {}
-
-            ## FORMULA ##
-            if {!$opts(valuesonly) && [set node [$cell selectNodes M:f]] ne {}} {
-              set wb($sheet,f,$rowcol) {}
-              if {[set formula [$cell selectNodes M:f/text()]] ne {}} {
-                lappend wb($sheet,f,$rowcol) f [$formula nodeValue]
-              }
-              if {[$node hasAttribute t] && [$node @t] eq {shared}} {
-                if {[$node hasAttribute si]} {
-                  lappend wb($sheet,f,$rowcol) i [$node @si]
-                }
-                if {[$node hasAttribute ref]} {
-                  lappend wb($sheet,f,$rowcol) r [$node @ref]
-                }
-              }
-            }
-
-            switch -- $type {
-             n - b - d - str {
-                # number (default), boolean, iso-date, formula string
-                if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-                  set value [$node nodeValue]
-                  if {$type eq {n} && [$cell hasAttribute s] && [string is double -strict $value]} {
-                    set idx [$cell @s]
-                    if {[info exists cellXfs($idx)] && [dict exists $cellXfs($idx) nfi]} {
-                      set numFmtId [dict get $cellXfs($idx) nfi]
-                      if {[info exists numFmts($numFmtId)] && [dict exists $numFmts($numFmtId) dt] && [dict get $numFmts($numFmtId) dt]} {
-                        set datetime $value
-                        catch {clock format [expr {round(($value - 25569) * 86400.0)}] -format $opts(datefmt) -gmt 1} value
-                      }
-                    }
-                  } 
-                } else {
-                  if {![$cell hasAttribute s]} continue
-                }
-              }
-               s {
-                # shared string
-                if {[set node [$cell selectNodes M:v/text()]] ne {}} {
-                  set index [$node nodeValue]
-                  if {[info exists sharedStrings($index)]} {
-                    set value $sharedStrings($index)
-                  }
-                } else {
-                  if {![$cell hasAttribute s]} continue
-                }
-              }
-               inlineStr {
-                # inline string
-                if {[set string [$cell selectNodes M:is]] ne {}} {
-                  foreach node [$string selectNodes M:t/text()] {
-                    append value [$node nodeValue]
-                  }
-                  foreach node [$string selectNodes */M:t/text()] {
-                    append value [$node nodeValue]
-                  }
-                } else {
-                  if {![$cell hasAttribute s]} continue
-                }
-              }
-               e {
-                # error
-              }
-            }
-
-            if {!$opts(valuesonly)} {
-              set wb($sheet,c,$rowcol) [$cell @r]
-            }
-            if {!$opts(valuesonly)} {
-              if {[$cell hasAttribute s]} {
-                set wb($sheet,s,$rowcol) [$cell @s]
-              }
-            }
-            if {!$opts(valuesonly)} {
-              if {[$cell hasAttribute t]} {
-                set wb($sheet,t,$rowcol) [$cell @t]
-              }
-            }
-            set wb($sheet,v,$rowcol) $value
-            if {!$opts(valuesonly) && $datetime ne {}} {
-              set wb($sheet,d,$rowcol) $datetime
+              set wb($sheet,t,$rowcol) [$cell @t]
             }
           }
-        }
-
-        if {!$opts(valuesonly)} {
-          foreach hlink [$root selectNodes /M:worksheet/M:hyperlinks/M:hyperlink] {
-            if {[$hlink hasAttribute ref] && [$hlink hasAttribute r:id]} {
-              set idx [::ooxml::StringToRowColumn [$hlink @ref]]
-              if {[info exists hl($sheet,[$hlink @r:id])]} {
-                if {[$hlink hasAttribute tooltip]} {
-                  set tt [$hlink @tooltip]
-                } else {
-                  set tt {}
-                }
-                set wb($sheet,l,$idx) [list l $hl($sheet,[$hlink @r:id]) t $tt]
-              }
-            }
+          set wb($sheet,v,$rowcol) $value
+          if {!$opts(valuesonly) && $datetime ne {}} {
+            set wb($sheet,d,$rowcol) $datetime
           }
         }
-
-        if {!$opts(valuesonly)} {
-          foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
-            if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
-              dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
-            }
-          }
-        }
-        if {!$opts(valuesonly)} {
-          foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
-            if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
-              set wb($sheet,freeze) [$freeze @topLeftCell]
-            }
-          }
-        }
-        if {!$opts(valuesonly)} {
-          foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
-            if {[$filter hasAttribute ref]} {
-              lappend wb($sheet,filter) [$filter @ref]
-            }
-          }
-        }
-        if {!$opts(valuesonly)} {
-          foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
-            if {[$merge hasAttribute ref]} {
-              lappend wb($sheet,merge) [$merge @ref]
-            }
-          }
-        }
-        $doc delete
       }
-      close $fd
-    }
-  }
 
-  if {$Tcl9} {
-    zipfs unmount $mnt
-  } else {
-    vfs::zip::Unmount $mnt xlsx
+      if {!$opts(valuesonly)} {
+        foreach hlink [$root selectNodes /M:worksheet/M:hyperlinks/M:hyperlink] {
+          if {[$hlink hasAttribute ref] && [$hlink hasAttribute r:id]} {
+            set idx [::ooxml::StringToRowColumn [$hlink @ref]]
+            if {[info exists hl($sheet,[$hlink @r:id])]} {
+              if {[$hlink hasAttribute tooltip]} {
+                set tt [$hlink @tooltip]
+              } else {
+                set tt {}
+              }
+              set wb($sheet,l,$idx) [list l $hl($sheet,[$hlink @r:id]) t $tt]
+            }
+          }
+        }
+      }
+
+      if {!$opts(valuesonly)} {
+        foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
+          if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
+            dict set wb($sheet,rowheight) [expr {[$row @r] - 1}] [$row @ht]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach freeze [$root selectNodes /M:worksheet/M:sheetViews/M:sheetView/M:pane] {
+          if {[$freeze hasAttribute topLeftCell] && [$freeze hasAttribute state] && [$freeze @state] eq {frozen}} {
+            set wb($sheet,freeze) [$freeze @topLeftCell]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach filter [$root selectNodes /M:worksheet/M:autoFilter] {
+          if {[$filter hasAttribute ref]} {
+            lappend wb($sheet,filter) [$filter @ref]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
+          if {[$merge hasAttribute ref]} {
+            lappend wb($sheet,merge) [$merge @ref]
+          }
+        }
+      }
+      $doc delete
+    }
+  } finally {
+    ZipClose
   }
   
   foreach cell [lsort -dictionary [array names wb *,v,*]] {

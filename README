@@ -23,9 +23,10 @@ SYSNOPSIS
 DEPENDENCIES
 
     Tcl >= 8.6.7
-    tclvfs::zip >= 1.4.2
     tdom >= 0.9.0
-
+    for reading:
+    tcllib module zipfile::decode
+    or tclvfs module vfs::zip >= 1.0.4
 
 GETTING THE CODE
 

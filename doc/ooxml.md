@@ -198,7 +198,43 @@ following methods:
 
 **border** *args*
 
-:
+:   Defines a border style for the current workbook and returns an ID to
+    refer to taht style.
+ 
+    Create a BORDERID with the following settings for the current workbook.
+
+    The following options are currently supported:
+
+    : **-list**
+    
+      Returns the list of currently defined border style IDs, in stead
+      of BORDERID
+      
+    : -leftstyle BORDERLINESTYLE
+    : -rightstyle BORDERLINESTYLE
+    : -topstyle ORDERLINESTYLE
+    : -bottomstyle BORDERLINESTYLE
+    : -diagonalstyle BORDERLINESTYLE
+    
+      See [BORDERLINESTYLE](#borderlinestyle) for the valid values.
+      
+    : -leftcolor COLOR
+    : -rightcolor COLOR
+    : -topcolor COLOR
+    : -bottomcolor COLOR
+    : -diagonalcolor COLOR
+    
+      See [COLOR](#color) for the valid values.
+      
+    : -diagonaldirection (up|down)
+    
+        The value must either *up* or *down*.
+        
+    : -tag TAGNAME
+    
+        To give the border style a name. This name can also be used as BORDERID. 
+
+    return BORDERID
 
 **style** *args*
 
@@ -634,6 +670,27 @@ Color ID Name             (A)RGB
 63       NightRider       00333333
 64       SystemForeground n/a
 65       SystemBackground n/a
+
+# BORDERLINESTYLE
+
+Serveral method options expect a *COLOR* argument. The list of
+possible values are:
+
+    dashDot
+    dashDotDot
+    dashed
+    dotted
+    double
+    hair
+    medium
+    mediumDashDot
+    mediumDashDotDot
+    mediumDashDotDot
+    none
+    slantDashDot
+    thick
+    thin
+
 
 # DEPENDENCIES
 

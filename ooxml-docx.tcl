@@ -262,6 +262,24 @@ proc ::ooxml::InitStaticDocx {} {
 
 ::ooxml::InitStaticDocx
 
+proc ooxml::CreateSubtree {optvar switchTagsList} {
+    upvar $optvar opt
+    array switchesData set $switchTagsList
+
+    set switches [array names switchesData]
+    foreach {opt value} [array get opts] {
+        if {$opt in $switches} {
+            foreach tag $switchesData($opt) {
+                $tag val $value
+            }
+        } else {
+            error "unknown option \"$opt\", should be:\
+                   [join [lrange $switches 0 end-1] ,]\
+                   or [lindex $switches end]"
+        }
+    }
+}
+
 oo::class create ooxml::docx_write {
     constructor { args } {
         my variable document
@@ -504,7 +522,8 @@ oo::class create ooxml::docx_write {
             }
             set opts([string range $opt 1 end]) $value
         }
-        
+        Tag_w:style w:type {
+        }
     }
     
     method write {file} {

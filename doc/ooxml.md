@@ -199,16 +199,14 @@ following methods:
 **border** *args*
 
 :   Defines a border style for the current workbook and returns an ID to
-    refer to taht style.
+    refer to that style.
  
-    Create a BORDERID with the following settings for the current workbook.
-
     The following options are currently supported:
 
     : **-list**
     
-      Returns the list of currently defined border style IDs, in stead
-      of BORDERID
+      Returns the list of currently defined border style IDs, instead
+      of BORDERID.
       
     : -leftstyle BORDERLINESTYLE
     : -rightstyle BORDERLINESTYLE
@@ -238,7 +236,32 @@ following methods:
 
 **style** *args*
 
-:
+:   Defines a style for the current workbook and returns an ID to
+    refer to that style.
+ 
+    The following options are currently supported:
+
+    : **-list**
+    
+      Returns the list of currently defined border style IDs, instead
+      of STYLEID.
+      
+    : -numfmt NUMFMTID
+    : -font FONTID
+        From method font. 
+    : -fill FILLID
+        From method fill. 
+    : -border BORDERID
+        From method border. 
+    : -horizontal HORIZONTAL
+    : -vertical VERTICAL
+    : -rotate DEGREE
+    : -tag TAGNAME
+
+        To give the format a name. This name can also be used as STYLEID. 
+
+
+
 
 **defaultdatestyle** *STYLEID*
 

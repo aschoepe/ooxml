@@ -1,5 +1,5 @@
-C Saved\sminor\sooxml.md\senhancements.
-D 2024-11-26T00:15:33.005
+C Version-1.9
+D 2024-11-28T20:17:55.373
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -7,8 +7,8 @@ F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d50
 F Makefile.in 72d943aeb040bab80d40162bca1009a90e72f278fd11896006c2acea4bbb54b7
 F README 17c00acf94be3c88cef9214d90dca482037281b9519e19dcc6472134e322aee7
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
-F configure 6222c13c02c30cda7a38a18943ff17307148755c58e1827808c79170b4d378f8 x
-F configure.ac 0a2efd9d4922083eb1a0f04cff89e171c4091e361f6bba738260556fdee7fdfc
+F configure 6412ea0f87438b3960e070a19bf5f4e986ff996b3c568bb747f9837bb6f17136 x
+F configure.ac f67aa7808c9dba4139598b52b44b76a75c0e2468b15c6d5fc3cd2f2b6b7329a0
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml.md 8e9af22574db8fdd0de01894d6f0cdb06a975c7e01bad5a024425d7fc0cf1c44
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
@@ -26,7 +26,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml.tcl 12c62f4d43af7e974585a9a7a04f713eb4722bba0d1be4355843329d4bf49c91
+F ooxml.tcl 4cf858531460fb92bec13c508717777bfce03ebf2c6afd1d9a16ab9fa057d3ad
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -79,8 +79,11 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 40851ebdcd6e65b334173570695d4db0234c6235e67ad76fa1cd3b4cb4bddbf2
-R 968bbaf1d56883bc3c46d74e5eaaa271
-U rolf
-Z 070f2fd079f5eb92c58bedd18898ae2b
+P c0dafb43349a0d22a3a66d8b570b087ffab7cc0ed58c6edbc5b96b1ff654830f
+R 69c027915a8ba137da5bd1e429b1ad66
+T +bgcolor * #fea5f4
+T +sym-release *
+T +sym-version-1.9 *
+U alex
+Z 892d3a27ef744d0ed01e0e8b250e2e21
 # Remove this line to create a well-formed Fossil manifest.

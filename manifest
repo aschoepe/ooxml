@@ -1,5 +1,5 @@
-C build\sfixes
-D 2024-11-29T08:25:32.326
+C fixed\suv\sdownload\spage
+D 2024-11-29T14:57:09.310
 F .fossil-settings/ignore-glob ac33082c8ffc2e8f0cd6887d5905eee927e3a0f6ac0b24ef1ad97e9d398aa1d5
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -78,9 +78,9 @@ F tools/pp.tcl 627884178da4a24f9d0ec52e1a4630c2ff973e6d40d26a3fd027bbeca9209eed
 F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a393960b8 x
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
-F uv/template-download.html dc161602e0402cfa0491a8d9edc44cfca234a91dc65d34ccc3c88006c9493e06
-P c8cf07d30d43604978558abcb691f8eedf73ed02f0e74ee316ae458a45e69e18
-R 2be13c611284cb4df84a570d41e91542
+F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
+P 9ca63f57b27ecd60e10df1a6444461855a6ae562dc2e40edaa358dba517b9e99
+R 158fb088f22da6713dcf10b2460130ad
 U alex
-Z 703aa07f879fb427c352a1bb6e36fd84
+Z 65bf7d67511b179df237b9eced497184
 # Remove this line to create a well-formed Fossil manifest.

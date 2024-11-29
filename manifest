@@ -1,5 +1,5 @@
-C Version-1.9
-D 2024-11-28T20:17:55.373
+C make\sarchive\sCOPYFILE_DISABLE=1\signore\sAppleDouble\sfiles
+D 2024-11-29T08:24:28.421
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -44,7 +44,7 @@ F tests/test_sheet1_xml_missing.xlsx 52d9c760f650bc518388b7982ff875cdff401001fd0
 F tests/test_sheet1_xml_no_utf8.xlsx 72b45333998f053a4e5de86408727b76836389550876be819b49ce811faebb9a
 F tests/test_sheet1_xml_no_xml.xlsx 016667d0ed9266be829dea35b8d8c38dea973a552380c333126a6c4c69978c02
 F tests/test_worksheets_xml_missing.xlsx 1ab0ee8183d26ee9a24ff3928d0dcae38dcb12397205c8a6660d97b755cbbdd2
-F tools/archive.sh ebbde269fc01ae00183bb4b4ca3669f537c11aa13d93860c852f6221f2d0e3c1 x
+F tools/archive.sh 12f30715c3ad5f758004d318e2d61639a47adb9d5b44eae4c4bd65c6a101a0c3 x
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -79,11 +79,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P c0dafb43349a0d22a3a66d8b570b087ffab7cc0ed58c6edbc5b96b1ff654830f
-R 69c027915a8ba137da5bd1e429b1ad66
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.9 *
+P 840948c6030e48cce61c534a9d53118297bb516af797c0aea05bcaf9b8a01af7
+R 174abdfacaf36502860a3f5651c96566
 U alex
-Z 892d3a27ef744d0ed01e0e8b250e2e21
+Z 1d1f45c8657cd33aebc99d517726d433
 # Remove this line to create a well-formed Fossil manifest.

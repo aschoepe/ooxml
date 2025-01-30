@@ -2,7 +2,7 @@
 #  ooxml ECMA-376 Office Open XML File Formats
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
-#  Copyright (C) 2024 Rolf Ade, DE
+#  Copyright (C) 2024, 2025 Rolf Ade, DE
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without modification,
@@ -56,17 +56,174 @@ namespace eval ::ooxml {
 }
 
 proc ooxml::InitDocxNodeCommands {} {
-    set elementNodes {
-        w:b w:bCs w:body w:dstrike w:b w:i w:iCs w:p w:pPr w:pStyle w:r w:rPr
-        w:strike w:rStyle w:t
+    foreach tag {
+        w:abstractNum w:abstractNumId w:active w:activeRecord
+        w:activeWritingStyle w:addressFieldName
+        w:adjustLineHeightInTable w:adjustRightInd w:alias w:aliases
+        w:alignBordersAndEdges w:alignTablesRowByRow w:allowPNG
+        w:allowSpaceOfSameStyleInTable w:altChunk w:altChunkPr
+        w:altName w:alwaysMergeEmptyNamespace
+        w:alwaysShowPlaceholderText w:annotationRef
+        w:applyBreakingRules w:attachedSchema w:attachedTemplate
+        w:attr w:autoCaption w:autoCaptions
+        w:autofitToFirstFixedWidthCell w:autoFormatOverride
+        w:autoHyphenation w:autoRedefine w:autoSpaceDE w:autoSpaceDN
+        w:autoSpaceLikeWord95 w:b w:background
+        w:balanceSingleByteDoubleByteWidth w:bar w:basedOn w:bCs w:bdo
+        w:bdr w:behavior w:behaviors w:between w:bibliography w:bidi
+        w:bidiVisual w:blockQuote w:body w:bodyDiv w:bookFoldPrinting
+        w:bookFoldPrintingSheets w:bookFoldRevPrinting w:bookmarkEnd
+        w:bookmarkStart w:bordersDoNotSurroundFooter
+        w:bordersDoNotSurroundHeader w:bottom w:br w:cachedColBalance
+        w:calcOnExit w:calendar w:cantSplit w:caps w:caption
+        w:captions w:category w:cellDel w:cellIns w:cellMerge
+        w:characterSpacingControl w:charset w:checkBox w:checked
+        w:checkErrors w:citation w:clickAndTypeStyle
+        w:clrSchemeMapping w:cnfStyle w:col w:colDelim w:color w:cols
+        w:column w:comboBox w:comment w:commentRangeEnd
+        w:commentRangeStart w:commentReference w:comments w:compat
+        w:compatSetting w:connectString w:consecutiveHyphenLimit
+        w:contentPart w:contextualSpacing w:continuationSeparator
+        w:control w:convMailMergeEsc w:cr w:cs w:customXml
+        w:customXmlDelRangeEnd w:customXmlDelRangeStart
+        w:customXmlInsRangeEnd w:customXmlInsRangeStart
+        w:customXmlMoveFromRangeEnd w:customXmlMoveFromRangeStart
+        w:customXmlMoveToRangeEnd w:customXmlMoveToRangeStart
+        w:customXmlPr w:dataBinding w:dataSource w:dataType w:date
+        w:dateFormat w:dayLong w:dayShort w:ddList w:decimalSymbol
+        w:default w:defaultTableStyle w:defaultTabStop w:del
+        w:delInstrText w:delText w:description w:destination w:dir
+        w:dirty w:displayBackgroundShape w:displayHangulFixedWidth
+        w:displayHorizontalDrawingGridEvery
+        w:displayVerticalDrawingGridEvery w:div w:divBdr w:divId
+        w:divs w:divsChild w:docDefaults w:docGrid w:docPart
+        w:docPartBody w:docPartCategory w:docPartGallery w:docPartList
+        w:docPartObj w:docPartPr w:docParts w:docPartUnique w:document
+        w:documentProtection w:documentType w:docVar w:docVars
+        w:doNotAutoCompressPictures w:doNotAutofitConstrainedTables
+        w:doNotBreakConstrainedForcedTable w:doNotBreakWrappedTables
+        w:doNotDemarcateInvalidXml w:doNotDisplayPageBoundaries
+        w:doNotEmbedSmartTags w:doNotExpandShiftReturn
+        w:doNotHyphenateCaps w:doNotIncludeSubdocsInStats
+        w:doNotLeaveBackslashAlone w:doNotOrganizeInFolder
+        w:doNotRelyOnCSS w:doNotSaveAsSingleFile w:doNotShadeFormData
+        w:doNotSnapToGridInCell w:doNotSuppressBlankLines
+        w:doNotSuppressIndentation w:doNotSuppressParagraphBorders
+        w:doNotTrackFormatting w:doNotTrackMoves
+        w:doNotUseEastAsianBreakRules
+        w:doNotUseHTMLParagraphAutoSpacing
+        w:doNotUseIndentAsNumberingTabStop w:doNotUseLongFileNames
+        w:doNotUseMarginsForDrawingGridOrigin
+        w:doNotValidateAgainstSchema w:doNotVertAlignCellWithSp
+        w:doNotVertAlignInTxbx w:doNotWrapTextWithPunct w:drawing
+        w:drawingGridHorizontalOrigin w:drawingGridHorizontalSpacing
+        w:drawingGridVerticalOrigin w:drawingGridVerticalSpacing
+        w:dropDownList w:dstrike w:dynamicAddress w:eastAsianLayout
+        w:effect w:em w:embedBold w:embedBoldItalic w:embedItalic
+        w:embedRegular w:embedSystemFonts w:embedTrueTypeFonts
+        w:emboss w:enabled w:encoding w:end w:endnote w:endnotePr
+        w:endnoteRef w:endnoteReference w:endnotes w:entryMacro
+        w:equation w:evenAndOddHeaders w:exitMacro w:family w:ffData
+        w:fHdr w:fieldMapData w:fitText w:flatBorders w:fldChar
+        w:fldData w:fldSimple w:font w:fonts w:footerReference
+        w:footnote w:footnoteLayoutLikeWW8 w:footnotePr w:footnoteRef
+        w:footnoteReference w:footnotes w:forceUpgrade
+        w:forgetLastTabAlignment w:format w:formProt w:formsDesign
+        w:frame w:frameLayout w:framePr w:frameset w:framesetSplitbar
+        w:ftr w:gallery w:glossaryDocument w:gridAfter w:gridBefore
+        w:gridCol w:gridSpan w:group w:growAutofit w:guid
+        w:gutterAtTop w:hdr w:hdrShapeDefaults w:header
+        w:headerReference w:headers w:headerSource w:helpText w:hidden
+        w:hideGrammaticalErrors w:hideMark w:hideSpellingErrors
+        w:highlight w:hMerge w:hps w:hpsBaseText w:hpsRaise
+        w:hyperlink w:hyphenationZone w:i w:iCs w:id
+        w:ignoreMixedContent w:ilvl w:imprint w:ind w:ins w:insideH
+        w:insideV w:instrText w:isLgl w:jc w:keepLines w:keepNext
+        w:kern w:kinsoku w:label w:lang w:lastRenderedPageBreak
+        w:latentStyles w:layoutRawTableWidth w:layoutTableRowsApart
+        w:left w:legacy w:lid w:lineWrapLikeWord6 w:link
+        w:linkedToFile w:linkStyles w:linkToQuery w:listEntry
+        w:listItem w:listSeparator w:lnNumType w:lock w:locked
+        w:longDesc w:lsdException w:lvl w:lvlJc w:lvlOverride
+        w:lvlPicBulletId w:lvlRestart w:lvlText w:mailAsAttachment
+        w:mailMerge w:mailSubject w:mainDocumentType w:mappedName
+        w:marBottom w:marH w:marLeft w:marRight w:marTop w:marW
+        w:matchSrc w:maxLength w:mirrorIndents w:mirrorMargins
+        w:monthLong w:monthShort w:moveFrom w:moveFromRangeEnd
+        w:moveFromRangeStart w:moveTo w:moveToRangeEnd
+        w:moveToRangeStart w:movie w:multiLevelType w:mwSmallCaps
+        w:name w:next w:noBorder w:noBreakHyphen w:noColumnBalance
+        w:noEndnote w:noExtraLineSpacing w:noLeading
+        w:noLineBreaksAfter w:noLineBreaksBefore w:noProof
+        w:noPunctuationKerning w:noResizeAllowed w:noSpaceRaiseLower
+        w:noTabHangInd w:notTrueType w:noWrap w:nsid w:num w:numbering
+        w:numberingChange w:numFmt w:numId w:numIdMacAtCleanup
+        w:numPicBullet w:numPr w:numRestart w:numStart w:numStyleLink
+        w:object w:objectEmbed w:objectLink w:odso w:oMath
+        w:optimizeForBrowser w:outline w:outlineLvl w:overflowPunct
+        w:p w:pageBreakBefore w:panose1 w:paperSrc w:pBdr w:permEnd
+        w:permStart w:personal w:personalCompose w:personalReply
+        w:pgBorders w:pgMar w:pgNum w:pgNumType w:pgSz w:pict
+        w:picture w:pitch w:pixelsPerInch w:placeholder w:pos
+        w:position w:pPr w:pPrChange w:pPrDefault
+        w:printBodyTextBeforeHeader w:printColBlack w:printerSettings
+        w:printFormsData w:printFractionalCharacterWidth
+        w:printPostScriptOverText w:printTwoOnOne w:proofErr
+        w:proofState w:pStyle w:ptab w:qFormat w:query w:r
+        w:readModeInkLockDown w:recipientData w:recipients w:relyOnVML
+        w:removeDateAndTime w:removePersonalInformation w:result
+        w:revisionView w:rFonts w:richText w:right w:rPr w:rPrChange
+        w:rPrDefault w:rsid w:rsidRoot w:rsids w:rStyle w:rt w:rtl
+        w:rtlGutter w:ruby w:rubyAlign w:rubyBase w:rubyPr
+        w:saveFormsData w:saveInvalidXml w:savePreviewPicture
+        w:saveSmartTagsAsXml w:saveSubsetFonts w:saveThroughXslt
+        w:saveXmlDataOnly w:scrollbar w:sdt w:sdtContent w:sdtEndPr
+        w:sdtPr w:sectPr w:sectPrChange w:selectFldWithFirstOrLastChar
+        w:semiHidden w:separator w:settings w:shadow w:shapeDefaults
+        w:shapeLayoutLikeWW8 w:shd w:showBreaksInFrames w:showEnvelope
+        w:showingPlcHdr w:showXMLTags w:sig w:size w:sizeAuto
+        w:smallCaps w:smartTag w:smartTagPr w:smartTagType
+        w:snapToGrid w:softHyphen w:sourceFileName w:spaceForUL
+        w:spacing w:spacingInWholePoints w:specVanish
+        w:splitPgBreakAndParaMark w:src w:start w:startOverride
+        w:statusText w:storeMappedDataAs w:strictFirstAndLastChars
+        w:strike w:style w:styleLink w:styleLockQFSet w:styleLockTheme
+        w:stylePaneFormatFilter w:stylePaneSortMethod w:styles
+        w:subDoc w:subFontBySize w:suff w:summaryLength
+        w:suppressAutoHyphens w:suppressBottomSpacing
+        w:suppressLineNumbers w:suppressOverlap
+        w:suppressSpacingAtTopOfPage w:suppressSpBfAfterPgBrk
+        w:suppressTopSpacing w:suppressTopSpacingWP
+        w:swapBordersFacingPages w:sym w:sz w:szCs w:t w:tab
+        w:tabIndex w:table w:tabs w:tag w:targetScreenSz w:tbl
+        w:tblBorders w:tblCaption w:tblCellMar w:tblCellSpacing
+        w:tblDescription w:tblGrid w:tblGridChange w:tblHeader
+        w:tblInd w:tblLayout w:tblLook w:tblOverlap w:tblpPr w:tblPr
+        w:tblPrChange w:tblPrEx w:tblPrExChange w:tblStyle
+        w:tblStyleColBandSize w:tblStylePr w:tblStyleRowBandSize
+        w:tblW w:tc w:tcBorders w:tcFitText w:tcMar w:tcPr
+        w:tcPrChange w:tcW w:temporary w:text w:textAlignment
+        w:textboxTightWrap w:textDirection w:textInput w:themeFontLang
+        w:title w:titlePg w:tl2br w:tmpl w:top w:topLinePunct w:tr
+        w:tr2bl w:trackRevisions w:trHeight w:trPr w:trPrChange
+        w:truncateFontHeightsLikeWP6 w:txbxContent w:type w:types w:u
+        w:udl w:uiPriority w:ulTrailSpace w:underlineTabInNumList
+        w:unhideWhenUsed w:uniqueTag w:updateFields
+        w:useAltKinsokuLineBreakRules w:useAnsiKerningPairs
+        w:useFELayout w:useNormalStyleForList w:usePrinterMetrics
+        w:useSingleBorderforContiguousCells w:useWord97LineBreakRules
+        w:useWord2002TableStyleRules w:useXSLTWhenSaving w:vAlign
+        w:vanish w:vertAlign w:view w:viewMergedData w:vMerge w:w
+        w:wAfter w:wBefore w:webHidden w:webSettings w:widowControl
+        w:wordWrap w:wpJustification w:wpSpaceWidth w:wrapTrailSpaces
+        w:writeProtection w:yearLong w:yearShort w:zoom
+    } {
+        dom createNodeCmd -tagName $tag elementNode Tag_$tag
     }
-    namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
-    foreach tag $elementNodes {
-        namespace eval ::ooxml "dom createNodeCmd -tagName $tag elementNode Tag_$tag
-                                namespace export Tag_$tag"
-    }
-    namespace eval ::ooxml "dom createNodeCmd textNode Text; namespace export Text"
+    dom createNodeCmd textNode Text
+    namespace export Tag_* Text
 }
+
 ::ooxml::InitDocxNodeCommands
 
 proc ::ooxml::InitStaticDocx {} {
@@ -256,26 +413,44 @@ proc ::ooxml::InitStaticDocx {} {
             </w:styles>
                     }
     } {
-        set ::ooxml::staticDocx($name) [dom parse $xml]
+        set ::ooxml::staticDocx($name) $xml
     }
 }
 
 ::ooxml::InitStaticDocx
 
-proc ooxml::CreateSubtree {optvar switchTagsList} {
-    upvar $optvar opt
-    array switchesData set $switchTagsList
+proc ooxml::noCheck {value} {
+    return $value
+}
+
+proc ooxml::CT_OnOff {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return "on"
+    } else {
+        return "off"
+    }
+}
+
+proc ooxml::Create switchActionList {
+    upvar opts opts
+    array set switchesData $switchActionList
 
     set switches [array names switchesData]
     foreach {opt value} [array get opts] {
         if {$opt in $switches} {
-            foreach tag $switchesData($opt) {
-                $tag val $value
+            lassign $switchesData($opt) check action
+            if {[catch {set ooxmlvalue [::ooxml::$check $value]} errMsg]} {
+                error "the value \"$value\" given to\
+                       the \"$opt\" option is invalid:\
+                       $errMsg"
             }
-        } else {
-            error "unknown option \"$opt\", should be:\
-                   [join [lrange $switches 0 end-1] ,]\
-                   or [lindex $switches end]"
+            foreach tag $action {
+                Tag_$tag w:val $ooxmlvalue
+            }
+            unset opts($opt)
         }
     }
 }
@@ -286,10 +461,13 @@ oo::class create ooxml::docx_write {
         my variable body
         my variable docs
         variable ::ooxml::xmlns
+        variable ::ooxml::staticDocx
 
-        ::ooxml::InitNodeCommands
         namespace import ::ooxml::Tag_*  ::ooxml::Text
-        
+
+        foreach auxFile [array names staticDocx] {
+            set docs($auxFile) [dom parse $staticDocx($auxFile)]
+        }
         dom createDocument w:document document
         $document documentElement root
         foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
@@ -301,6 +479,7 @@ oo::class create ooxml::docx_write {
     }
 
     destructor {
+
     }
 
     method import {what docxfile} {
@@ -367,118 +546,132 @@ oo::class create ooxml::docx_write {
         }
     }
 
-    method appendToParagraph {text args} {
+    method append {text args} {
         my variable body
 
-        set validOptions {
-            -style
-            -bold
-            -italic
-            -strike
-            -dstrike
+        if {[llength $args] % 2 != 0} {
+            error "invalid arguments: expectecd -option value pairs"
         }
-        set len [llength $args]
-        set idx 0
-        for {set idx 0} {$idx < $len} {incr idx} {
-            set opt [lindex $args $idx]
-            if {$opt ni $validOptions} {
-                error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
-            }
-            incr idx
-            if {!($idx < $len)} {
-                error "option '$opt': missing argument"
-            }
-            set value [lindex $args $idx]
-            switch -- $opt {
-                -style {
-                    # TODO check value
-                }
-                -bold -
-                -italic -
-                -strike -
-                -dstrike {
-                    if {$value ni {on off}} {
-                        error "invalid value '$value' for the $opt option:\
-                        must be an XSD boolean (true, false, 0 or 1) or \"on\"\
-                        or \"off\""
-                    }
-                }
-                default {
-                    error "internal error: no value check for $opt - please report
-                }
-
-            }
-            set opts([string range $opt 1 end]) $value
-        }
-
+        array set opts $args
         # Identify the last paragraph
         set p [$body lastChild]
         while {$p ne ""} {
             if {[$p nodeType] ne "ELEMENT_NODE"} {
-                set child [$p previousSibling]
+                set p [$p previousSibling]
                 continue
             }
             if {[$p nodeName] ne "w:p"} {
-                set child [$p previousSibling]
+                # Perhaps it is wise to raise error in this situation
+                # or create a new one?
+                set p [$p previousSibling]
                 continue
             }
             break
         }
         if {$p eq ""} {
+            # Or create a new one?
             error "no paragraph to append to in the document"
         }
-        $p appendFromScript {
-            Tag_w:r {
-                if {[info exists opts]} {
+        if {[catch {
+            $p appendFromScript {
+                Tag_w:r {
                     Tag_w:rPr {
-                        foreach {opt value} [array get opts] {
-                            switch $opt {
-                                style  {
-                                    Tag_w:rStyle w:val $value
-                                }
-                                bold {
-                                    Tag_w:b w:val $value
-                                    Tag_w:bCs w:val $value
-                                }
-                                italic {
-                                    Tag_w:i w:val $value
-                                    Tag_w:iCs w:val $value
-                                }
-                                strike {
-                                    Tag_w:strike w:val $value
-                                }
-                                dstrike {
-                                    Tag_w:dstrike w:val $value
-                                }
-                                default {
-                                    error "internal error: $opt not implemented"
-                                }
-                                
-                            }
+                        ::ooxml::Create {
+                            -style {CT_OnOff w:style}
+                            -bold {CT_OnOff {w:b w:bCs}}
+                            -italic {CT_OnOff {w:i w:iCs}}
+                            -strict {CT_OnOff w:strike}
+                            -dstrike {CT_OnOff w:dstrike}
                         }
                     }
+                    my Wt $text
                 }
-                if {[info exists opts(style)]} {
-                    Tag_w:rPr {
-                        Tag_w:rStyle w:val $opts(style)
-                    }
-                }
-                my Wt $text
             }
+        } errMsg]} {
+            uplevel error $errMsg
+        }
+        set unrecognized [array names opts]
+        if {[llength $unrecognized]} {
+            error "unrecognized: $unrecognized"
         }
     }
 
     method Wt {text} {
-        set atts ""
-        if {[string index $text 0] eq " " || [string index $text end] eq " "} {
-            lappend atts xml:space preserve
-        }
-        Tag_w:t $atts {
-            Text [dom clearString -replace $text]
+        # Just not exactly that easy.
+        # Handle at least \n \r \t special
+        set pos 0
+        set end [string length $text]
+        foreach part [split $text "\n\r\t\f"] {
+            if {$pos == [incr pos [string length $part]]} {
+                incr pos
+                continue
+            }
+            set atts ""
+            if {[string index $part 0] eq " " || [string index $part end] eq " "} {
+                lappend atts xml:space preserve
+            }
+            Tag_w:t $atts {
+                Text [dom clearString -replace $part]
+            }
+            if {$pos < $end} {
+                switch [string index $text $pos] {
+                    "\n" Tag_w:br
+                    "\r" Tag_w:cr
+                    "\t" Tag_w:tab
+                    "\f" {Tag_w:br w:type "page"}
+                }
+            }
+            incr pos
         }
     }
 
-    method style {args} {
+    method GetDocDefault {styles} {
+        set docDefaults [$styles selectNodes -cache 1 {w:docDefaults[1]}]
+        if {$node eq ""} {
+            set nextNode [$styles selectNodes -cache 1 {*[1]}]
+            $styles insertBeforeFromScript Tag_w:docDefaults $nextNode
+            set docDefaults [$styles selectNodes -cache 1 {*[1]}]
+        }
+        return $docDefaults
+    }
+            
+    method style {cmd args} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        if {$cmd eq "ids"} {
+            return [$styles selectNodes -list {w:style string(@w:styleId)}]
+        }
+        switch $cmd {
+            "defaultparagraph" {
+                set docDefaults [my GetDocDefault $styles]
+            }
+            "defaultcharacter" {
+                set docDefaults [my GetDocDefault $styles]
+            }
+            "paragraph" {
+                if {![llength $args]} {
+                    error "missing paragraph name argument"
+                }
+                set name [lindex $args 0]
+                set style [$styles selectNodes {
+                    w:style[@w:type="paragraph" and @w:styleId=$name ]
+                }]
+            }
+            "character" {
+                if {![llength $args]} {
+                    error "missing paragraph name argument"
+                }
+                set name [lindex $args 0]
+                set style [$styles selectNodes {
+                    w:style[@w:type="character" and @w:styleId=$name ]
+                }]
+            }
+            default {
+                error "invalid subcommand \"$cmd\""
+            }
+        }
+        return
         set validOptions {
             -id
             -type 
@@ -533,7 +726,6 @@ oo::class create ooxml::docx_write {
         variable ::ooxml::xmlns
         variable ::ooxml::staticDocx
 
-        ooxml::InitNodeCommands
         namespace import ::ooxml::Tag_* ::ooxml::Text
 
         # Initialize zip file
@@ -549,17 +741,8 @@ oo::class create ooxml::docx_write {
         }
         fconfigure $zf -translation binary -eofchar {}
 
-        foreach staticFile {
-            [Content_Types].xml
-            _rels/.rels
-            docProps/app.xml
-            docProps/core.xml
-            word/_rels/document.xml.rels
-            word/fontTable.xml
-            word/settings.xml
-            word/styles.xml
-        } {
-            ::ooxml::Dom2zip $zf $staticDocx($staticFile) $staticFile cd count
+        foreach auxFile [array names docs] {
+            ::ooxml::Dom2zip $zf $docs($auxFile) $auxFile cd count
         }
 
         # word/document.xml

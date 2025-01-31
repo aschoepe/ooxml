@@ -718,7 +718,36 @@ oo::class create ooxml::docx_write {
         Tag_w:style w:type {
         }
     }
-    
+
+    method simpletable {tabledata} {
+        my variable body
+
+        $body appendFromScript {
+            Tag_w:tbl {
+                Tag_w:tblPr
+                # Tag_w:tblGrid {
+                #     Tag_w:gridCol w:w 200
+                #     Tag_w:gridCol w:w 200
+                #     Tag_w:gridCol w:w 200
+                # }
+                foreach row $tabledata {
+                    Tag_w:tr {
+                        foreach cell $row {
+                            Tag_w:tc {
+                                # Tag_w:tcPr {
+                                #     Tag_w:tcW w:w 200 w:type "dxa"
+                                # }
+                                Tag_w:p {
+                                    Tag_w:r {my Wt $cell}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     method write {file} {
         my variable document
         my variable body

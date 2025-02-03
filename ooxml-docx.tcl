@@ -30,7 +30,7 @@
 #
 
 package require Tcl 8.6.7-
-package require tdom 0.9.5-
+package require tdom 0.9.6-
 package require msgcat
 package require ooxml
 
@@ -52,10 +52,20 @@ namespace eval ::ooxml {
         wp14 http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing
         w14 http://schemas.microsoft.com/office/word/2010/wordml
     }
-    
+
+    set properties(stylerun) {
+        -bold {CT_OnOff {w:b w:bCs}}
+        -dstrike {CT_OnOff w:dstrike}
+        -font {noCheck w:rFonts rFonts}
+        -italic {CT_OnOff {w:i w:iCs}}
+        -strict {CT_OnOff w:strike}
+    }
+    set properties(run) [concat $properties(stylerun) {-style {RStyle w:style}}]
 }
 
 proc ooxml::InitDocxNodeCommands {} {
+    variable xmlns
+    
     foreach tag {
         w:abstractNum w:abstractNumId w:active w:activeRecord
         w:activeWritingStyle w:addressFieldName
@@ -218,7 +228,7 @@ proc ooxml::InitDocxNodeCommands {} {
         w:wordWrap w:wpJustification w:wpSpaceWidth w:wrapTrailSpaces
         w:writeProtection w:yearLong w:yearShort w:zoom
     } {
-        dom createNodeCmd -tagName $tag elementNode Tag_$tag
+        dom createNodeCmd -tagName $tag -namespace $xmlns(w) elementNode Tag_$tag
     }
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
@@ -411,7 +421,7 @@ proc ::ooxml::InitStaticDocx {} {
                     </w:rPr>
                 </w:style>
             </w:styles>
-                    }
+        }
     } {
         set ::ooxml::staticDocx($name) $xml
     }
@@ -434,28 +444,8 @@ proc ooxml::CT_OnOff {value} {
     }
 }
 
-proc ooxml::Create switchActionList {
-    upvar opts opts
-    array set switchesData $switchActionList
-
-    set switches [array names switchesData]
-    foreach {opt value} [array get opts] {
-        if {$opt in $switches} {
-            lassign $switchesData($opt) check action
-            if {[catch {set ooxmlvalue [::ooxml::$check $value]} errMsg]} {
-                error "the value \"$value\" given to\
-                       the \"$opt\" option is invalid:\
-                       $errMsg"
-            }
-            foreach tag $action {
-                Tag_$tag w:val $ooxmlvalue
-            }
-            unset opts($opt)
-        }
-    }
-}
-
 oo::class create ooxml::docx_write {
+
     constructor { args } {
         my variable document
         my variable body
@@ -479,7 +469,13 @@ oo::class create ooxml::docx_write {
     }
 
     destructor {
+        my variable document
+        my variable docs
 
+        $document delete
+        foreach auxDoc [array names docs] {
+            $docs($auxDoc) delete
+        }
     }
 
     method import {what docxfile} {
@@ -493,7 +489,40 @@ oo::class create ooxml::docx_write {
     method write {what file} {
 
     }
+
+    method rFonts {value} {
+        Tag_w:rFonts \
+            [my watt ascii] $value \
+            [my watt hAnsi] $value \
+            [my watt eastAsia] $value \
+            [my watt cs] $value
+    }
     
+    method Create switchActionList {
+        upvar opts opts
+        array set switchesData $switchActionList
+
+        set switches [array names switchesData]
+        foreach {opt value} [array get opts] {
+            if {$opt in $switches} {
+                lassign $switchesData($opt) check action createCmd
+                if {[catch {set ooxmlvalue [::ooxml::$check $value]} errMsg]} {
+                    error "the value \"$value\" given to\
+                       the \"$opt\" option is invalid:\
+                       $errMsg"
+                }
+                if {$createCmd eq ""} {
+                    foreach tag $action {
+                        Tag_$tag w:val $ooxmlvalue
+                    }
+                } else {
+                    my $createCmd $ooxmlvalue
+                }
+                unset opts($opt)
+            }
+        }
+    }
+
     method paragraph {text args} {
         my variable body
 
@@ -530,7 +559,7 @@ oo::class create ooxml::docx_write {
                         foreach {opt value} [array get opts] {
                             switch $opt {
                                 style  {
-                                    Tag_w:pStyle w:val $value
+                                    Tag_w:pStyle [my watt val] $value {}
                                 }
                                 default {
                                     error "internal error: $opt not implemented"
@@ -576,13 +605,7 @@ oo::class create ooxml::docx_write {
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:rPr {
-                        ::ooxml::Create {
-                            -style {CT_OnOff w:style}
-                            -bold {CT_OnOff {w:b w:bCs}}
-                            -italic {CT_OnOff {w:i w:iCs}}
-                            -strict {CT_OnOff w:strike}
-                            -dstrike {CT_OnOff w:dstrike}
-                        }
+                        my Create $::ooxml::properties(run)
                     }
                     my Wt $text
                 }
@@ -618,13 +641,17 @@ oo::class create ooxml::docx_write {
                     "\n" Tag_w:br
                     "\r" Tag_w:cr
                     "\t" Tag_w:tab
-                    "\f" {Tag_w:br w:type "page"}
+                    "\f" {Tag_w:br [my watt type] "page" {}}
                 }
             }
             incr pos
         }
     }
 
+    method watt {attname} {
+        list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
+    }
+    
     method GetDocDefault {styles} {
         set docDefaults [$styles selectNodes -cache 1 {w:docDefaults[1]}]
         if {$node eq ""} {
@@ -654,9 +681,21 @@ oo::class create ooxml::docx_write {
                     error "missing paragraph name argument"
                 }
                 set name [lindex $args 0]
+                array set opts [lrange $args 1 end]
                 set style [$styles selectNodes {
-                    w:style[@w:type="paragraph" and @w:styleId=$name ]
+                    w:style[@w:type="paragraph" and @w:styleId=$name]
                 }]
+                if {$style eq ""} {
+                    $styles appendFromScript {
+                        Tag_w:style [my watt type] "paragraph" [my watt styleId] $name {
+                            Tag_w:name [my watt val] $name {}
+                            Tag_w:pPr
+                            Tag_w:rPr {
+                                my Create $::ooxml::properties(stylerun)
+                            }
+                        }
+                    }
+                }
             }
             "character" {
                 if {![llength $args]} {
@@ -670,52 +709,6 @@ oo::class create ooxml::docx_write {
             default {
                 error "invalid subcommand \"$cmd\""
             }
-        }
-        return
-        set validOptions {
-            -id
-            -type 
-            -name
-            -basedOn
-            -color
-            -font
-        }
-        set len [llength $args]
-        set idx 0
-        for {set idx 0} {$idx < $len} {incr idx} {
-            set opt [lindex $args $idx]
-            if {$opt ni $validOptions} {
-                error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
-            }
-            incr idx
-            if {!($idx < $len)} {
-                error "option '$opt': missing argument"
-            }
-            set value [lindex $args $idx]
-            switch -- $opt {
-                -id -
-                -name -
-                -basedOn {
-                    # name check?
-                }
-                -type {
-                    if {$value ni {character numbering paragraph table}} {
-                        error "invalid value '$value' for the $opt option:\
-                        must be character, numbering, paragraph or table"
-                    }
-                }
-                -color -
-                -font {
-                    # TODO value check
-                }
-                default {
-                    error "internal error: no value check for $opt - please report
-                }
-
-            }
-            set opts([string range $opt 1 end]) $value
-        }
-        Tag_w:style w:type {
         }
     }
 

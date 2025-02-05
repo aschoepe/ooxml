@@ -17,6 +17,7 @@ $docx style paragraph Mystyle -font Utopia -bold 1 -italic true \
     -spacing {before 120 after 60}
 $docx paragraph "Another paragraph with its own style" -style Mystyle
 $docx paragraph [string repeat "Next paragraph, back to default style, with local changes" 20] -spacing {line 400}
+$docx paragraph "Another paragraph with its own style" -align right
 puts [$docx style ids]
 $docx write testout.docx
 $docx destroy

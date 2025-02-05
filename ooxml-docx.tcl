@@ -63,6 +63,7 @@ namespace eval ::ooxml {
     set properties(run) [concat $properties(stylerun) {-style {RStyle w:style}}]
     set properties(styleparagraph) {
         -spacing {noCheck w:spacing spacing}
+        -align {ST_Jc w:jc}
     }
     set properties(paragraph) [concat $properties(styleparagraph) {-style {PStyle w:pStyle}}]
 }
@@ -503,6 +504,28 @@ oo::class create ooxml::docx_write {
                the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
         }
         return $value
+    }
+
+    method ST_Jc {value} {
+        set alignValues {
+            start
+            center
+            end
+            both
+            mediumKashida
+            distribute
+            numTab
+            highKashida
+            lowKashida
+            thaiDistribute
+            left
+            right
+        }
+        if {$value in $alignValues} {
+            return $value
+        }
+        error "unknown align value \"$value\", should be:\
+               [join [lrange $alignValues 0 end-1] ,] or [lindex $alignValues end]"
     }
 
     method PStyle {value} {

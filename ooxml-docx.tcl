@@ -435,7 +435,7 @@ proc ::ooxml::InitStaticDocx {} {
 
 ::ooxml::InitStaticDocx
 
-oo::class create ooxml::docx_write {
+oo::class create ooxml::docx {
 
     constructor { args } {
         my variable docs

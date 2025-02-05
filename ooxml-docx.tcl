@@ -453,7 +453,7 @@ oo::class create ooxml::docx_write {
         foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
             $root setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        $root setAttribute mc:Ignorable "w14 wp14"
+        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
     }

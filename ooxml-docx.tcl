@@ -437,9 +437,8 @@ proc ::ooxml::InitStaticDocx {} {
 oo::class create ooxml::docx_write {
 
     constructor { args } {
-        my variable document
-        my variable body
         my variable docs
+        my variable body
         variable ::ooxml::xmlns
         variable ::ooxml::staticDocx
 
@@ -448,10 +447,11 @@ oo::class create ooxml::docx_write {
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
         }
-        dom createDocument w:document document
+        set document [dom createDocument w:document]
+        set docs(word/document.xml) $document
         $document documentElement root
         foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
-            $root setAttribute xmlns:$ns $xmlns($ns)
+            $root setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
         $root setAttribute mc:Ignorable "w14 wp14"
         $root appendFromScript Tag_w:body
@@ -459,12 +459,10 @@ oo::class create ooxml::docx_write {
     }
 
     destructor {
-        my variable document
         my variable docs
 
-        $document delete
-        foreach auxDoc [array names docs] {
-            $docs($auxDoc) delete
+        foreach part [array names docs] {
+            $docs($part) delete
         }
     }
 
@@ -472,12 +470,31 @@ oo::class create ooxml::docx_write {
 
     }
 
-    method read {what file} {
+    method readpart {what file} {
+        my variable docs
 
+        set fd [::tdom::xmlOpenFile $file]
+        if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
+            close $fd
+            error $errMsg
+        }
+        close $fd
+        if {[info exists docs($what)]} {
+            $docs($what) delete
+        }
+        set docs($what) $doc
     }
 
-    method write {what file} {
+    method writepart {what file} {
+        my variable docs
 
+        if {![info exists docs($what)]} {
+            error "unknown part $what"
+        }
+        set fd [open $file w+]
+        fconfigure $fd -encoding utf-8
+        $docs($what) asXML -channel $fd
+        close $fd
     }
 
     method noCheck {value} {
@@ -786,7 +803,6 @@ oo::class create ooxml::docx_write {
     }
 
     method write {file} {
-        my variable document
         my variable body
         my variable docs
         variable ::ooxml::xmlns
@@ -807,13 +823,9 @@ oo::class create ooxml::docx_write {
         }
         fconfigure $zf -translation binary -eofchar {}
 
-        foreach auxFile [array names docs] {
-            ::ooxml::Dom2zip $zf $docs($auxFile) $auxFile cd count
+        foreach part [array names docs] {
+            ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
-
-        # word/document.xml
-        ::ooxml::Dom2zip $zf $document "word/document.xml" cd count
-        
         
         # Finalize zip.
         set cdoffset [tell $zf]

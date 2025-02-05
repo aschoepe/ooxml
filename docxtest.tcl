@@ -22,5 +22,8 @@ $docx style paragraph RigthAlign -align right
 $docx paragraph "Another paragraph with its own style" -style RigthAlign
 puts [$docx style ids]
 $docx write testout.docx
+$docx writepart word/document.xml document.xml
+$docx readpart word/document.xml document.xml
+$docx write testout1.docx
 $docx destroy
 

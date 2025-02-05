@@ -61,6 +61,10 @@ namespace eval ::ooxml {
         -strict {CT_OnOff w:strike}
     }
     set properties(run) [concat $properties(stylerun) {-style {RStyle w:style}}]
+    set properties(styleparagraph) {
+        -spacing {noCheck w:spacing spacing}
+    }
+    set properties(paragraph) [concat $properties(styleparagraph) {-style {PStyle w:pStyle}}]
 }
 
 proc ooxml::InitDocxNodeCommands {} {
@@ -429,21 +433,6 @@ proc ::ooxml::InitStaticDocx {} {
 
 ::ooxml::InitStaticDocx
 
-proc ooxml::noCheck {value} {
-    return $value
-}
-
-proc ooxml::CT_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
-    }
-    if {$value} {
-        return "on"
-    } else {
-        return "off"
-    }
-}
-
 oo::class create ooxml::docx_write {
 
     constructor { args } {
@@ -490,12 +479,67 @@ oo::class create ooxml::docx_write {
 
     }
 
+    method noCheck {value} {
+        return $value
+    }
+
+    method CT_OnOff {value} {
+        if {![string is boolean -strict $value]} {
+            error "expected a Tcl boolean value"
+        }
+        if {$value} {
+            return "on"
+        } else {
+            return "off"
+        }
+    }
+
+    method ST_TwipsMeasure {value} {
+        if {[string is integer -strict $value] && $value >= 0} {
+            return $value
+        }
+        if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+            error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+        }
+        return $value
+    }
+
+    method PStyle {value} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        if {[$styles selectNodes {w:style[@w:styleId=$value]}] eq ""} {
+            error "unknown style \"$value\""
+        }
+        return $value
+    }
+
     method rFonts {value} {
         Tag_w:rFonts \
             [my watt ascii] $value \
             [my watt hAnsi] $value \
             [my watt eastAsia] $value \
             [my watt cs] $value
+    }
+
+    method spacing {value} {
+        set errMsg "the value given to the -spacing attribute is invalid,\
+                    expected a name value list with name any combination of\
+                    after, before or line" 
+        if {[catch {array set atts $value}]} {
+            error $errMsg
+        }
+        set attlist [list]
+        foreach key [array names atts] {
+            if {$key ni {after before line}} {
+                error $errMsg
+            }
+            my ST_TwipsMeasure $atts($key)
+            lappend attlist [my watt $key] $atts($key)
+        }
+        Tag_w:spacing {*}$attlist {}
+        
     }
     
     method Create switchActionList {
@@ -506,7 +550,7 @@ oo::class create ooxml::docx_write {
         foreach {opt value} [array get opts] {
             if {$opt in $switches} {
                 lassign $switchesData($opt) check action createCmd
-                if {[catch {set ooxmlvalue [::ooxml::$check $value]} errMsg]} {
+                if {[catch {set ooxmlvalue [my $check $value]} errMsg]} {
                     error "the value \"$value\" given to\
                        the \"$opt\" option is invalid:\
                        $errMsg"
@@ -523,56 +567,32 @@ oo::class create ooxml::docx_write {
         }
     }
 
+    method checkRemainingOpts {} {
+        upvar opts opts
+
+        if {[llength [array names opts]]} {
+            uplevel error "unknown: [array names opts]"
+        }
+    }
+    
     method paragraph {text args} {
         my variable body
 
-        set validOptions {
-            -style
+        if {[llength $args] % 2 != 0} {
+            error "invalid arguments: expectecd -option value pairs"
         }
-        set len [llength $args]
-        for {set idx 0} {$idx < $len} {incr idx} {
-            set opt [lindex $args $idx]
-            if {$opt ni $validOptions} {
-                error "unknown option \"$opt\", should be: [join [lrange $validOptions 0 end-1] ,] or [lindex $validOptions end]"
-            }
-            incr idx
-            if {$idx >= $len} {
-                error "option '$opt': missing argument"
-            }
-            set value [lindex $args $idx]
-            switch -- $opt {
-                -style {
-                    # TODO check value
-                }
-                default {
-                    error "internal error: no value check for $opt - please report"
-                }
-
-            }
-            set opts([string range $opt 1 end]) $value
-        }
-        
+        array set opts $args
         $body appendFromScript {
             Tag_w:p {
-                if {[info exists opts]} {
-                    Tag_w:pPr {
-                        foreach {opt value} [array get opts] {
-                            switch $opt {
-                                style  {
-                                    Tag_w:pStyle [my watt val] $value {}
-                                }
-                                default {
-                                    error "internal error: $opt not implemented"
-                                }
-                            }
-                        }
-                    }
+                Tag_w:pPr {
+                    my Create $::ooxml::properties(paragraph)
                 }
                 Tag_w:r {
                     my Wt $text
                 }
             }
         }
+        my checkRemainingOpts
     }
 
     method append {text args} {
@@ -613,10 +633,7 @@ oo::class create ooxml::docx_write {
         } errMsg]} {
             uplevel error $errMsg
         }
-        set unrecognized [array names opts]
-        if {[llength $unrecognized]} {
-            error "unrecognized: $unrecognized"
-        }
+        my checkRemainingOpts
     }
 
     method Wt {text} {
@@ -685,17 +702,21 @@ oo::class create ooxml::docx_write {
                 set style [$styles selectNodes {
                     w:style[@w:type="paragraph" and @w:styleId=$name]
                 }]
-                if {$style eq ""} {
-                    $styles appendFromScript {
-                        Tag_w:style [my watt type] "paragraph" [my watt styleId] $name {
-                            Tag_w:name [my watt val] $name {}
-                            Tag_w:pPr
-                            Tag_w:rPr {
-                                my Create $::ooxml::properties(stylerun)
-                            }
+                if {$style ne ""} {
+                    error "style \"$name\" already exists"
+                }
+                $styles appendFromScript {
+                    Tag_w:style [my watt type] "paragraph" [my watt styleId] $name {
+                        Tag_w:name [my watt val] $name {}
+                        Tag_w:pPr {
+                            my Create $::ooxml::properties(styleparagraph)
+                        }
+                        Tag_w:rPr {
+                            my Create $::ooxml::properties(stylerun)
                         }
                     }
                 }
+                my checkRemainingOpts
             }
             "character" {
                 if {![llength $args]} {

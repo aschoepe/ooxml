@@ -57,10 +57,11 @@ namespace eval ::ooxml {
         -bold {CT_OnOff {w:b w:bCs}}
         -dstrike {CT_OnOff w:dstrike}
         -font {noCheck w:rFonts rFonts}
+        -fontsize {ST_TwipsMeasure {w:sz w:szCs}}
         -italic {CT_OnOff {w:i w:iCs}}
         -strict {CT_OnOff w:strike}
     }
-    set properties(run) [concat $properties(stylerun) {-style {RStyle w:style}}]
+    set properties(run) [concat $properties(stylerun) {-style {RStyle w:rStyle}}]
     set properties(styleparagraph) {
         -spacing {noCheck w:spacing spacing}
         -align {ST_Jc w:jc}
@@ -512,6 +513,11 @@ oo::class create ooxml::docx_write {
         }
     }
 
+    # ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
+    # The difference is only the interpretation of the integer (only)
+    # values. For ST_HpsMeasure the number specifies half points
+    # (1/144 of an inch), for ST_TwipsMeasure the number specifies
+    # twentieths of a point (equivalent to 1/1440th of an inch).
     method ST_TwipsMeasure {value} {
         if {[string is integer -strict $value] && $value >= 0} {
             return $value
@@ -549,12 +555,22 @@ oo::class create ooxml::docx_write {
         my variable docs
         
         set styles [$docs(word/styles.xml) documentElement]
-        if {[$styles selectNodes {w:style[@w:styleId=$value]}] eq ""} {
-            error "unknown style \"$value\""
+        if {[$styles selectNodes {w:style[@w:type="paragraph" and @w:styleId=$value]}] eq ""} {
+            error "unknown paragraph style \"$value\""
         }
         return $value
     }
 
+    method RStyle {value} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        if {[$styles selectNodes {w:style[@w:type="character" and @w:styleId=$value]}] eq ""} {
+            error "unknown character style \"$value\""
+        }
+        return $value
+    }
+    
     method rFonts {value} {
         Tag_w:rFonts \
             [my watt ascii] $value \
@@ -610,9 +626,14 @@ oo::class create ooxml::docx_write {
     method checkRemainingOpts {} {
         upvar opts opts
 
-        if {[llength [array names opts]]} {
-            uplevel error "unknown: [array names opts]"
+        set nrRemainigOpts [llength [array names opts]]
+        if {$nrRemainigOpts == 0} return
+        if {$nrRemainigOpts == 1} {
+            set text "unknown option:"
+        } else {
+            set text "unknown options:"
         }
+        uplevel [list error "$text [array names opts]"]
     }
     
     method paragraph {text args} {
@@ -650,8 +671,8 @@ oo::class create ooxml::docx_write {
                 continue
             }
             if {[$p nodeName] ne "w:p"} {
-                # Perhaps it is wise to raise error in this situation
-                # or create a new one?
+                # Perhaps it would be more wise to raise error in this
+                # situation or to create a new one?
                 set p [$p previousSibling]
                 continue
             }
@@ -671,14 +692,14 @@ oo::class create ooxml::docx_write {
                 }
             }
         } errMsg]} {
-            uplevel error $errMsg
+            uplevel error [list $errMsg]
         }
         my checkRemainingOpts
     }
 
     method Wt {text} {
         # Just not exactly that easy.
-        # Handle at least \n \r \t special
+        # Handle at least \n \r \t and \f special
         set pos 0
         set end [string length $text]
         foreach part [split $text "\n\r\t\f"] {
@@ -710,11 +731,13 @@ oo::class create ooxml::docx_write {
     }
     
     method GetDocDefault {styles} {
-        set docDefaults [$styles selectNodes -cache 1 {w:docDefaults[1]}]
-        if {$node eq ""} {
-            set nextNode [$styles selectNodes -cache 1 {*[1]}]
+        # styles has the content model sequence:
+        # docDefaults? latentStyles? styles*
+        set docDefaults [$styles firstChild]
+        if {[$docDefaults localName] ne "docDefaults"} {
+            set nextNode $docDefaults
             $styles insertBeforeFromScript Tag_w:docDefaults $nextNode
-            set docDefaults [$styles selectNodes -cache 1 {*[1]}]
+            set docDefaults [$styles firstChild]
         }
         return $docDefaults
     }
@@ -723,33 +746,63 @@ oo::class create ooxml::docx_write {
         my variable docs
         
         set styles [$docs(word/styles.xml) documentElement]
-        if {$cmd eq "ids"} {
-            return [$styles selectNodes -list {w:style string(@w:styleId)}]
-        }
         switch $cmd {
-            "defaultparagraph" {
+            "paragraphdefault" {
                 set docDefaults [my GetDocDefault $styles]
+                set pdefault [$docDefaults selectNodes w:pPrDefault]
+                foreach this $pdefault {
+                    $pdefault delete
+                }
+                # docDefaults has two childs in the order:
+                # rPrDefault pPrDefault
+                array set opts $args
+                $docDefaults appendFromScript {
+                    Tag_w:pPrDefault {
+                        Tag_w:pPr {
+                            my Create $::ooxml::properties(styleparagraph)
+                        }
+                    }
+                }
+                my checkRemainingOpts
             }
-            "defaultcharacter" {
+            "characterdefault" {
                 set docDefaults [my GetDocDefault $styles]
+                set rdefault [$docDefaults selectNodes w:rPrDefault]
+                foreach this $rdefault {
+                    $rdefault delete
+                }
+                # docDefaults has two childs in the order:
+                # rPrDefault pPrDefault
+                array set opts $args
+                $docDefaults insertBeforeFromScript {
+                    Tag_w:rPrDefault {
+                        Tag_w:rPr {
+                            my Create $::ooxml::properties(stylerun)
+                        }
+                    }
+                } [$docDefaults firstChild]
+                my checkRemainingOpts
             }
+            "character" -
             "paragraph" {
                 if {![llength $args]} {
-                    error "missing paragraph name argument"
+                    error "missing the style name argument"
                 }
                 set name [lindex $args 0]
                 array set opts [lrange $args 1 end]
                 set style [$styles selectNodes {
-                    w:style[@w:type="paragraph" and @w:styleId=$name]
+                    w:style[@w:type=$cmd and @w:styleId=$name]
                 }]
                 if {$style ne ""} {
-                    error "style \"$name\" already exists"
+                    error "$cmd style \"$name\" already exists"
                 }
                 $styles appendFromScript {
-                    Tag_w:style [my watt type] "paragraph" [my watt styleId] $name {
+                    Tag_w:style [my watt type] $cmd [my watt styleId] $name {
                         Tag_w:name [my watt val] $name {}
-                        Tag_w:pPr {
-                            my Create $::ooxml::properties(styleparagraph)
+                        if {$cmd eq "paragraph"} {
+                            Tag_w:pPr {
+                                my Create $::ooxml::properties(styleparagraph)
+                            }
                         }
                         Tag_w:rPr {
                             my Create $::ooxml::properties(stylerun)
@@ -758,14 +811,41 @@ oo::class create ooxml::docx_write {
                 }
                 my checkRemainingOpts
             }
-            "character" {
-                if {![llength $args]} {
-                    error "missing paragraph name argument"
+            "ids" {
+                if {[llength $args] != 1} {
+                    error "wrong number of arguments, expectecd the style type"
                 }
-                set name [lindex $args 0]
-                set style [$styles selectNodes {
-                    w:style[@w:type="character" and @w:styleId=$name ]
-                }]
+                set type [lindex $args 0]
+                return [$styles selectNodes -list {w:style[@w:type=$type] string(@w:styleId)}]
+            }
+            "delete" {
+                if {[llength $args] != 2} {
+                    error "wrong number of arguments for the subcommand \"delete\", expected\
+                          " the style type and the style ID"
+                }
+                lassign $args type name
+                if {$type ni {paragraph paragraphdefault character characterdefault}} {
+                    error "unknown style type \"type\""
+                }
+                switch $type {
+                    "paragraphdefault" {
+                        foreach node [$styles selectNodes w:docDefaults/w:pPrDefault] {
+                            $node delete
+                        }
+                    }
+                    "characterdefault" {
+                        foreach node [$styles selectNodes w:docDefaults/w:rPrDefault] {
+                            $node delete
+                        }
+                    }
+                    default {
+                        foreach node [$styles selectNodes {
+                            w:style[@w:type=$type and @w:styleId=$name]
+                        }] {
+                            $node delete
+                        }
+                    }
+                }
             }
             default {
                 error "invalid subcommand \"$cmd\""

@@ -69,7 +69,14 @@ doc/ooxml.html: doc/ooxml.md
 doc/ooxml.n: doc/ooxml.md
 	pandoc --standalone -f markdown -t man doc/ooxml.md -o doc/ooxml.n
 
-doc: doc/ooxml.html doc/ooxml.n
+doc/ooxml-docx.html: doc/ooxml-docx.md
+	pandoc --standalone -f markdown -t html doc/ooxml-docx.md \
+		--css main.css -o doc/ooxml-docx.html
+
+doc/ooxml-docx.n: doc/ooxml-docx.md
+	pandoc --standalone -f markdown -t man doc/ooxml-docx.md -o doc/ooxml-docx.n
+
+doc: doc/ooxml.html doc/ooxml.n doc/ooxml-docx.html doc/ooxml-docx.n
 
 all: manifest.txt doc/ooxml.html doc/ooxml.n
 
@@ -85,7 +92,7 @@ archive:
 
 clean:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
-	-rm -rf doc/ooxml.html doc/ooxml.n
+	-rm -rf doc/ooxml.html doc/ooxml.n doc/ooxml-docx.html doc/ooxml-docx.n
 
 distclean: clean
 	-rm -f $(CONFIG_CLEAN_FILES)

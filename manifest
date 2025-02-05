@@ -1,5 +1,5 @@
-C Added\sparagraph\salignment\s(both\son\sparagraph\slocal\sas\sparagraph\sstyle\slevel,\sI\ssuspect).
-D 2025-02-05T01:15:05.465
+C As\sshows.
+D 2025-02-05T01:17:13.452
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -11,7 +11,7 @@ F configure 6222c13c02c30cda7a38a18943ff17307148755c58e1827808c79170b4d378f8 x
 F configure.ac e445e4e77f8ec5ae46424002cc3437576dfcbd78ab6a089b748a1e8458358b6e
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml.md f73aceb0f41d7f6de2004dfde1999169c2393440bd699b3aeea3a84c4bf63008
-F docxtest.tcl ea902626195615df56d093becef91d5c7babc107319e5030ee52bbae869e55d0
+F docxtest.tcl f4ba4ff1b695c9ca311ec5cd7445888b13a1788af1886215d8e6b94ccc3d855a
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -76,8 +76,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P d23fa9f2fdf493b233dda4fae1fc360a61d315a5037ad5f44db7612c74c211eb
-R a40954cb5c83d47479a9e335839ef8a2
+P ec348400080e954c5e96f99b53b9b2e98fff2bedbd02964bf01df329221ecbea
+R ab994299782bb4ad0b9f292069517a03
 U rolf
-Z 3d27e69a6828a1ad871b902c81992104
+Z c6854addbbe95a239fded0fb01a0b708
 # Remove this line to create a well-formed Fossil manifest.

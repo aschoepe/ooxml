@@ -1,5 +1,5 @@
-C Added\s-underline.
-D 2025-02-06T01:57:07.822
+C Enhanced\sdocumentation.
+D 2025-02-06T12:16:59.479
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -10,9 +10,9 @@ F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 6222c13c02c30cda7a38a18943ff17307148755c58e1827808c79170b4d378f8 x
 F configure.ac e445e4e77f8ec5ae46424002cc3437576dfcbd78ab6a089b748a1e8458358b6e
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
-F doc/ooxml-docx.md abaadd8602e8051595b404794070ec264444e3e4483129ea723d8dc6d8990069
+F doc/ooxml-docx.md 5ee6dc614af19a3a3a6953b2ce24f79bd93f09c72f838feaee2ff92cedf8c21f
 F doc/ooxml.md f73aceb0f41d7f6de2004dfde1999169c2393440bd699b3aeea3a84c4bf63008
-F docxtest.tcl 1ca38431fae3695efd05497a0edc454d08d207dc2019f55c46e76b58e6eff4e7
+F docxtest.tcl 9e37288d6a16f5b2b8ffc8d071a58f8ffd6d1ee95707e041fca7f83389bf1ca7
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -77,8 +77,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 19260442f9f28d242dbbb55c42d6cca024f164931ec4613cb00d31202c80244c
-R 34c30dc2613cf846fd248e82d829a840
+P 106b3e09c3c5223528df45d98608c3275d95a43f6c8a9c5e1c86e0e2172dc139
+R 7f4d0108a40eaf59e2e9c39be222b162
 U rolf
-Z 81dcc1b0d6978392f41ebeb5fde46e8f
+Z dde4f50c2deaa5e6996cea61000ffbaf
 # Remove this line to create a well-formed Fossil manifest.

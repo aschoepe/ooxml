@@ -11,7 +11,7 @@ foreach type {paragraph character} {
 $docx style characterdefault -fontsize 20 -font "Liberation Serif"
 $docx style paragraph Heading1 -fontsize 28 -bold on
 $docx paragraph "My first heading" -style Heading1 -spacing {before 240 after 120}
-$docx paragraph [string repeat "My first paragraph " 50]
+$docx paragraph [string repeat "My first paragraph " 50] -spacing {after 120}
 $docx append "build in parts" -bold on -fontsize 16
 $docx append " serveral parts indeed" -italic on
 $docx append " and different fonts" -font "Utopia"

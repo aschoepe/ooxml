@@ -46,13 +46,13 @@ following methods:
 
 : The supported subcommands are:
 
-    : **paragraphdefault**
+    : **paragraphdefault** *?-option value ...?*
     
-    : **characterdefault**
+    : **characterdefault** *?-option value ...?*
     
-    : **paragraph**
+    : **paragraph** *styleid* *?-option value ...?*
 
-    : **character**
+    : **character** *styleid* *?-option value ...?*
     
     : **ids** *styletype*
     
@@ -62,9 +62,97 @@ following methods:
 
 **write** *?filename?*
 
-:   Writes the document as ".docx" to the file *filename*. If
-    *filename* does not have the suffix ".docx" it will be appended to
-    the name. 
+Writes the document as ".docx" to the file *filename*. If *filename*
+does not have the suffix ".docx" it will be appended to the name.
+
+# CHARACTER OPTIONS
+
+**-bold** *onOffValue*
+
+**-color** *auto|RRGGBB hex value*
+
+**-dstrike** *onOffValue*
+
+**-font** *font familiy name*
+
+**-fontsize** *measure*
+
+**-italic** *onOffValue*
+
+**-strict** *onOffValue*
+
+**-underline** *kind*
+
+The allowd *kind* values are:
+
+    single
+    words
+    double
+    thick
+    dotted
+    dottedHeavy
+    dash
+    dashedHeavy
+    dashLong
+    dashLongHeavy
+    dotDash
+    dashDotHeavy
+    dotDotDash
+    dashDotDotHeavy
+    wave
+    wavyHeavy
+    wavyDouble
+    none
+
+# PARAGRAPH OPTIONS
+
+**-spacing** *{kind measue ?kind measue? ..}*
+
+: The value to the option must be a Tcl list of keyword measurement
+  pairs and defines the space before, after and inbetween the lines of
+  the paragraph. The space values are give as [measurement](#measurement)
+  
+  
+**-align** *kind*
+
+The allowd *kind* values are:
+
+    start
+    center
+    end
+    both
+    mediumKashida
+    distribute
+    numTab
+    highKashida
+    lowKashida
+    thaiDistribute
+    left
+    right
+
+# OPTION VALUE TYPES
+
+Several option values share the same value types. This types are:
+
+## MEASUREMENT
+
+A measurement is given either as interger value without unit or as
+integer immediately followed by a unit. If the value is just a number
+then what distance is specified by the number depends on the option
+and is documented with the option. The allowed units are:
+
+    mm
+         Millimeter
+    cm
+         Centimeter
+    in
+         Inch (1in = 2.54cm)
+    pt
+         Point (1pt = 1/72in)
+    pc
+         Pica (1pc = 12pt)
+    pi
+         The same as pc: Pica (1pi = 12pt)
 
 # DEPENDENCIES
 

@@ -61,6 +61,7 @@ namespace eval ::ooxml {
         -fontsize {ST_TwipsMeasure {w:sz w:szCs}}
         -italic {CT_OnOff {w:i w:iCs}}
         -strict {CT_OnOff w:strike}
+        -underline {ST_Underline w:u}
     }
     set properties(run) [concat $properties(stylerun) {-style {RStyle w:rStyle}}]
     set properties(styleparagraph) {
@@ -579,6 +580,34 @@ oo::class create ooxml::docx {
         if {[string length $value] != 6 || ![string is xdigit]} {
             error "unknown color value \"$value\", should be \"auto\" or a hex value in\
                    RRGGBB format."
+        }
+        return $value
+    }
+
+    method ST_Underline {value} {
+        set values {
+            single
+            words
+            double
+            thick
+            dotted
+            dottedHeavy
+            dash
+            dashedHeavy
+            dashLong
+            dashLongHeavy
+            dotDash
+            dashDotHeavy
+            dotDotDash
+            dashDotDotHeavy
+            wave
+            wavyHeavy
+            wavyDouble
+            none
+        }
+        if {$value ni $values} {
+            error "unkown underline value \"$value\", expected\
+                  [join [lrange $values 0 end-1] ,] or [lindex $values end]"
         }
         return $value
     }

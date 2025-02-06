@@ -55,15 +55,16 @@ namespace eval ::ooxml {
 
     set properties(stylerun) {
         -bold {CT_OnOff {w:b w:bCs}}
+        -color {ST_HexColor w:color}
         -dstrike {CT_OnOff w:dstrike}
-        -font {noCheck w:rFonts rFonts}
+        -font {NoCheck w:rFonts RFonts}
         -fontsize {ST_TwipsMeasure {w:sz w:szCs}}
         -italic {CT_OnOff {w:i w:iCs}}
         -strict {CT_OnOff w:strike}
     }
     set properties(run) [concat $properties(stylerun) {-style {RStyle w:rStyle}}]
     set properties(styleparagraph) {
-        -spacing {noCheck w:spacing spacing}
+        -spacing {NoCheck w:spacing Spacing}
         -align {ST_Jc w:jc}
     }
     set properties(paragraph) [concat $properties(styleparagraph) {-style {PStyle w:pStyle}}]
@@ -498,7 +499,7 @@ oo::class create ooxml::docx {
         close $fd
     }
 
-    method noCheck {value} {
+    method NoCheck {value} {
         return $value
     }
 
@@ -570,16 +571,27 @@ oo::class create ooxml::docx {
         }
         return $value
     }
+
+    method ST_HexColor {value} {
+        if {$value ne "auto"} {
+            return $value
+        }
+        if {[string length $value] != 6 || ![string is xdigit]} {
+            error "unknown color value \"$value\", should be \"auto\" or a hex value in\
+                   RRGGBB format."
+        }
+        return $value
+    }
     
-    method rFonts {value} {
+    method RFonts {value} {
         Tag_w:rFonts \
-            [my watt ascii] $value \
-            [my watt hAnsi] $value \
-            [my watt eastAsia] $value \
-            [my watt cs] $value
+            [my Watt ascii] $value \
+            [my Watt hAnsi] $value \
+            [my Watt eastAsia] $value \
+            [my Watt cs] $value
     }
 
-    method spacing {value} {
+    method Spacing {value} {
         set errMsg "the value given to the -spacing attribute is invalid,\
                     expected a name value list with name any combination of\
                     after, before or line" 
@@ -592,7 +604,7 @@ oo::class create ooxml::docx {
                 error $errMsg
             }
             my ST_TwipsMeasure $atts($key)
-            lappend attlist [my watt $key] $atts($key)
+            lappend attlist [my Watt $key] $atts($key)
         }
         Tag_w:spacing {*}$attlist {}
         
@@ -623,7 +635,7 @@ oo::class create ooxml::docx {
         }
     }
 
-    method checkRemainingOpts {} {
+    method CheckRemainingOpts {} {
         upvar opts opts
 
         set nrRemainigOpts [llength [array names opts]]
@@ -653,7 +665,7 @@ oo::class create ooxml::docx {
                 }
             }
         }
-        my checkRemainingOpts
+        my CheckRemainingOpts
     }
 
     method append {text args} {
@@ -694,7 +706,7 @@ oo::class create ooxml::docx {
         } errMsg]} {
             uplevel error [list $errMsg]
         }
-        my checkRemainingOpts
+        my CheckRemainingOpts
     }
 
     method Wt {text} {
@@ -719,14 +731,14 @@ oo::class create ooxml::docx {
                     "\n" Tag_w:br
                     "\r" Tag_w:cr
                     "\t" Tag_w:tab
-                    "\f" {Tag_w:br [my watt type] "page" {}}
+                    "\f" {Tag_w:br [my Watt type] "page" {}}
                 }
             }
             incr pos
         }
     }
 
-    method watt {attname} {
+    method Watt {attname} {
         list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
     }
     
@@ -763,7 +775,7 @@ oo::class create ooxml::docx {
                         }
                     }
                 }
-                my checkRemainingOpts
+                my CheckRemainingOpts
             }
             "characterdefault" {
                 set docDefaults [my GetDocDefault $styles]
@@ -781,7 +793,7 @@ oo::class create ooxml::docx {
                         }
                     }
                 } [$docDefaults firstChild]
-                my checkRemainingOpts
+                my CheckRemainingOpts
             }
             "character" -
             "paragraph" {
@@ -797,8 +809,8 @@ oo::class create ooxml::docx {
                     error "$cmd style \"$name\" already exists"
                 }
                 $styles appendFromScript {
-                    Tag_w:style [my watt type] $cmd [my watt styleId] $name {
-                        Tag_w:name [my watt val] $name {}
+                    Tag_w:style [my Watt type] $cmd [my Watt styleId] $name {
+                        Tag_w:name [my Watt val] $name {}
                         if {$cmd eq "paragraph"} {
                             Tag_w:pPr {
                                 my Create $::ooxml::properties(styleparagraph)
@@ -809,7 +821,7 @@ oo::class create ooxml::docx {
                         }
                     }
                 }
-                my checkRemainingOpts
+                my CheckRemainingOpts
             }
             "ids" {
                 if {[llength $args] != 1} {

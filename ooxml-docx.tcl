@@ -89,6 +89,10 @@ namespace eval ::ooxml {
             left ST_TwipsMeasure
             right ST_TwipsMeasure
             top ST_TwipsMeasure}}
+        -paperSource {w:paperSrc {
+            first ST_DecimalNumber
+            other ST_DecimalNumber
+        }}
         -sizeAndOrientaion {w:pgSz {
             {height h} ST_TwipsMeasure
             {orientation orient} ST_PageOrientation

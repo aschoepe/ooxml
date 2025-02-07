@@ -8,7 +8,7 @@ foreach type {paragraph character} {
         $docx style delete $type $styleid
     }
 }
-$docx pagesetup -sizeAndOrientaion {width 16838 height 23811 orientation landscape} -margins {left 2000 right 2000}
+$docx pagesetup -sizeAndOrientaion {width 16838 height 23811 orientation landscape} -margins {left 2000 right 2000} -paperSource {first 1 other 2}
 $docx style characterdefault -fontsize 20 -font "Liberation Serif"
 $docx style paragraph Heading1 -fontsize 28 -bold on
 $docx paragraph "My first heading" -style Heading1 -spacing {before 240 after 120}

@@ -31,7 +31,6 @@
 
 package require Tcl 8.6.7-
 package require tdom 0.9.6-
-package require msgcat
 package require ooxml
 
 namespace eval ::ooxml {
@@ -54,24 +53,38 @@ namespace eval ::ooxml {
     }
 
     set properties(stylerun) {
-        -bold {CT_OnOff {w:b w:bCs}}
-        -color {ST_HexColor w:color}
-        -dstrike {CT_OnOff w:dstrike}
-        -font {NoCheck w:rFonts RFonts}
-        -fontsize {ST_TwipsMeasure {w:sz w:szCs}}
-        -italic {CT_OnOff {w:i w:iCs}}
-        -strict {CT_OnOff w:strike}
-        -underline {ST_Underline w:u}
+        -bold {{w:b w:bCs} CT_OnOff}
+        -color {w:color ST_HexColor}
+        -dstrike {w:dstrike CT_OnOff}
+        -font {w:rFonts NoCheck RFonts}
+        -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
+        -italic {{w:i w:iCs} CT_OnOff}
+        -strict {w:strike CT_OnOff}
+        -underline {w:u ST_Underline}
     }
-    set properties(run) [concat $properties(stylerun) {-style {RStyle w:rStyle}}]
+    set properties(run) [concat $properties(stylerun) {-style {w:rStyle RStyle}}]
     set properties(styleparagraph) {
-        -spacing {NoCheck w:spacing Spacing}
-        -align {ST_Jc w:jc}
+        -spacing {w:spacing {
+            after ST_TwipsMeasure
+            before ST_TwipsMeasure
+            line ST_TwipsMeasure}}
+        -align {w:jc ST_Jc}
     }
-    set properties(paragraph) [concat $properties(styleparagraph) {-style {PStyle w:pStyle}}]
+    set properties(paragraph) [concat $properties(styleparagraph) {-style {w:pStyle PStyle}}]
     set properties(sectionsetup) {
-        -sizeAndOrientaion {NoCheck w:pgSz Pagesize}
-        -margins {NoCheck w:pgMar Margins}
+        -sizeAndOrientaion {w:pgSz {
+            {height h} ST_TwipsMeasure
+            {orientation orient} ST_PageOrientation
+            {width w} ST_TwipsMeasure}}
+        -margins {w:pgMar {
+            bottom ST_TwipsMeasure
+            footer ST_TwipsMeasure
+            gutter ST_TwipsMeasure
+            header ST_TwipsMeasure
+            left ST_TwipsMeasure
+            right ST_TwipsMeasure
+            top ST_TwipsMeasure
+        }}
     }
 }
 
@@ -549,6 +562,25 @@ oo::class create ooxml::docx {
         return $value
     }
 
+    method ST_SignedTwipsMeasure {value} {
+        if {[string is integer -strict $value]} {
+            return $value
+        }
+        if {![regexp {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+            error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+        }
+        return $value
+    }
+
+    method ST_PageOrientation {value} {
+        if {$value ni {landscape portrait}} {
+            error "unknown symbol \"$value\", expected \"landscape\"\
+                   or \"portrait\""
+        }
+        return $value
+    }
+    
     method ST_Jc {value} {
         set alignValues {
             start
@@ -638,75 +670,8 @@ oo::class create ooxml::docx {
             [my Watt cs] $value
     }
 
-    method AllowedValues {values} {
-        return "[join [lrange $values 0 end-1] ", "] or [lindex $values end]"
-    }
-    
-    method Spacing {value} {
-        set names {after before line}
-        set errMsg "the value given to the -spacing attribute is invalid,\
-                    expected is a name value list with name any combination of\
-                    [my AllowedValues $names]" 
-        if {[catch {array set atts $value}]} {
-            error $errMsg
-        }
-        set attlist [list]
-        foreach key [array names atts] {
-            if {$key ni $names} {
-                error $errMsg
-            }
-            my ST_TwipsMeasure $atts($key)
-            lappend attlist [my Watt $key] $atts($key)
-        }
-        Tag_w:spacing {*}$attlist {}
-    }
-
-    method Pagesize {value} {
-        set errMsg "invalid value, expected is a name value list with names out of\
-                    width, height or orientation"
-        if {[catch {array set atts $value}]} {
-            error $errMsg
-        }
-        array set key2att {
-            height h
-            orientation orient
-            width w
-        }
-        set attlist [list]
-        foreach key [array names atts] {
-            if {$key eq "orientation"} {
-                if {$atts($key) ni {portrait landscape}} {
-                    error "invalid value \"$atts($key)\" given to the \"orientation\"\
-                           keyword."
-                }
-                lappend attlist [my Watt orient] $atts($key)
-                continue
-            }
-            if {$key ni {width height}} {
-                error $errMsg
-            }
-            my ST_TwipsMeasure $atts($key)
-            lappend attlist [my Watt $key2att($key)] $atts($key)
-        }
-        Tag_w:pgSz {*}$attlist {}
-    }
-
-    method Margins {value} {
-        set names {bottom footer gutter header left right top}
-        set errMsg "invalid value, expected is a name value list with names out of\
-                    [my AllowedValues $names]"
-        if {[catch {array set atts $value}]} {
-            error $errMsg
-        }
-        set attlist [list]
-        foreach key [array names atts] {
-            if {$key ni $names} {
-                error $errMsg
-            }
-            my ST_TwipsMeasure $atts($key)
-            lappend attlist [my Watt $key] $atts($key)
-        }
-        Tag_w:pgMar {*}$attlist {}
+    method AllowedValues {values {word "or"}} {
+        return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
     }
     
     method Create switchActionList {
@@ -715,21 +680,94 @@ oo::class create ooxml::docx {
 
         set switches [array names switchesData]
         foreach {opt value} [array get opts] {
-            if {$opt in $switches} {
-                lassign $switchesData($opt) check action createCmd
-                if {[catch {set ooxmlvalue [my $check $value]} errMsg]} {
-                    error "the value \"$value\" given to\
-                       the \"$opt\" option is invalid:\
-                       $errMsg"
-                }
-                if {$createCmd eq ""} {
-                    foreach tag $action {
-                        Tag_$tag w:val $ooxmlvalue
+            if {$opt ni $switches} {
+                continue
+            }
+            set optdata $switchesData($opt)
+            switch [llength $optdata] {
+                2 {
+                    lassign $optdata tags attdefs
+                    if {[llength $attdefs] == 1} {
+                        if {[catch {set ooxmlvalue [my $attdefs $value]} errMsg]} {
+                            error "the value \"$value\" given to the\
+                                   \"$opt\" option is invalid: $errMsg"
+                        }
+                        foreach tag $tags {
+                            Tag_$tag w:val $ooxmlvalue
+                        }
+                        unset opts($opt)
+                        continue
                     }
-                } else {
-                    my $createCmd $ooxmlvalue
+                    # If we stumble about a tag with just one
+                    # attribute to set and that attribute is not w:val
+                    # this case has be handled here.
+                    #
+                    # For know the code assumes always several atts
+                    # and therefore the value to the option is always
+                    # handled as a key value pairs list.
+                    set attlist ""
+                    array unset atts
+                    if {[catch {array set atts $value}]} {
+                        set keys ""
+                        foreach {attdata type} $attdefs {
+                            lappend keys [lindex $attdata 0]
+                        }
+                        error "the value given to the \"$opt\" option is\
+                               invalid, expected ist a name value pairs\
+                               list with names out of\
+                               [my AllowedValues $keys]"
+                    }
+                    foreach {attdata type} $attdefs {
+                        if {[llength $attdata] == 2} {
+                            lassign $attdata key attname
+                        } else {
+                            set key $attdata
+                            set attname $key
+                        }
+                        if {![info exists atts($key)]} {
+                            continue
+                        }
+                        if {[catch {set ooxmlvalue [my $type $atts($key)]} errMsg]} {
+                            error "the argument \"$value\" given to the\
+                                   \"$opt\" option is invalid: the value\
+                                   given to the key \"$key\" in the argument\
+                                   is invalid: $errMsg"
+                        }
+                        lappend attlist [my Watt $attname] $ooxmlvalue
+                        unset atts($key)
+                    }
+                    foreach tag $tags {
+                        Tag_$tag {*}$attlist {}
+                    }
+                    unset opts($opt)                    
+                    # Check if there are unknown keys left in the key
+                    # values list
+                    set remainigKeys [array names atts]
+                    if {[llength $remainigKeys] == 0} {
+                        continue
+                    }
+                    set keys ""
+                    foreach {attdata type} $attdefs {
+                        lappend keys [lindex $attdata 0]
+                    }
+                    if {[llength $remainigKeys] == 1} {
+                        error "unknown key \"[lindex $remainigKeys 0]\" in\
+                               the value \"$value\" of the option \"$opt\",\
+                               the expected keys are [my AllowedValues $keys]"
+                    } else {
+                        error "unknown keys [my AllowedValues $remainigKeys] in\
+                               the value \"$value\" of the option \"$opt\",\
+                               the expected keys are [my AllowedValues $keys]"
+                    }
                 }
-                unset opts($opt)
+                3 {
+                    my [lindex $optdata 2] $value
+                    unset opts($opt)
+                    
+                }
+                default {
+                    error "invalid properties value"
+                }
             }
         }
     }
@@ -740,11 +778,11 @@ oo::class create ooxml::docx {
         set nrRemainigOpts [llength [array names opts]]
         if {$nrRemainigOpts == 0} return
         if {$nrRemainigOpts == 1} {
-            set text "unknown option:"
+            set text "unknown option: [lindex [array names opts] 0]"
         } else {
-            set text "unknown options:"
+            set text "unknown options: [my AllowedValues [array names opts] "and"]"
         }
-        uplevel [list error "$text [array names opts]"]
+        uplevel [list error $text]
     }
     
     method Wt {text} {
@@ -1101,7 +1139,7 @@ oo::class create ooxml::docx {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
 
-        # Cleanup the appendedPageSetup node in case after the
+        # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than
         # writen again.
         if {$appendedPageSetup ne ""} {

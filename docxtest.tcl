@@ -30,6 +30,9 @@ $docx paragraph [string repeat "Next paragraph, back to default style, with a fe
 $docx paragraph "Another paragraph with its own style (local applied)" -align right
 $docx style paragraph RigthAlign -align right
 $docx paragraph "Another paragraph with its own style (applied by style)" -style RigthAlign
+$docx paragraph [string repeat "Next paragraph with stupid text. " 20] \
+    -indentation {firstLine 3cm hanging 2cm start 1cm end 4cm}
+
 puts "paragraph style ids: [$docx style ids paragraph]"
 puts "character style ids: [$docx style ids character]"
 $docx write testout.docx

@@ -64,18 +64,23 @@ namespace eval ::ooxml {
     }
     set properties(run) [concat $properties(stylerun) {-style {w:rStyle RStyle}}]
     set properties(styleparagraph) {
+        -align {w:jc ST_Jc}
+        -indentation {w:ind {
+            end ST_SignedTwipsMeasure
+            endChars ST_DecimalNumber
+            firstLine ST_SignedTwipsMeasure
+            firstLineChars ST_DecimalNumber
+            hanging ST_SignedTwipsMeasure
+            hangingChars ST_DecimalNumber
+            start ST_SignedTwipsMeasure
+            startChars ST_DecimalNumber}}
         -spacing {w:spacing {
             after ST_TwipsMeasure
             before ST_TwipsMeasure
             line ST_TwipsMeasure}}
-        -align {w:jc ST_Jc}
     }
     set properties(paragraph) [concat $properties(styleparagraph) {-style {w:pStyle PStyle}}]
     set properties(sectionsetup) {
-        -sizeAndOrientaion {w:pgSz {
-            {height h} ST_TwipsMeasure
-            {orientation orient} ST_PageOrientation
-            {width w} ST_TwipsMeasure}}
         -margins {w:pgMar {
             bottom ST_TwipsMeasure
             footer ST_TwipsMeasure
@@ -83,8 +88,11 @@ namespace eval ::ooxml {
             header ST_TwipsMeasure
             left ST_TwipsMeasure
             right ST_TwipsMeasure
-            top ST_TwipsMeasure
-        }}
+            top ST_TwipsMeasure}}
+        -sizeAndOrientaion {w:pgSz {
+            {height h} ST_TwipsMeasure
+            {orientation orient} ST_PageOrientation
+            {width w} ST_TwipsMeasure}}
     }
 }
 
@@ -546,6 +554,13 @@ oo::class create ooxml::docx {
         }
     }
 
+    method ST_DecimalNumber {value} {
+        if {![string is integer -strict $value]} {
+            error "expected integer but got \"$value\""
+        }
+        return $value
+    }
+
     # ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
     # The difference is only the interpretation of the integer (only)
     # values. For ST_HpsMeasure the number specifies half points
@@ -566,7 +581,7 @@ oo::class create ooxml::docx {
         if {[string is integer -strict $value]} {
             return $value
         }
-        if {![regexp {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+        if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
             error "\"$value\" is not a valid measure value - value must match\
                the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
         }

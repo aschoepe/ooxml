@@ -30,17 +30,33 @@ default setting.
 The created docx object commands currently support the
 following methods:
 
-**readpart** *part* *filename*
-
-**writepart** *part* *filename*
-
-**paragraph** *text* *?-option value ...?*
-
-: Appends *text* as paragraph to the content of the document. 
-
 **append** *text* *?-option value ...?*
 
 : Appends *text* to the last paragraph of the content of the document.
+  The option/value pairs control locally the appearance of the *text*
+  within the paragraph. See [CHARACTER OPTIONS](#character) for the
+  valid options and the type of their argument.
+
+**pagesetup** *?-option value ...?*
+
+**paragraph** *text* *?-style styleid -option value ...?*
+
+: Appends *text* as paragraph to the content of the document. If the
+  *-style* option is given, the referenced style will be used. The
+  other options may loccaly overwrite a style stetting or add more
+  properties. See [PARAGRAPH OPTIONS](#paragraph) and [CHARACTER
+  OPTIONS](#character) for the valid options and the type of their
+  argument.
+
+**readpart** *part* *filename*
+
+**write** *?filename?*
+
+**writepart** *part* *filename*
+
+**sectionsetup** *?-option value ...?*
+
+**simpletable** *args*
 
 **style** *subcommand* *args*
 
@@ -57,10 +73,6 @@ following methods:
     : **ids** *styletype*
     
     : **delete** *styletype* *styleid*
-
-**simpletable** *args*
-
-**write** *?filename?*
 
 Writes the document as ".docx" to the file *filename*. If *filename*
 does not have the suffix ".docx" it will be appended to the name.
@@ -136,7 +148,7 @@ Several option values share the same value types. This types are:
 
 ## MEASUREMENT
 
-A measurement is given either as interger value without unit or as
+A measurement is given either as integer value without unit or as
 integer immediately followed by a unit. If the value is just a number
 then what distance is specified by the number depends on the option
 and is documented with the option. The allowed units are:

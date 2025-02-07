@@ -1,5 +1,5 @@
-C Added\spagesetup\sand\ssectionsetup\s(paper\ssize,\smargins).\sOngoing\sinternal\simprovements.
-D 2025-02-07T00:32:45.839
+C Some\sdocumentation\stweaks.
+D 2025-02-07T00:50:17.435
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -10,7 +10,7 @@ F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 6222c13c02c30cda7a38a18943ff17307148755c58e1827808c79170b4d378f8 x
 F configure.ac e445e4e77f8ec5ae46424002cc3437576dfcbd78ab6a089b748a1e8458358b6e
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
-F doc/ooxml-docx.md 5ee6dc614af19a3a3a6953b2ce24f79bd93f09c72f838feaee2ff92cedf8c21f
+F doc/ooxml-docx.md 4bed31f4e5b8c3bf6ccf4fe7218fce5ce508d09cbdbf9c24b926d8c48b63f8a6
 F doc/ooxml.md f73aceb0f41d7f6de2004dfde1999169c2393440bd699b3aeea3a84c4bf63008
 F docxtest.tcl 9f45d051356d9ebc0d51a8bff96e09a08c1f65a144f41d20c8080cb058e892b1
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
@@ -77,8 +77,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P bfd07aa4ee6430cd96eab79a1ced399d9864986c56d75efb3fc4994d7fc01d1d
-R 4fdf0fb3068a905b52c5e2ec014b56a7
+P ac5fa2af964ae5dd321b4c1edb94c2db536c81c2ee8a8ee2894bcd3a7281c0e9
+R 55735b6a36360dfdefc05fabb7be60fb
 U rolf
-Z 98beeab423b65f329a9253adb726f3e1
+Z c3a82e7ff37635cf0a935d7f110bb881
 # Remove this line to create a well-formed Fossil manifest.

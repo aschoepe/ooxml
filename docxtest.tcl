@@ -8,6 +8,7 @@ foreach type {paragraph character} {
         $docx style delete $type $styleid
     }
 }
+$docx pagesetup -sizeAndOrientaion {width 16838 height 23811 orientation landscape} -margins {left 2000 right 2000}
 $docx style characterdefault -fontsize 20 -font "Liberation Serif"
 $docx style paragraph Heading1 -fontsize 28 -bold on
 $docx paragraph "My first heading" -style Heading1 -spacing {before 240 after 120}
@@ -32,8 +33,8 @@ $docx paragraph "Another paragraph with its own style (applied by style)" -style
 puts "paragraph style ids: [$docx style ids paragraph]"
 puts "character style ids: [$docx style ids character]"
 $docx write testout.docx
-$docx writepart word/document.xml document.xml
-$docx readpart word/document.xml document.xml
+$docx writepart word/styles.xml document.xml
+$docx readpart word/styles.xml document.xml
 $docx write testout1.docx
 $docx destroy
 

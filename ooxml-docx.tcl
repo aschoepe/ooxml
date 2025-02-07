@@ -69,6 +69,10 @@ namespace eval ::ooxml {
         -align {ST_Jc w:jc}
     }
     set properties(paragraph) [concat $properties(styleparagraph) {-style {PStyle w:pStyle}}]
+    set properties(sectionsetup) {
+        -sizeAndOrientaion {NoCheck w:pgSz Pagesize}
+        -margins {NoCheck w:pgMar Margins}
+    }
 }
 
 proc ooxml::InitDocxNodeCommands {} {
@@ -442,11 +446,16 @@ oo::class create ooxml::docx {
     constructor { args } {
         my variable docs
         my variable body
+        my variable pagesetup
+        my variable sectionsetup
+        
         variable ::ooxml::xmlns
         variable ::ooxml::staticDocx
 
         namespace import ::ooxml::Tag_*  ::ooxml::Text
 
+        set pagesetup ""
+        set sectionsetup ""
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
         }
@@ -486,6 +495,15 @@ oo::class create ooxml::docx {
             $docs($what) delete
         }
         set docs($what) $doc
+        # If pagesetup or sectionsetup are not empty they stored a node
+        # out of the fragment list of document and they are now gone
+        # with the deletion of document
+        if {$what eq "word/document.xml"} {
+            my variable pagesetup
+            my variable sectionsetup
+            set pagesetup ""
+            set sectionsetup ""
+        }
     }
 
     method writepart {what file} {
@@ -550,7 +568,7 @@ oo::class create ooxml::docx {
             return $value
         }
         error "unknown align value \"$value\", should be:\
-               [join [lrange $alignValues 0 end-1] ,] or [lindex $alignValues end]"
+               [my AllowedValues $alignValues]"
     }
 
     method PStyle {value} {
@@ -607,7 +625,7 @@ oo::class create ooxml::docx {
         }
         if {$value ni $values} {
             error "unkown underline value \"$value\", expected\
-                  [join [lrange $values 0 end-1] ,] or [lindex $values end]"
+                  [my AllowedValues $values]"
         }
         return $value
     }
@@ -620,23 +638,75 @@ oo::class create ooxml::docx {
             [my Watt cs] $value
     }
 
+    method AllowedValues {values} {
+        return "[join [lrange $values 0 end-1] ", "] or [lindex $values end]"
+    }
+    
     method Spacing {value} {
+        set names {after before line}
         set errMsg "the value given to the -spacing attribute is invalid,\
-                    expected a name value list with name any combination of\
-                    after, before or line" 
+                    expected is a name value list with name any combination of\
+                    [my AllowedValues $names]" 
         if {[catch {array set atts $value}]} {
             error $errMsg
         }
         set attlist [list]
         foreach key [array names atts] {
-            if {$key ni {after before line}} {
+            if {$key ni $names} {
                 error $errMsg
             }
             my ST_TwipsMeasure $atts($key)
             lappend attlist [my Watt $key] $atts($key)
         }
         Tag_w:spacing {*}$attlist {}
-        
+    }
+
+    method Pagesize {value} {
+        set errMsg "invalid value, expected is a name value list with names out of\
+                    width, height or orientation"
+        if {[catch {array set atts $value}]} {
+            error $errMsg
+        }
+        array set key2att {
+            height h
+            orientation orient
+            width w
+        }
+        set attlist [list]
+        foreach key [array names atts] {
+            if {$key eq "orientation"} {
+                if {$atts($key) ni {portrait landscape}} {
+                    error "invalid value \"$atts($key)\" given to the \"orientation\"\
+                           keyword."
+                }
+                lappend attlist [my Watt orient] $atts($key)
+                continue
+            }
+            if {$key ni {width height}} {
+                error $errMsg
+            }
+            my ST_TwipsMeasure $atts($key)
+            lappend attlist [my Watt $key2att($key)] $atts($key)
+        }
+        Tag_w:pgSz {*}$attlist {}
+    }
+
+    method Margins {value} {
+        set names {bottom footer gutter header left right top}
+        set errMsg "invalid value, expected is a name value list with names out of\
+                    [my AllowedValues $names]"
+        if {[catch {array set atts $value}]} {
+            error $errMsg
+        }
+        set attlist [list]
+        foreach key [array names atts] {
+            if {$key ni $names} {
+                error $errMsg
+            }
+            my ST_TwipsMeasure $atts($key)
+            lappend attlist [my Watt $key] $atts($key)
+        }
+        Tag_w:pgMar {*}$attlist {}
     }
     
     method Create switchActionList {
@@ -677,67 +747,6 @@ oo::class create ooxml::docx {
         uplevel [list error "$text [array names opts]"]
     }
     
-    method paragraph {text args} {
-        my variable body
-
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        array set opts $args
-        $body appendFromScript {
-            Tag_w:p {
-                Tag_w:pPr {
-                    my Create $::ooxml::properties(paragraph)
-                }
-                Tag_w:r {
-                    my Wt $text
-                }
-            }
-        }
-        my CheckRemainingOpts
-    }
-
-    method append {text args} {
-        my variable body
-
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        array set opts $args
-        # Identify the last paragraph
-        set p [$body lastChild]
-        while {$p ne ""} {
-            if {[$p nodeType] ne "ELEMENT_NODE"} {
-                set p [$p previousSibling]
-                continue
-            }
-            if {[$p nodeName] ne "w:p"} {
-                # Perhaps it would be more wise to raise error in this
-                # situation or to create a new one?
-                set p [$p previousSibling]
-                continue
-            }
-            break
-        }
-        if {$p eq ""} {
-            # Or create a new one?
-            error "no paragraph to append to in the document"
-        }
-        if {[catch {
-            $p appendFromScript {
-                Tag_w:r {
-                    Tag_w:rPr {
-                        my Create $::ooxml::properties(run)
-                    }
-                    my Wt $text
-                }
-            }
-        } errMsg]} {
-            uplevel error [list $errMsg]
-        }
-        my CheckRemainingOpts
-    }
-
     method Wt {text} {
         # Just not exactly that easy.
         # Handle at least \n \r \t and \f special
@@ -782,7 +791,76 @@ oo::class create ooxml::docx {
         }
         return $docDefaults
     }
-            
+
+    method LastParagraph {{returnEmpty 0}} {
+        my variable body
+        
+        # Identify the last paragraph
+        set p [$body lastChild]
+        while {$p ne ""} {
+            if {[$p nodeType] ne "ELEMENT_NODE"} {
+                set p [$p previousSibling]
+                continue
+            }
+            if {[$p nodeName] ne "w:p"} {
+                # Perhaps it would be more wise to raise error in this
+                # situation or to create a new one?
+                set p [$p previousSibling]
+                continue
+            }
+            break
+        }
+        if {$p eq "" && !$returnEmpty} {
+            # Or create a new one?
+            error "no paragraph to append to in the document"
+        }
+        return $p
+    }
+    
+    method paragraph {text args} {
+        my variable body
+
+        if {[llength $args] % 2 != 0} {
+            error "invalid arguments: expectecd -option value pairs"
+        }
+        array set opts $args
+        $body appendFromScript {
+            Tag_w:p {
+                Tag_w:pPr {
+                    my Create $::ooxml::properties(paragraph)
+                }
+                Tag_w:r {
+                    my Wt $text
+                }
+            }
+        }
+        my CheckRemainingOpts
+    }
+
+    method append {text args} {
+        my variable body
+
+        if {[llength $args] % 2 != 0} {
+            error "invalid arguments: expectecd -option value pairs"
+        }
+        array set opts $args
+        # Identify the last paragraph
+        set p [my LastParagraph]
+        if {[catch {
+            $p appendFromScript {
+                Tag_w:r {
+                    Tag_w:rPr {
+                        my Create $::ooxml::properties(run)
+                    }
+                    my Wt $text
+                }
+            }
+        } errMsg]} {
+            uplevel error [list $errMsg]
+        }
+        my CheckRemainingOpts
+    }
+
     method style {cmd args} {
         my variable docs
         
@@ -923,14 +1001,89 @@ oo::class create ooxml::docx {
         }
     }
 
+    # WordprocessingML has no concept of a page. Rather it groups
+    # paragraphs (the main building block) into "sections". The page
+    # setup of a section is located within the w:p subtree of the last
+    # paragraph of the section. And that settings reach out _back_
+    # over all w:p subtrees without page setup.
+    method pagesetup {args} {
+        my variable docs
+        my variable body
+        my variable pagesetup
+        variable ::ooxml::xmlns
+
+        if {$pagesetup ne ""} {
+            $pagesetup delete
+        }
+        set pagesetup [$docs(word/document.xml) createElementNS $xmlns(w) w:sectPr]
+        array set opts $args
+        $pagesetup appendFromScript {
+            my Create $::ooxml::properties(sectionsetup)
+        }
+        my CheckRemainingOpts
+    }
+
+    method sectionstart {args} {
+        my variable docs
+        my variable pagesetup
+        my variable sectionsetup
+        variable ::ooxml::xmlns
+
+        set p [my LastParagraph 1]
+        if {$sectionsetup ne ""} {
+            if {$p ne ""} {
+                $p appendChild $sectionsetup
+            }
+        } elseif {$pagesetup ne ""} {
+            if {$p ne ""} {
+                $p appendChild [$pagesetup clone -deep]
+            }
+        }
+        $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
+        array set opts $args
+        $sectionsetup appendFromScript {
+            my Create $::ooxml::properties(pagesetup)
+        }
+        my CheckRemainingOpts
+    }
+
+    method sectionend {args} {
+        my variable pagesetup
+        my variable sectionsetup
+        
+        if {$sectionsetup eq ""} {
+            error "no section started"
+        }
+        set p [my LastParagraph 1]
+        if {$p ne ""} {
+            $p appendChild $sectionsetup
+        }
+        set sectionsetup ""
+    }
+    
     method write {file} {
         my variable body
         my variable docs
+        my variable pagesetup
+        my variable sectionsetup
         variable ::ooxml::xmlns
-        variable ::ooxml::staticDocx
 
-        namespace import ::ooxml::Tag_* ::ooxml::Text
-
+        # Finalize section and do pagesetup
+        if {$sectionsetup ne ""} {
+            set p [my LastParagraph 1]
+            if {$p ne ""} {
+                $p appendChild $sectionsetup
+                set sectionsetup ""
+            } else {
+                $sectionsetup delete
+            }
+        }
+        set appendedPageSetup ""
+        if {$pagesetup ne ""} {
+            $body appendChild [$pagesetup clone -deep]
+            set appendedPageSetup [$body lastChild]
+        }
+        
         # Initialize zip file
         set file [string trim $file]
         if {$file eq {}} {
@@ -947,6 +1100,13 @@ oo::class create ooxml::docx {
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
+
+        # Cleanup the appendedPageSetup node in case after the
+        # document was written more content will be added and than
+        # writen again.
+        if {$appendedPageSetup ne ""} {
+            $appendedPageSetup delete
+        }
         
         # Finalize zip.
         set cdoffset [tell $zf]
@@ -954,6 +1114,6 @@ oo::class create ooxml::docx {
         puts -nonewline $zf $cd
         puts -nonewline $zf $endrec
         close $zf
-        return 0
+        return
     }
 }

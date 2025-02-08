@@ -40,16 +40,17 @@ namespace eval ::ooxml {
     variable xmlns
 
     array set xmlns {
+        mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
+        rel http://schemas.openxmlformats.org/package/2006/relationships
         v urn:schemas-microsoft-com:vml
         w http://schemas.openxmlformats.org/wordprocessingml/2006/main
         w10 urn:schemas-microsoft-com:office:word
-        wp http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing
-        wps http://schemas.microsoft.com/office/word/2010/wordprocessingShape
-        wpg http://schemas.microsoft.com/office/word/2010/wordprocessingGroup
-        mc http://schemas.openxmlformats.org/markup-compatibility/2006
-        wp14 http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing
         w14 http://schemas.microsoft.com/office/word/2010/wordml
+        wp http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing
+        wp14 http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing
+        wpg http://schemas.microsoft.com/office/word/2010/wordprocessingGroup
+        wps http://schemas.microsoft.com/office/word/2010/wordprocessingShape
     }
 
     set properties(stylerun) {
@@ -266,6 +267,11 @@ proc ooxml::InitDocxNodeCommands {} {
         w:writeProtection w:yearLong w:yearShort w:zoom
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) elementNode Tag_$tag
+    }
+    foreach tag {
+        Relationships Relationship
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(rel) elementNode Tag_$tag
     }
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
@@ -819,7 +825,7 @@ oo::class create ooxml::docx {
         if {$nrRemainigOpts == 1} {
             set text "unknown option: [lindex [array names opts] 0]"
         } else {
-            set text "unknown options: [my AllowedValues [array names opts] "and"]"
+            set text "unknown options: [my AllowedValues [array names opts] and]"
         }
         uplevel [list error $text]
     }
@@ -856,7 +862,7 @@ oo::class create ooxml::docx {
     method Watt {attname} {
         list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
     }
-    
+
     method GetDocDefault {styles} {
         # styles has the content model sequence:
         # docDefaults? latentStyles? styles*
@@ -1126,7 +1132,7 @@ oo::class create ooxml::docx {
         my CheckRemainingOpts
     }
 
-    method sectionend {args} {
+    method sectionend {} {
         my variable pagesetup
         my variable sectionsetup
         
@@ -1138,6 +1144,56 @@ oo::class create ooxml::docx {
             $p appendChild $sectionsetup
         }
         set sectionsetup ""
+    }
+
+    method url {text url args} {
+        my variable docs
+        my variable body
+        variable ::ooxml::xmlns
+
+        if {[llength $args] % 2 != 0} {
+            error "invalid arguments: expectecd -option value pairs"
+        }
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        set ids [$relsRoot selectNodes -namespaces [list r $xmlns(r)] \
+                     -list {r:Relationship string(@Id)}]
+        set rId 1
+        foreach id $ids {
+            set nr [string range $id 3 end]
+            if {[string range $id 0 2] eq "rId"
+                && [string is integer -strict $nr]
+            } {
+                if {$nr > $rId} {
+                    set rId $nr
+                }
+            }
+        }
+        incr rId
+        set relns http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink
+        $relsRoot appendFromScript {
+            Tag_Relationship Id rId$rId \
+                Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink \
+                Target $url \
+                TargetMode External
+        }
+        array set opts $args
+        # Identify the last paragraph
+        set p [my LastParagraph]
+        if {[catch {
+            $p appendFromScript {
+                Tag_w:hyperlink [list $xmlns(r) r:id] rId$rId {
+                    Tag_w:r {
+                        Tag_w:rPr {
+                            my Create $::ooxml::properties(run)
+                        }
+                        my Wt $text
+                    }
+                }
+            }
+        } errMsg]} {
+            uplevel error [list $errMsg]
+        }
+        my CheckRemainingOpts        
     }
     
     method write {file} {

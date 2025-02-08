@@ -39,6 +39,14 @@ following methods:
 
 **pagesetup** *?-option value ...?*
 
+The allowed options are:
+
+-margins keyValueList
+
+-paperSource keyValueList
+
+-sizeAndOrientaion keyValueList
+
 **paragraph** *text* *?-style styleid -option value ...?*
 
 : Appends *text* as paragraph to the content of the document. If the
@@ -54,7 +62,12 @@ following methods:
 
 **writepart** *part* *filename*
 
-**sectionsetup** *?-option value ...?*
+**sectionstart** *?-option value ...?*
+
+The allowed *-option value* pairs are the same as for the *pagesetup*
+method, see there.
+
+**sectionend**
 
 **simpletable** *args*
 
@@ -73,6 +86,8 @@ following methods:
     : **ids** *styletype*
     
     : **delete** *styletype* *styleid*
+
+**write** *?filename?*
 
 Writes the document as ".docx" to the file *filename*. If *filename*
 does not have the suffix ".docx" it will be appended to the name.
@@ -118,13 +133,6 @@ The allowd *kind* values are:
 
 # PARAGRAPH OPTIONS
 
-**-spacing** *{kind measue ?kind measue? ..}*
-
-: The value to the option must be a Tcl list of keyword measurement
-  pairs and defines the space before, after and inbetween the lines of
-  the paragraph. The space values are give as [measurement](#measurement)
-  
-  
 **-align** *kind*
 
 The allowd *kind* values are:
@@ -141,6 +149,27 @@ The allowd *kind* values are:
     thaiDistribute
     left
     right
+
+**-indentation** *kind*
+
+The allowd *kind* values are:
+
+    end
+    endChars
+    firstLine
+    firstLineChars
+    hanging
+    hangingChars
+    start
+    startChars
+
+**-spacing** *{kind measue ?kind measue? ..}*
+
+The value to the option must be a Tcl list of keyword measurement
+pairs and defines the space before, after and inbetween the lines of
+the paragraph. The space values are give as
+[measurement](#measurement)
+  
 
 # OPTION VALUE TYPES
 

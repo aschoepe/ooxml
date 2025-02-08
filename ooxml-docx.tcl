@@ -471,6 +471,7 @@ oo::class create ooxml::docx {
     constructor { args } {
         my variable docs
         my variable body
+        my variable setuproot
         my variable pagesetup
         my variable sectionsetup
         
@@ -479,8 +480,6 @@ oo::class create ooxml::docx {
 
         namespace import ::ooxml::Tag_*  ::ooxml::Text
 
-        set pagesetup ""
-        set sectionsetup ""
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
         }
@@ -493,6 +492,24 @@ oo::class create ooxml::docx {
         $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
+
+        # Since the "general page setup" (WordprocessingML does not
+        # really have a concept for that) is a child of w:body after
+        # the last paragraph it seemed handy to not realy insert that
+        # into the tree at the moment the user calls pagesetup but
+        # just before serializing - as the user consecutive add
+        # content we can just append to the w:body without looking at
+        # every place if there is already a page setup child and we
+        # have to insert new content before that element. Long story
+        # short - and yes it smells like a hack, there should be a
+        # more simpler and natural way, perhaps there is a reason for
+        # this overlong comment - wie need an umbrella node with the
+        # necessary XML namespaces to that wie do not have unnecessary
+        # XML namespaces declarations in the serialized docx.
+        set setuproot [$document createElementNS $xmlns(w) w:umbrella]
+        set pagesetup ""
+        set sectionsetup ""
+
     }
 
     destructor {
@@ -509,6 +526,7 @@ oo::class create ooxml::docx {
 
     method readpart {what file} {
         my variable docs
+        variable ::ooxml::xmlns
 
         set fd [::tdom::xmlOpenFile $file]
         if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
@@ -524,8 +542,10 @@ oo::class create ooxml::docx {
         # out of the fragment list of document and they are now gone
         # with the deletion of document
         if {$what eq "word/document.xml"} {
+            my variable setuproot
             my variable pagesetup
             my variable sectionsetup
+            set setuproot [$docs(word/document.xml) createElementNS $xmlns(w) w:umbrella]
             set pagesetup ""
             set sectionsetup ""
         }
@@ -1066,13 +1086,15 @@ oo::class create ooxml::docx {
     method pagesetup {args} {
         my variable docs
         my variable body
+        my variable setuproot
         my variable pagesetup
         variable ::ooxml::xmlns
 
         if {$pagesetup ne ""} {
             $pagesetup delete
         }
-        set pagesetup [$docs(word/document.xml) createElementNS $xmlns(w) w:sectPr]
+        $setuproot appendFromScript Tag_w:sectPr
+        set pagesetup [$setuproot lastChild]
         array set opts $args
         $pagesetup appendFromScript {
             my Create $::ooxml::properties(sectionsetup)

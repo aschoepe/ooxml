@@ -33,6 +33,7 @@ $docx paragraph "Another paragraph with its own style (applied by style)" -style
 $docx paragraph [string repeat "Next paragraph with stupid text. " 20] \
     -indentation {firstLine 3cm hanging 2cm start 1cm end 4cm}
 $docx url "click this" "https://www.staatstheater-stuttgart.de/" -underline dotted
+$docx url "and click that" "https://core.tcl-lang.org/" -underline dotted
 puts "paragraph style ids: [$docx style ids paragraph]"
 puts "character style ids: [$docx style ids character]"
 $docx write testout.docx

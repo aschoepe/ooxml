@@ -42,6 +42,7 @@ namespace eval ::ooxml {
     array set xmlns {
         mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
+        r http://schemas.openxmlformats.org/officeDocument/2006/relationships
         rel http://schemas.openxmlformats.org/package/2006/relationships
         v urn:schemas-microsoft-com:vml
         w http://schemas.openxmlformats.org/wordprocessingml/2006/main
@@ -1155,7 +1156,8 @@ oo::class create ooxml::docx {
             error "invalid arguments: expectecd -option value pairs"
         }
         set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-        set ids [$relsRoot selectNodes -namespaces [list r $xmlns(r)] \
+        set relsns http://schemas.openxmlformats.org/package/2006/relationships
+        set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
                      -list {r:Relationship string(@Id)}]
         set rId 1
         foreach id $ids {
@@ -1169,7 +1171,7 @@ oo::class create ooxml::docx {
             }
         }
         incr rId
-        set relns http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink
+        puts "new rId $rId"
         $relsRoot appendFromScript {
             Tag_Relationship Id rId$rId \
                 Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink \

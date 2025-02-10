@@ -3,11 +3,11 @@ source ./ooxml.tcl
 source ./ooxml-docx.tcl
 
 set docx [::ooxml::docx new]
-foreach type {paragraph character} {
-    foreach styleid [$docx style ids $type] {
-        $docx style delete $type $styleid
-    }
-}
+# foreach type {paragraph character} {
+#     foreach styleid [$docx style ids $type] {
+#         $docx style delete $type $styleid
+#     }
+# }
 $docx pagesetup -sizeAndOrientaion {width 16838 height 23811 orientation landscape} -margins {left 2000 right 2000} -paperSource {first 1 other 2}
 $docx style characterdefault -fontsize 20 -font "Liberation Serif"
 $docx style paragraph Heading1 -fontsize 28 -bold on
@@ -32,8 +32,11 @@ $docx style paragraph RigthAlign -align right
 $docx paragraph "Another paragraph with its own style (applied by style)" -style RigthAlign
 $docx paragraph [string repeat "Next paragraph with stupid text. " 20] \
     -indentation {firstLine 3cm hanging 2cm start 1cm end 4cm}
-$docx url "click this" "https://www.staatstheater-stuttgart.de/" -underline dotted
-$docx url "and click that" "https://core.tcl-lang.org/" -underline dotted
+$docx url "click this" "https://www.staatstheater-stuttgart.de/" -underline single
+$docx url "and click that" "https://core.tcl-lang.org/" -underline single
+$docx append " more text"
+$docx paragraph "A new paragraph"
+$docx picture img.jpg
 puts "paragraph style ids: [$docx style ids paragraph]"
 puts "character style ids: [$docx style ids character]"
 $docx write testout.docx

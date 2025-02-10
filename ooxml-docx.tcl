@@ -478,6 +478,7 @@ oo::class create ooxml::docx {
     constructor { args } {
         my variable docs
         my variable body
+        my variable media
         my variable setuproot
         my variable pagesetup
         my variable sectionsetup
@@ -499,6 +500,7 @@ oo::class create ooxml::docx {
         $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
+        set media ""
 
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
@@ -921,6 +923,13 @@ oo::class create ooxml::docx {
         my CheckRemainingOpts
     }
 
+    method picture {file} {
+        my variable docs
+        my variable media
+
+        lappend media $file
+    }
+    
     method append {text args} {
         my variable body
 
@@ -1201,6 +1210,7 @@ oo::class create ooxml::docx {
     method write {file} {
         my variable body
         my variable docs
+        my variable media
         my variable pagesetup
         my variable sectionsetup
         variable ::ooxml::xmlns
@@ -1237,7 +1247,10 @@ oo::class create ooxml::docx {
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
-
+        foreach this $media {
+            append cd [::ooxml::add_file_to_archive $zf word/media/ $this]
+            incr count
+        }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than
         # writen again.

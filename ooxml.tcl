@@ -585,8 +585,8 @@ proc ::ooxml::add_str_to_archive {zipchan path data {comment {}}} {
   return $hdr
 }
 
-proc ::ooxml::add_file_to_archive {zipchan base path {comment ""}} {
-    set fullpath [file join $base $path]
+proc ::ooxml::add_file_with_path_to_archive {zipchan path filepath {comment ""}} {
+    set fullpath $filepath
     set mtime [timet_to_dos [file mtime $fullpath]]
     if {[file isdirectory $fullpath]} {
         append path /
@@ -633,7 +633,7 @@ proc ::ooxml::add_file_to_archive {zipchan base path {comment ""}} {
         # handling PNG or JPEG or nested ZIP files.
         if {$size < 0x00200000} {
             set fin [::open $fullpath rb]
-            setbinary $fin
+            fconfigure $fin -translation binary
             set data [::read $fin]
             set crc [::zlib crc32 $data]
             set cdata [::zlib deflate $data]
@@ -647,7 +647,7 @@ proc ::ooxml::add_file_to_archive {zipchan base path {comment ""}} {
         } else {
             set method 8
             set fin [::open $fullpath rb]
-            setbinary $fin
+            fconfigure $fin -translation binary
             set zlib [::zlib stream deflate]
             while {![eof $fin]} {
                 set data [read $fin 4096]

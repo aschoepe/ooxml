@@ -32,11 +32,13 @@
 package require Tcl 8.6.7-
 package require tdom 0.9.6-
 package require ooxml
+package require ooxml::core 
 
-namespace eval ::ooxml {
+namespace eval ::ooxml::docx {
 
-    namespace export docx_write
-
+    namespace export docx
+    namespace import ::ooxml::core
+    
     variable xmlns
 
     array set xmlns {
@@ -100,11 +102,7 @@ namespace eval ::ooxml {
             {orientation orient} ST_PageOrientation
             {width w} ST_TwipsMeasure}}
     }
-}
 
-proc ooxml::InitDocxNodeCommands {} {
-    variable xmlns
-    
     foreach tag {
         w:abstractNum w:abstractNumId w:active w:activeRecord
         w:activeWritingStyle w:addressFieldName
@@ -278,10 +276,8 @@ proc ooxml::InitDocxNodeCommands {} {
     namespace export Tag_* Text
 }
 
-::ooxml::InitDocxNodeCommands
-
-proc ::ooxml::InitStaticDocx {} {
-    if {[info exists ::ooxml::staticDocx]} return
+proc ::ooxml::docx::InitStaticDocx {} {
+    if {[info exists ::ooxml::docx::staticDocx]} return
     foreach {name xml} {
         [Content_Types].xml {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -467,13 +463,13 @@ proc ::ooxml::InitStaticDocx {} {
             </w:styles>
         }
     } {
-        set ::ooxml::staticDocx($name) $xml
+        set ::ooxml::docx::staticDocx($name) $xml
     }
 }
 
-::ooxml::InitStaticDocx
+::ooxml::docx::InitStaticDocx
 
-oo::class create ooxml::docx {
+oo::class create ooxml::docx::docx {
 
     constructor { args } {
         my variable docs
@@ -483,10 +479,11 @@ oo::class create ooxml::docx {
         my variable pagesetup
         my variable sectionsetup
         
-        variable ::ooxml::xmlns
-        variable ::ooxml::staticDocx
+        variable ::ooxml::docx::xmlns
+        variable ::ooxml::docx::staticDocx
 
-        namespace import ::ooxml::Tag_*  ::ooxml::Text
+        namespace import ::ooxml::docx::Tag_*  ::ooxml::docx::Text
+        namespace import ::ooxml::core::*
 
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
@@ -535,7 +532,7 @@ oo::class create ooxml::docx {
 
     method readpart {what file} {
         my variable docs
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         set fd [::tdom::xmlOpenFile $file]
         if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
@@ -906,14 +903,11 @@ oo::class create ooxml::docx {
     method paragraph {text args} {
         my variable body
 
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        array set opts $args
+        OptVal $args "text"
         $body appendFromScript {
             Tag_w:p {
                 Tag_w:pPr {
-                    my Create $::ooxml::properties(paragraph)
+                    my Create $::ooxml::docx::properties(paragraph)
                 }
                 Tag_w:r {
                     my Wt $text
@@ -923,27 +917,22 @@ oo::class create ooxml::docx {
         my CheckRemainingOpts
     }
 
-    method picture {file} {
-        my variable docs
+    method image {file args} {
         my variable media
 
+        OptVal $args "file"
         lappend media $file
+        
     }
     
     method append {text args} {
-        my variable body
-
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        array set opts $args
-        # Identify the last paragraph
+        OptVal $args "text"
         set p [my LastParagraph]
         if {[catch {
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:rPr {
-                        my Create $::ooxml::properties(run)
+                        my Create $::ooxml::docx::properties(run)
                     }
                     my Wt $text
                 }
@@ -971,7 +960,7 @@ oo::class create ooxml::docx {
                 $docDefaults appendFromScript {
                     Tag_w:pPrDefault {
                         Tag_w:pPr {
-                            my Create $::ooxml::properties(styleparagraph)
+                            my Create $::ooxml::docx::properties(styleparagraph)
                         }
                     }
                 }
@@ -989,7 +978,7 @@ oo::class create ooxml::docx {
                 $docDefaults insertBeforeFromScript {
                     Tag_w:rPrDefault {
                         Tag_w:rPr {
-                            my Create $::ooxml::properties(stylerun)
+                            my Create $::ooxml::docx::properties(stylerun)
                         }
                     }
                 } [$docDefaults firstChild]
@@ -1013,11 +1002,11 @@ oo::class create ooxml::docx {
                         Tag_w:name [my Watt val] $name {}
                         if {$cmd eq "paragraph"} {
                             Tag_w:pPr {
-                                my Create $::ooxml::properties(styleparagraph)
+                                my Create $::ooxml::docx::properties(styleparagraph)
                             }
                         }
                         Tag_w:rPr {
-                            my Create $::ooxml::properties(stylerun)
+                            my Create $::ooxml::docx::properties(stylerun)
                         }
                     }
                 }
@@ -1104,7 +1093,7 @@ oo::class create ooxml::docx {
         my variable body
         my variable setuproot
         my variable pagesetup
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         if {$pagesetup ne ""} {
             $pagesetup delete
@@ -1113,7 +1102,7 @@ oo::class create ooxml::docx {
         set pagesetup [$setuproot lastChild]
         array set opts $args
         $pagesetup appendFromScript {
-            my Create $::ooxml::properties(sectionsetup)
+            my Create $::ooxml::docx::properties(sectionsetup)
         }
         my CheckRemainingOpts
     }
@@ -1122,7 +1111,7 @@ oo::class create ooxml::docx {
         my variable docs
         my variable pagesetup
         my variable sectionsetup
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         set p [my LastParagraph 1]
         if {$sectionsetup ne ""} {
@@ -1137,7 +1126,7 @@ oo::class create ooxml::docx {
         $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
         array set opts $args
         $sectionsetup appendFromScript {
-            my Create $::ooxml::properties(pagesetup)
+            my Create $::ooxml::docx::properties(pagesetup)
         }
         my CheckRemainingOpts
     }
@@ -1156,46 +1145,57 @@ oo::class create ooxml::docx {
         set sectionsetup ""
     }
 
+    method Add2Relationships {type target} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        # The following is perhaps over-complicated:
+        # set relsns http://schemas.openxmlformats.org/package/2006/relationships
+        # set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
+        #              -list {r:Relationship string(@Id)}]
+        # set rId 1
+        # foreach id $ids {
+        #     set nr [string range $id 3 end]
+        #     if {[string range $id 0 2] eq "rId"
+        #         && [string is integer -strict $nr]
+        #     } {
+        #         if {$nr > $rId} {
+        #             set rId $nr
+        #         }
+        #     }
+        # }
+        # At least for documents we build up from scratch this should
+        # work reliable enough (and work faster)
+        set lastchild [$relsRoot lastChild]
+        set rId [string range [$lastchild @Id] 3 end]
+        incr rId
+        set attlist [list \
+             Id rId$rId \
+             Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type \
+             Target $target]
+        if {$type eq "hyperlink"} {
+            lappend attlist TargetMode External
+        }
+        $relsRoot appendFromScript {
+            Tag_Relationship {*}$attlist 
+        }
+        return $rId
+    }
+    
     method url {text url args} {
         my variable docs
-        my variable body
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-        set relsns http://schemas.openxmlformats.org/package/2006/relationships
-        set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
-                     -list {r:Relationship string(@Id)}]
-        set rId 1
-        foreach id $ids {
-            set nr [string range $id 3 end]
-            if {[string range $id 0 2] eq "rId"
-                && [string is integer -strict $nr]
-            } {
-                if {$nr > $rId} {
-                    set rId $nr
-                }
-            }
-        }
-        incr rId
-        puts "new rId $rId"
-        $relsRoot appendFromScript {
-            Tag_Relationship Id rId$rId \
-                Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink \
-                Target $url \
-                TargetMode External
-        }
-        array set opts $args
-        # Identify the last paragraph
+        OptVal $args "text url"
+        set rId [my Add2Relationships hyperlink $url]
         set p [my LastParagraph]
         if {[catch {
             $p appendFromScript {
                 Tag_w:hyperlink [list $xmlns(r) r:id] rId$rId {
                     Tag_w:r {
                         Tag_w:rPr {
-                            my Create $::ooxml::properties(run)
+                            my Create $::ooxml::docx::properties(run)
                         }
                         my Wt $text
                     }
@@ -1213,7 +1213,7 @@ oo::class create ooxml::docx {
         my variable media
         my variable pagesetup
         my variable sectionsetup
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         # Finalize section and do pagesetup
         if {$sectionsetup ne ""} {
@@ -1248,7 +1248,7 @@ oo::class create ooxml::docx {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
         foreach this $media {
-            append cd [::ooxml::add_file_to_archive $zf word/media/ $this]
+            append cd [::ooxml::add_file_with_path_to_archive $zf word/media/[file tail $this] $this]
             incr count
         }
         # Cleanup the appendedPageSetup node in case that after the

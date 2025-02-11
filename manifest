@@ -1,5 +1,5 @@
-C wip
-D 2025-02-10T09:38:01.667
+C Added\s::ooxml::add_file_with_path_to_archive\sas\shelper\sto\sadd\sfiles\s(images)\sto\sthe\sresult.\sShould\sperhaps\smove\sto\sthe\snewly\sintroduced\sooxml-core,\swhich\sshould\sbe\sthe\splace\sfor\sprocs\sused\sby\sdocx\sand\sexcel\sas\swell\sas\sXML\sinfrastructure\sshared\s(type\schecking).\sAdded\sooxml::drawing\sas\sa\spromis\sto\sfinish\sthe\svom\spicture\sto\simage\srenamed\smethod.
+D 2025-02-11T01:15:14.808
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -12,7 +12,7 @@ F configure.ac e445e4e77f8ec5ae46424002cc3437576dfcbd78ab6a089b748a1e8458358b6e
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml-docx.md 6473e6955f99cf8a3cce02345e49893577aa0f4ffb2f35c65ef7d7bfa95be27d
 F doc/ooxml.md f73aceb0f41d7f6de2004dfde1999169c2393440bd699b3aeea3a84c4bf63008
-F docxtest.tcl 9c50497d6ab02fd9743aa5f9856dc09b79a15753fe5faa85182e671c9c14a4bc
+F docxtest.tcl c64f1fb4d044f8c43065816e33eacaab75b53114adfebbf82f4d5b6b46bd7e9e
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
@@ -28,8 +28,10 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml-docx.tcl 338b8fdc54c1ed48ff197a447e423bc128c9b52672debb3dbf5c556c84dbe099
-F ooxml.tcl 207ed1ed4e16831170a3c70bad222c19caff8219346a903939bbf0a40c6f3cb5
+F ooxml-core.tcl 27f431eec33d369ed09273dd497ac03781fd7da976b1c8bae8e70b5f8534c4e3
+F ooxml-docx.tcl 56fa83584d70156de3ec992d04098bc81f55df497f9a91f55bc6e94fc96c214b
+F ooxml-drawing.tcl 0bf31eebc2738604a5411d8f39fbfc2a5ed9df33413d49d8716e8b817c779eeb
+F ooxml.tcl 33b34338eccc31e43878fd19026c126bc4475300722ac45ad97201e728c1a7ec
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -77,11 +79,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 10de40b5d101879105ae6af205ebfa6f3eb524c70671a0ad0bb1a9fb2660f33a
-R a04a9505f864c2d999b0db105d6f777e
-T *branch * wip
-T *sym-wip *
-T -sym-docx *
+P aa4085a1ca61173622c434bfb0d13782682aab975cfa825b681b469d0edcc44a
+R 868bba5fdb3cbe5b4a0081d2831abf4d
 U rolf
-Z cc1433c7e150e107ba17339baa7abab2
+Z 0e2a4cf11410a7af2f604707b2bfea02
 # Remove this line to create a well-formed Fossil manifest.

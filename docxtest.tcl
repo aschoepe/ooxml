@@ -1,8 +1,9 @@
 
 source ./ooxml.tcl
+source ./ooxml-core.tcl
 source ./ooxml-docx.tcl
 
-set docx [::ooxml::docx new]
+set docx [::ooxml::docx::docx new]
 # foreach type {paragraph character} {
 #     foreach styleid [$docx style ids $type] {
 #         $docx style delete $type $styleid
@@ -36,7 +37,12 @@ $docx url "click this" "https://www.staatstheater-stuttgart.de/" -underline sing
 $docx url "and click that" "https://core.tcl-lang.org/" -underline single
 $docx append " more text"
 $docx paragraph "A new paragraph"
-$docx picture img.jpg
+# Prevent error if someone follow this actually testing
+if {[file exists book.jpg]} {
+    $docx image book.jpg
+} else {
+    puts "Missing book.jpg to include into docx"
+}
 puts "paragraph style ids: [$docx style ids paragraph]"
 puts "character style ids: [$docx style ids character]"
 $docx write testout.docx

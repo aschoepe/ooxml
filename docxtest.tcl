@@ -1,6 +1,5 @@
 
 source ./ooxml.tcl
-source ./ooxml-core.tcl
 source ./ooxml-docx.tcl
 
 set docx [::ooxml::docx::docx new]

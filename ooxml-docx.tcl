@@ -368,99 +368,7 @@ proc ::ooxml::docx::InitStaticDocx {} {
             </w:settings>
         }
         word/styles.xml {
-            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14">
-                <w:docDefaults>
-                    <w:rPrDefault>
-                        <w:rPr>
-                            <w:rFonts w:ascii="Liberation Serif" w:hAnsi="Liberation Serif" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
-                            <w:kern w:val="2"/>
-                            <w:sz w:val="24"/>
-                            <w:szCs w:val="24"/>
-                            <w:lang w:val="en" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
-                        </w:rPr>
-                    </w:rPrDefault>
-                    <w:pPrDefault>
-                        <w:pPr>
-                            <w:widowControl/>
-                            <w:suppressAutoHyphens w:val="true"/>
-                        </w:pPr>
-                    </w:pPrDefault>
-                </w:docDefaults>
-                <w:style w:type="paragraph" w:styleId="Normal">
-                    <w:name w:val="Normal"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:widowControl/>
-                        <w:bidi w:val="0"/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:ascii="Liberation Serif" w:hAnsi="Liberation Serif" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
-                        <w:color w:val="auto"/>
-                        <w:kern w:val="2"/>
-                        <w:sz w:val="24"/>
-                        <w:szCs w:val="24"/>
-                        <w:lang w:val="en" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="Heading">
-                    <w:name w:val="Heading"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:next w:val="TextBody"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:keepNext w:val="true"/>
-                        <w:spacing w:before="240" w:after="120"/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:ascii="Liberation Sans" w:hAnsi="Liberation Sans" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
-                        <w:sz w:val="28"/>
-                        <w:szCs w:val="28"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="TextBody">
-                    <w:name w:val="Body Text"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:pPr>
-                        <w:spacing w:lineRule="auto" w:line="276" w:before="0" w:after="140"/>
-                    </w:pPr>
-                    <w:rPr/>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="List">
-                    <w:name w:val="List"/>
-                    <w:basedOn w:val="TextBody"/>
-                    <w:pPr/>
-                    <w:rPr>
-                        <w:rFonts w:cs="FreeSans"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="Caption">
-                    <w:name w:val="Caption"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:suppressLineNumbers/>
-                        <w:spacing w:before="120" w:after="120"/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:cs="FreeSans"/>
-                        <w:i/>
-                        <w:iCs/>
-                        <w:sz w:val="24"/>
-                        <w:szCs w:val="24"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="Index">
-                    <w:name w:val="Index"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:suppressLineNumbers/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:cs="FreeSans"/>
-                    </w:rPr>
-                </w:style>
-            </w:styles>
+            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14"/>
         }
     } {
         set ::ooxml::docx::staticDocx($name) $xml
@@ -867,7 +775,7 @@ oo::class create ooxml::docx::docx {
         # styles has the content model sequence:
         # docDefaults? latentStyles? styles*
         set docDefaults [$styles firstChild]
-        if {[$docDefaults localName] ne "docDefaults"} {
+        if {$docDefaults == "" || [$docDefaults localName] ne "docDefaults"} {
             set nextNode $docDefaults
             $styles insertBeforeFromScript Tag_w:docDefaults $nextNode
             set docDefaults [$styles firstChild]
@@ -878,7 +786,6 @@ oo::class create ooxml::docx::docx {
     method LastParagraph {{returnEmpty 0}} {
         my variable body
         
-        # Identify the last paragraph
         set p [$body lastChild]
         while {$p ne ""} {
             if {[$p nodeType] ne "ELEMENT_NODE"} {
@@ -956,7 +863,7 @@ oo::class create ooxml::docx::docx {
                 }
                 # docDefaults has two childs in the order:
                 # rPrDefault pPrDefault
-                array set opts $args
+                OptVal $args "paragraphdefault"
                 $docDefaults appendFromScript {
                     Tag_w:pPrDefault {
                         Tag_w:pPr {
@@ -974,7 +881,7 @@ oo::class create ooxml::docx::docx {
                 }
                 # docDefaults has two childs in the order:
                 # rPrDefault pPrDefault
-                array set opts $args
+                OptVal $args "characterdefault"
                 $docDefaults insertBeforeFromScript {
                     Tag_w:rPrDefault {
                         Tag_w:rPr {
@@ -990,7 +897,7 @@ oo::class create ooxml::docx::docx {
                     error "missing the style name argument"
                 }
                 set name [lindex $args 0]
-                array set opts [lrange $args 1 end]
+                OptVal [lrange $args 1 end] $cmd
                 set style [$styles selectNodes {
                     w:style[@w:type=$cmd and @w:styleId=$name]
                 }]

@@ -40,8 +40,10 @@ namespace eval ::ooxml::docx {
     variable xmlns
 
     array set xmlns {
+        a http://schemas.openxmlformats.org/drawingml/2006/main
         mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
+        pic http://schemas.openxmlformats.org/drawingml/2006/picture
         r http://schemas.openxmlformats.org/officeDocument/2006/relationships
         rel http://schemas.openxmlformats.org/package/2006/relationships
         v urn:schemas-microsoft-com:vml
@@ -99,6 +101,12 @@ namespace eval ::ooxml::docx {
             {height h} ST_TwipsMeasure
             {orientation orient} ST_PageOrientation
             {width w} ST_TwipsMeasure}}
+    }
+    set properties(xfrm) {
+        -dimension {a:ext {
+            {width -cx} ST_Emu
+            {height -cy} ST_Emu
+        }}
     }
 
     foreach {name xml} {
@@ -366,6 +374,21 @@ namespace eval ::ooxml::docx {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(rel) elementNode Tag_$tag
     }
+    foreach tag {
+        wp:anchor
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
+    }
+    foreach tag {
+        a:graphic a:graphicData a:blip a:stretch a:fillRect a:xfrm a:ext a:off
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
+    }        
+    foreach tag {
+        pic:pic pic:blipFill pic:nvPicPr pic:cNvPr pic:cNvPicPr pic:spPr
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(pic) elementNode Tag_$tag
+    }        
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
 
@@ -381,6 +404,26 @@ namespace eval ::ooxml::docx {
         return $value
     }
 
+    proc ST_Emu {value} {
+        if {[string is integer -strict $value] && $value >= 0} {
+            return $value
+        }
+        if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+            error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+        }
+        scan $value "%f%s" value unit
+        switch $unit {
+            mm {set factor 36000}
+            cm {set factor 360000}
+            in {set factor 914400}
+            pt {set factor 12700}
+            pc {set factor 152400}
+            pi {set factor 152400}
+        }
+        return [expr {round($value*$factor)}]
+    }
+    
     proc CT_OnOff {value} {
         if {![string is boolean -strict $value]} {
             error "expected a Tcl boolean value"
@@ -715,7 +758,11 @@ oo::class create ooxml::docx::docx {
                                        is invalid: $errMsg"
                             }
                         }
-                        lappend attlist [my Watt $attname] $ooxmlvalue
+                        if {[string index $attname 0] eq "-"} {
+                            lappend attlist [string range $attname 1 end] $ooxmlvalue
+                        } else {
+                            lappend attlist [my Watt $attname] $ooxmlvalue
+                        }
                         unset atts($key)
                     }
                     foreach tag $tags {
@@ -800,6 +847,10 @@ oo::class create ooxml::docx::docx {
         list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
     }
 
+    method Ratt {attname} {
+        list http://schemas.openxmlformats.org/officeDocument/2006/relationships r:$attname
+    }
+
     method GetDocDefault {styles} {
         # styles has the content model sequence:
         # docDefaults? latentStyles? styles*
@@ -855,10 +906,34 @@ oo::class create ooxml::docx::docx {
 
     method image {file args} {
         my variable media
-
+        variable ::ooxml::docx::properties
+        
         OptVal $args "file"
         lappend media $file
-        
+        set rId [my Add2Relationships image media/$file]
+        set p [my LastParagraph]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:drawing {
+                    Tag_wp:anchor {
+                        Tag_a:graphic {
+                            Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                                Tag_pic:pic {
+                                    Tag_pic:blipFill {
+                                        Tag_a:blip [my Ratt embed] rId$rId {}
+                                    }
+                                    Tag_pic:spPr bwMode "auto" {
+                                        Tag_a:xfrm {
+                                            my Create $properties(xfrm)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     method append {text args} {

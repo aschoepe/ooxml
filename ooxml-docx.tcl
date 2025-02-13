@@ -33,15 +33,17 @@ package require Tcl 8.6.7-
 package require tdom 0.9.6-
 package require ooxml
 
-namespace eval ::ooxml {
+namespace eval ::ooxml::docx {
 
-    namespace export docx_write
-
+    namespace export docx OptVal NoCheck CT_* ST_*
+    
     variable xmlns
 
     array set xmlns {
+        a http://schemas.openxmlformats.org/drawingml/2006/main
         mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
+        pic http://schemas.openxmlformats.org/drawingml/2006/picture
         r http://schemas.openxmlformats.org/officeDocument/2006/relationships
         rel http://schemas.openxmlformats.org/package/2006/relationships
         v urn:schemas-microsoft-com:vml
@@ -100,11 +102,109 @@ namespace eval ::ooxml {
             {orientation orient} ST_PageOrientation
             {width w} ST_TwipsMeasure}}
     }
-}
+    set properties(xfrm) {
+        -dimension {a:ext {
+            {width -cx} ST_Emu
+            {height -cy} ST_Emu
+        }}
+    }
 
-proc ooxml::InitDocxNodeCommands {} {
-    variable xmlns
-    
+    foreach {name xml} {
+        [Content_Types].xml {
+            <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+                <Default Extension="xml" ContentType="application/xml"/>
+                <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                <Default Extension="png" ContentType="image/png"/>
+                <Default Extension="jpeg" ContentType="image/jpeg"/>
+                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+                <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+                <Override PartName="/word/_rels/document.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+                <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+                <Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/>
+                <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
+            </Types>
+        }
+        _rels/.rels {
+            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+                <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+                <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+            </Relationships>
+        }
+        word/_rels/document.xml.rels {
+            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+                <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>
+                <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
+            </Relationships>
+        }
+        docProps/app.xml {
+            <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+            </Properties>
+        }
+        docProps/core.xml {
+            <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <dcterms:created xsi:type="dcterms:W3CDTF">2024-10-30T15:52:52Z</dcterms:created>
+                <dc:creator/>
+                <dc:description/>
+                <dc:language>de-DE</dc:language>
+                <cp:lastModifiedBy/>
+                <dcterms:modified xsi:type="dcterms:W3CDTF">2024-10-30T15:53:59Z</dcterms:modified>
+                <cp:revision>1</cp:revision>
+                <dc:subject/>
+                <dc:title/>
+            </cp:coreProperties>
+        }
+        word/fontTable.xml {        
+            <w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+                <w:font w:name="Times New Roman">
+                    <w:charset w:val="00" w:characterSet="windows-1252"/>
+                    <w:family w:val="roman"/>
+                    <w:pitch w:val="variable"/>
+                </w:font>
+                <w:font w:name="Symbol">
+                    <w:charset w:val="02"/>
+                    <w:family w:val="roman"/>
+                    <w:pitch w:val="variable"/>
+                </w:font>
+                <w:font w:name="Arial">
+                    <w:charset w:val="00" w:characterSet="windows-1252"/>
+                    <w:family w:val="swiss"/>
+                    <w:pitch w:val="variable"/>
+                </w:font>
+                <w:font w:name="Liberation Serif">
+                    <w:altName w:val="Times New Roman"/>
+                    <w:charset w:val="01" w:characterSet="utf-8"/>
+                    <w:family w:val="roman"/>
+                    <w:pitch w:val="variable"/>
+                </w:font>
+                <w:font w:name="Liberation Sans">
+                    <w:altName w:val="Arial"/>
+                    <w:charset w:val="01" w:characterSet="utf-8"/>
+                    <w:family w:val="swiss"/>
+                    <w:pitch w:val="variable"/>
+                </w:font>
+            </w:fonts>
+        }
+        word/settings.xml {
+            <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                <w:zoom w:val="bestFit" w:percent="228"/>
+                <w:defaultTabStop w:val="709"/>
+                <w:autoHyphenation w:val="true"/>
+                <w:compat>
+                    <w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/>
+                </w:compat>
+            </w:settings>
+        }
+        word/styles.xml {
+            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14"/>
+        }
+    } {
+        set ::ooxml::docx::staticDocx($name) $xml
+    }
+
     foreach tag {
         w:abstractNum w:abstractNumId w:active w:activeRecord
         w:activeWritingStyle w:addressFieldName
@@ -274,218 +374,188 @@ proc ooxml::InitDocxNodeCommands {} {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(rel) elementNode Tag_$tag
     }
+    foreach tag {
+        wp:anchor
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
+    }
+    foreach tag {
+        a:graphic a:graphicData a:blip a:stretch a:fillRect a:xfrm a:ext a:off
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
+    }        
+    foreach tag {
+        pic:pic pic:blipFill pic:nvPicPr pic:cNvPr pic:cNvPicPr pic:spPr
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(pic) elementNode Tag_$tag
+    }        
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
-}
 
-::ooxml::InitDocxNodeCommands
-
-proc ::ooxml::InitStaticDocx {} {
-    if {[info exists ::ooxml::staticDocx]} return
-    foreach {name xml} {
-        [Content_Types].xml {
-            <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-                <Default Extension="xml" ContentType="application/xml"/>
-                <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Default Extension="png" ContentType="image/png"/>
-                <Default Extension="jpeg" ContentType="image/jpeg"/>
-                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
-                <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
-                <Override PartName="/word/_rels/document.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-                <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
-                <Override PartName="/word/fontTable.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"/>
-                <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
-            </Types>
+    # Method option handling helper procs and value checks follow
+    proc OptVal {arglist prefix} {
+        if {[llength $arglist] % 2 != 0} {
+            error "invalid arguments: expectecd $prefix -option value pairs"
         }
-        _rels/.rels {
-            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
-                <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
-                <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-            </Relationships>
-        }
-        word/_rels/document.xml.rels {
-            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-                <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>
-                <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
-            </Relationships>
-        }
-        docProps/app.xml {
-            <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
-            </Properties>
-        }
-        docProps/core.xml {
-            <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                <dcterms:created xsi:type="dcterms:W3CDTF">2024-10-30T15:52:52Z</dcterms:created>
-                <dc:creator/>
-                <dc:description/>
-                <dc:language>de-DE</dc:language>
-                <cp:lastModifiedBy/>
-                <dcterms:modified xsi:type="dcterms:W3CDTF">2024-10-30T15:53:59Z</dcterms:modified>
-                <cp:revision>1</cp:revision>
-                <dc:subject/>
-                <dc:title/>
-            </cp:coreProperties>
-        }
-        word/fontTable.xml {        
-            <w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-                <w:font w:name="Times New Roman">
-                    <w:charset w:val="00" w:characterSet="windows-1252"/>
-                    <w:family w:val="roman"/>
-                    <w:pitch w:val="variable"/>
-                </w:font>
-                <w:font w:name="Symbol">
-                    <w:charset w:val="02"/>
-                    <w:family w:val="roman"/>
-                    <w:pitch w:val="variable"/>
-                </w:font>
-                <w:font w:name="Arial">
-                    <w:charset w:val="00" w:characterSet="windows-1252"/>
-                    <w:family w:val="swiss"/>
-                    <w:pitch w:val="variable"/>
-                </w:font>
-                <w:font w:name="Liberation Serif">
-                    <w:altName w:val="Times New Roman"/>
-                    <w:charset w:val="01" w:characterSet="utf-8"/>
-                    <w:family w:val="roman"/>
-                    <w:pitch w:val="variable"/>
-                </w:font>
-                <w:font w:name="Liberation Sans">
-                    <w:altName w:val="Arial"/>
-                    <w:charset w:val="01" w:characterSet="utf-8"/>
-                    <w:family w:val="swiss"/>
-                    <w:pitch w:val="variable"/>
-                </w:font>
-            </w:fonts>
-        }
-        word/settings.xml {
-            <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-                <w:zoom w:val="bestFit" w:percent="228"/>
-                <w:defaultTabStop w:val="709"/>
-                <w:autoHyphenation w:val="true"/>
-                <w:compat>
-                    <w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/>
-                </w:compat>
-            </w:settings>
-        }
-        word/styles.xml {
-            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14">
-                <w:docDefaults>
-                    <w:rPrDefault>
-                        <w:rPr>
-                            <w:rFonts w:ascii="Liberation Serif" w:hAnsi="Liberation Serif" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
-                            <w:kern w:val="2"/>
-                            <w:sz w:val="24"/>
-                            <w:szCs w:val="24"/>
-                            <w:lang w:val="en" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
-                        </w:rPr>
-                    </w:rPrDefault>
-                    <w:pPrDefault>
-                        <w:pPr>
-                            <w:widowControl/>
-                            <w:suppressAutoHyphens w:val="true"/>
-                        </w:pPr>
-                    </w:pPrDefault>
-                </w:docDefaults>
-                <w:style w:type="paragraph" w:styleId="Normal">
-                    <w:name w:val="Normal"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:widowControl/>
-                        <w:bidi w:val="0"/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:ascii="Liberation Serif" w:hAnsi="Liberation Serif" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
-                        <w:color w:val="auto"/>
-                        <w:kern w:val="2"/>
-                        <w:sz w:val="24"/>
-                        <w:szCs w:val="24"/>
-                        <w:lang w:val="en" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="Heading">
-                    <w:name w:val="Heading"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:next w:val="TextBody"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:keepNext w:val="true"/>
-                        <w:spacing w:before="240" w:after="120"/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:ascii="Liberation Sans" w:hAnsi="Liberation Sans" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
-                        <w:sz w:val="28"/>
-                        <w:szCs w:val="28"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="TextBody">
-                    <w:name w:val="Body Text"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:pPr>
-                        <w:spacing w:lineRule="auto" w:line="276" w:before="0" w:after="140"/>
-                    </w:pPr>
-                    <w:rPr/>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="List">
-                    <w:name w:val="List"/>
-                    <w:basedOn w:val="TextBody"/>
-                    <w:pPr/>
-                    <w:rPr>
-                        <w:rFonts w:cs="FreeSans"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="Caption">
-                    <w:name w:val="Caption"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:suppressLineNumbers/>
-                        <w:spacing w:before="120" w:after="120"/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:cs="FreeSans"/>
-                        <w:i/>
-                        <w:iCs/>
-                        <w:sz w:val="24"/>
-                        <w:szCs w:val="24"/>
-                    </w:rPr>
-                </w:style>
-                <w:style w:type="paragraph" w:styleId="Index">
-                    <w:name w:val="Index"/>
-                    <w:basedOn w:val="Normal"/>
-                    <w:qFormat/>
-                    <w:pPr>
-                        <w:suppressLineNumbers/>
-                    </w:pPr>
-                    <w:rPr>
-                        <w:rFonts w:cs="FreeSans"/>
-                    </w:rPr>
-                </w:style>
-            </w:styles>
-        }
-    } {
-        set ::ooxml::staticDocx($name) $xml
+        uplevel "array set opts [list $arglist]"
     }
+
+    proc NoCheck {value} {
+        return $value
+    }
+
+    proc ST_Emu {value} {
+        if {[string is integer -strict $value] && $value >= 0} {
+            return $value
+        }
+        if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+            error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+        }
+        scan $value "%f%s" value unit
+        switch $unit {
+            mm {set factor 36000}
+            cm {set factor 360000}
+            in {set factor 914400}
+            pt {set factor 12700}
+            pc {set factor 152400}
+            pi {set factor 152400}
+        }
+        return [expr {round($value*$factor)}]
+    }
+    
+    proc CT_OnOff {value} {
+        if {![string is boolean -strict $value]} {
+            error "expected a Tcl boolean value"
+        }
+        if {$value} {
+            return "on"
+        } else {
+            return "off"
+        }
+    }
+
+    proc ST_DecimalNumber {value} {
+        if {![string is integer -strict $value]} {
+            error "expected integer but got \"$value\""
+        }
+        return $value
+    }
+
+    # ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
+    # The difference is only the interpretation of the integer (only)
+    # values. For ST_HpsMeasure the number specifies half points
+    # (1/144 of an inch), for ST_TwipsMeasure the number specifies
+    # twentieths of a point (equivalent to 1/1440th of an inch).
+    proc ST_TwipsMeasure {value} {
+        if {[string is integer -strict $value] && $value >= 0} {
+            return $value
+        }
+        if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+            error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+        }
+        return $value
+    }
+
+    proc ST_SignedTwipsMeasure {value} {
+        if {[string is integer -strict $value]} {
+            return $value
+        }
+        if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+            error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+        }
+        return $value
+    }
+
+    proc ST_PageOrientation {value} {
+        if {$value ni {landscape portrait}} {
+            error "unknown symbol \"$value\", expected \"landscape\"\
+                   or \"portrait\""
+        }
+        return $value
+    }
+
+    proc ST_Jc {value} {
+        set alignValues {
+            start
+            center
+            end
+            both
+            mediumKashida
+            distribute
+            numTab
+            highKashida
+            lowKashida
+            thaiDistribute
+            left
+            right
+        }
+        if {$value in $alignValues} {
+            return $value
+        }
+        error "unknown align value \"$value\", should be:\
+               [my AllowedValues $alignValues]"
+    }
+    
+    proc ST_HexColor {value} {
+        if {$value ne "auto"} {
+            return $value
+        }
+        if {[string length $value] != 6 || ![string is xdigit]} {
+            error "unknown color value \"$value\", should be \"auto\" or a hex value in\
+                   RRGGBB format."
+        }
+        return $value
+    }
+
+    proc ST_Underline {value} {
+        set values {
+            single
+            words
+            double
+            thick
+            dotted
+            dottedHeavy
+            dash
+            dashedHeavy
+            dashLong
+            dashLongHeavy
+            dotDash
+            dashDotHeavy
+            dotDotDash
+            dashDotDotHeavy
+            wave
+            wavyHeavy
+            wavyDouble
+            none
+        }
+        if {$value ni $values} {
+            error "unkown underline value \"$value\", expected\
+                  [my AllowedValues $values]"
+        }
+        return $value
+    }
+    
 }
 
-::ooxml::InitStaticDocx
-
-oo::class create ooxml::docx {
+oo::class create ooxml::docx::docx {
 
     constructor { args } {
         my variable docs
         my variable body
+        my variable media
         my variable setuproot
         my variable pagesetup
         my variable sectionsetup
         
-        variable ::ooxml::xmlns
-        variable ::ooxml::staticDocx
+        variable ::ooxml::docx::xmlns
+        variable ::ooxml::docx::staticDocx
 
-        namespace import ::ooxml::Tag_*  ::ooxml::Text
+        namespace import ::ooxml::docx::*
+        # namespace import ::ooxml::docx::Tag_*  ::ooxml::docx::Text
+        # namespace import ::ooxml::docx::
 
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
@@ -499,6 +569,7 @@ oo::class create ooxml::docx {
         $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
+        set media ""
 
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
@@ -533,7 +604,7 @@ oo::class create ooxml::docx {
 
     method readpart {what file} {
         my variable docs
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         set fd [::tdom::xmlOpenFile $file]
         if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
@@ -570,84 +641,6 @@ oo::class create ooxml::docx {
         close $fd
     }
 
-    method NoCheck {value} {
-        return $value
-    }
-
-    method CT_OnOff {value} {
-        if {![string is boolean -strict $value]} {
-            error "expected a Tcl boolean value"
-        }
-        if {$value} {
-            return "on"
-        } else {
-            return "off"
-        }
-    }
-
-    method ST_DecimalNumber {value} {
-        if {![string is integer -strict $value]} {
-            error "expected integer but got \"$value\""
-        }
-        return $value
-    }
-
-    # ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
-    # The difference is only the interpretation of the integer (only)
-    # values. For ST_HpsMeasure the number specifies half points
-    # (1/144 of an inch), for ST_TwipsMeasure the number specifies
-    # twentieths of a point (equivalent to 1/1440th of an inch).
-    method ST_TwipsMeasure {value} {
-        if {[string is integer -strict $value] && $value >= 0} {
-            return $value
-        }
-        if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-            error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-        }
-        return $value
-    }
-
-    method ST_SignedTwipsMeasure {value} {
-        if {[string is integer -strict $value]} {
-            return $value
-        }
-        if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-            error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-        }
-        return $value
-    }
-
-    method ST_PageOrientation {value} {
-        if {$value ni {landscape portrait}} {
-            error "unknown symbol \"$value\", expected \"landscape\"\
-                   or \"portrait\""
-        }
-        return $value
-    }
-    
-    method ST_Jc {value} {
-        set alignValues {
-            start
-            center
-            end
-            both
-            mediumKashida
-            distribute
-            numTab
-            highKashida
-            lowKashida
-            thaiDistribute
-            left
-            right
-        }
-        if {$value in $alignValues} {
-            return $value
-        }
-        error "unknown align value \"$value\", should be:\
-               [my AllowedValues $alignValues]"
-    }
 
     method PStyle {value} {
         my variable docs
@@ -669,45 +662,6 @@ oo::class create ooxml::docx {
         return $value
     }
 
-    method ST_HexColor {value} {
-        if {$value ne "auto"} {
-            return $value
-        }
-        if {[string length $value] != 6 || ![string is xdigit]} {
-            error "unknown color value \"$value\", should be \"auto\" or a hex value in\
-                   RRGGBB format."
-        }
-        return $value
-    }
-
-    method ST_Underline {value} {
-        set values {
-            single
-            words
-            double
-            thick
-            dotted
-            dottedHeavy
-            dash
-            dashedHeavy
-            dashLong
-            dashLongHeavy
-            dotDash
-            dashDotHeavy
-            dotDotDash
-            dashDotDotHeavy
-            wave
-            wavyHeavy
-            wavyDouble
-            none
-        }
-        if {$value ni $values} {
-            error "unkown underline value \"$value\", expected\
-                  [my AllowedValues $values]"
-        }
-        return $value
-    }
-    
     method RFonts {value} {
         Tag_w:rFonts \
             [my Watt ascii] $value \
@@ -734,9 +688,25 @@ oo::class create ooxml::docx {
                 2 {
                     lassign $optdata tags attdefs
                     if {[llength $attdefs] == 1} {
-                        if {[catch {set ooxmlvalue [my $attdefs $value]} errMsg]} {
-                            error "the value \"$value\" given to the\
-                                   \"$opt\" option is invalid: $errMsg"
+                        # An element with just w:val as attribute and the
+                        # attdefs gives the value type. A few value
+                        # checks need access to the docx object
+                        # internal data and are implemented as object
+                        # methods. The bulk of the type checks are
+                        # "static" procs in the ooxml::docx namespace.
+                        set error 0
+                        if {[catch {set ooxmlvalue [$attdefs $value]} errMsg]} {
+                            if {![llength [info procs ::ooxml::docx::$attdefs]]} {
+                                if {[catch {set ooxmlvalue [my $attdefs $value]} errMsg]} {
+                                    set error 1
+                                }
+                            } {
+                                set error 1
+                            }
+                            if {$error} {
+                                error "the value \"$value\" given to the\
+                                       \"$opt\" option is invalid: $errMsg"
+                            }
                         }
                         foreach tag $tags {
                             Tag_$tag w:val $ooxmlvalue
@@ -748,7 +718,7 @@ oo::class create ooxml::docx {
                     # attribute to set and that attribute is not w:val
                     # this case has be handled here.
                     #
-                    # For know the code assumes always several atts
+                    # For now the code assumes always several atts
                     # and therefore the value to the option is always
                     # handled as a key value pairs list.
                     set attlist ""
@@ -773,13 +743,26 @@ oo::class create ooxml::docx {
                         if {![info exists atts($key)]} {
                             continue
                         }
-                        if {[catch {set ooxmlvalue [my $type $atts($key)]} errMsg]} {
-                            error "the argument \"$value\" given to the\
-                                   \"$opt\" option is invalid: the value\
-                                   given to the key \"$key\" in the argument\
-                                   is invalid: $errMsg"
+                        if {[catch {set ooxmlvalue [$type $atts($key)]} errMsg]} {
+                            if {![llength [info procs ::ooxml::docx::$type]]} {
+                                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
+                                    set error 1
+                                }
+                            } {
+                                set error 1
+                            }
+                            if {$error} {
+                                error "the argument \"$value\" given to the\
+                                       \"$opt\" option is invalid: the value\
+                                       given to the key \"$key\" in the argument\
+                                       is invalid: $errMsg"
+                            }
                         }
-                        lappend attlist [my Watt $attname] $ooxmlvalue
+                        if {[string index $attname 0] eq "-"} {
+                            lappend attlist [string range $attname 1 end] $ooxmlvalue
+                        } else {
+                            lappend attlist [my Watt $attname] $ooxmlvalue
+                        }
                         unset atts($key)
                     }
                     foreach tag $tags {
@@ -864,11 +847,15 @@ oo::class create ooxml::docx {
         list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
     }
 
+    method Ratt {attname} {
+        list http://schemas.openxmlformats.org/officeDocument/2006/relationships r:$attname
+    }
+
     method GetDocDefault {styles} {
         # styles has the content model sequence:
         # docDefaults? latentStyles? styles*
         set docDefaults [$styles firstChild]
-        if {[$docDefaults localName] ne "docDefaults"} {
+        if {$docDefaults == "" || [$docDefaults localName] ne "docDefaults"} {
             set nextNode $docDefaults
             $styles insertBeforeFromScript Tag_w:docDefaults $nextNode
             set docDefaults [$styles firstChild]
@@ -879,7 +866,6 @@ oo::class create ooxml::docx {
     method LastParagraph {{returnEmpty 0}} {
         my variable body
         
-        # Identify the last paragraph
         set p [$body lastChild]
         while {$p ne ""} {
             if {[$p nodeType] ne "ELEMENT_NODE"} {
@@ -904,14 +890,11 @@ oo::class create ooxml::docx {
     method paragraph {text args} {
         my variable body
 
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        array set opts $args
+        OptVal $args "text"
         $body appendFromScript {
             Tag_w:p {
                 Tag_w:pPr {
-                    my Create $::ooxml::properties(paragraph)
+                    my Create $::ooxml::docx::properties(paragraph)
                 }
                 Tag_w:r {
                     my Wt $text
@@ -921,20 +904,46 @@ oo::class create ooxml::docx {
         my CheckRemainingOpts
     }
 
-    method append {text args} {
-        my variable body
-
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
+    method image {file args} {
+        my variable media
+        variable ::ooxml::docx::properties
+        
+        OptVal $args "file"
+        lappend media $file
+        set rId [my Add2Relationships image media/$file]
+        set p [my LastParagraph]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:drawing {
+                    Tag_wp:anchor {
+                        Tag_a:graphic {
+                            Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                                Tag_pic:pic {
+                                    Tag_pic:blipFill {
+                                        Tag_a:blip [my Ratt embed] rId$rId {}
+                                    }
+                                    Tag_pic:spPr bwMode "auto" {
+                                        Tag_a:xfrm {
+                                            my Create $properties(xfrm)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        array set opts $args
-        # Identify the last paragraph
+    }
+    
+    method append {text args} {
+        OptVal $args "text"
         set p [my LastParagraph]
         if {[catch {
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:rPr {
-                        my Create $::ooxml::properties(run)
+                        my Create $::ooxml::docx::properties(run)
                     }
                     my Wt $text
                 }
@@ -958,11 +967,11 @@ oo::class create ooxml::docx {
                 }
                 # docDefaults has two childs in the order:
                 # rPrDefault pPrDefault
-                array set opts $args
+                OptVal $args "paragraphdefault"
                 $docDefaults appendFromScript {
                     Tag_w:pPrDefault {
                         Tag_w:pPr {
-                            my Create $::ooxml::properties(styleparagraph)
+                            my Create $::ooxml::docx::properties(styleparagraph)
                         }
                     }
                 }
@@ -976,11 +985,11 @@ oo::class create ooxml::docx {
                 }
                 # docDefaults has two childs in the order:
                 # rPrDefault pPrDefault
-                array set opts $args
+                OptVal $args "characterdefault"
                 $docDefaults insertBeforeFromScript {
                     Tag_w:rPrDefault {
                         Tag_w:rPr {
-                            my Create $::ooxml::properties(stylerun)
+                            my Create $::ooxml::docx::properties(stylerun)
                         }
                     }
                 } [$docDefaults firstChild]
@@ -992,7 +1001,7 @@ oo::class create ooxml::docx {
                     error "missing the style name argument"
                 }
                 set name [lindex $args 0]
-                array set opts [lrange $args 1 end]
+                OptVal [lrange $args 1 end] $cmd
                 set style [$styles selectNodes {
                     w:style[@w:type=$cmd and @w:styleId=$name]
                 }]
@@ -1004,11 +1013,11 @@ oo::class create ooxml::docx {
                         Tag_w:name [my Watt val] $name {}
                         if {$cmd eq "paragraph"} {
                             Tag_w:pPr {
-                                my Create $::ooxml::properties(styleparagraph)
+                                my Create $::ooxml::docx::properties(styleparagraph)
                             }
                         }
                         Tag_w:rPr {
-                            my Create $::ooxml::properties(stylerun)
+                            my Create $::ooxml::docx::properties(stylerun)
                         }
                     }
                 }
@@ -1095,7 +1104,7 @@ oo::class create ooxml::docx {
         my variable body
         my variable setuproot
         my variable pagesetup
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         if {$pagesetup ne ""} {
             $pagesetup delete
@@ -1104,7 +1113,7 @@ oo::class create ooxml::docx {
         set pagesetup [$setuproot lastChild]
         array set opts $args
         $pagesetup appendFromScript {
-            my Create $::ooxml::properties(sectionsetup)
+            my Create $::ooxml::docx::properties(sectionsetup)
         }
         my CheckRemainingOpts
     }
@@ -1113,7 +1122,7 @@ oo::class create ooxml::docx {
         my variable docs
         my variable pagesetup
         my variable sectionsetup
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         set p [my LastParagraph 1]
         if {$sectionsetup ne ""} {
@@ -1128,7 +1137,7 @@ oo::class create ooxml::docx {
         $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
         array set opts $args
         $sectionsetup appendFromScript {
-            my Create $::ooxml::properties(pagesetup)
+            my Create $::ooxml::docx::properties(pagesetup)
         }
         my CheckRemainingOpts
     }
@@ -1147,46 +1156,57 @@ oo::class create ooxml::docx {
         set sectionsetup ""
     }
 
+    method Add2Relationships {type target} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        # The following is perhaps over-complicated:
+        # set relsns http://schemas.openxmlformats.org/package/2006/relationships
+        # set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
+        #              -list {r:Relationship string(@Id)}]
+        # set rId 1
+        # foreach id $ids {
+        #     set nr [string range $id 3 end]
+        #     if {[string range $id 0 2] eq "rId"
+        #         && [string is integer -strict $nr]
+        #     } {
+        #         if {$nr > $rId} {
+        #             set rId $nr
+        #         }
+        #     }
+        # }
+        # At least for documents we build up from scratch this should
+        # work reliable enough (and work faster)
+        set lastchild [$relsRoot lastChild]
+        set rId [string range [$lastchild @Id] 3 end]
+        incr rId
+        set attlist [list \
+             Id rId$rId \
+             Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type \
+             Target $target]
+        if {$type eq "hyperlink"} {
+            lappend attlist TargetMode External
+        }
+        $relsRoot appendFromScript {
+            Tag_Relationship {*}$attlist 
+        }
+        return $rId
+    }
+    
     method url {text url args} {
         my variable docs
-        my variable body
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
-        if {[llength $args] % 2 != 0} {
-            error "invalid arguments: expectecd -option value pairs"
-        }
-        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-        set relsns http://schemas.openxmlformats.org/package/2006/relationships
-        set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
-                     -list {r:Relationship string(@Id)}]
-        set rId 1
-        foreach id $ids {
-            set nr [string range $id 3 end]
-            if {[string range $id 0 2] eq "rId"
-                && [string is integer -strict $nr]
-            } {
-                if {$nr > $rId} {
-                    set rId $nr
-                }
-            }
-        }
-        incr rId
-        puts "new rId $rId"
-        $relsRoot appendFromScript {
-            Tag_Relationship Id rId$rId \
-                Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink \
-                Target $url \
-                TargetMode External
-        }
-        array set opts $args
-        # Identify the last paragraph
+        OptVal $args "text url"
+        set rId [my Add2Relationships hyperlink $url]
         set p [my LastParagraph]
         if {[catch {
             $p appendFromScript {
                 Tag_w:hyperlink [list $xmlns(r) r:id] rId$rId {
                     Tag_w:r {
                         Tag_w:rPr {
-                            my Create $::ooxml::properties(run)
+                            my Create $::ooxml::docx::properties(run)
                         }
                         my Wt $text
                     }
@@ -1201,9 +1221,10 @@ oo::class create ooxml::docx {
     method write {file} {
         my variable body
         my variable docs
+        my variable media
         my variable pagesetup
         my variable sectionsetup
-        variable ::ooxml::xmlns
+        variable ::ooxml::docx::xmlns
 
         # Finalize section and do pagesetup
         if {$sectionsetup ne ""} {
@@ -1237,7 +1258,10 @@ oo::class create ooxml::docx {
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
-
+        foreach this $media {
+            append cd [::ooxml::add_file_with_path_to_archive $zf word/media/[file tail $this] $this]
+            incr count
+        }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than
         # writen again.

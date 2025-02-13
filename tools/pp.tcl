@@ -39,8 +39,12 @@ proc unzip {zipfile dir} {
 
 proc pp {xmlfile} {
     if {[file isdirectory $xmlfile]} return
+    set pathparts [file split $xmlfile]
+    if {[lindex $pathparts end-1] eq "media" && [lindex $pathparts end-2] eq "word"} {
+        return
+    }
     if {[catch {set data [::tdom::xmlReadFile $xmlfile]} errMsg]} {
-        puts "cannot read $xmlfile (probably a binary file) - $errMsg"
+        puts "cannot parse $xmlfile as XML (perhaps a binary file?) - $errMsg"
         return 
     }
     if {[catch {dom parse $data doc}]} {

@@ -39,7 +39,7 @@ $docx paragraph "A new paragraph"
 # Prevent error if someone follow this actually testing
 if {[file exists book.jpg]} {
     #$docx image book.jpg -dimension {width 2872105 height 2872105}
-    $docx image book.jpg -dimension {width 3cm height 3cm}
+    $docx image book.jpg -dimension {width 3cm height 3cm} -bwMode black
 } else {
     puts "Missing book.jpg to include into docx"
 }

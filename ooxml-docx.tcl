@@ -108,7 +108,19 @@ namespace eval ::ooxml::docx {
             {height -cy} ST_Emu
         }}
     }
-
+    # The content model of tblPr is sequence; keep the options in
+    # order (and insert new options at the right place)
+    set desclist [list]
+    foreach tblBordersOpt {top start left bottom end right insideH insideV} {
+        lappend desclist -${tblBordersOpt}border [list w:$tblBordersOpt {
+            {type val} ST_Border
+            color ST_HexColor
+            {borderwidth sz} ST_EighthPointMeasure
+            space ST_PointMeasure
+        }]
+    }
+    set properties(tblBorders) $desclist
+    
     foreach {name xml} {
         [Content_Types].xml {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -409,8 +421,9 @@ namespace eval ::ooxml::docx {
             return $value
         }
         if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-            error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+            error "\"$value\" is not a valid measure value - value must be an\
+                   integer or match the regular expression\
+                   \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
         }
         scan $value "%f%s" value unit
         switch $unit {
@@ -423,6 +436,209 @@ namespace eval ::ooxml::docx {
         }
         return [expr {round($value*$factor)}]
     }
+
+    proc ST_Border {value} {
+        set values {
+            nil
+            none
+            single
+            thick
+            double
+            dotted
+            dashed
+            dotDash
+            dotDotDash
+            triple
+            thinThickSmallGap
+            thickThinSmallGap
+            thinThickThinSmallGap
+            thinThickMediumGap
+            thickThinMediumGap
+            thinThickThinMediumGap
+            thinThickLargeGap
+            thickThinLargeGap
+            thinThickThinLargeGap
+            wave
+            doubleWave
+            dashSmallGap
+            dashDotStroked
+            threeDEmboss
+            threeDEngrave
+            outset
+            inset
+            apples
+            archedScallops
+            babyPacifier
+            babyRattle
+            balloons3Colors
+            balloonsHotAir
+            basicBlackDashes
+            basicBlackDots
+            basicBlackSquares
+            basicThinLines
+            basicWhiteDashes
+            basicWhiteDots
+            basicWhiteSquares
+            basicWideInline
+            basicWideMidline
+            basicWideOutline
+            bats
+            birds
+            birdsFlight
+            cabins
+            cakeSlice
+            candyCorn
+            celticKnotwork
+            certificateBanner
+            chainLink
+            champagneBottle
+            checkedBarBlack
+            checkedBarColor
+            checkered
+            christmasTree
+            circlesLines
+            circlesRectangles
+            classicalWave
+            clocks
+            compass
+            confetti
+            confettiGrays
+            confettiOutline
+            confettiStreamers
+            confettiWhite
+            cornerTriangles
+            couponCutoutDashes
+            couponCutoutDots
+            crazyMaze
+            creaturesButterfly
+            creaturesFish
+            creaturesInsects
+            creaturesLadyBug
+            crossStitch
+            cup
+            decoArch
+            decoArchColor
+            decoBlocks
+            diamondsGray
+            doubleD
+            doubleDiamonds
+            earth1
+            earth2
+            earth3
+            eclipsingSquares1
+            eclipsingSquares2
+            eggsBlack
+            fans
+            film
+            firecrackers
+            flowersBlockPrint
+            flowersDaisies
+            flowersModern1
+            flowersModern2
+            flowersPansy
+            flowersRedRose
+            flowersRoses
+            flowersTeacup
+            flowersTiny
+            gems
+            gingerbreadMan
+            gradient
+            handmade1
+            handmade2
+            heartBalloon
+            heartGray
+            hearts
+            heebieJeebies
+            holly
+            houseFunky
+            hypnotic
+            iceCreamCones
+            lightBulb
+            lightning1
+            lightning2
+            mapPins
+            mapleLeaf
+            mapleMuffins
+            marquee
+            marqueeToothed
+            moons
+            mosaic
+            musicNotes
+            northwest
+            ovals
+            packages
+            palmsBlack
+            palmsColor
+            paperClips
+            papyrus
+            partyFavor
+            partyGlass
+            pencils
+            people
+            peopleWaving
+            peopleHats
+            poinsettias
+            postageStamp
+            pumpkin1
+            pushPinNote2
+            pushPinNote1
+            pyramids
+            pyramidsAbove
+            quadrants
+            rings
+            safari
+            sawtooth
+            sawtoothGray
+            scaredCat
+            seattle
+            shadowedSquares
+            sharksTeeth
+            shorebirdTracks
+            skyrocket
+            snowflakeFancy
+            snowflakes
+            sombrero
+            southwest
+            stars
+            starsTop
+            stars3d
+            starsBlack
+            starsShadowed
+            sun
+            swirligig
+            tornPaper
+            tornPaperBlack
+            trees
+            triangleParty
+            triangles
+            triangle1
+            triangle2
+            triangleCircle1
+            triangleCircle2
+            shapes1
+            shapes2
+            twistedLines1
+            twistedLines2
+            vine
+            waveline
+            weavingAngles
+            weavingBraid
+            weavingRibbon
+            weavingStrips
+            whiteFlowers
+            woodwork
+            xIllusions
+            zanyTriangles
+            zigZag
+            zigZagStitch
+        }
+        if {$value in $values} {
+            return $value
+        }
+        error "unknown border type value \"$value\", expected one of:\
+               [my AllowedValues $values]"
+    }
+
     
     proc CT_OnOff {value} {
         if {![string is boolean -strict $value]} {
@@ -478,7 +694,7 @@ namespace eval ::ooxml::docx {
     }
 
     proc ST_Jc {value} {
-        set alignValues {
+        set values {
             start
             center
             end
@@ -492,11 +708,11 @@ namespace eval ::ooxml::docx {
             left
             right
         }
-        if {$value in $alignValues} {
+        if {$value in $values} {
             return $value
         }
-        error "unknown align value \"$value\", should be:\
-               [my AllowedValues $alignValues]"
+        error "unknown align value \"$value\", expected one of:\
+               [my AllowedValues $values]"
     }
     
     proc ST_HexColor {value} {
@@ -510,6 +726,22 @@ namespace eval ::ooxml::docx {
         return $value
     }
 
+    proc ST_EighthPointMeasure {value} {
+        if {[string is integer -strict $value] && $value >= 0} {
+            return $value
+        }
+        error "\"$value\" is not a valid measure value - value must be an\
+               integer"
+    }
+
+    proc ST_PointMeasure {value} {
+        if {[string is integer -strict $value] && $value >= 0} {
+            return $value
+        }
+        error "\"$value\" is not a valid measure value - value must be an\
+               integer"
+    }
+    
     proc ST_Underline {value} {
         set values {
             single
@@ -532,12 +764,33 @@ namespace eval ::ooxml::docx {
             none
         }
         if {$value ni $values} {
-            error "unkown underline value \"$value\", expected\
+            error "unkown underline value \"$value\", expected one of\
                   [my AllowedValues $values]"
         }
         return $value
     }
-    
+
+    proc ST_BlackWhiteMode {value} {
+        set values {
+            auto
+            black
+            blackGray
+            blackWhite
+            clr
+            gray
+            grayWhite
+            hidden
+            invGray
+            ltGray
+            white
+        }
+        if {$value in $values} {
+            return $value
+        }
+        error "unknown back and white mode \"$value\", expected one of\
+            [my AllowedValues $values]"
+    }
+            
 }
 
 oo::class create ooxml::docx::docx {
@@ -674,6 +927,99 @@ oo::class create ooxml::docx::docx {
         return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
     }
     
+    method CreateWorker {value opt optdata} {
+        upvar opts opts
+        
+        switch [llength $optdata] {
+            2 {
+                lassign $optdata tags attdefs
+                if {[llength $attdefs] == 1} {
+                    # An element with just w:val as attribute and
+                    # the attdefs gives the value type.
+                    set ooxmlvalue [my CallType $attdefs $value \
+                                        "the value \"$value\" given to the \"$opt\"\
+                                              option is invalid"]
+                    foreach tag $tags {
+                        Tag_$tag w:val $ooxmlvalue
+                    }
+                    unset opts($opt)
+                    return -code continue
+                }
+                # If we stumble about a tag with just one
+                # attribute to set and that attribute is not w:val
+                # this case has be handled here.
+                #
+                # For now the code assumes always several atts
+                # and therefore the value to the option is always
+                # handled as a key value pairs list.
+                set attlist ""
+                array unset atts
+                if {[catch {array set atts $value}]} {
+                    set keys ""
+                    foreach {attdata type} $attdefs {
+                        lappend keys [lindex $attdata 0]
+                    }
+                    error "the value given to the \"$opt\" option is\
+                           invalid, expected ist a key value pairs\
+                           list with keys out of\
+                           [my AllowedValues $keys]"
+                }
+                foreach {attdata type} $attdefs {
+                    if {[llength $attdata] == 2} {
+                        lassign $attdata key attname
+                    } else {
+                        set key $attdata
+                        set attname $key
+                    }
+                    if {![info exists atts($key)]} {
+                        continue
+                    }
+                    set ooxmlvalue [my CallType $type $atts($key) \
+                                        "the argument \"$value\" given to the \"$opt\"\
+                             option is invalid: the value given to the key\
+                             \"$key\" in the argument is invalid"]
+                    if {[string index $attname 0] eq "-"} {
+                        lappend attlist [string range $attname 1 end] $ooxmlvalue
+                    } else {
+                        lappend attlist [my Watt $attname] $ooxmlvalue
+                    }
+                    unset atts($key)
+                }
+                foreach tag $tags {
+                    Tag_$tag {*}$attlist {}
+                }
+                unset opts($opt)                    
+                # Check if there are unknown keys left in the key
+                # values list
+                set remainigKeys [array names atts]
+                if {[llength $remainigKeys] == 0} {
+                    return -code continue
+                }
+                set keys ""
+                foreach {attdata type} $attdefs {
+                    lappend keys [lindex $attdata 0]
+                }
+                if {[llength $remainigKeys] == 1} {
+                    error "unknown key \"[lindex $remainigKeys 0]\" in\
+                               the value \"$value\" of the option \"$opt\",\
+                               the expected keys are [my AllowedValues $keys]"
+                } else {
+                    error "unknown keys [my AllowedValues $remainigKeys] in\
+                               the value \"$value\" of the option \"$opt\",\
+                               the expected keys are [my AllowedValues $keys]"
+                }
+            }
+            3 {
+                my [lindex $optdata 2] $value
+                unset opts($opt)
+                
+            }
+            default {
+                error "invalid properties value"
+            }
+        }
+    }
+    
     method Create switchActionList {
         upvar opts opts
         array set switchesData $switchActionList
@@ -684,123 +1030,23 @@ oo::class create ooxml::docx::docx {
                 continue
             }
             set optdata $switchesData($opt)
-            switch [llength $optdata] {
-                2 {
-                    lassign $optdata tags attdefs
-                    if {[llength $attdefs] == 1} {
-                        # An element with just w:val as attribute and the
-                        # attdefs gives the value type. A few value
-                        # checks need access to the docx object
-                        # internal data and are implemented as object
-                        # methods. The bulk of the type checks are
-                        # "static" procs in the ooxml::docx namespace.
-                        set error 0
-                        if {[catch {set ooxmlvalue [$attdefs $value]} errMsg]} {
-                            if {![llength [info procs ::ooxml::docx::$attdefs]]} {
-                                if {[catch {set ooxmlvalue [my $attdefs $value]} errMsg]} {
-                                    set error 1
-                                }
-                            } {
-                                set error 1
-                            }
-                            if {$error} {
-                                error "the value \"$value\" given to the\
-                                       \"$opt\" option is invalid: $errMsg"
-                            }
-                        }
-                        foreach tag $tags {
-                            Tag_$tag w:val $ooxmlvalue
-                        }
-                        unset opts($opt)
-                        continue
-                    }
-                    # If we stumble about a tag with just one
-                    # attribute to set and that attribute is not w:val
-                    # this case has be handled here.
-                    #
-                    # For now the code assumes always several atts
-                    # and therefore the value to the option is always
-                    # handled as a key value pairs list.
-                    set attlist ""
-                    array unset atts
-                    if {[catch {array set atts $value}]} {
-                        set keys ""
-                        foreach {attdata type} $attdefs {
-                            lappend keys [lindex $attdata 0]
-                        }
-                        error "the value given to the \"$opt\" option is\
-                               invalid, expected ist a name value pairs\
-                               list with names out of\
-                               [my AllowedValues $keys]"
-                    }
-                    foreach {attdata type} $attdefs {
-                        if {[llength $attdata] == 2} {
-                            lassign $attdata key attname
-                        } else {
-                            set key $attdata
-                            set attname $key
-                        }
-                        if {![info exists atts($key)]} {
-                            continue
-                        }
-                        if {[catch {set ooxmlvalue [$type $atts($key)]} errMsg]} {
-                            if {![llength [info procs ::ooxml::docx::$type]]} {
-                                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
-                                    set error 1
-                                }
-                            } {
-                                set error 1
-                            }
-                            if {$error} {
-                                error "the argument \"$value\" given to the\
-                                       \"$opt\" option is invalid: the value\
-                                       given to the key \"$key\" in the argument\
-                                       is invalid: $errMsg"
-                            }
-                        }
-                        if {[string index $attname 0] eq "-"} {
-                            lappend attlist [string range $attname 1 end] $ooxmlvalue
-                        } else {
-                            lappend attlist [my Watt $attname] $ooxmlvalue
-                        }
-                        unset atts($key)
-                    }
-                    foreach tag $tags {
-                        Tag_$tag {*}$attlist {}
-                    }
-                    unset opts($opt)                    
-                    # Check if there are unknown keys left in the key
-                    # values list
-                    set remainigKeys [array names atts]
-                    if {[llength $remainigKeys] == 0} {
-                        continue
-                    }
-                    set keys ""
-                    foreach {attdata type} $attdefs {
-                        lappend keys [lindex $attdata 0]
-                    }
-                    if {[llength $remainigKeys] == 1} {
-                        error "unknown key \"[lindex $remainigKeys 0]\" in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [my AllowedValues $keys]"
-                    } else {
-                        error "unknown keys [my AllowedValues $remainigKeys] in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [my AllowedValues $keys]"
-                    }
-                }
-                3 {
-                    my [lindex $optdata 2] $value
-                    unset opts($opt)
-                    
-                }
-                default {
-                    error "invalid properties value"
-                }
-            }
+            my CreateWorker $value $opt $optdata
         }
     }
 
+    method CreateOrder switchActionList {
+        upvar opts opts
+
+        foreach {opt optdata} $switchActionList {
+            if {![info exists opts($opt)]} {
+                continue
+            }
+            set value $opts($opt)
+            puts "CreateOrder $opt"
+            my CreateWorker $value $opt $optdata
+        }
+    }
+    
     method CheckRemainingOpts {} {
         upvar opts opts
 
@@ -903,7 +1149,37 @@ oo::class create ooxml::docx::docx {
         }
         my CheckRemainingOpts
     }
-
+    
+    method CallType {type value errtext} {
+        # A few value checks need access to the docx object internal
+        # data and therefor are implemented as object methods. The
+        # bulk of the type checks are "static" procs in the
+        # ooxml::docx namespace.
+        set error 0
+        if {[catch {set ooxmlvalue [$type $value]} errMsg]} {
+            if {![llength [info procs ::ooxml::docx::$type]]} {
+                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {set error 1}
+            } else {set error 1}
+            if {$error} {
+                error "$errtext: $errMsg"
+            }
+        }
+        return $ooxmlvalue
+    }
+    
+    method Option {option attname type {default ""}} {
+        upvar opts opts
+        if {[info exists opts($option)]} {
+            set ooxmlvalue [my CallType $type $opts($option) \
+                                "the value given to the \"$option\" option\
+                                 is invalid"]
+            unset opts($option)
+        } else {
+            return ""
+        }
+        return [list $attname $ooxmlvalue]
+    }
+    
     method image {file args} {
         my variable media
         variable ::ooxml::docx::properties
@@ -922,7 +1198,7 @@ oo::class create ooxml::docx::docx {
                                     Tag_pic:blipFill {
                                         Tag_a:blip [my Ratt embed] rId$rId {}
                                     }
-                                    Tag_pic:spPr bwMode "auto" {
+                                    Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
                                         Tag_a:xfrm {
                                             my Create $properties(xfrm)
                                         }
@@ -934,6 +1210,7 @@ oo::class create ooxml::docx::docx {
                 }
             }
         }
+        my CheckRemainingOpts
     }
     
     method append {text args} {
@@ -1065,17 +1342,23 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method simpletable {tabledata} {
+    method simpletable {tabledata args} {
         my variable body
+        variable ::ooxml::docx::properties
 
+        OptVal $args "tabledata"
         $body appendFromScript {
             Tag_w:tbl {
-                Tag_w:tblPr
-                # Tag_w:tblGrid {
-                #     Tag_w:gridCol w:w 200
-                #     Tag_w:gridCol w:w 200
-                #     Tag_w:gridCol w:w 200
-                # }
+                Tag_w:tblPr {
+                    Tag_w:tblBorders {
+                        my CreateOrder $properties(tblBorders)
+                    }
+                    # Tag_w:tblGrid {
+                    #     Tag_w:gridCol w:w 200
+                    #     Tag_w:gridCol w:w 200
+                    #     Tag_w:gridCol w:w 200
+                    # }
+                }
                 foreach row $tabledata {
                     Tag_w:tr {
                         foreach cell $row {
@@ -1092,6 +1375,7 @@ oo::class create ooxml::docx::docx {
                 }
             }
         }
+        my CheckRemainingOpts
     }
 
     # WordprocessingML has no concept of a page. Rather it groups

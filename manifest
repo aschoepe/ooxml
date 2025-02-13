@@ -1,5 +1,5 @@
-C Made\sthe\smethod\ssimpletable\sa\slittle\sless\ssimpler;\snow\sborders\s(enclosing\sas\swell\sas\sinside)\smay\sbe\sspecified.
-D 2025-02-13T13:39:53.952
+C Added\s-columnwidths\sto\ssimpletable.
+D 2025-02-13T18:08:35.378
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -28,7 +28,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms ca97f4d8b513650c237fc95c283515722bdc9c6852193e9287612f5bd51b2585
-F ooxml-docx.tcl b01c74d6d1b9794dbaec28c84fd73996d2a7aa9e466e5e81ac7b877ffac87917
+F ooxml-docx.tcl 3654b58040a632d01d78f9e219fc92c2cb90e6342023c8fabecf9022a2f479b8
 F ooxml.tcl 33b34338eccc31e43878fd19026c126bc4475300722ac45ad97201e728c1a7ec
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -77,8 +77,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P c986b2f4d5ba0568028e080805c9f8ea89932f3bcabe9c0930bd5fa0d1602488
-R e44c4aeeca3befd4160ebbce97038e8b
+P 276d9ea8a69cab8aecd05dfdc13757ebd01efb4f55ae5c723e89f6c7e919eb19
+R 8a2bc705ba9d97aac215684b3512c3c2
 U rolf
-Z 9ba72039762029f9655e521a05ff622e
+Z 2edbb646d6eacf442120b7a27aff5cff
 # Remove this line to create a well-formed Fossil manifest.

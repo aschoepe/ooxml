@@ -1042,7 +1042,6 @@ oo::class create ooxml::docx::docx {
                 continue
             }
             set value $opts($opt)
-            puts "CreateOrder $opt"
             my CreateWorker $value $opt $optdata
         }
     }
@@ -1342,6 +1341,16 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method EatOption {option} {
+        upvar opts opts
+        if {[info exists opts($option)]} {
+            set value $opts($option)
+            unset opts($option)
+            return $value
+        }
+        return ""
+    }
+
     method simpletable {tabledata args} {
         my variable body
         variable ::ooxml::docx::properties
@@ -1353,11 +1362,14 @@ oo::class create ooxml::docx::docx {
                     Tag_w:tblBorders {
                         my CreateOrder $properties(tblBorders)
                     }
-                    # Tag_w:tblGrid {
-                    #     Tag_w:gridCol w:w 200
-                    #     Tag_w:gridCol w:w 200
-                    #     Tag_w:gridCol w:w 200
-                    # }
+                }
+                set widths [my EatOption -columnwidths]
+                if {[llength $widths]} {
+                    Tag_w:tblGrid {
+                        foreach width $widths {
+                            Tag_w:gridCol [my Watt w] [ST_TwipsMeasure $width] {}
+                        }
+                    }
                 }
                 foreach row $tabledata {
                     Tag_w:tr {

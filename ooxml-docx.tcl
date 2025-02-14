@@ -1416,38 +1416,46 @@ oo::class create ooxml::docx::docx {
 
     method sectionstart {args} {
         my variable docs
+        my variable body
         my variable pagesetup
         my variable sectionsetup
         variable ::ooxml::docx::xmlns
 
-        set p [my LastParagraph 1]
-        if {$sectionsetup ne ""} {
-            if {$p ne ""} {
-                $p appendChild $sectionsetup
-            }
-        } elseif {$pagesetup ne ""} {
-            if {$p ne ""} {
-                $p appendChild [$pagesetup clone -deep]
+        $body appendFromScript {
+            Tag_w:p {
+                Tag_w:pPr {
+                    if {$sectionsetup ne ""} {
+                        ::tdom::fsinsertNode $sectionsetup
+                    } elseif {$pagesetup ne ""} {
+                        ::tdom::fsinsertNode [$pagesetup clone -deep]
+                    }
+                }
             }
         }
         $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
         array set opts $args
         $sectionsetup appendFromScript {
-            my Create $::ooxml::docx::properties(pagesetup)
+            my Create $::ooxml::docx::properties(sectionsetup)
         }
         my CheckRemainingOpts
     }
 
     method sectionend {} {
+        my variable body
         my variable pagesetup
         my variable sectionsetup
         
         if {$sectionsetup eq ""} {
             error "no section started"
         }
-        set p [my LastParagraph 1]
-        if {$p ne ""} {
-            $p appendChild $sectionsetup
+        $body appendFromScript {
+            Tag_w:p {
+                Tag_w:pPr {
+                    Tag_w:sectPr {
+                        ::tdom::fsinsertNode $sectionsetup
+                    }
+                }
+            }
         }
         set sectionsetup ""
     }

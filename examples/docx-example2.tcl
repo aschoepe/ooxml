@@ -14,8 +14,9 @@ $docx style paragraphdefault -spacing {before 240 after 120}
 $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 
 # Set the margins
-#$docx pagesetup -margins {left 3cm right 3cm top 4cm bottom 4cm}
-$docx pagesetup -sizeAndOrientaion {width 15840 height 12240}
+#$docx pagesetup 
+$docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
+    -margins {left 1cm right 1cm top 1cm bottom 1cm}
 
 $docx paragraph "Chapter one" -style Heading1
 # Add two paragraphs
@@ -23,12 +24,13 @@ $docx paragraph "A very simple monoton paragraph: $loreipsum"
 $docx paragraph "The next paragraph: $loreipsum"
 
 # Start a new section with different page setup
-$docx sectionstart -sizeAndOrientaion {width 12240 height 15840}
+$docx sectionstart -sizeAndOrientaion {width 12240 height 15840} \
+    -margins {left 3cm right 3cm top 4cm bottom 4cm}
 
 $docx paragraph "Chapter two" -style Heading1
-# Add two paragraphs
+# Add some paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
-for {set i 0} {$i < 2} {incr i} {
+for {set i 0} {$i < 8} {incr i} {
     $docx paragraph "The next paragraph: $loreipsum"
 }
 

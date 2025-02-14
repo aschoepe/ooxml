@@ -84,7 +84,14 @@ namespace eval ::ooxml::docx {
             line ST_TwipsMeasure}}
     }
     set properties(paragraph) [concat $properties(styleparagraph) {-style {w:pStyle PStyle}}]
+
+    # The content model of sectPr is sequence; keep the options in
+    # order (and insert new options at the right place)
     set properties(sectionsetup) {
+        -sizeAndOrientaion {w:pgSz {
+            {height h} ST_TwipsMeasure
+            {orientation orient} ST_PageOrientation
+            {width w} ST_TwipsMeasure}}
         -margins {w:pgMar {
             bottom ST_TwipsMeasure
             footer ST_TwipsMeasure
@@ -97,10 +104,6 @@ namespace eval ::ooxml::docx {
             first ST_DecimalNumber
             other ST_DecimalNumber
         }}
-        -sizeAndOrientaion {w:pgSz {
-            {height h} ST_TwipsMeasure
-            {orientation orient} ST_PageOrientation
-            {width w} ST_TwipsMeasure}}
     }
     set properties(xfrm) {
         -dimension {a:ext {
@@ -1409,7 +1412,7 @@ oo::class create ooxml::docx::docx {
         set pagesetup [$setuproot lastChild]
         array set opts $args
         $pagesetup appendFromScript {
-            my Create $::ooxml::docx::properties(sectionsetup)
+            my CreateOrder $::ooxml::docx::properties(sectionsetup)
         }
         my CheckRemainingOpts
     }
@@ -1435,7 +1438,7 @@ oo::class create ooxml::docx::docx {
         $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
         array set opts $args
         $sectionsetup appendFromScript {
-            my Create $::ooxml::docx::properties(sectionsetup)
+            my CreateOrder $::ooxml::docx::properties(sectionsetup)
         }
         my CheckRemainingOpts
     }
@@ -1451,9 +1454,7 @@ oo::class create ooxml::docx::docx {
         $body appendFromScript {
             Tag_w:p {
                 Tag_w:pPr {
-                    Tag_w:sectPr {
-                        ::tdom::fsinsertNode $sectionsetup
-                    }
+                    ::tdom::fsinsertNode $sectionsetup
                 }
             }
         }

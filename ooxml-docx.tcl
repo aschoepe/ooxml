@@ -35,7 +35,7 @@ package require ooxml
 
 namespace eval ::ooxml::docx {
 
-    namespace export docx OptVal NoCheck CT_* ST_*
+    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF
     
     variable xmlns
 
@@ -161,15 +161,6 @@ namespace eval ::ooxml::docx {
         }
         docProps/core.xml {
             <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-                <dcterms:created xsi:type="dcterms:W3CDTF">2024-10-30T15:52:52Z</dcterms:created>
-                <dc:creator/>
-                <dc:description/>
-                <dc:language>de-DE</dc:language>
-                <cp:lastModifiedBy/>
-                <dcterms:modified xsi:type="dcterms:W3CDTF">2024-10-30T15:53:59Z</dcterms:modified>
-                <cp:revision>1</cp:revision>
-                <dc:subject/>
-                <dc:title/>
             </cp:coreProperties>
         }
         word/fontTable.xml {        
@@ -408,9 +399,10 @@ namespace eval ::ooxml::docx {
     namespace export Tag_* Text
 
     # Method option handling helper procs and value checks follow
-    proc OptVal {arglist prefix} {
+    proc OptVal {arglist {prefix ""}} {
         if {[llength $arglist] % 2 != 0} {
-            error "invalid arguments: expectecd $prefix -option value pairs"
+            if {$prefix ne ""} {append prefix " "}
+            error "invalid arguments: expectecd ${prefix}?-option value ?-option value? .."
         }
         uplevel "array set opts [list $arglist]"
     }
@@ -793,7 +785,16 @@ namespace eval ::ooxml::docx {
         error "unknown back and white mode \"$value\", expected one of\
             [my AllowedValues $values]"
     }
-            
+
+    proc W3CDTF {value} {
+        if {[catch {
+            set value [clock format [clock scan $value] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]
+        }]} {
+            error "invalid datetime value \"$value\", expected everything which is\
+                accepted by \[clock scan\]"
+        }
+        return $value
+    }
 }
 
 oo::class create ooxml::docx::docx {
@@ -844,6 +845,39 @@ oo::class create ooxml::docx::docx {
         set pagesetup ""
         set sectionsetup ""
 
+        OptVal $args
+        set coreroot [$docs(docProps/core.xml) documentElement]
+        $coreroot appendFromScript {
+            foreach elem {
+                cp:category
+                cp:contentStatus
+                dcterms:created
+                dc:creator
+                dc:description
+                dc:identifier
+                cp:keywords
+                dc:language
+                cp:lastModifiedBy
+                cp:lastPrinted
+                dcterms:modified
+                cp:revision
+                dc:subject
+                dc:title
+                cp:version
+            } {
+                lassign [split $elem :] prefix option
+                set value [my EatOption -$option]
+                if {$value ne ""} {
+                    set attlist ""
+                    if {$prefix eq "dcterms"} {
+                        set value [W3CDTF $value]
+                        lappend attlist xsi:type dcterms:W3CDTF
+                    }
+                    ::tdom::fsnewNode $elem $attlist {Text $value}
+                }
+            }
+        }
+        my CheckRemainingOpts
     }
 
     destructor {
@@ -1520,7 +1554,7 @@ oo::class create ooxml::docx::docx {
         } errMsg]} {
             uplevel error [list $errMsg]
         }
-        my CheckRemainingOpts        
+        my CheckRemainingOpts
     }
     
     method write {file} {

@@ -2,7 +2,7 @@
 source ./ooxml.tcl
 source ./ooxml-docx.tcl
 
-set docx [::ooxml::docx::docx new]
+set docx [::ooxml::docx::docx new -creator foo -created 2025-02-10]
 # foreach type {paragraph character} {
 #     foreach styleid [$docx style ids $type] {
 #         $docx style delete $type $styleid

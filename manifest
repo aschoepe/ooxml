@@ -1,5 +1,5 @@
-C A\sbit\sbetter,\sfor\swhat\sit\sis\sworth:\sjust\smake\sthe\sdocx\sproperties\sconfigure\sas\speople\sused\sto\sbe\sfamiliary\sdue\sto\stk\swidgets.
-D 2025-02-15T02:33:59.248
+C Added\sthe\sbeginning\sof\sa\sexample\sfile\sfor\stables.
+D 2025-02-15T13:45:17.008
 F .fossil-settings/ignore-glob 71ca68df5b5bb837789759567ad328a4fd6bb8bad0e3f1e8b1192e0f03eb9526
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -17,6 +17,7 @@ F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af9
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/docx-example1.tcl 08d0f14e56a3678e9a2648eb5f6f6471f704b05698238bb704e36000d0c19021 x
 F examples/docx-example2.tcl ee0c2152da47ed6712efef06584aeb4c47077acf9edb538c63a1073d30e849d8 x
+F examples/docx-example3.tcl 1fd614dbe3b3f19f72d647aaa5a4270cfa1735513561c0f592f1795285a0eb6c x
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx e560157e92837ef3b6be15e730b344117fd46acae74f16881d42c60538bfc964
 F examples/sample1.tcl 090e8fcf112faa0c08747ba7b01eb52c1b46c6d74e2e386278d5af8ebe19cf55 x
@@ -79,8 +80,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html fc408026fefd6517a4857e2c2b1ec1621fbd593ca34b21d9fdb387f9ddbc5e55
-P 40d014b958ff766d88e695253593bedc81ffa5dcdac44548db19367234b17745
-R 602c1305e6257d02af34f98babe37364
+P 882ae8e86c0221b2b7e17dff612080e6c871204fd8f1fb6b874c6b42b58fbc33
+R 0fb2a2b01974fd659f25af47921a7983
 U rolf
-Z a274eb35c7b8f9513232dbf984b2c215
+Z c8baba876a60c3cf83e9d48b069b69cb
 # Remove this line to create a well-formed Fossil manifest.

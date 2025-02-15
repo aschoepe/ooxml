@@ -845,6 +845,20 @@ oo::class create ooxml::docx::docx {
         set pagesetup ""
         set sectionsetup ""
 
+        my configure {*}$args
+    }
+
+    destructor {
+        my variable docs
+
+        foreach part [array names docs] {
+            $docs($part) delete
+        }
+    }
+
+    method configure {args} {
+        my variable docs
+
         OptVal $args
         set coreroot [$docs(docProps/core.xml) documentElement]
         $coreroot appendFromScript {
@@ -873,21 +887,16 @@ oo::class create ooxml::docx::docx {
                         set value [W3CDTF $value]
                         lappend attlist xsi:type dcterms:W3CDTF
                     }
+                    foreach currentnode [$coreroot selectNodes {*[local-name()=$option]}] {
+                        $currentnode delete
+                    }
                     ::tdom::fsnewNode $elem $attlist {Text $value}
                 }
             }
         }
         my CheckRemainingOpts
     }
-
-    destructor {
-        my variable docs
-
-        foreach part [array names docs] {
-            $docs($part) delete
-        }
-    }
-
+    
     method import {what docxfile} {
 
     }

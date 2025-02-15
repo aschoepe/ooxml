@@ -48,6 +48,7 @@ puts "character style ids: [$docx style ids character]"
 $docx write testout.docx
 $docx writepart word/styles.xml document.xml
 $docx readpart word/styles.xml document.xml
-$docx write testout1.docx
+$docx configure -creator bar
+$docx write testout.docx
 $docx destroy
 

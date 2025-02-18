@@ -59,5 +59,19 @@ $docx append " and you can freely combine them " -fontsize 15pt \
     -underline double -color ff0000
 $docx append " which isn't so important because using them all would be ugly.\
                Rest of the paragraph $loreipsum"
+
+
+# Style heritage:
+$docx style paragraph Base -font "Latin Modern Mono Caps" -color 101010 -fontsize 12pt
+$docx style paragraph H1 -basedon Base -fontsize 18pt
+$docx style paragraph H2 -basedon Base -fontsize 16pt
+
+$docx paragraph "Toplevel Heading" -style H1
+$docx paragraph "Second Level Heading 1" -style H2
+$docx paragraph $loreipsum -style Base
+$docx paragraph "Second Level Heading 2" -style H2
+$docx paragraph $loreipsum -style Base
+
+
 $docx write docx-example1.docx
 $docx destroy

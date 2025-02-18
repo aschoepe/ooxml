@@ -993,7 +993,7 @@ oo::class create ooxml::docx::docx {
                 }
                 # If we stumble about a tag with just one
                 # attribute to set and that attribute is not w:val
-                # this case has be handled here.
+                # this case has to be handled here.
                 #
                 # For now the code assumes always several atts
                 # and therefore the value to the option is always
@@ -1330,9 +1330,11 @@ oo::class create ooxml::docx::docx {
                 if {$style ne ""} {
                     error "$cmd style \"$name\" already exists"
                 }
+                set basedon [my EatOption -basedon]
                 $styles appendFromScript {
                     Tag_w:style [my Watt type] $cmd [my Watt styleId] $name {
                         Tag_w:name [my Watt val] $name {}
+                        Tag_w:basedOn [my Watt val] $basedon {}
                         if {$cmd eq "paragraph"} {
                             Tag_w:pPr {
                                 my Create $::ooxml::docx::properties(styleparagraph)

@@ -120,6 +120,7 @@ namespace eval ::ooxml::docx {
             color ST_HexColor
             {borderwidth sz} ST_EighthPointMeasure
             space ST_PointMeasure
+            shadow CT_OnOff
         }]
     }
     set properties(tblBorders) $desclist
@@ -399,6 +400,10 @@ namespace eval ::ooxml::docx {
     namespace export Tag_* Text
 
     # Method option handling helper procs and value checks follow
+    proc AllowedValues {values {word "or"}} {
+        return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
+    }
+    
     proc OptVal {arglist {prefix ""}} {
         if {[llength $arglist] % 2 != 0} {
             if {$prefix ne ""} {append prefix " "}
@@ -631,7 +636,7 @@ namespace eval ::ooxml::docx {
             return $value
         }
         error "unknown border type value \"$value\", expected one of:\
-               [my AllowedValues $values]"
+               [AllowedValues $values]"
     }
 
     
@@ -707,7 +712,7 @@ namespace eval ::ooxml::docx {
             return $value
         }
         error "unknown align value \"$value\", expected one of:\
-               [my AllowedValues $values]"
+               [AllowedValues $values]"
     }
     
     proc ST_HexColor {value} {
@@ -760,7 +765,7 @@ namespace eval ::ooxml::docx {
         }
         if {$value ni $values} {
             error "unkown underline value \"$value\", expected one of\
-                  [my AllowedValues $values]"
+                  [AllowedValues $values]"
         }
         return $value
     }
@@ -783,7 +788,7 @@ namespace eval ::ooxml::docx {
             return $value
         }
         error "unknown back and white mode \"$value\", expected one of\
-            [my AllowedValues $values]"
+            [AllowedValues $values]"
     }
 
     proc W3CDTF {value} {
@@ -969,10 +974,6 @@ oo::class create ooxml::docx::docx {
             [my Watt cs] $value
     }
 
-    method AllowedValues {values {word "or"}} {
-        return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
-    }
-    
     method CreateWorker {value opt optdata} {
         upvar opts opts
         
@@ -1008,7 +1009,7 @@ oo::class create ooxml::docx::docx {
                     error "the value given to the \"$opt\" option is\
                            invalid, expected ist a key value pairs\
                            list with keys out of\
-                           [my AllowedValues $keys]"
+                           [AllowedValues $keys]"
                 }
                 foreach {attdata type} $attdefs {
                     if {[llength $attdata] == 2} {
@@ -1048,11 +1049,11 @@ oo::class create ooxml::docx::docx {
                 if {[llength $remainigKeys] == 1} {
                     error "unknown key \"[lindex $remainigKeys 0]\" in\
                                the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [my AllowedValues $keys]"
+                               the expected keys are [AllowedValues $keys]"
                 } else {
-                    error "unknown keys [my AllowedValues $remainigKeys] in\
+                    error "unknown keys [AllowedValues $remainigKeys] in\
                                the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [my AllowedValues $keys]"
+                               the expected keys are [AllowedValues $keys]"
                 }
             }
             3 {
@@ -1100,7 +1101,7 @@ oo::class create ooxml::docx::docx {
         if {$nrRemainigOpts == 1} {
             set text "unknown option: [lindex [array names opts] 0]"
         } else {
-            set text "unknown options: [my AllowedValues [array names opts] and]"
+            set text "unknown options: [AllowedValues [array names opts] and]"
         }
         uplevel [list error $text]
     }
@@ -1278,6 +1279,7 @@ oo::class create ooxml::docx::docx {
 
     method style {cmd args} {
         my variable docs
+        variable ::ooxml::docx::properties
         
         set styles [$docs(word/styles.xml) documentElement]
         switch $cmd {
@@ -1293,7 +1295,7 @@ oo::class create ooxml::docx::docx {
                 $docDefaults appendFromScript {
                     Tag_w:pPrDefault {
                         Tag_w:pPr {
-                            my Create $::ooxml::docx::properties(styleparagraph)
+                            my Create $properties(styleparagraph)
                         }
                     }
                 }
@@ -1311,14 +1313,15 @@ oo::class create ooxml::docx::docx {
                 $docDefaults insertBeforeFromScript {
                     Tag_w:rPrDefault {
                         Tag_w:rPr {
-                            my Create $::ooxml::docx::properties(stylerun)
+                            my Create $properties(stylerun)
                         }
                     }
                 } [$docDefaults firstChild]
                 my CheckRemainingOpts
             }
             "character" -
-            "paragraph" {
+            "paragraph" -
+            "table" {
                 if {![llength $args]} {
                     error "missing the style name argument"
                 }
@@ -1335,13 +1338,21 @@ oo::class create ooxml::docx::docx {
                     Tag_w:style [my Watt type] $cmd [my Watt styleId] $name {
                         Tag_w:name [my Watt val] $name {}
                         Tag_w:basedOn [my Watt val] $basedon {}
-                        if {$cmd eq "paragraph"} {
-                            Tag_w:pPr {
-                                my Create $::ooxml::docx::properties(styleparagraph)
+                        if {$cmd eq "table"} {
+                            Tag_w:tblPr {
+                                Tag_w:tblBorders {
+                                    my CreateOrder $properties(tblBorders)
+                                }
                             }
-                        }
-                        Tag_w:rPr {
-                            my Create $::ooxml::docx::properties(stylerun)
+                        } else {
+                            if {$cmd eq "paragraph"} {
+                                Tag_w:pPr {
+                                    my Create $properties(styleparagraph)
+                                }
+                            }
+                            Tag_w:rPr {
+                                my Create $properties(stylerun)
+                            }
                         }
                     }
                 }
@@ -1404,9 +1415,13 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::properties
 
         OptVal $args "tabledata"
+        set style [my EatOption -style]
         $body appendFromScript {
             Tag_w:tbl {
                 Tag_w:tblPr {
+                    if {$style ne ""} {
+                        Tag_w:tblStyle [my Watt val] $style {}
+                    }
                     Tag_w:tblBorders {
                         my CreateOrder $properties(tblBorders)
                     }

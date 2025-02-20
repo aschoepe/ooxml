@@ -30,10 +30,18 @@ $docx simpletable $simpledata \
 $docx paragraph "I meant outside."
 
 $docx simpletable $simpledata \
-    -topborder {type double space 8} \
-    -bottomborder {type double space 8} \
-    -startborder {type double space 8} \
-    -endborder {type double space 8} \
+    -topborder {type double} \
+    -bottomborder {type double} \
+    -startborder {type double} \
+    -endborder {type double} 
+
+$docx style table myTable \
+    -topborder {type single borderwidth 320} \
+    -bottomborder {type single borderwidth 320} \
+    -startborder {type single borderwidth 320} \
+    -endborder {type single borderwidth 320} 
+$docx paragraph "A table with -style"
+$docx simpletable $simpledata -style myTable
 
 $docx write docx-example3.docx
 $docx destroy

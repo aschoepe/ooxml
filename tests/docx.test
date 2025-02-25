@@ -1,0 +1,36 @@
+#
+# Commands covered: docx
+#
+#
+# (c) 2025 Rolf Ade
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+package require ooxml
+source [file join [file dir [info script]] ../ooxml-docx.tcl]
+namespace import ::ooxml::docx::docx
+
+set docx [docx new]
+test docx-1.1 {paragraph argument check} {
+    catch {$docx paragraph}
+} 1
+
+test docx-1.2 {paragraph argument check} {
+    catch {$docx paragraph "some text"}
+} 0
+
+test docx-1.3 {paragraph argument check} {
+    catch {$docx paragraph "some text" -style}
+} 1
+
+# cleanup
+::tcltest::cleanupTests
+return

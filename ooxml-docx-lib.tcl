@@ -50,7 +50,7 @@ proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
 proc ::ooxml::docx::lib::OptVal {arglist {prefix ""}} {
     if {[llength $arglist] % 2 != 0} {
         if {$prefix ne ""} {append prefix " "}
-        error "invalid arguments: expectecd ${prefix}?-option value ?-option value? .."
+        error "invalid arguments: expected ${prefix}?-option value ?-option value? ..?"
     }
     uplevel "array set opts [list $arglist]"
 }

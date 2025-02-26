@@ -87,9 +87,16 @@ namespace eval ::ooxml::docx {
     }
     set properties(paragraph) [concat $properties(styleparagraph) {-style {w:pStyle PStyle}}]
 
+    set properties(xfrm) {
+        -dimension {a:ext {
+            {width -cx} ST_Emu
+            {height -cy} ST_Emu
+        }}
+    }
+    
     # The content model of sectPr is sequence; keep the options in
     # order (and insert new options at the right place)
-    set properties(sectionsetup) {
+    set properties(sectionsetup1) {
         -sizeAndOrientaion {w:pgSz {
             {height h} ST_TwipsMeasure
             {orientation orient} ST_PageOrientation
@@ -107,25 +114,26 @@ namespace eval ::ooxml::docx {
             other ST_DecimalNumber
         }}
     }
-    set properties(xfrm) {
-        -dimension {a:ext {
-            {width -cx} ST_Emu
-            {height -cy} ST_Emu
-        }}
+
+    set BorderOpts {
+        color ST_HexColor
+        {borderwidth sz} ST_EighthPointMeasure
+        space ST_PointMeasure
+        {type val} ST_Border
     }
+    # The content model of pgBorders is sequence; keep the options in
+    # order (and insert new options at the right place)
+    foreach pageBordersOpts {top left bottom right} {
+        lappend properties(sectionsetup2) \
+            -${pageBordersOpts}PageBorder [list w:$pageBordersOpts $BorderOpts]
+    }
+    
     # The content model of tblPr is sequence; keep the options in
     # order (and insert new options at the right place)
-    set desclist [list]
     foreach tblBordersOpt {top start left bottom end right insideH insideV} {
-        lappend desclist -${tblBordersOpt}border [list w:$tblBordersOpt {
-            {type val} ST_Border
-            color ST_HexColor
-            {borderwidth sz} ST_EighthPointMeasure
-            space ST_PointMeasure
-            shadow CT_OnOff
-        }]
+        lappend properties(tblBorders) \
+            -${tblBordersOpt}Border [list w:$tblBordersOpt $BorderOpts]
     }
-    set properties(tblBorders) $desclist
     
     foreach {name xml} {
         [Content_Types].xml {
@@ -1052,17 +1060,25 @@ oo::class create ooxml::docx::docx {
         my CheckRemainingOpts
     }
 
+    method SectionCommon {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        my CreateOrder $properties(sectionsetup1)
+        Tag_w:pgBorders {
+            my CreateOrder $properties(sectionsetup2)
+        }
+    }
+    
     # WordprocessingML has no concept of a page. Rather it groups
     # paragraphs (the main building block) into "sections". The page
     # setup of a section is located within the w:p subtree of the last
     # paragraph of the section. And that settings reach out _back_
     # over all w:p subtrees without page setup.
     method pagesetup {args} {
-        my variable docs
         my variable body
         my variable setuproot
         my variable pagesetup
-        variable ::ooxml::docx::xmlns
 
         if {$pagesetup ne ""} {
             $pagesetup delete
@@ -1071,7 +1087,7 @@ oo::class create ooxml::docx::docx {
         set pagesetup [$setuproot lastChild]
         array set opts $args
         $pagesetup appendFromScript {
-            my CreateOrder $::ooxml::docx::properties(sectionsetup)
+            my SectionCommon
         }
         my CheckRemainingOpts
     }
@@ -1097,7 +1113,7 @@ oo::class create ooxml::docx::docx {
         $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
         array set opts $args
         $sectionsetup appendFromScript {
-            my CreateOrder $::ooxml::docx::properties(sectionsetup)
+            my SectionCommon
         }
         my CheckRemainingOpts
     }

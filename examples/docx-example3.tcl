@@ -25,21 +25,21 @@ $docx simpletable $table
 $docx paragraph "I want borders."
 $docx paragraph "Sure thing:"
 $docx simpletable $simpledata \
-    -insideVborder {type single space 8} -insideHborder {type single space 8}
+    -insideVBorder {type single space 8} -insideHBorder {type single space 8}
 
 $docx paragraph "I meant outside."
 
 $docx simpletable $simpledata \
-    -topborder {type double} \
-    -bottomborder {type double} \
-    -startborder {type double} \
-    -endborder {type double} 
+    -topBorder {type double} \
+    -bottomBorder {type double} \
+    -startBorder {type double} \
+    -endBorder {type double} 
 
 $docx style table myTable \
-    -topborder {type single borderwidth 320} \
-    -bottomborder {type single borderwidth 320} \
-    -startborder {type single borderwidth 320} \
-    -endborder {type single borderwidth 320} 
+    -topBorder {type single borderwidth 320} \
+    -bottomBorder {type single borderwidth 320} \
+    -startBorder {type single borderwidth 320} \
+    -endBorder {type single borderwidth 320} 
 $docx paragraph "A table with -style"
 $docx simpletable $simpledata -style myTable
 

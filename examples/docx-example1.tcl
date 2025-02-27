@@ -77,6 +77,11 @@ $docx paragraph $loreipsum -align both \
     -indentation {firstLine 3cm hanging 2cm start 1cm end 4cm} \
     -spacing {before 240 after 120}
 
+$docx paragraph $loreipsum -leftBorder {type thick borderwidth 20 color 00ff00 space 20}
+
+$docx style paragraph withBorder -rightBorder {type thick borderwidth 20 color 00ff00 space 20}
+$docx paragraph $loreipsum -style withBorder
+$docx paragraph $loreipsum -style withBorder
 
 $docx write docx-example1.docx
 $docx destroy

@@ -126,14 +126,15 @@ namespace eval ::ooxml::docx {
         space ST_PointMeasure
         {type val} ST_Border
     }
-    foreach pageBordersOpt {top left bottom right} {
-        lappend properties(sectionsetup2) \
-            -${pageBordersOpt}PageBorder [list w:$pageBordersOpt $BorderOpts]
-    }
-    
-    foreach tblBordersOpt {top start left bottom end right insideH insideV} {
-        lappend properties(tblBorders) \
-            -${tblBordersOpt}Border [list w:$tblBordersOpt $BorderOpts]
+    foreach {property borderOptions} {
+        paragraphBorders {top left bottom right between bar}
+        sectionBorders {top left bottom right}
+        tableBorders {top start left bottom end right insideH insideV}
+    } {
+        foreach option $borderOptions {
+            lappend properties($property) \
+                -${option}Border [list w:$option $BorderOpts]
+        }
     }
     
     foreach {name xml} {
@@ -769,12 +770,16 @@ oo::class create ooxml::docx::docx {
     
     method paragraph {text args} {
         my variable body
-
+        variable ::ooxml::docx::properties
+        
         OptVal $args "text"
         $body appendFromScript {
             Tag_w:p {
                 Tag_w:pPr {
-                    my Create $::ooxml::docx::properties(paragraph)
+                    Tag_w:pBdr {
+                        my Create $properties(paragraphBorders)
+                    }
+                    my Create $properties(paragraph)
                 }
                 Tag_w:r {
                     my Wt $text
@@ -809,7 +814,7 @@ oo::class create ooxml::docx::docx {
                                  is invalid"]
             unset opts($option)
         } else {
-            return ""
+            set ooxmlvalue $default
         }
         return [list $attname $ooxmlvalue]
     }
@@ -883,6 +888,9 @@ oo::class create ooxml::docx::docx {
                 $docDefaults appendFromScript {
                     Tag_w:pPrDefault {
                         Tag_w:pPr {
+                            Tag_w:pBdr {
+                                my Create $properties(paragraphBorders)
+                            }
                             my Create $properties(styleparagraph)
                         }
                     }
@@ -935,6 +943,9 @@ oo::class create ooxml::docx::docx {
                         } else {
                             if {$cmd eq "paragraph"} {
                                 Tag_w:pPr {
+                                    Tag_w:pBdr {
+                                        my Create $properties(paragraphBorders)
+                                    }
                                     my Create $properties(styleparagraph)
                                 }
                             }

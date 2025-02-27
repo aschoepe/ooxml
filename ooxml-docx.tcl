@@ -58,6 +58,12 @@ namespace eval ::ooxml::docx {
         wps http://schemas.microsoft.com/office/word/2010/wordprocessingShape
     }
 
+    # Most WordprocessingML elements have a sequence content model. So
+    # the basic rule is to keep the order of the options below as is
+    # (and to care that new options are inserted at the right place).
+    # Exceptions are locally noted.
+
+    # Unspecified order
     set properties(stylerun) {
         -bold {{w:b w:bCs} CT_OnOff}
         -color {w:color ST_HexColor}
@@ -69,8 +75,12 @@ namespace eval ::ooxml::docx {
         -underline {w:u ST_Underline}
     }
     set properties(run) [concat $properties(stylerun) {-style {w:rStyle RStyle}}]
+
     set properties(styleparagraph) {
-        -align {w:jc ST_Jc}
+        -spacing {w:spacing {
+            after ST_TwipsMeasure
+            before ST_TwipsMeasure
+            line ST_TwipsMeasure}}
         -indentation {w:ind {
             end ST_SignedTwipsMeasure
             endChars ST_DecimalNumber
@@ -80,12 +90,9 @@ namespace eval ::ooxml::docx {
             hangingChars ST_DecimalNumber
             start ST_SignedTwipsMeasure
             startChars ST_DecimalNumber}}
-        -spacing {w:spacing {
-            after ST_TwipsMeasure
-            before ST_TwipsMeasure
-            line ST_TwipsMeasure}}
+        -align {w:jc ST_Jc}
     }
-    set properties(paragraph) [concat $properties(styleparagraph) {-style {w:pStyle PStyle}}]
+    set properties(paragraph) [concat {-style {w:pStyle PStyle}} $properties(styleparagraph)]
 
     set properties(xfrm) {
         -dimension {a:ext {
@@ -94,8 +101,6 @@ namespace eval ::ooxml::docx {
         }}
     }
     
-    # The content model of sectPr is sequence; keep the options in
-    # order (and insert new options at the right place)
     set properties(sectionsetup1) {
         -sizeAndOrientaion {w:pgSz {
             {height h} ST_TwipsMeasure
@@ -121,15 +126,11 @@ namespace eval ::ooxml::docx {
         space ST_PointMeasure
         {type val} ST_Border
     }
-    # The content model of pgBorders is sequence; keep the options in
-    # order (and insert new options at the right place)
-    foreach pageBordersOpts {top left bottom right} {
+    foreach pageBordersOpt {top left bottom right} {
         lappend properties(sectionsetup2) \
-            -${pageBordersOpts}PageBorder [list w:$pageBordersOpts $BorderOpts]
+            -${pageBordersOpt}PageBorder [list w:$pageBordersOpt $BorderOpts]
     }
     
-    # The content model of tblPr is sequence; keep the options in
-    # order (and insert new options at the right place)
     foreach tblBordersOpt {top start left bottom end right insideH insideV} {
         lappend properties(tblBorders) \
             -${tblBordersOpt}Border [list w:$tblBordersOpt $BorderOpts]
@@ -527,10 +528,10 @@ oo::class create ooxml::docx::docx {
             $docs($what) delete
         }
         set docs($what) $doc
-        # If pagesetup or sectionsetup are not empty they stored a node
-        # out of the fragment list of document and they are now gone
-        # with the deletion of document
         if {$what eq "word/document.xml"} {
+            # If pagesetup or sectionsetup are not empty they stored a
+            # node out of the fragment list of document and they are
+            # now gone with the deletion of document
             my variable setuproot
             my variable pagesetup
             my variable sectionsetup
@@ -581,122 +582,102 @@ oo::class create ooxml::docx::docx {
             [my Watt cs] $value
     }
 
-    method CreateWorker {value opt optdata} {
-        upvar opts opts
-        
-        switch [llength $optdata] {
-            2 {
-                lassign $optdata tags attdefs
-                if {[llength $attdefs] == 1} {
-                    # An element with just w:val as attribute and
-                    # the attdefs gives the value type.
-                    set ooxmlvalue [my CallType $attdefs $value \
-                                        "the value \"$value\" given to the \"$opt\"\
-                                              option is invalid"]
-                    foreach tag $tags {
-                        Tag_$tag w:val $ooxmlvalue
-                    }
-                    unset opts($opt)
-                    return -code continue
-                }
-                # If we stumble about a tag with just one
-                # attribute to set and that attribute is not w:val
-                # this case has to be handled here.
-                #
-                # For now the code assumes always several atts
-                # and therefore the value to the option is always
-                # handled as a key value pairs list.
-                set attlist ""
-                array unset atts
-                if {[catch {array set atts $value}]} {
-                    set keys ""
-                    foreach {attdata type} $attdefs {
-                        lappend keys [lindex $attdata 0]
-                    }
-                    error "the value given to the \"$opt\" option is\
-                           invalid, expected ist a key value pairs\
-                           list with keys out of\
-                           [AllowedValues $keys]"
-                }
-                foreach {attdata type} $attdefs {
-                    if {[llength $attdata] == 2} {
-                        lassign $attdata key attname
-                    } else {
-                        set key $attdata
-                        set attname $key
-                    }
-                    if {![info exists atts($key)]} {
-                        continue
-                    }
-                    set ooxmlvalue [my CallType $type $atts($key) \
-                                        "the argument \"$value\" given to the \"$opt\"\
-                             option is invalid: the value given to the key\
-                             \"$key\" in the argument is invalid"]
-                    if {[string index $attname 0] eq "-"} {
-                        lappend attlist [string range $attname 1 end] $ooxmlvalue
-                    } else {
-                        lappend attlist [my Watt $attname] $ooxmlvalue
-                    }
-                    unset atts($key)
-                }
-                foreach tag $tags {
-                    Tag_$tag {*}$attlist {}
-                }
-                unset opts($opt)                    
-                # Check if there are unknown keys left in the key
-                # values list
-                set remainigKeys [array names atts]
-                if {[llength $remainigKeys] == 0} {
-                    return -code continue
-                }
-                set keys ""
-                foreach {attdata type} $attdefs {
-                    lappend keys [lindex $attdata 0]
-                }
-                if {[llength $remainigKeys] == 1} {
-                    error "unknown key \"[lindex $remainigKeys 0]\" in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [AllowedValues $keys]"
-                } else {
-                    error "unknown keys [AllowedValues $remainigKeys] in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [AllowedValues $keys]"
-                }
-            }
-            3 {
-                my [lindex $optdata 2] $value
-                unset opts($opt)
-                
-            }
-            default {
-                error "invalid properties value"
-            }
-        }
-    }
-    
     method Create switchActionList {
         upvar opts opts
-        array set switchesData $switchActionList
-
-        set switches [array names switchesData]
-        foreach {opt value} [array get opts] {
-            if {$opt ni $switches} {
-                continue
-            }
-            set optdata $switchesData($opt)
-            my CreateWorker $value $opt $optdata
-        }
-    }
-
-    method CreateOrder switchActionList {
-        upvar opts opts
-
+        
         foreach {opt optdata} $switchActionList {
             if {![info exists opts($opt)]} {
                 continue
             }
             set value $opts($opt)
-            my CreateWorker $value $opt $optdata
+            switch [llength $optdata] {
+                2 {
+                    lassign $optdata tags attdefs
+                    if {[llength $attdefs] == 1} {
+                        # An element with just w:val as attribute and
+                        # the attdefs gives the value type.
+                        set ooxmlvalue [my CallType $attdefs $value \
+                                            "the value \"$value\" given to the \"$opt\"\
+                                              option is invalid"]
+                        foreach tag $tags {
+                            Tag_$tag w:val $ooxmlvalue
+                        }
+                        unset opts($opt)
+                        continue
+                    }
+                    # If we stumble about a tag with just one
+                    # attribute to set and that attribute is not w:val
+                    # this case has to be handled here.
+                    #
+                    # For now the code assumes always several atts
+                    # and therefore the value to the option is always
+                    # handled as a key value pairs list.
+                    set attlist ""
+                    array unset atts
+                    if {[catch {array set atts $value}]} {
+                        set keys ""
+                        foreach {attdata type} $attdefs {
+                            lappend keys [lindex $attdata 0]
+                        }
+                        error "the value given to the \"$opt\" option is\
+                           invalid, expected ist a key value pairs\
+                           list with keys out of\
+                           [AllowedValues $keys]"
+                    }
+                    foreach {attdata type} $attdefs {
+                        if {[llength $attdata] == 2} {
+                            lassign $attdata key attname
+                        } else {
+                            set key $attdata
+                            set attname $key
+                        }
+                        if {![info exists atts($key)]} {
+                            continue
+                        }
+                        set ooxmlvalue [my CallType $type $atts($key) \
+                                            "the argument \"$value\" given to the \"$opt\"\
+                             option is invalid: the value given to the key\
+                             \"$key\" in the argument is invalid"]
+                        if {[string index $attname 0] eq "-"} {
+                            lappend attlist [string range $attname 1 end] $ooxmlvalue
+                        } else {
+                            lappend attlist [my Watt $attname] $ooxmlvalue
+                        }
+                        unset atts($key)
+                    }
+                    foreach tag $tags {
+                        Tag_$tag {*}$attlist {}
+                    }
+                    unset opts($opt)                    
+                    # Check if there are unknown keys left in the key
+                    # values list
+                    set remainigKeys [array names atts]
+                    if {[llength $remainigKeys] == 0} {
+                        continue
+                    }
+                    set keys ""
+                    foreach {attdata type} $attdefs {
+                        lappend keys [lindex $attdata 0]
+                    }
+                    if {[llength $remainigKeys] == 1} {
+                        error "unknown key \"[lindex $remainigKeys 0]\" in\
+                               the value \"$value\" of the option \"$opt\",\
+                               the expected keys are [AllowedValues $keys]"
+                    } else {
+                        error "unknown keys [AllowedValues $remainigKeys] in\
+                               the value \"$value\" of the option \"$opt\",\
+                               the expected keys are [AllowedValues $keys]"
+                    }
+                }
+                3 {
+                    my [lindex $optdata 2] $value
+                    unset opts($opt)
+                    
+                }
+                default {
+                    error "invalid properties value"
+                }
+            }
         }
     }
     
@@ -948,7 +929,7 @@ oo::class create ooxml::docx::docx {
                         if {$cmd eq "table"} {
                             Tag_w:tblPr {
                                 Tag_w:tblBorders {
-                                    my CreateOrder $properties(tblBorders)
+                                    my Create $properties(tblBorders)
                                 }
                             }
                         } else {
@@ -1030,7 +1011,7 @@ oo::class create ooxml::docx::docx {
                         Tag_w:tblStyle [my Watt val] $style {}
                     }
                     Tag_w:tblBorders {
-                        my CreateOrder $properties(tblBorders)
+                        my Create $properties(tblBorders)
                     }
                 }
                 set widths [my EatOption -columnwidths]
@@ -1064,9 +1045,9 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::properties
         upvar opts opts
 
-        my CreateOrder $properties(sectionsetup1)
+        my Create $properties(sectionsetup1)
         Tag_w:pgBorders {
-            my CreateOrder $properties(sectionsetup2)
+            my Create $properties(sectionsetup2)
         }
     }
     

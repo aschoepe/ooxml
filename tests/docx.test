@@ -18,6 +18,8 @@ package require ooxml
 source [file join [file dir [info script]] ../ooxml-docx.tcl]
 namespace import ::ooxml::docx::docx
 
+
+
 set docx [docx new]
 test docx-1.1 {paragraph argument check} {
     catch {$docx paragraph}
@@ -30,6 +32,9 @@ test docx-1.2 {paragraph argument check} {
 test docx-1.3 {paragraph argument check} {
     catch {$docx paragraph "some text" -style}
 } 1
+$docx delete
+
+
 
 # cleanup
 ::tcltest::cleanupTests

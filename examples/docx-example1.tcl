@@ -73,5 +73,10 @@ $docx paragraph "Second Level Heading 2" -style H2
 $docx paragraph $loreipsum -style Base
 
 
+$docx paragraph $loreipsum -align both \
+    -indentation {firstLine 3cm hanging 2cm start 1cm end 4cm} \
+    -spacing {before 240 after 120}
+
+
 $docx write docx-example1.docx
 $docx destroy

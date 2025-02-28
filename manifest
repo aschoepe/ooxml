@@ -1,11 +1,11 @@
-C Worksheet\smust\snot\scontain\sa\s"/",\smap\sit\sto\s"-".
-D 2025-02-28T08:07:39.708
+C Correction\sof\sthe\sREADME
+D 2025-02-28T08:14:39.560
 F .fossil-settings/ignore-glob ac33082c8ffc2e8f0cd6887d5905eee927e3a0f6ac0b24ef1ad97e9d398aa1d5
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F Makefile.in 72d943aeb040bab80d40162bca1009a90e72f278fd11896006c2acea4bbb54b7
-F README 17c00acf94be3c88cef9214d90dca482037281b9519e19dcc6472134e322aee7
+F README b55eabdf2b7071e5f61a99f35d3f905171a58dfcf111ca1a7a96408bd43da071
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 6412ea0f87438b3960e070a19bf5f4e986ff996b3c568bb747f9837bb6f17136 x
 F configure.ac f67aa7808c9dba4139598b52b44b76a75c0e2468b15c6d5fc3cd2f2b6b7329a0
@@ -79,8 +79,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 3bf33e6b1cf43624bfdeeade6523a1249ec6e7b7c030db02031741df544f6252
-R 71af6548016653cbfd3382ef7d9dcd8f
+P 3255e23d16914f2f58780697b3b20cec249bd81dd49d041e2f67534628120f20
+R ac3fa2539a8650978c7b1f26691bb01b
 U alex
-Z ef4e69f8afa94038f0cc70c3ece1d7a7
+Z 4846bb234847ecd5ec544a9f575b4a05
 # Remove this line to create a well-formed Fossil manifest.

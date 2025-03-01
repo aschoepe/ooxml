@@ -37,6 +37,12 @@ following methods:
   within the paragraph. See [CHARACTER OPTIONS](#character) for the
   valid options and the type of their argument.
 
+**import** *part* *docx*
+
+: Imports the given *part* from the file *docx* into the docx object,
+  replacing what the object had for that part of the docx zip archive,
+  if ever.
+
 **pagesetup** *?-option value ...?*
 
 The allowed options are:
@@ -59,6 +65,9 @@ The allowed options are:
 **readpart** *part* *filename*
 
 **write** *?filename?*
+
+: Writes the object as WordprocessingML docx file to *filename*. If
+  the argument is ommited then document.docx will be used.
 
 **writepart** *part* *filename*
 

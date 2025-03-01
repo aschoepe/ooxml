@@ -136,6 +136,11 @@ namespace eval ::ooxml::docx {
                 -${option}Border [list w:$option $BorderOpts]
         }
     }
+
+    set properties(numbering) {
+        -level {w:ilvl ST_DecimalNumber}
+        -styleNr {w:numId ST_DecimalNumber}
+    }
     
     foreach {name xml} {
         [Content_Types].xml {
@@ -820,6 +825,9 @@ oo::class create ooxml::docx::docx {
         $body appendFromScript {
             Tag_w:p {
                 Tag_w:pPr {
+                    Tag_w:numPr {
+                        my Create $properties(numbering)
+                    }
                     Tag_w:pBdr {
                         my Create $properties(paragraphBorders)
                     }

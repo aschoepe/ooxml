@@ -207,6 +207,9 @@ namespace eval ::ooxml::docx {
                 </w:font>
             </w:fonts>
         }
+        word/numbering.xml {
+            <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
+        }
         word/settings.xml {
             <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
                 <w:zoom w:val="bestFit" w:percent="228"/>
@@ -870,6 +873,22 @@ oo::class create ooxml::docx::docx {
         my CheckRemainingOpts
     }
 
+    method numbering {cmd args} {
+        my variable docs
+
+        set numbering $docs(word/numbering.xml)
+        switch $cmd {
+            "add" {
+                set abstractNumIds [lsort -integer \
+                                        [$numbering selectNodes -list {
+                                            w:abstractNum @w:abstractNumId
+                                        }]]
+                set id [expr {[lindex $abstractNumIds end] + 1}]
+                
+            }
+        }
+    }
+    
     method style {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties

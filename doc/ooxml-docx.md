@@ -51,7 +51,7 @@ The allowed options are:
 
 : Appends *text* as paragraph to the content of the document. If the
   *-style* option is given, the referenced style will be used. The
-  other options may loccaly overwrite a style stetting or add more
+  other options may locally overwrite a style stetting or add more
   properties. See [PARAGRAPH OPTIONS](#paragraph) and [CHARACTER
   OPTIONS](#character) for the valid options and the type of their
   argument.

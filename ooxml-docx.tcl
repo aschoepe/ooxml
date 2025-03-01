@@ -515,12 +515,58 @@ oo::class create ooxml::docx::docx {
     }
     
     method import {what docxfile} {
-
+        variable ::ooxml::Tcl9
+        variable ::ooxml::zipfs
+        my variable docs
+        
+        if {[catch {
+            if {$Tcl9} {
+                set mnt [zipfs mount $docxfile docx]
+            } else {
+                package require vfs::zip
+                set mnt [vfs::zip::Mount $docxfile docx]
+            }
+        } errMsg]} {
+            error "Cannot mount \"$docxfile\" as zip archive. Details: $errMsg"
+        }
+        switch $what {
+            "styles" {
+                set what "word/styles.xml"
+            }
+        }
+        if {[catch {set fd [open ${zipfs}docx/$what r]}]} {
+            error "Did not found part \"$what\" in $docxfile"
+        }
+        fconfigure $fd -encoding utf-8
+        if {[catch {set thisdoc [dom parse [read $fd]]} errMsg]} {
+            error "Cannot parse part $what in $docxfile. Details: $errMsg"
+        }
+        if {[info exists docs($what)]} {
+            $docs($what) delete
+        }
+        set docs($what) $thisdoc
+        if {$what eq "word/document.xml"} {
+            my ResetPageSetup
+        }
     }
 
-    method readpart {what file} {
+    method ResetPageSetup {} {
         my variable docs
         variable ::ooxml::docx::xmlns
+
+        # If pagesetup or sectionsetup are not empty they stored a
+        # node out of the fragment list of document and they are
+        # now gone with the deletion of document
+        my variable setuproot
+        my variable pagesetup
+        my variable sectionsetup
+        set setuproot [$docs(word/document.xml) createElementNS $xmlns(w) w:umbrella]
+        set pagesetup ""
+        set sectionsetup ""
+    }
+    
+    method readpart {what file} {
+        my variable docs
 
         set fd [::tdom::xmlOpenFile $file]
         if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
@@ -533,15 +579,7 @@ oo::class create ooxml::docx::docx {
         }
         set docs($what) $doc
         if {$what eq "word/document.xml"} {
-            # If pagesetup or sectionsetup are not empty they stored a
-            # node out of the fragment list of document and they are
-            # now gone with the deletion of document
-            my variable setuproot
-            my variable pagesetup
-            my variable sectionsetup
-            set setuproot [$docs(word/document.xml) createElementNS $xmlns(w) w:umbrella]
-            set pagesetup ""
-            set sectionsetup ""
+            my ResetPageSetup
         }
     }
 

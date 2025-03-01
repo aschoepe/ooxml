@@ -533,6 +533,9 @@ oo::class create ooxml::docx::docx {
             "styles" {
                 set what "word/styles.xml"
             }
+            "numbering" {
+                set what "word/numbering.xml"
+            }
         }
         if {[catch {set fd [open ${zipfs}docx/$what r]}]} {
             error "Did not found part \"$what\" in $docxfile"

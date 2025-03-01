@@ -40,8 +40,11 @@ following methods:
 **import** *part* *docx*
 
 : Imports the given *part* from the file *docx* into the docx object,
-  replacing what the object had for that part of the docx zip archive,
-  if ever.
+  replacing what the object had for that part of the docx zip archive.
+  in case.
+  
+  The shortcut "styles" may be used for word/styles.xml and
+  "numbering" for word/numbering.xml.
 
 **pagesetup** *?-option value ...?*
 

@@ -1,5 +1,5 @@
-C Correction\sof\sthe\sREADME
-D 2025-02-28T08:14:39.560
+C Additional\scharacters\sthat\scannot\sbe\sused\sin\sthe\sworksheet\sname\sand\smax\slength\s31\scharacters.
+D 2025-03-02T07:27:32.847
 F .fossil-settings/ignore-glob ac33082c8ffc2e8f0cd6887d5905eee927e3a0f6ac0b24ef1ad97e9d398aa1d5
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -26,7 +26,7 @@ F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
-F ooxml.tcl 7d0d5f07a7669a1438a027618a13ded8a194c028218b3968c424dada2ca1e215
+F ooxml.tcl 0ff48262f4ede08d193d18aed599fc98775e47c0dff764daa1fba3f6f7371948
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -79,8 +79,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 3255e23d16914f2f58780697b3b20cec249bd81dd49d041e2f67534628120f20
-R ac3fa2539a8650978c7b1f26691bb01b
+P f9bba3d85334338ef938f1ed218d1be4047e5d8f9891009299125f2e133ba12b
+R f593441c44d15fe85609691c5d8311b9
 U alex
-Z 4846bb234847ecd5ec544a9f575b4a05
+Z ab71c09632242f87ab95277b0343e7f4
 # Remove this line to create a well-formed Fossil manifest.

@@ -141,6 +141,12 @@ namespace eval ::ooxml::docx {
         -level {w:ilvl ST_DecimalNumber}
         -styleNr {w:numId ST_DecimalNumber}
     }
+
+    set properties(abstractNumStyle) {
+        -numberFormat {w:numFmt ST_NumberFormat}
+        -levelText {w:lvlText NoCheck}
+        -align {w:lvlJc ST_Jc}
+    }
     
     foreach {name xml} {
         [Content_Types].xml {
@@ -925,16 +931,63 @@ oo::class create ooxml::docx::docx {
 
     method numbering {cmd args} {
         my variable docs
+        variable ::ooxml::docx::properties
 
-        set numbering $docs(word/numbering.xml)
+        set numbering [$docs(word/numbering.xml) documentElement]
         switch $cmd {
-            "add" {
-                set abstractNumIds [lsort -integer \
-                                        [$numbering selectNodes -list {
-                                            w:abstractNum @w:abstractNumId
-                                        }]]
-                set id [expr {[lindex $abstractNumIds end] + 1}]
-                
+            "abstractNum" {
+                if {![llength $args]} {
+                    error "missing the style id argument"
+                }
+                set id [lindex $args 0]
+                set style [$numbering selectNodes {
+                    w:abstractNum[@w:abstractNumId=$id]
+                }]
+                if {$style ne ""} {
+                    error "abstractNum style id $id already exists"
+                }
+                $numbering appendFromScript {
+                    Tag_w:abstractNum [my Watt abstractNumId] $id {
+                        set level 0
+                        foreach levelData [lrange $args 1 end] {
+                            Tag_w:lvl [my Watt val] $level {
+                                set start [my EatOption -start]
+                                if {$start ne ""} {
+                                    ST_DecimalNumber $start
+                                } else {
+                                    set start 1
+                                }
+                                Tag_w:start [my Watt val] $start {}
+                                my Croate properties(abstractNumStyle)
+                            }
+                        }
+                    }
+                }
+            }
+            "abstractNumIds" {
+                return [lsort -integer \
+                            [$numbering selectNodes -list {
+                                w:abstractNum @w:abstractNumId
+                            }]]
+            }
+            "delete" {
+                if {[llength $args] != 2} {
+                    error "wrong number of arguments for the subcommand \"delete\", expected\
+                               the style type and the style ID"
+                }
+                lassign $args type id
+                if {$type ni {abstractNum num}} {
+                    error "unknown style type \"type\""
+                }
+                switch $type {
+                    "abstractNum" {
+                        foreach node [$numbering selectNodes {
+                            w:abstractNum[@w:abstractNumId=$id]
+                        }] {
+                            $node delete
+                        }
+                    }
+                }
             }
         }
     }
@@ -942,7 +995,7 @@ oo::class create ooxml::docx::docx {
     method style {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties
-        
+
         set styles [$docs(word/styles.xml) documentElement]
         switch $cmd {
             "paragraphdefault" {
@@ -1036,7 +1089,7 @@ oo::class create ooxml::docx::docx {
             "delete" {
                 if {[llength $args] != 2} {
                     error "wrong number of arguments for the subcommand \"delete\", expected\
-                          " the style type and the style ID"
+                           the style type and the style ID"
                 }
                 lassign $args type name
                 if {$type ni {paragraph paragraphdefault character characterdefault}} {

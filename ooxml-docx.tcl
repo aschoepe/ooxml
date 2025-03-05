@@ -139,7 +139,7 @@ namespace eval ::ooxml::docx {
 
     set properties(numbering) {
         -level {w:ilvl ST_DecimalNumber}
-        -styleNr {w:numId ST_DecimalNumber}
+        -numberingStyle {w:numId ST_DecimalNumber}
     }
 
     set properties(abstractNumStyle) {
@@ -955,7 +955,7 @@ oo::class create ooxml::docx::docx {
                         set levelnr 0
                         foreach level $levelData {
                             OptVal $level "option"
-                            Tag_w:lvl [my Watt val] $levelnr {
+                            Tag_w:lvl [my Watt ilvl] $levelnr {
                                 set start [my EatOption -start]
                                 if {$start ne ""} {
                                     ST_DecimalNumber $start
@@ -964,6 +964,12 @@ oo::class create ooxml::docx::docx {
                                 }
                                 Tag_w:start [my Watt val] $start {}
                                 my Create $properties(abstractNumStyle)
+                                Tag_w:pPr {
+                                    my Create $properties(styleparagraph)
+                                }
+                                Tag_w:rPr {
+                                    my Create $properties(stylerun)
+                                }
                             }
                             if {[catch {my CheckRemainingOpts} errMsg]} {
                                 error "level definition $levelnr: $errMsg"

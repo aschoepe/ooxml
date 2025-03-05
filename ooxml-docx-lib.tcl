@@ -344,6 +344,41 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_TabJc {value} {
+    set values {
+        clear
+        start
+        center
+        end
+        decimal
+        bar
+        num
+        left
+        right
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown tab stop type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TabTlc {value} {
+    set values {
+        none
+        dot
+        hyphen
+        underscore
+        heavy
+        middleDot
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown tab fill type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::W3CDTF {value} {
     if {[catch {
         set value [clock format [clock scan $value] -format %Y-%m-%dT%H:%M:%SZ -gmt 1]

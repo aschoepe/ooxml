@@ -341,21 +341,21 @@ namespace eval ::ooxml::docx {
         w:noPunctuationKerning w:noResizeAllowed w:noSpaceRaiseLower
         w:noTabHangInd w:notTrueType w:noWrap w:nsid w:num w:numbering
         w:numberingChange w:numFmt w:numId w:numIdMacAtCleanup
-        w:numPicBullet w:numPr w:numRestart w:numStart w:numStyleLink
+        w:numPicBullet w:numRestart w:numStart w:numStyleLink
         w:object w:objectEmbed w:objectLink w:odso w:oMath
         w:optimizeForBrowser w:outline w:outlineLvl w:overflowPunct
-        w:p w:pageBreakBefore w:panose1 w:paperSrc w:pBdr w:permEnd
+        w:p w:pageBreakBefore w:panose1 w:paperSrc w:permEnd
         w:permStart w:personal w:personalCompose w:personalReply
         w:pgBorders w:pgMar w:pgNum w:pgNumType w:pgSz w:pict
         w:picture w:pitch w:pixelsPerInch w:placeholder w:pos
-        w:position w:pPr w:pPrChange w:pPrDefault
+        w:position w:pPrChange w:pPrDefault
         w:printBodyTextBeforeHeader w:printColBlack w:printerSettings
         w:printFormsData w:printFractionalCharacterWidth
         w:printPostScriptOverText w:printTwoOnOne w:proofErr
         w:proofState w:pStyle w:ptab w:qFormat w:query w:r
         w:readModeInkLockDown w:recipientData w:recipients w:relyOnVML
         w:removeDateAndTime w:removePersonalInformation w:result
-        w:revisionView w:rFonts w:richText w:right w:rPr w:rPrChange
+        w:revisionView w:rFonts w:richText w:right w:rPrChange
         w:rPrDefault w:rsid w:rsidRoot w:rsids w:rStyle w:rt w:rtl
         w:rtlGutter w:ruby w:rubyAlign w:rubyBase w:rubyPr
         w:saveFormsData w:saveInvalidXml w:savePreviewPicture
@@ -378,10 +378,10 @@ namespace eval ::ooxml::docx {
         w:suppressSpacingAtTopOfPage w:suppressSpBfAfterPgBrk
         w:suppressTopSpacing w:suppressTopSpacingWP
         w:swapBordersFacingPages w:sym w:sz w:szCs w:t w:tab
-        w:tabIndex w:table w:tabs w:tag w:targetScreenSz w:tbl
-        w:tblBorders w:tblCaption w:tblCellMar w:tblCellSpacing
+        w:tabIndex w:table w:tag w:targetScreenSz w:tbl
+        w:tblCaption w:tblCellMar w:tblCellSpacing
         w:tblDescription w:tblGrid w:tblGridChange w:tblHeader
-        w:tblInd w:tblLayout w:tblLook w:tblOverlap w:tblpPr w:tblPr
+        w:tblInd w:tblLayout w:tblLook w:tblOverlap w:tblpPr
         w:tblPrChange w:tblPrEx w:tblPrExChange w:tblStyle
         w:tblStyleColBandSize w:tblStylePr w:tblStyleRowBandSize
         w:tblW w:tc w:tcBorders w:tcFitText w:tcMar w:tcPr
@@ -402,6 +402,11 @@ namespace eval ::ooxml::docx {
         w:writeProtection w:yearLong w:yearShort w:zoom
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) elementNode Tag_$tag
+    }
+    foreach tag {
+        w:tabs w:pPr w:rPr w:tblBorders w:tblPr w:numPr w:pBdr
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
     }
     foreach tag {
         Relationships Relationship
@@ -823,7 +828,25 @@ oo::class create ooxml::docx::docx {
         }
         return $p
     }
-    
+
+    method Tabs {tabsdata} {
+        foreach tabstop $tabsdata {
+            if {[llength $tabstop] == 1} {
+                OptVal [list -tabs [list pos $tabstop type "start"]] "" 
+            } else {
+                OptVal [list -tabs [list $tabstop]] ""
+            }
+            my Create {
+                -tabs {w:tab {
+                    leader ST_TabTlc
+                    pos ST_SignedTwipsMeasure
+                    {type val} ST_TabJc
+                }}
+            }
+            unset opts
+        }
+    }
+            
     method paragraph {text args} {
         my variable body
         variable ::ooxml::docx::properties
@@ -837,6 +860,9 @@ oo::class create ooxml::docx::docx {
                     }
                     Tag_w:pBdr {
                         my Create $properties(paragraphBorders)
+                    }
+                    Tag_w:tabs {
+                        my Tabs [my EatOption -tabs]
                     }
                     my Create $properties(paragraph)
                 }
@@ -855,7 +881,7 @@ oo::class create ooxml::docx::docx {
         # ooxml::docx namespace.
         set error 0
         if {[catch {set ooxmlvalue [$type $value]} errMsg]} {
-            if {![llength [info procs ::ooxml::docx::$type]]} {
+            if {![llength [info procs ::ooxml::docx::lib::$type]]} {
                 if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
                     set error 1
                 }

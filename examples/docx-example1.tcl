@@ -83,5 +83,7 @@ $docx style paragraph withBorder -rightBorder {type thick borderwidth 20 color 0
 $docx paragraph $loreipsum -style withBorder
 $docx paragraph $loreipsum -style withBorder
 
+$docx paragraph "Tabs test $loreipsum" -tabs {3cm 6cm 9cm 12cm}
+
 $docx write docx-example1.docx
 $docx destroy

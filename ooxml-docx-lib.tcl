@@ -38,7 +38,7 @@ namespace eval ::ooxml::docx {
 
 namespace eval ::ooxml::docx::lib {
 
-    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF
+    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF AllowedValues
 
 }
 

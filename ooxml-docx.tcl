@@ -856,8 +856,12 @@ oo::class create ooxml::docx::docx {
         set error 0
         if {[catch {set ooxmlvalue [$type $value]} errMsg]} {
             if {![llength [info procs ::ooxml::docx::$type]]} {
-                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {set error 1}
-            } else {set error 1}
+                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
+                    set error 1
+                }
+            } else {
+                set error 1
+            }
             if {$error} {
                 error "$errtext: $errMsg"
             }
@@ -936,10 +940,10 @@ oo::class create ooxml::docx::docx {
         set numbering [$docs(word/numbering.xml) documentElement]
         switch $cmd {
             "abstractNum" {
-                if {![llength $args]} {
-                    error "missing the style id argument"
+                if {[llength $args] != 2} {
+                    error "wrong # of argumentes, expecting abstractNumId <list with each element a level description>"
                 }
-                set id [lindex $args 0]
+                lassign $args id levelData
                 set style [$numbering selectNodes {
                     w:abstractNum[@w:abstractNumId=$id]
                 }]
@@ -948,9 +952,10 @@ oo::class create ooxml::docx::docx {
                 }
                 $numbering appendFromScript {
                     Tag_w:abstractNum [my Watt abstractNumId] $id {
-                        set level 0
-                        foreach levelData [lrange $args 1 end] {
-                            Tag_w:lvl [my Watt val] $level {
+                        set levelnr 0
+                        foreach level $levelData {
+                            OptVal $level "option"
+                            Tag_w:lvl [my Watt val] $levelnr {
                                 set start [my EatOption -start]
                                 if {$start ne ""} {
                                     ST_DecimalNumber $start
@@ -958,9 +963,16 @@ oo::class create ooxml::docx::docx {
                                     set start 1
                                 }
                                 Tag_w:start [my Watt val] $start {}
-                                my Croate properties(abstractNumStyle)
+                                my Create $properties(abstractNumStyle)
                             }
+                            if {[catch {my CheckRemainingOpts} errMsg]} {
+                                error "level definition $levelnr: $errMsg"
+                            }
+                            incr levelnr
                         }
+                    }
+                    Tag_w:num [my Watt numId] $id {
+                        Tag_w:abstractNumId [my Watt val] $id {}
                     }
                 }
             }
@@ -988,6 +1000,9 @@ oo::class create ooxml::docx::docx {
                         }
                     }
                 }
+            }
+            default {
+                error "invalid subcommand \"$cmd\""
             }
         }
     }
@@ -1059,7 +1074,7 @@ oo::class create ooxml::docx::docx {
                         if {$cmd eq "table"} {
                             Tag_w:tblPr {
                                 Tag_w:tblBorders {
-                                    my Create $properties(tblBorders)
+                                    my Create $properties(tableBorders)
                                 }
                             }
                         } else {
@@ -1144,7 +1159,7 @@ oo::class create ooxml::docx::docx {
                         Tag_w:tblStyle [my Watt val] $style {}
                     }
                     Tag_w:tblBorders {
-                        my Create $properties(tblBorders)
+                        my Create $properties(tableBorders)
                     }
                 }
                 set widths [my EatOption -columnwidths]

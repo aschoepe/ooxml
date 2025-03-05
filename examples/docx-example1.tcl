@@ -30,9 +30,9 @@ $docx paragraph "The next Heading" -style Heading1
 
 # Certain parts of a paragraph may have local formating. This is done
 # by starting a paragraph and then append to that.
-$docx paragraph "The start of the first paragraph after the first Heading. "
+$docx paragraph "The start of a paragraph. "
 $docx append "Another chunk of the paragraph, just with the same formating. "
-$docx append "This chunk of the paragraph is obviously localy formated." \
+$docx append "This chunk of the paragraph is obviously locally formated." \
       -color 0000ff
 $docx append "You have certain effects already on your hand "
 foreach textOnOff {

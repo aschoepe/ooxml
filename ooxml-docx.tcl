@@ -136,6 +136,17 @@ namespace eval ::ooxml::docx {
                 -${option}Border [list w:$option $BorderOpts]
         }
     }
+
+    set properties(numbering) {
+        -level {w:ilvl ST_DecimalNumber}
+        -numberingStyle {w:numId ST_DecimalNumber}
+    }
+
+    set properties(abstractNumStyle) {
+        -numberFormat {w:numFmt ST_NumberFormat}
+        -levelText {w:lvlText NoCheck}
+        -align {w:lvlJc ST_Jc}
+    }
     
     foreach {name xml} {
         [Content_Types].xml {
@@ -166,6 +177,7 @@ namespace eval ::ooxml::docx {
                 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
                 <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>
                 <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
+                <Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
             </Relationships>
         }
         docProps/app.xml {
@@ -206,6 +218,9 @@ namespace eval ::ooxml::docx {
                     <w:pitch w:val="variable"/>
                 </w:font>
             </w:fonts>
+        }
+        word/numbering.xml {
+            <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
         }
         word/settings.xml {
             <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -530,6 +545,9 @@ oo::class create ooxml::docx::docx {
             "styles" {
                 set what "word/styles.xml"
             }
+            "numbering" {
+                set what "word/numbering.xml"
+            }
         }
         if {[catch {set fd [open ${zipfs}docx/$what r]}]} {
             error "Did not found part \"$what\" in $docxfile"
@@ -814,6 +832,9 @@ oo::class create ooxml::docx::docx {
         $body appendFromScript {
             Tag_w:p {
                 Tag_w:pPr {
+                    Tag_w:numPr {
+                        my Create $properties(numbering)
+                    }
                     Tag_w:pBdr {
                         my Create $properties(paragraphBorders)
                     }
@@ -835,8 +856,12 @@ oo::class create ooxml::docx::docx {
         set error 0
         if {[catch {set ooxmlvalue [$type $value]} errMsg]} {
             if {![llength [info procs ::ooxml::docx::$type]]} {
-                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {set error 1}
-            } else {set error 1}
+                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
+                    set error 1
+                }
+            } else {
+                set error 1
+            }
             if {$error} {
                 error "$errtext: $errMsg"
             }
@@ -908,10 +933,90 @@ oo::class create ooxml::docx::docx {
         my CheckRemainingOpts
     }
 
+    method numbering {cmd args} {
+        my variable docs
+        variable ::ooxml::docx::properties
+
+        set numbering [$docs(word/numbering.xml) documentElement]
+        switch $cmd {
+            "abstractNum" {
+                if {[llength $args] != 2} {
+                    error "wrong # of argumentes, expecting abstractNumId <list with each element a level description>"
+                }
+                lassign $args id levelData
+                set style [$numbering selectNodes {
+                    w:abstractNum[@w:abstractNumId=$id]
+                }]
+                if {$style ne ""} {
+                    error "abstractNum style id $id already exists"
+                }
+                $numbering appendFromScript {
+                    Tag_w:abstractNum [my Watt abstractNumId] $id {
+                        set levelnr 0
+                        foreach level $levelData {
+                            OptVal $level "option"
+                            Tag_w:lvl [my Watt ilvl] $levelnr {
+                                set start [my EatOption -start]
+                                if {$start ne ""} {
+                                    ST_DecimalNumber $start
+                                } else {
+                                    set start 1
+                                }
+                                Tag_w:start [my Watt val] $start {}
+                                my Create $properties(abstractNumStyle)
+                                Tag_w:pPr {
+                                    my Create $properties(styleparagraph)
+                                }
+                                Tag_w:rPr {
+                                    my Create $properties(stylerun)
+                                }
+                            }
+                            if {[catch {my CheckRemainingOpts} errMsg]} {
+                                error "level definition $levelnr: $errMsg"
+                            }
+                            incr levelnr
+                        }
+                    }
+                    Tag_w:num [my Watt numId] $id {
+                        Tag_w:abstractNumId [my Watt val] $id {}
+                    }
+                }
+            }
+            "abstractNumIds" {
+                return [lsort -integer \
+                            [$numbering selectNodes -list {
+                                w:abstractNum @w:abstractNumId
+                            }]]
+            }
+            "delete" {
+                if {[llength $args] != 2} {
+                    error "wrong number of arguments for the subcommand \"delete\", expected\
+                               the style type and the style ID"
+                }
+                lassign $args type id
+                if {$type ni {abstractNum num}} {
+                    error "unknown style type \"type\""
+                }
+                switch $type {
+                    "abstractNum" {
+                        foreach node [$numbering selectNodes {
+                            w:abstractNum[@w:abstractNumId=$id]
+                        }] {
+                            $node delete
+                        }
+                    }
+                }
+            }
+            default {
+                error "invalid subcommand \"$cmd\""
+            }
+        }
+    }
+    
     method style {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties
-        
+
         set styles [$docs(word/styles.xml) documentElement]
         switch $cmd {
             "paragraphdefault" {
@@ -975,7 +1080,7 @@ oo::class create ooxml::docx::docx {
                         if {$cmd eq "table"} {
                             Tag_w:tblPr {
                                 Tag_w:tblBorders {
-                                    my Create $properties(tblBorders)
+                                    my Create $properties(tableBorders)
                                 }
                             }
                         } else {
@@ -1005,7 +1110,7 @@ oo::class create ooxml::docx::docx {
             "delete" {
                 if {[llength $args] != 2} {
                     error "wrong number of arguments for the subcommand \"delete\", expected\
-                          " the style type and the style ID"
+                           the style type and the style ID"
                 }
                 lassign $args type name
                 if {$type ni {paragraph paragraphdefault character characterdefault}} {
@@ -1060,7 +1165,7 @@ oo::class create ooxml::docx::docx {
                         Tag_w:tblStyle [my Watt val] $style {}
                     }
                     Tag_w:tblBorders {
-                        my Create $properties(tblBorders)
+                        my Create $properties(tableBorders)
                     }
                 }
                 set widths [my EatOption -columnwidths]

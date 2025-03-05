@@ -38,7 +38,7 @@ namespace eval ::ooxml::docx {
 
 namespace eval ::ooxml::docx::lib {
 
-    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF
+    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF AllowedValues
 
 }
 
@@ -268,6 +268,79 @@ proc ::ooxml::docx::lib::ST_BlackWhiteMode {value} {
         return $value
     }
     error "unknown back and white mode \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_NumberFormat {value} {
+    set values {
+        decimal
+        upperRoman
+        lowerRoman
+        upperLetter
+        lowerLetter
+        ordinal
+        cardinalText
+        ordinalText
+        hex
+        chicago
+        ideographDigital
+        japaneseCounting
+        aiueo
+        iroha
+        decimalFullWidth
+        decimalHalfWidth
+        japaneseLegal
+        japaneseDigitalTenThousand
+        decimalEnclosedCircle
+        decimalFullWidth2
+        aiueoFullWidth
+        irohaFullWidth
+        decimalZero
+        bullet
+        ganada
+        chosung
+        decimalEnclosedFullstop
+        decimalEnclosedParen
+        decimalEnclosedCircleChinese
+        ideographEnclosedCircle
+        ideographTraditional
+        ideographZodiac
+        ideographZodiacTraditional
+        taiwaneseCounting
+        ideographLegalTraditional
+        taiwaneseCountingThousand
+        taiwaneseDigital
+        chineseCounting
+        chineseLegalSimplified
+        chineseCountingThousand
+        koreanDigital
+        koreanCounting
+        koreanLegal
+        koreanDigital2
+        vietnameseCounting
+        russianLower
+        russianUpper
+        none
+        numberInDash
+        hebrew1
+        hebrew2
+        arabicAlpha
+        arabicAbjad
+        hindiVowels
+        hindiConsonants
+        hindiNumbers
+        hindiCounting
+        thaiLetters
+        thaiNumbers
+        thaiCounting
+        bahtText
+        dollarText
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown numbering format \"$value\", expected one of\
             [AllowedValues $values]"
 }
 

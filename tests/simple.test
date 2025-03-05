@@ -58,6 +58,13 @@ if {[package vsatisfies [package present Tcl] 9]} {
     catch {zipfs  mount simple.xlsx xlsx} mnt
   } 0
   variable zipfs "//zipfs:/"
+} elseif {$::ooxml::zipAccessMethod eq "tcllib"} {
+  test MountXLSX-2.1 {Mount XLSX File} {
+    catch {
+      ::zipfile::decode::open simple.xlsx
+      variable zipdesc [::zipfile::decode::archive]
+    }
+  } 0
 } else {
   test MountXLSX-2.1 {Mount XLSX File} {
     catch {vfs::zip::Mount simple.xlsx xlsx} mnt
@@ -66,18 +73,22 @@ if {[package vsatisfies [package present Tcl] 9]} {
 }
 
 test DocPropsApp-3.1 {Parse xlsx/docProps/app.xml} {
-  set fd [open ${zipfs}xlsx/docProps/app.xml r]
-  fconfigure $fd -encoding utf-8
-  set doc [dom parse [read $fd]]
-  close $fd
-
-  set appXmlNs {
-    x http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
-    vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+  if {$::ooxml::zipAccessMethod eq "tcllib"} {
+    set doc [dom parse [encoding convertfrom utf-8\
+                            [::zipfile::decode::getfile $zipdesc docProps/app.xml]]]
+  } else {
+    set fd [open ${zipfs}xlsx/docProps/app.xml r]
+    fconfigure $fd -encoding utf-8
+    set doc [dom parse [read $fd]]
+    close $fd
   }
-
   return [set appDoc [string match domDoc* $doc]]
 } 1
+
+set appXmlNs {
+  x http://schemas.openxmlformats.org/officeDocument/2006/extended-properties
+  vt http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes
+}
 
 testConstraint appCheck $appDoc
 
@@ -96,11 +107,16 @@ $doc delete
 
 
 test DocPropsCore-4.1 {Parse xlsx/docProps/core.xml} {
-  set fd [open ${zipfs}xlsx/docProps/core.xml r]
-  fconfigure $fd -encoding utf-8
-  set doc [dom parse [read $fd]]
-  close $fd
-
+  if {$::ooxml::zipAccessMethod eq "tcllib"} {
+    set doc [dom parse [encoding convertfrom utf-8\
+                            [::zipfile::decode::getfile $zipdesc docProps/core.xml]]]
+  } else {
+    set fd [open ${zipfs}xlsx/docProps/core.xml r]
+    fconfigure $fd -encoding utf-8
+    set doc [dom parse [read $fd]]
+    close $fd
+  }
+  
   set coreXmlNs {
     cp http://schemas.openxmlformats.org/package/2006/metadata/core-properties
     dc http://purl.org/dc/elements/1.1/
@@ -138,7 +154,9 @@ $doc delete
 
 if {[package vsatisfies [package present Tcl] 9]} {
   zipfs unmount $mnt
-} else {
+} elseif {$::ooxml::zipAccessMethod eq "tcllib"} {
+  ::zipfile::decode::close
+}  else {
   vfs::zip::Unmount $mnt xlsx
 }
 file delete -force simple.xlsx

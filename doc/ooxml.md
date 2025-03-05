@@ -198,11 +198,70 @@ following methods:
 
 **border** *args*
 
-:
+:   Defines a border style for the current workbook and returns an ID to
+    refer to that style.
+ 
+    The following options are currently supported:
+
+    : **-list**
+    
+      Returns the list of currently defined border style IDs, instead
+      of BORDERID.
+      
+    : -leftstyle BORDERLINESTYLE
+    : -rightstyle BORDERLINESTYLE
+    : -topstyle ORDERLINESTYLE
+    : -bottomstyle BORDERLINESTYLE
+    : -diagonalstyle BORDERLINESTYLE
+    
+      See [BORDERLINESTYLE](#borderlinestyle) for the valid values.
+      
+    : -leftcolor COLOR
+    : -rightcolor COLOR
+    : -topcolor COLOR
+    : -bottomcolor COLOR
+    : -diagonalcolor COLOR
+    
+      See [COLOR](#color) for the valid values.
+      
+    : -diagonaldirection (up|down)
+    
+        The value must either *up* or *down*.
+        
+    : -tag TAGNAME
+    
+        To give the border style a name. This name can also be used as BORDERID. 
+
+    return BORDERID
 
 **style** *args*
 
-:
+:   Defines a style for the current workbook and returns an ID to
+    refer to that style.
+ 
+    The following options are currently supported:
+
+    : **-list**
+    
+      Returns the list of currently defined border style IDs, instead
+      of STYLEID.
+      
+    : -numfmt NUMFMTID
+    : -font FONTID
+        From method font. 
+    : -fill FILLID
+        From method fill. 
+    : -border BORDERID
+        From method border. 
+    : -horizontal HORIZONTAL
+    : -vertical VERTICAL
+    : -rotate DEGREE
+    : -tag TAGNAME
+
+        To give the format a name. This name can also be used as STYLEID. 
+
+
+
 
 **defaultdatestyle** *STYLEID*
 
@@ -635,8 +694,29 @@ Color ID Name             (A)RGB
 64       SystemForeground n/a
 65       SystemBackground n/a
 
+# BORDERLINESTYLE
+
+Serveral method options expect a *COLOR* argument. The list of
+possible values are:
+
+    dashDot
+    dashDotDot
+    dashed
+    dotted
+    double
+    hair
+    medium
+    mediumDashDot
+    mediumDashDotDot
+    mediumDashDotDot
+    none
+    slantDashDot
+    thick
+    thin
+
+
 # DEPENDENCIES
 
     Tcl >= 8.6.7
-    tclvfs::zip >= 1.4.2 (or Tcl 9)
+    tclvfs::zip >= 1.0.4 or tcllib::zip::decode or Tcl 9 (only for xlsx reading)
     tdom >= 0.9.0

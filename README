@@ -17,19 +17,20 @@ SYSNOPSIS
         export Tcl tablelist to an Excel file with ::ooxml::tablelist_to_xl.
 
     For information on how to use these commands, see the examples and the man-page
-    at https://tcl.sowaswie.de/repos/fossil/ooxml.
+    at https://fossil.sowaswie.de/ooxml.
     
 
 DEPENDENCIES
 
     Tcl >= 8.6.7
-    tclvfs::zip >= 1.4.2
     tdom >= 0.9.0
-
+    for reading:
+    tcllib module zipfile::decode
+    or tclvfs module vfs::zip >= 1.0.4
 
 GETTING THE CODE
 
-    The development repository is hosted at https://tcl.sowaswie.de/repos/fossil/ooxml
+    The development repository is hosted at https://fossil.sowaswie.de/ooxml
     You are encouraged to use trunk.
 
 
@@ -46,13 +47,13 @@ INSTALLING
 
 REPORTING BUGS
 
-    Please head to https://tcl.sowaswie.de/repos/fossil/ooxml/ticket and
+    Please head to https://fossil.sowaswie.de/ooxml/ticket and
     click on "New Ticket". Log in as anonymous and report your findings.
     If you prefer to have an individual login write Alex a mail.
 
 
 HISTORY
 
-    ooxml was started by Alexander Schoepe (alx.tcl@sowaswie.de)
+    ooxml was started by Alexander Schoepe (fossil@sowaswie.de)
     and improved with contributions by Rolf Ade (rolf@pointsman.de).
 

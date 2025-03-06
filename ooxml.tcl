@@ -4085,7 +4085,7 @@ oo::class create ooxml::xl_write {
       Tag_definedNames {
         for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
           if {$obj(printarea,$ws) ne {}} {
-            Tag_definedName name _xlnm.Print_Area localSheetId [expr {$ws - 1}] { Text [string cat $obj(sheet,$ws) ! $obj(printarea,$ws)] }
+            Tag_definedName name _xlnm.Print_Area localSheetId [expr {$ws - 1}] { Text [string cat ' $obj(sheet,$ws) '! $obj(printarea,$ws)] }
           }
         }
         # Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }

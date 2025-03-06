@@ -1,6 +1,6 @@
-C If\sthe\sworksheet\sname\scontains\sa\sspace,\ssingle\squotes\s('')\sare\srequired.
-D 2025-03-06T09:34:17.736
-F .fossil-settings/ignore-glob ac33082c8ffc2e8f0cd6887d5905eee927e3a0f6ac0b24ef1ad97e9d398aa1d5
+C Added\sxlsxPrintArea-example.tcl
+D 2025-03-06T09:40:33.767
+F .fossil-settings/ignore-glob d52d3e8a6e6083fb112b384eedadf2785c9c5c4a6db8b35055caba15f7f28e79
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
@@ -24,6 +24,7 @@ F examples/sample6.tcl 32f09644ff0f8e4c2eccbb859b194ec58dba8594a070c0124b156725b
 F examples/sample7.tcl 1232d4f6af2ad1110433afcd82022a8ce70f6267fd6b7fdd74d23a0ba30de5d6 x
 F examples/sample8.tcl 1efedead57bac620c1381538684c853fd03c2f89cb3019e80864f396c9067391 x
 F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2d629ab9 x
+F examples/xlsxPrintArea-example.tcl 1450f5ab68fe0ed0f7699d0b122ff719035a1fa5fa54625ab32d7b0773f9050c x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml.tcl d55dce344a3193138a137e32b23728cd9381202766c59be9f6633c8079088586
@@ -79,8 +80,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P fb331d8742720e1ddc017b41e2fbbe7b7f970108f97921d5033d3f48adc241b6
-R da4beac60e8fea91aa9e9391a8171bc5
+P f88bc1a4e19bffcdd29606594165f73ecb35cd382ac01f0a2d2d710ddf59e0f8
+R f38ac1f720b6f8c21a5313d1b8c8a2bd
 U alex
-Z 91af0b4bfdf515e86eca970048ed4d18
+Z 05e86c1721a8f6107a95ab9e26ca5d22
 # Remove this line to create a well-formed Fossil manifest.

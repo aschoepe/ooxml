@@ -2536,7 +2536,7 @@ oo::class create ooxml::xl_write {
 
     incr obj(sheets)
     set obj(callRow,$obj(sheets)) 0
-    set obj(sheet,$obj(sheets)) [string range 0 30 [string map {: -  \\ -  / -  ? -  * -  \[  (  \] )} $name]]
+    set obj(sheet,$obj(sheets)) [string range [string map {: -  \\ -  / -  ? -  * -  \[  (  \] )} $name] 0 30]
     set obj(gCol,$obj(sheets)) -1
     set obj(row,$obj(sheets)) -1
     set obj(col,$obj(sheets)) -1

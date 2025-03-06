@@ -1,5 +1,5 @@
-C Added\sthe\stab\sstop\sdefinition\sfor\sa\sparagraph.\sReduced\sthe\sempty\stags\snoise\sa\sbit.
-D 2025-03-05T23:30:37.328
+C Improved\simport\sfrom\sdocx.\sSwitched\sto\sthe\szip\sopen\sand\sparse\sfiles\sinfrastructure\sof\sooxml.
+D 2025-03-06T01:20:58.430
 F .fossil-settings/ignore-glob ac33082c8ffc2e8f0cd6887d5905eee927e3a0f6ac0b24ef1ad97e9d398aa1d5
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -36,7 +36,7 @@ F examples/strings.tcl 87ec65e7707434689e4ee868c3171bcaeb18d22a0323029b7c7afbf41
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 0205a3587fac4f5fcac7ea9a6ff493cfcb54a0d07096a0d1289903b72905728e
-F ooxml-docx.tcl 09c440a99c7bdb2c0b2a035b12fadf00a6b2e26af42fae69cd2c19106f6c955f
+F ooxml-docx.tcl 73129fd8bd404d2aeb83af4a6a1316bb943b0b794ba2092e645a210b47a71bd8
 F ooxml.tcl 89e7f0c7b5e55e534ba2f312b89f89d60dddecf2b53f1c4223d75414d0d98b95
 F pkgIndex.tcl.in fa6ba3133c31834da951d0a53112052fded69b443d4f63897a7c22c26e10460d
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -91,8 +91,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P e1766669ebea3e6db4a93fd6ebe0b9dbafdce428b6d10a44e4287c542ffeb3ed
-R 3152366e28288b4ae75a6b9c8908afcf
+P b04d5ddae19581a3ade7b290430601a713ff2d46c28b0ac582f92105bb4ab7ff
+R 965f543f8bbc43f33785ff04325268f1
 U rolf
-Z 646297bc2a41c4730a7116017e597991
+Z dc8db6331a440e33473096f45396bd54
 # Remove this line to create a well-formed Fossil manifest.

@@ -532,42 +532,53 @@ oo::class create ooxml::docx::docx {
     }
     
     method import {what docxfile} {
-        variable ::ooxml::Tcl9
-        variable ::ooxml::zipfs
         my variable docs
-        
-        if {[catch {
-            if {$Tcl9} {
-                set mnt [zipfs mount $docxfile docx]
-            } else {
-                package require vfs::zip
-                set mnt [vfs::zip::Mount $docxfile docx]
+        variable ::ooxml::docx::xmlns
+
+        ::ooxml::ZipOpen $docxfile
+        set rId ""
+        try {
+            switch -glob $what {
+                "styles" {
+                    set what "word/styles.xml"
+                }
+                "numbering" {
+                    set what "word/numbering.xml"
+                }
+                "header*" -
+                "footer*" {
+                    set what "word/$what.xml"
+                }
             }
-        } errMsg]} {
-            error "Cannot mount \"$docxfile\" as zip archive. Details: $errMsg"
-        }
-        switch $what {
-            "styles" {
-                set what "word/styles.xml"
+            set thisdoc [::ooxml::ZipReadParse $what]
+            set target [string range $what 5 end]
+            if {[info exists docs($what)]} {
+                $docs($what) delete
+                if {[string range $what 0 4] eq "word/"} {
+                    set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+                    set rId [$relsRoot selectNodes -namespaces [list r $xmlns(rel)] {
+                        string(r:Relationship[@Target=$target])
+                    }]
+                }
+            } elseif {[string range $what 0 4] eq "word/"} {
+                set thisrels [::ooxml::ZipReadParse "word/_rels/document.xml.rels"]
+                set relsroot [$thisrels documentElement]
+                set typeurl [$relsroot selectNodes -namespaces [list r $xmlns(rel)] {
+                    string(r:Relationship[@Target=$target]/@Type)
+                }]
+                # The typeurl starts with
+                # http://schemas.openxmlformats.org/officeDocument/2006/relationships/
+                set rId [my Add2Relationships [string range $typeurl 68 end] $target]
+                $thisrels delete
             }
-            "numbering" {
-                set what "word/numbering.xml"
+            set docs($what) $thisdoc
+            if {$what eq "word/document.xml"} {
+                my ResetPageSetup
             }
+        } finally {
+            ::ooxml::ZipClose
         }
-        if {[catch {set fd [open ${zipfs}docx/$what r]}]} {
-            error "Did not found part \"$what\" in $docxfile"
-        }
-        fconfigure $fd -encoding utf-8
-        if {[catch {set thisdoc [dom parse [read $fd]]} errMsg]} {
-            error "Cannot parse part $what in $docxfile. Details: $errMsg"
-        }
-        if {[info exists docs($what)]} {
-            $docs($what) delete
-        }
-        set docs($what) $thisdoc
-        if {$what eq "word/document.xml"} {
-            my ResetPageSetup
-        }
+        return $rId
     }
 
     method ResetPageSetup {} {

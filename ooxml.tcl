@@ -3060,6 +3060,11 @@ oo::class create ooxml::xl_write {
               my autofilter $currentSheet {*}[split $item :]
             }
           }
+          if {[info exists a($sheet,printarea)]} {
+            foreach item $a($sheet,printarea) {
+              my printarea $currentSheet {*}[split [string map {{$} {}} $item] :]
+            }
+          }
           if {[info exists a($sheet,merge)]} {
             foreach item $a($sheet,merge) {
               my merge $currentSheet {*}[split $item :]

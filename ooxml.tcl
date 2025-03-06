@@ -2785,6 +2785,8 @@ oo::class create ooxml::xl_write {
       lassign [split [::ooxml::StringToRowColumn $opts(index)] ,] obj(row,$sheet) obj(col,$sheet)
     } elseif {[string trim $opts(index)] eq {}} {
       incr obj(col,$sheet)
+    } elseif {[string is double -strict $opts(index)]} {
+      error "option '-index $opts(index)': wrong argument, should not be double"
     }
     if {$obj(row,$sheet) < 0 || $obj(col,$sheet) < 0} {
       return -1

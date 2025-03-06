@@ -1,5 +1,5 @@
-C Updated\signore-glob
-D 2025-03-06T09:47:43.029
+C Added\svscode\sworkspace
+D 2025-03-06T09:48:13.918
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -27,6 +27,7 @@ F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2
 F examples/xlsxPrintArea-example.tcl 1450f5ab68fe0ed0f7699d0b122ff719035a1fa5fa54625ab32d7b0773f9050c x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
+F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl d55dce344a3193138a137e32b23728cd9381202766c59be9f6633c8079088586
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -80,8 +81,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 7b2628febc0ed8e43877ca723e6a09790d849d764e06a8b07370ad8b321c57f3
-R e4f9e6c31ba7f88db71b81bceea2cdc0
+P 30bddf8cbf5f03593efe51fad536de4d855fc246f12155963afa8ae1758a987f
+R 2c8d7171b6ca82a0d35a19f05fd0c7a5
 U alex
-Z 5251dec56e71a645754423ff4f763476
+Z 9076ea75b0642e1e94acb6ce489c452c
 # Remove this line to create a well-formed Fossil manifest.

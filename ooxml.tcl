@@ -1047,6 +1047,7 @@ proc ::ooxml::xl_read { file args } {
   array set numFmts [array get predefNumFmts]
   array set sharedStrings {}
   set sheets {}
+  array set printArea {}
 
   array set opts {
     valuesonly 0
@@ -1116,9 +1117,7 @@ proc ::ooxml::xl_read { file args } {
     }
     foreach node [$root selectNodes {/M:workbook/M:definedNames/M:definedName[@name="_xlnm.Print_Area"]}] {
       if {[$node hasAttribute localSheetId]} {
-        set localSheetId [$node @localSheetId]
-        set index [lindex [split [$node text] !] end]
-        puts stderr "localSheetId=$localSheetId index=$index"
+        set printArea([$node @localSheetId]) [lindex [split [$node text] !] end]
       }
     }
     foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
@@ -1593,7 +1592,11 @@ proc ::ooxml::xl_read { file args } {
           }
         }
       }
-
+      if {!$opts(valuesonly)} {
+        foreach {n v} [array get printArea] {
+          set wb($n,printarea) $v
+        }
+      }
       if {!$opts(valuesonly)} {
         foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
           if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {

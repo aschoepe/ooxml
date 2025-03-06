@@ -1,5 +1,5 @@
-C Index\sshould\snot\sbe\sa\sdouble.\sTicket\s[c07105771b451431]
-D 2025-03-06T11:30:16.750
+C xl_read\sPrintArea
+D 2025-03-06T18:02:23.656
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -28,7 +28,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
-F ooxml.tcl 96500ab36fbefa5e1ccb9182c85662645d15612845129033d9b5f2a8fa74e180
+F ooxml.tcl 4e0759c439a3962b6916f464c396a898dacc207ab2701271d8fa6ebe7ebca951
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -36,7 +36,7 @@ F tclconfig/install-sh d5e7acec82cb30a616dc8023b6d77abf3e7109f86175f47741afe89b3
 F tclconfig/tcl.m4 24841be70516af95124d989e9b9a9fb07879fdc9cf2248c4ce6fc7aa3a5ae72b
 F tests/all.tcl 5f87ca6b7d1e5bf0aa6e3a7fa4408f629ab2a224cc20910fb12ea6928f1aecbd
 F tests/benchmark.test ad9ac56279c418f73e420b5d56da568a526322786e263f2717ad3752916ea90b
-F tests/formatcell.test 7ead8446d6571370a66c5f50a55e78be2dd57674edb7868be527a2a7bc4a66ef
+F tests/formatcell.test 0d1eae44bae27879d0c3b6e699ece1cf9e8cfe5acc1e6598aee624d4a6897284
 F tests/formula.test 8f5624d8f324bb9c26040373a201bbcb9d2565c0734c32c7c77142b4c75ce7a8
 F tests/misc.test b166df102f2f39a696ab003509e709e1b456ddbda76a72c73484225dd844fc02
 F tests/namedfmts.test a256cebeef32996f0280a3071b941a961d7dbca9e709945394b4edd448655c47
@@ -81,8 +81,11 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 1cea2380dce665619b043a81ec2588d27c8687326e3c90f8cfef354921f2c754
-R a9b3f540c5dec07816b43fa153b781b9
+P 01ce966114e11a45b4cfcf513eef28ef12cf184cc154ab54d1c5d8adcfa6998f
+R 00a7765da1cbc9b6b47bec3f44af5463
+T *branch * printarea
+T *sym-printarea *
+T -sym-trunk *
 U alex
-Z e7280cb6ff42d7ca8ac020dbcee418e5
+Z 757a98486c971d1b6b2253ca880cb129
 # Remove this line to create a well-formed Fossil manifest.

@@ -18,5 +18,5 @@ if {[set sheet [$spreadsheet worksheet {Table 1}]] > -1} {
   $spreadsheet row $sheet
   $spreadsheet cell $sheet {check tooltip} -hyperlink {https://fossil.sowaswie.de/ooxml/wiki?name=man-page} -tooltip {ooXML Manual Page}
 }
-$spreadsheet write export9.xlsx
+$spreadsheet write hyperlinksTooltips.xlsx
 $spreadsheet destroy

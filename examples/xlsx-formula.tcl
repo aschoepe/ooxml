@@ -46,5 +46,5 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
   $spreadsheet cell $sheet 4 -index C8
   $spreadsheet cell $sheet {} -index C9 -formulaidx 1
 }
-$spreadsheet write export4.xlsx
+$spreadsheet write formula.xlsx
 $spreadsheet destroy

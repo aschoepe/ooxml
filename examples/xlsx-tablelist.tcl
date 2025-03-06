@@ -25,7 +25,7 @@ $lb configure -yscrollcommand [list .y set]
 grid .y -row 0 -column 1 -sticky ns
 grid columnconfigure . 0 -weight 1
 grid rowconfigure . 0 -weight 1
-ttk::button .export -text Export -command [list ::ooxml::tablelist_to_xl $lb -file export3.xlsx -globalstyle]
+ttk::button .export -text Export -command [list ::ooxml::tablelist_to_xl $lb -file tablelist.xlsx -globalstyle]
 grid .export -row 2 -column 0
 
 set list {}

@@ -40,5 +40,5 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
     }
   }
 }
-$spreadsheet write export2.xlsx
+$spreadsheet write writeRowsAutoIncr.xlsx
 $spreadsheet destroy

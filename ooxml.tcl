@@ -2,8 +2,8 @@
 #  ooxml ECMA-376 Office Open XML File Formats
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
-#  Copyright (C) 2018-2024 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
-#  Copyright (C) 2019-2024 Rolf Ade, DE
+#  Copyright (C) 2018-2025 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
+#  Copyright (C) 2019-2025 Rolf Ade, DE
 #  Copyright (C) 2023-2024 Harald Oehlmann, DE
 #  All rights reserved.
 #
@@ -162,6 +162,8 @@
 #   method autofilter sheet indexFrom indexTo
 # 
 #   method freeze sheet index
+#
+#   method printarea sheet indexFrom indexTo
 # 
 #   method presetstyles
 #
@@ -740,6 +742,21 @@ proc ::ooxml::StringToRowColumn { name } {
 }
 
 
+proc ::ooxml::IndexFix { index {fix {row col}} } {
+  if {[regexp {^([A-Za-z]+)([0-9]+)$} $index all col row]} {
+    if {[string match -nocase {*r*} $fix]} {
+      set col [string cat {$} $col]
+    }
+    if {[string match -nocase {*r*} $fix]} {
+      set row [string cat {$} $row]
+    }
+    return ${col}${row}
+  } else {
+    return $index
+  }
+}
+
+
 proc ::ooxml::IndexToString { index } {
   lassign [split $index ,] row col
   if {[string is integer -strict $row] && [string is integer -strict $col] && $row > -1 && $col > -1} {
@@ -1095,6 +1112,13 @@ proc ::ooxml::xl_read { file args } {
             lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
           }
         }
+      }
+    }
+    foreach node [$root selectNodes {/M:workbook/M:definedNames/M:definedName[@name="_xlnm.Print_Area"]}] {
+      if {[$node hasAttribute localSheetId]} {
+        set localSheetId [$node @localSheetId]
+        set index [lindex [split [$node text] !] end]
+        puts stderr "localSheetId=$localSheetId index=$index"
       }
     }
     foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
@@ -2546,6 +2570,7 @@ oo::class create ooxml::xl_write {
     set obj(dmaxcol,$obj(sheets)) 0
     set obj(autofilter,$obj(sheets)) {}
     set obj(freeze,$obj(sheets)) {}
+    set obj(printarea,$obj(sheets)) {}
     set obj(merge,$obj(sheets)) {}
     set obj(rowHeight,$obj(sheets)) {}
 
@@ -2898,6 +2923,18 @@ oo::class create ooxml::xl_write {
     set index [::ooxml::IndexToString $index]
     if {$index ne {}} {
       set obj(freeze,$sheet) $index
+      return 0
+    }
+    return 1
+  }
+
+  method printarea { sheet indexFrom indexTo } {
+    my variable obj
+
+    set indexFrom [::ooxml::IndexFix [::ooxml::IndexToString $indexFrom] {row col}]
+    set indexTo [::ooxml::IndexFix [::ooxml::IndexToString $indexTo] {row col}]
+    if {$indexFrom ne {} && $indexTo ne {}} {
+      set obj(printarea,$sheet) $indexFrom:$indexTo
       return 0
     }
     return 1
@@ -4045,10 +4082,13 @@ oo::class create ooxml::xl_write {
           Tag_sheet name $obj(sheet,$ws) sheetId $ws r:id rId$ws {}
         }
       }
-      if {0} {
-        Tag_definedNames {
-          Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
+      Tag_definedNames {
+        for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+          if {$obj(printarea,$ws) ne {}} {
+            Tag_definedName name _xlnm.Print_Area localSheetId [expr {$ws - 1}] { Text [string cat ' $obj(sheet,$ws) '! $obj(printarea,$ws)] }
+          }
         }
+        # Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
       }
       Tag_calcPr calcId 140000 concurrentCalc 0 {}
       # fullCalcOnLoad 1

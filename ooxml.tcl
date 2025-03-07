@@ -3091,6 +3091,9 @@ oo::class create ooxml::xl_write {
           if {[info exists a($sheet,pageMargins)]} {
             my pageMargins $currentSheet {*}$a($sheet,pageMargins)
           }
+          if {[info exists a($sheet,pageSetup)]} {
+            my pageSetup $currentSheet {*}$a($sheet,pageSetup)
+          }
         }
       }
     }

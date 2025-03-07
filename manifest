@@ -1,5 +1,5 @@
-C xl_read\spageSetup
-D 2025-03-07T03:25:47.745
+C presetsheets\sfor\spageSetup
+D 2025-03-07T03:28:26.744
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -28,7 +28,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
-F ooxml.tcl fb91f6a16fb0f8e49332e7f90b94b805260243156a88a5a03e9fe931d0e0347c
+F ooxml.tcl 7a6979cbc95d93d4c5e416e5dc567b839dcbc5183196b1a65b034703a5bb99ff
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -81,11 +81,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 2ee59dbabccb193b727f45e4dea3f574d0de3907bd14a151e435104e8246b15d
-R b5933f869841d3d90e9fbb3f3e082a6d
-T *branch * pageSetup
-T *sym-pageSetup *
-T -sym-pageMargins *
+P 00366a8351ceed4aed791e814e34038d039d6142bcd0f981bc40437f252dc1a2
+R 4cca053101cb9bc7717be0b77b5ac450
 U alex
-Z b230e3990598041de6078182616803b8
+Z 03e6eb1c51d26e162a6ab48e7cc226ce
 # Remove this line to create a well-formed Fossil manifest.

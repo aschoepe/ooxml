@@ -1634,6 +1634,15 @@ proc ::ooxml::xl_read { file args } {
           }
         }
       }
+      if {!$opts(valuesonly)} {
+        foreach node [$root selectNodes /M:worksheet/M:pageSetup] {
+          foreach n [$node attributeNames] {
+            if {$n in {blackAndWhite cellComments copies draft errors firstPageNumber fitToHeight fitToWidth horziontalDpi orientation pageOrder paperHeight paperSize paperWide scale useFirstPageNumber verticalDpi}} {
+              dict set wb($sheet,pageSetup) -$n [$node @$n]
+            }
+          }
+        }
+      }
       $doc delete
     }
   } finally {

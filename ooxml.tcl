@@ -1625,6 +1625,15 @@ proc ::ooxml::xl_read { file args } {
           }
         }
       }
+      if {!$opts(valuesonly)} {
+        foreach node [$root selectNodes /M:worksheet/M:pageMargins] {
+          foreach n [$node attributeNames] {
+            if {$n in {left right top bottom header footer}} {
+              dict set wb($sheet,pageMargins) $n [$node @$n]
+            }
+          }
+        }
+      }
       $doc delete
     }
   } finally {

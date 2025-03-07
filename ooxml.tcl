@@ -1625,6 +1625,24 @@ proc ::ooxml::xl_read { file args } {
           }
         }
       }
+      if {!$opts(valuesonly)} {
+        foreach node [$root selectNodes /M:worksheet/M:pageMargins] {
+          foreach n [$node attributeNames] {
+            if {$n in {left right top bottom header footer}} {
+              dict set wb($sheet,pageMargins) -$n [$node @$n]
+            }
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach node [$root selectNodes /M:worksheet/M:pageSetup] {
+          foreach n [$node attributeNames] {
+            if {$n in {blackAndWhite cellComments copies draft errors firstPageNumber fitToHeight fitToWidth horziontalDpi orientation pageOrder paperHeight paperSize paperWide scale useFirstPageNumber verticalDpi}} {
+              dict set wb($sheet,pageSetup) -$n [$node @$n]
+            }
+          }
+        }
+      }
       $doc delete
     }
   } finally {
@@ -3070,6 +3088,12 @@ oo::class create ooxml::xl_write {
               my merge $currentSheet {*}[split $item :]
             }
           }
+        }
+        if {[info exists a($sheet,pageMargins)]} {
+          my pageMargins $currentSheet {*}$a($sheet,pageMargins)
+        }
+        if {[info exists a($sheet,pageSetup)]} {
+          my pageSetup $currentSheet {*}$a($sheet,pageSetup)
         }
       }
     }

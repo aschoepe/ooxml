@@ -1,5 +1,5 @@
-C Reorganizing\stests;\sDrop\sprintarea\sfrom\sformatcell.test.
-D 2025-03-07T08:50:49.559
+C New\stest\sfile:\sprintarea.test.\sThis\sis\sa\ssimple\stest\sand\scan\sbe\sused\sfor\supcoming\stests.
+D 2025-03-07T09:06:40.694
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -40,6 +40,7 @@ F tests/formatcell.test c5836d1f71cea99b86a352eebad5612509b7ffb3050a9ad3e8743859
 F tests/formula.test 8f5624d8f324bb9c26040373a201bbcb9d2565c0734c32c7c77142b4c75ce7a8
 F tests/misc.test b166df102f2f39a696ab003509e709e1b456ddbda76a72c73484225dd844fc02
 F tests/namedfmts.test a256cebeef32996f0280a3071b941a961d7dbca9e709945394b4edd448655c47
+F tests/printarea.test 9b868142f9489f470076eb54a8484c1e5d33624bab47bfe163eea830cfc9349e
 F tests/readerror.test 28d07b6f22f1ac0d9fdd4bdcfc9161afd716d87f5e0a62a76403de3d36577e5c
 F tests/simple.test 88cd5283edd5564ff0c5f41104f463267171c188f273e9b210f3a533649daf15
 F tests/test_sheet1_xml_missing.xlsx 52d9c760f650bc518388b7982ff875cdff401001fd0a7f7ee1813499ab8861f8
@@ -81,11 +82,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 7ad30606f947b7288ab2e17f3b1e9429f1691ab3edbb6a99f8d37a363ad6c5d4
-R 7836d56c837a302e68bef295c74e7268
-T *branch * tcltest
-T *sym-tcltest *
-T -sym-trunk *
+P 48cb33957ed5da1e64e3f42d975f54a164c60950617774485c6980c8ac8af18c
+R e59b7c0442176e47d24e6b1a25e96ff5
 U alex
-Z 364b981ad3475cfe34d162b7a8c4464f
+Z 97ea7c54e188612d0026d8cb06f656a1
 # Remove this line to create a well-formed Fossil manifest.

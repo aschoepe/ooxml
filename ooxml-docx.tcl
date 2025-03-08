@@ -137,6 +137,15 @@ namespace eval ::ooxml::docx {
         }
     }
 
+    set properties(sectionsetup2) {
+        -pageNumbering {w:pgNumType {
+            chapSep ST_ChapterSep
+            chapStyle ST_DecimalNumber
+            fmt ST_NumberFormat
+            start ST_DecimalNumber
+        }}
+    }
+    
     set properties(numbering) {
         -level {w:ilvl ST_DecimalNumber}
         -numberingStyle {w:numId ST_DecimalNumber}
@@ -1238,8 +1247,9 @@ oo::class create ooxml::docx::docx {
 
         my Create $properties(sectionsetup1)
         Tag_w:pgBorders {
-            my Create $properties(sectionsetup2)
+            my Create $properties(sectionBorders)
         }
+        my Create $properties(sectionsetup2)
     }
     
     # WordprocessingML has no concept of a page. Rather it groups

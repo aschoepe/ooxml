@@ -344,6 +344,21 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_ChapterSep {value} {
+    set values {
+        hyphen
+        period
+        colon
+        emDash
+        enDash
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown section separator character \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_TabJc {value} {
     set values {
         clear

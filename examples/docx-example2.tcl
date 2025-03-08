@@ -17,7 +17,7 @@ $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 #$docx pagesetup 
 $docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
     -margins {left 1cm right 1cm top 1cm bottom 1cm} \
-    -topPageBorder {type dashed borderwidth 10}
+    -topBorder {type dashed borderwidth 10}
 
 $docx paragraph "Chapter one" -style Heading1
 # Add two paragraphs
@@ -27,7 +27,8 @@ $docx paragraph "The next paragraph: $loreipsum"
 # Start a new section with different page setup
 $docx sectionstart -sizeAndOrientaion {width 12240 height 15840} \
     -margins {left 3cm right 3cm top 4cm bottom 4cm} \
-    -leftPageBorder {type thick borderwidth 20 color 00ff00 space 20}
+    -leftBorder {type thick borderwidth 20 color 00ff00 space 20} \
+    -pageNumbering {fmt upperRoman start 222}
 
 $docx paragraph "Chapter two" -style Heading1
 # Add some paragraphs

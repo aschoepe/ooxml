@@ -1,5 +1,5 @@
-C Improved\simport\sfrom\sdocx.\sSwitched\sto\sthe\szip\sopen\sand\sparse\sfiles\sinfrastructure\sof\sooxml.
-D 2025-03-06T01:20:58.430
+C Fixed\sfallout\sof\ssystematically\snaming\sof\sborder\soptions.\sAdded\spgNumType\s(though\sthat\sis\snot\sall\sto\smake\spage\snumbering\swork).
+D 2025-03-08T12:23:38.331
 F .fossil-settings/ignore-glob ac33082c8ffc2e8f0cd6887d5905eee927e3a0f6ac0b24ef1ad97e9d398aa1d5
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -16,7 +16,7 @@ F docxtest.tcl d55c5fbee8d7e3d7fcb7193578abf8d554c99f87c2d3eabc2d94b61856636f38
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/docx-example1.tcl 94ad5426e81fb3c010653f055b76c1ff65875f334b6400bac01dfb66e20a20c6 x
-F examples/docx-example2.tcl b87becb4514d1b970dd6e8d645db956778dd22259791e863729ef71c01711ebe x
+F examples/docx-example2.tcl 257bf63098545eb35be0f29474b57a1f4a9bd081aacf8c9a34f8169f37dcf48e x
 F examples/docx-example3.tcl 276c5a2676a36f4fe181d91ee09aff12eb396bfda242a20e6485a2374d99bae3 x
 F examples/docx-example4-in.docx 3ae216f142325eca22df5a5a624451e39e20005b06d3fcdaca8419b977e599e5
 F examples/docx-example4.tcl a9469cab4accc49d1b6af742f2f9355cf1978690f0f1fbded9ae702d70aedee7 x
@@ -35,8 +35,8 @@ F examples/sample9.tcl 8078cc94047d5042c17b206b5626b77d17d4d64517420eafd8180def2
 F examples/strings.tcl 87ec65e7707434689e4ee868c3171bcaeb18d22a0323029b7c7afbf412cab926
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
-F ooxml-docx-lib.tcl 0205a3587fac4f5fcac7ea9a6ff493cfcb54a0d07096a0d1289903b72905728e
-F ooxml-docx.tcl 73129fd8bd404d2aeb83af4a6a1316bb943b0b794ba2092e645a210b47a71bd8
+F ooxml-docx-lib.tcl d124dc5cdb9a47e7091646c66a6595a8331657c9bb55f8ff6fbbb1147bfc86ab
+F ooxml-docx.tcl d6a76e900e1c848fe1f264c129507687c5212bab0e529a6fe614afd5b56f11a3
 F ooxml.tcl 89e7f0c7b5e55e534ba2f312b89f89d60dddecf2b53f1c4223d75414d0d98b95
 F pkgIndex.tcl.in fa6ba3133c31834da951d0a53112052fded69b443d4f63897a7c22c26e10460d
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
@@ -91,8 +91,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P b04d5ddae19581a3ade7b290430601a713ff2d46c28b0ac582f92105bb4ab7ff
-R 965f543f8bbc43f33785ff04325268f1
+P 325f5640578fdd9e2a4902ab8d130f545e343580c4f6430226c9b30cc1ca0d62
+R 71eb975f74551a78a2fbf203984a8b54
 U rolf
-Z dc8db6331a440e33473096f45396bd54
+Z fede34f7253c63d8dbceabe4739c8bd2
 # Remove this line to create a well-formed Fossil manifest.

@@ -39,5 +39,6 @@ if {[set sheet [$spreadsheet worksheet {Tabelle 1}]] > -1} {
     }
   }
 }
-$spreadsheet write export1.xlsx
+$spreadsheet write writeRowIndex.xlsx
+Index.xlsx
 $spreadsheet destroy

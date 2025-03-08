@@ -823,6 +823,9 @@ test FormatCellAutoFilter-5.2 {Auto Filter} {
   $spreadsheet autofilter $sheet 19,5 19,6
 } 0
 
+test FormatCellPrintArea-5.3 {Print Area} {
+  $spreadsheet printarea $sheet A1 C3
+} 0
 
 test FormatCellRowHeight-6.1 {Row Height} {
   $spreadsheet rowheight $sheet 33 20
@@ -1074,6 +1077,15 @@ test FormatCellCheckCells-10.7 {Check Hyperlinks} {
   return $rc
   #w_hlinks(1,45,0) = l https://fossil.sowaswie.de/ooxml t weblink
   #workbook(0,l,45,0) = l https://fossil.sowaswie.de/ooxml t weblink
+} 1
+
+
+test FormatCellCheckFilter-10.8 {Check Worksheet Print Area} {
+  set rc 1
+  if {![info exists workbook(0,printarea)] || $workbook(0,printarea) ne $w_obj(printarea,1)} {
+    set rc 0
+  }
+  return $rc
 } 1
 
 

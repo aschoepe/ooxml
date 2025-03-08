@@ -252,5 +252,5 @@ if {[set sheet [$spreadsheet worksheet {Blatt 1}]] > -1} {
   $spreadsheet merge $sheet 41,1 43,1
   $spreadsheet merge $sheet 39,3 42,5
 }
-$spreadsheet write export6.xlsx
+$spreadsheet write aLotOfFormats.xlsx
 $spreadsheet destroy

@@ -2,8 +2,8 @@
 #  ooxml ECMA-376 Office Open XML File Formats
 #  https://www.ecma-international.org/publications/standards/Ecma-376.htm
 #
-#  Copyright (C) 2018-2024 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
-#  Copyright (C) 2019-2024 Rolf Ade, DE
+#  Copyright (C) 2018-2025 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
+#  Copyright (C) 2019-2025 Rolf Ade, DE
 #  Copyright (C) 2023-2024 Harald Oehlmann, DE
 #  All rights reserved.
 #
@@ -162,6 +162,8 @@
 #   method autofilter sheet indexFrom indexTo
 # 
 #   method freeze sheet index
+#
+#   method printarea sheet indexFrom indexTo
 # 
 #   method presetstyles
 #
@@ -843,6 +845,21 @@ proc ::ooxml::StringToRowColumn { name } {
 }
 
 
+proc ::ooxml::IndexFix { index {fix {row col}} } {
+  if {[regexp {^([A-Za-z]+)([0-9]+)$} $index all col row]} {
+    if {[string match -nocase {*r*} $fix]} {
+      set col [string cat {$} $col]
+    }
+    if {[string match -nocase {*r*} $fix]} {
+      set row [string cat {$} $row]
+    }
+    return ${col}${row}
+  } else {
+    return $index
+  }
+}
+
+
 proc ::ooxml::IndexToString { index } {
   lassign [split $index ,] row col
   if {[string is integer -strict $row] && [string is integer -strict $col] && $row > -1 && $col > -1} {
@@ -1133,6 +1150,7 @@ proc ::ooxml::xl_read { file args } {
   array set numFmts [array get predefNumFmts]
   array set sharedStrings {}
   set sheets {}
+  array set printArea {}
 
   array set opts {
     valuesonly 0
@@ -1198,6 +1216,11 @@ proc ::ooxml::xl_read { file args } {
             lappend sheets [incr idx] $sheetId $name $rid [$node @Target]
           }
         }
+      }
+    }
+    foreach node [$root selectNodes {/M:workbook/M:definedNames/M:definedName[@name="_xlnm.Print_Area"]}] {
+      if {[$node hasAttribute localSheetId]} {
+        set printArea([$node @localSheetId]) [lindex [split [$node text] !] end]
       }
     }
     foreach node [$root selectNodes /M:workbook/M:bookViews/M:workbookView] {
@@ -1672,7 +1695,11 @@ proc ::ooxml::xl_read { file args } {
           }
         }
       }
-
+      if {!$opts(valuesonly)} {
+        foreach {n v} [array get printArea] {
+          set wb($n,printarea) $v
+        }
+      }
       if {!$opts(valuesonly)} {
         foreach row [$root selectNodes /M:worksheet/M:sheetData/M:row] {
           if {[$row hasAttribute r] && [$row hasAttribute ht] && [$row hasAttribute customHeight] && [$row @customHeight] == 1} {
@@ -1698,6 +1725,24 @@ proc ::ooxml::xl_read { file args } {
         foreach merge [$root selectNodes /M:worksheet/M:mergeCells/M:mergeCell] {
           if {[$merge hasAttribute ref]} {
             lappend wb($sheet,merge) [$merge @ref]
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach node [$root selectNodes /M:worksheet/M:pageMargins] {
+          foreach n [$node attributeNames] {
+            if {$n in {left right top bottom header footer}} {
+              dict set wb($sheet,pageMargins) -$n [$node @$n]
+            }
+          }
+        }
+      }
+      if {!$opts(valuesonly)} {
+        foreach node [$root selectNodes /M:worksheet/M:pageSetup] {
+          foreach n [$node attributeNames] {
+            if {$n in {blackAndWhite cellComments copies draft errors firstPageNumber fitToHeight fitToWidth horziontalDpi orientation pageOrder paperHeight paperSize paperWide scale useFirstPageNumber verticalDpi}} {
+              dict set wb($sheet,pageSetup) -$n [$node @$n]
+            }
           }
         }
       }
@@ -2639,7 +2684,7 @@ oo::class create ooxml::xl_write {
 
     incr obj(sheets)
     set obj(callRow,$obj(sheets)) 0
-    set obj(sheet,$obj(sheets)) [string range 0 30 [string map {: -  \\ -  / -  ? -  * -  \[  (  \] )} $name]]
+    set obj(sheet,$obj(sheets)) [string range [string map {: -  \\ -  / -  ? -  * -  \[  (  \] )} $name] 0 30]
     set obj(gCol,$obj(sheets)) -1
     set obj(row,$obj(sheets)) -1
     set obj(col,$obj(sheets)) -1
@@ -2649,6 +2694,7 @@ oo::class create ooxml::xl_write {
     set obj(dmaxcol,$obj(sheets)) 0
     set obj(autofilter,$obj(sheets)) {}
     set obj(freeze,$obj(sheets)) {}
+    set obj(printarea,$obj(sheets)) {}
     set obj(merge,$obj(sheets)) {}
     set obj(rowHeight,$obj(sheets)) {}
 
@@ -2863,6 +2909,8 @@ oo::class create ooxml::xl_write {
       lassign [split [::ooxml::StringToRowColumn $opts(index)] ,] obj(row,$sheet) obj(col,$sheet)
     } elseif {[string trim $opts(index)] eq {}} {
       incr obj(col,$sheet)
+    } elseif {[string is double -strict $opts(index)]} {
+      error "option '-index $opts(index)': wrong argument, should not be double"
     }
     if {$obj(row,$sheet) < 0 || $obj(col,$sheet) < 0} {
       return -1
@@ -3006,6 +3054,18 @@ oo::class create ooxml::xl_write {
     return 1
   }
 
+  method printarea { sheet indexFrom indexTo } {
+    my variable obj
+
+    set indexFrom [::ooxml::IndexFix [::ooxml::IndexToString $indexFrom] {row col}]
+    set indexTo [::ooxml::IndexFix [::ooxml::IndexToString $indexTo] {row col}]
+    if {$indexFrom ne {} && $indexTo ne {}} {
+      set obj(printarea,$sheet) $indexFrom:$indexTo
+      return 0
+    }
+    return 1
+  }
+
   method merge { sheet indexFrom indexTo } {
     my variable obj
 
@@ -3121,11 +3181,22 @@ oo::class create ooxml::xl_write {
               my autofilter $currentSheet {*}[split $item :]
             }
           }
+          if {[info exists a($sheet,printarea)]} {
+            foreach item $a($sheet,printarea) {
+              my printarea $currentSheet {*}[split [string map {{$} {}} $item] :]
+            }
+          }
           if {[info exists a($sheet,merge)]} {
             foreach item $a($sheet,merge) {
               my merge $currentSheet {*}[split $item :]
             }
           }
+        }
+        if {[info exists a($sheet,pageMargins)]} {
+          my pageMargins $currentSheet {*}$a($sheet,pageMargins)
+        }
+        if {[info exists a($sheet,pageSetup)]} {
+          my pageSetup $currentSheet {*}$a($sheet,pageSetup)
         }
       }
     }
@@ -4148,10 +4219,13 @@ oo::class create ooxml::xl_write {
           Tag_sheet name $obj(sheet,$ws) sheetId $ws r:id rId$ws {}
         }
       }
-      if {0} {
-        Tag_definedNames {
-          Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
+      Tag_definedNames {
+        for {set ws 1} {$ws <= $obj(sheets)} {incr ws} {
+          if {$obj(printarea,$ws) ne {}} {
+            Tag_definedName name _xlnm.Print_Area localSheetId [expr {$ws - 1}] { Text [string cat ' $obj(sheet,$ws) '! $obj(printarea,$ws)] }
+          }
         }
+        # Tag_definedName name _xlnm._FilterDatabase localSheetId 0 hidden 1 { Text Blatt1!$A$1:$C$1 }
       }
       Tag_calcPr calcId 140000 concurrentCalc 0 {}
       # fullCalcOnLoad 1

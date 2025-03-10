@@ -79,6 +79,10 @@
 # 
 # ::ooxml::StringToRowColumn name
 #   return rowcol
+#
+#
+# ::ooxml::IndexFix index fix
+#   return fixedIndex
 # 
 # 
 # ::ooxml::CalcColumnWidth numberOfCharacters {maximumDigitWidth 7} {pixelPadding 5}
@@ -4539,7 +4543,7 @@ proc ::ooxml::build-info { {cmd {}} } {
   }
 }
 
-package provide ooxml 1.9
+package provide ooxml 1.10
 
 set ::ooxml::pkgPath [file dirname [info script]]
 

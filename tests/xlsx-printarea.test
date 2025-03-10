@@ -1,0 +1,84 @@
+#
+# Commands covered: definedNames _xlnm.Print_Area
+#
+
+#
+# (c) 2025 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest 2
+    namespace import -force ::tcltest::*
+    loadTestedCommands
+}
+
+package require ooxml
+
+# Begin with a new spreadsheet and a new workbook
+
+test newSpreadsheet-1.1 {Create New Spreadsheet} -body {
+    set spreadsheet [::ooxml::xl_write new -creator {Alexander Schöpe}]
+} -result {::oo::Obj*} -match glob
+
+test newWorksheet-1.2 {Create New Worksheet} {
+    set sheet [$spreadsheet worksheet {Blatt 1}]
+} 1
+
+# *************** Begin here with settings, formats and data ***************
+
+test printArea-2.1 {Set Print Area} {
+    $spreadsheet printarea $sheet A1 C3
+} 0
+
+# *************** End here with settings, formats and data ***************
+
+# Save all data for later comparison
+
+foreach item {obj cells fonts numFmts styles fills borders cols view hlinks} {
+    array set w_$item [array get ${spreadsheet}::$item]
+    # parray w_$item
+}
+
+# Write XLSX file and destroy spreadsheet
+
+test writeSpreatsheet-3.1 {Write Spreatsheet} {
+        $spreadsheet write printarea.xlsx
+} 0
+
+test destroySpreatsheet-3.2 {Destroy Spreatsheet} {
+    $spreadsheet destroy
+} 0
+
+# Read XLSX file for comparison
+
+test readWorkbook-4.1 {Read Workbook} {
+    array set workbook [ooxml::xl_read printarea.xlsx]
+    # parray workbook
+    return [llength $workbook(sheets)]
+} 1
+
+# *************** Begin here with comparison ***************
+
+test printArea-5.1 {Check Print Area} {
+    set rc 1
+    if {![info exists workbook(0,printarea)] || $workbook(0,printarea) ne $w_obj(printarea,1)} {
+        set rc 0
+    }
+    return $rc
+} 1
+
+# *************** End here with comparison ***************
+
+# Cleanup
+
+file delete -force printarea.xlsx
+
+::tcltest::cleanupTests
+return
+
+# Local Variables:
+# tcl-indent-level: 4
+# End:

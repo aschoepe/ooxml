@@ -113,6 +113,11 @@ test IndexToString-1.5 {IndexToString A} {
 } {}
 
 
+test ::ooxml::IndexFix1.1 {IndexFix A1} {
+  ::ooxml::IndexFix A1
+} {$A$1}
+
+
 test CalcColumnWidth-1.1 {CalcColumnWidth takes args} -body {
   ::ooxml::CalcColumnWidth
 } -returnCodes error -result "wrong # args: should be \"::ooxml::CalcColumnWidth numberOfCharacters ?maximumDigitWidth? ?pixelPadding?\""

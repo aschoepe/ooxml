@@ -499,171 +499,65 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method configure {args} {
-        my variable docs
-
-        OptVal $args
-        set coreroot [$docs(docProps/core.xml) documentElement]
-        $coreroot appendFromScript {
-            foreach elem {
-                cp:category
-                cp:contentStatus
-                dcterms:created
-                dc:creator
-                dc:description
-                dc:identifier
-                cp:keywords
-                dc:language
-                cp:lastModifiedBy
-                cp:lastPrinted
-                dcterms:modified
-                cp:revision
-                dc:subject
-                dc:title
-                cp:version
-            } {
-                lassign [split $elem :] prefix option
-                set value [my EatOption -$option]
-                if {$value ne ""} {
-                    set attlist ""
-                    if {$prefix eq "dcterms"} {
-                        set value [W3CDTF $value]
-                        lappend attlist xsi:type dcterms:W3CDTF
-                    }
-                    foreach currentnode [$coreroot selectNodes {*[local-name()=$option]}] {
-                        $currentnode delete
-                    }
-                    ::tdom::fsnewNode $elem $attlist {Text $value}
-                }
-            }
-        }
-        my CheckRemainingOpts
-    }
-    
-    method import {what docxfile} {
+    method Add2Relationships {type target} {
         my variable docs
         variable ::ooxml::docx::xmlns
 
-        ::ooxml::ZipOpen $docxfile
-        set rId ""
-        try {
-            switch -glob $what {
-                "styles" {
-                    set what "word/styles.xml"
-                }
-                "numbering" {
-                    set what "word/numbering.xml"
-                }
-                "header*" -
-                "footer*" {
-                    set what "word/$what.xml"
-                }
-            }
-            set thisdoc [::ooxml::ZipReadParse $what]
-            set target [string range $what 5 end]
-            if {[info exists docs($what)]} {
-                $docs($what) delete
-                if {[string range $what 0 4] eq "word/"} {
-                    set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-                    set rId [$relsRoot selectNodes -namespaces [list r $xmlns(rel)] {
-                        string(r:Relationship[@Target=$target])
-                    }]
-                }
-            } elseif {[string range $what 0 4] eq "word/"} {
-                set thisrels [::ooxml::ZipReadParse "word/_rels/document.xml.rels"]
-                set relsroot [$thisrels documentElement]
-                set typeurl [$relsroot selectNodes -namespaces [list r $xmlns(rel)] {
-                    string(r:Relationship[@Target=$target]/@Type)
-                }]
-                # The typeurl starts with
-                # http://schemas.openxmlformats.org/officeDocument/2006/relationships/
-                set rId [my Add2Relationships [string range $typeurl 68 end] $target]
-                $thisrels delete
-            }
-            set docs($what) $thisdoc
-            if {$what eq "word/document.xml"} {
-                my ResetPageSetup
-            }
-        } finally {
-            ::ooxml::ZipClose
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        # The following is perhaps over-complicated:
+        # set relsns http://schemas.openxmlformats.org/package/2006/relationships
+        # set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
+        #              -list {r:Relationship string(@Id)}]
+        # set rId 1
+        # foreach id $ids {
+        #     set nr [string range $id 3 end]
+        #     if {[string range $id 0 2] eq "rId"
+        #         && [string is integer -strict $nr]
+        #     } {
+        #         if {$nr > $rId} {
+        #             set rId $nr
+        #         }
+        #     }
+        # }
+        # At least for documents we build up from scratch this should
+        # work reliable enough (and work faster)
+        set lastchild [$relsRoot lastChild]
+        set rId [string range [$lastchild @Id] 3 end]
+        incr rId
+        set attlist [list \
+             Id rId$rId \
+             Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type \
+             Target $target]
+        if {$type eq "hyperlink"} {
+            lappend attlist TargetMode External
+        }
+        $relsRoot appendFromScript {
+            Tag_Relationship {*}$attlist 
         }
         return $rId
     }
-
-    method ResetPageSetup {} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
-
-        # If pagesetup or sectionsetup are not empty they stored a
-        # node out of the fragment list of document and they are
-        # now gone with the deletion of document
-        my variable setuproot
-        my variable pagesetup
-        my variable sectionsetup
-        set setuproot [$docs(word/document.xml) createElementNS $xmlns(w) w:umbrella]
-        set pagesetup ""
-        set sectionsetup ""
+    
+    method CallType {type value errtext} {
+        # A few value checks need access to the docx object internal
+        # data and therefor are implemented as object methods. The
+        # bulk of the type checks are "static" procs in the
+        # ooxml::docx namespace.
+        set error 0
+        if {[catch {set ooxmlvalue [$type $value]} errMsg]} {
+            if {![llength [info procs ::ooxml::docx::lib::$type]]} {
+                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
+                    set error 1
+                }
+            } else {
+                set error 1
+            }
+            if {$error} {
+                error "$errtext: $errMsg"
+            }
+        }
+        return $ooxmlvalue
     }
     
-    method readpart {what file} {
-        my variable docs
-
-        set fd [::tdom::xmlOpenFile $file]
-        if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
-            close $fd
-            error $errMsg
-        }
-        close $fd
-        if {[info exists docs($what)]} {
-            $docs($what) delete
-        }
-        set docs($what) $doc
-        if {$what eq "word/document.xml"} {
-            my ResetPageSetup
-        }
-    }
-
-    method writepart {what file} {
-        my variable docs
-
-        if {![info exists docs($what)]} {
-            error "unknown part $what"
-        }
-        set fd [open $file w+]
-        fconfigure $fd -encoding utf-8
-        $docs($what) asXML -channel $fd
-        close $fd
-    }
-
-
-    method PStyle {value} {
-        my variable docs
-        
-        set styles [$docs(word/styles.xml) documentElement]
-        if {[$styles selectNodes {w:style[@w:type="paragraph" and @w:styleId=$value]}] eq ""} {
-            error "unknown paragraph style \"$value\""
-        }
-        return $value
-    }
-
-    method RStyle {value} {
-        my variable docs
-        
-        set styles [$docs(word/styles.xml) documentElement]
-        if {[$styles selectNodes {w:style[@w:type="character" and @w:styleId=$value]}] eq ""} {
-            error "unknown character style \"$value\""
-        }
-        return $value
-    }
-
-    method RFonts {value} {
-        Tag_w:rFonts \
-            [my Watt ascii] $value \
-            [my Watt hAnsi] $value \
-            [my Watt eastAsia] $value \
-            [my Watt cs] $value
-    }
-
     method Create switchActionList {
         upvar opts opts
         
@@ -775,42 +669,15 @@ oo::class create ooxml::docx::docx {
         }
         uplevel [list error $text]
     }
-    
-    method Wt {text} {
-        # Just not exactly that easy.
-        # Handle at least \n \r \t and \f special
-        set pos 0
-        set end [string length $text]
-        foreach part [split $text "\n\r\t\f"] {
-            if {$pos == [incr pos [string length $part]]} {
-                incr pos
-                continue
-            }
-            set atts ""
-            if {[string index $part 0] eq " " || [string index $part end] eq " "} {
-                lappend atts xml:space preserve
-            }
-            Tag_w:t $atts {
-                Text [dom clearString -replace $part]
-            }
-            if {$pos < $end} {
-                switch [string index $text $pos] {
-                    "\n" Tag_w:br
-                    "\r" Tag_w:cr
-                    "\t" Tag_w:tab
-                    "\f" {Tag_w:br [my Watt type] "page" {}}
-                }
-            }
-            incr pos
+
+    method EatOption {option} {
+        upvar opts opts
+        if {[info exists opts($option)]} {
+            set value $opts($option)
+            unset opts($option)
+            return $value
         }
-    }
-
-    method Watt {attname} {
-        list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
-    }
-
-    method Ratt {attname} {
-        list http://schemas.openxmlformats.org/officeDocument/2006/relationships r:$attname
+        return ""
     }
 
     method GetDocDefault {styles} {
@@ -849,6 +716,77 @@ oo::class create ooxml::docx::docx {
         return $p
     }
 
+    method PStyle {value} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        if {[$styles selectNodes {w:style[@w:type="paragraph" and @w:styleId=$value]}] eq ""} {
+            error "unknown paragraph style \"$value\""
+        }
+        return $value
+    }
+
+    method Option {option attname type {default ""}} {
+        upvar opts opts
+        if {[info exists opts($option)]} {
+            set ooxmlvalue [my CallType $type $opts($option) \
+                                "the value given to the \"$option\" option\
+                                 is invalid"]
+            unset opts($option)
+        } else {
+            set ooxmlvalue $default
+        }
+        return [list $attname $ooxmlvalue]
+    }
+    
+    method Ratt {attname} {
+        list http://schemas.openxmlformats.org/officeDocument/2006/relationships r:$attname
+    }
+
+    method ResetPageSetup {} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+
+        # If pagesetup or sectionsetup are not empty they stored a
+        # node out of the fragment list of document and they are
+        # now gone with the deletion of document
+        my variable setuproot
+        my variable pagesetup
+        my variable sectionsetup
+        set setuproot [$docs(word/document.xml) createElementNS $xmlns(w) w:umbrella]
+        set pagesetup ""
+        set sectionsetup ""
+    }
+    
+    method RFonts {value} {
+        Tag_w:rFonts \
+            [my Watt ascii] $value \
+            [my Watt hAnsi] $value \
+            [my Watt eastAsia] $value \
+            [my Watt cs] $value
+    }
+    
+    method RStyle {value} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        if {[$styles selectNodes {w:style[@w:type="character" and @w:styleId=$value]}] eq ""} {
+            error "unknown character style \"$value\""
+        }
+        return $value
+    }
+
+    method SectionCommon {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        my Create $properties(sectionsetup1)
+        Tag_w:pgBorders {
+            my Create $properties(sectionBorders)
+        }
+        my Create $properties(sectionsetup2)
+    }
+    
     method Tabs {tabsdata} {
         foreach tabstop $tabsdata {
             if {[llength $tabstop] == 1} {
@@ -866,101 +804,40 @@ oo::class create ooxml::docx::docx {
             unset opts
         }
     }
-            
-    method paragraph {text args} {
-        my variable body
-        variable ::ooxml::docx::properties
-        
-        OptVal $args "text"
-        $body appendFromScript {
-            Tag_w:p {
-                Tag_w:pPr {
-                    Tag_w:numPr {
-                        my Create $properties(numbering)
-                    }
-                    Tag_w:pBdr {
-                        my Create $properties(paragraphBorders)
-                    }
-                    Tag_w:tabs {
-                        my Tabs [my EatOption -tabs]
-                    }
-                    my Create $properties(paragraph)
-                }
-                Tag_w:r {
-                    my Wt $text
-                }
-            }
-        }
-        my CheckRemainingOpts
+
+    method Watt {attname} {
+        list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
     }
-    
-    method CallType {type value errtext} {
-        # A few value checks need access to the docx object internal
-        # data and therefor are implemented as object methods. The
-        # bulk of the type checks are "static" procs in the
-        # ooxml::docx namespace.
-        set error 0
-        if {[catch {set ooxmlvalue [$type $value]} errMsg]} {
-            if {![llength [info procs ::ooxml::docx::lib::$type]]} {
-                if {[catch {set ooxmlvalue [my $type $value]} errMsg]} {
-                    set error 1
-                }
-            } else {
-                set error 1
+
+    method Wt {text} {
+        # Just not exactly that easy.
+        # Handle at least \n \r \t and \f special
+        set pos 0
+        set end [string length $text]
+        foreach part [split $text "\n\r\t\f"] {
+            if {$pos == [incr pos [string length $part]]} {
+                incr pos
+                continue
             }
-            if {$error} {
-                error "$errtext: $errMsg"
+            set atts ""
+            if {[string index $part 0] eq " " || [string index $part end] eq " "} {
+                lappend atts xml:space preserve
             }
-        }
-        return $ooxmlvalue
-    }
-    
-    method Option {option attname type {default ""}} {
-        upvar opts opts
-        if {[info exists opts($option)]} {
-            set ooxmlvalue [my CallType $type $opts($option) \
-                                "the value given to the \"$option\" option\
-                                 is invalid"]
-            unset opts($option)
-        } else {
-            set ooxmlvalue $default
-        }
-        return [list $attname $ooxmlvalue]
-    }
-    
-    method image {file args} {
-        my variable media
-        variable ::ooxml::docx::properties
-        
-        OptVal $args "file"
-        lappend media $file
-        set rId [my Add2Relationships image media/$file]
-        set p [my LastParagraph]
-        $p appendFromScript {
-            Tag_w:r {
-                Tag_w:drawing {
-                    Tag_wp:anchor {
-                        Tag_a:graphic {
-                            Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
-                                Tag_pic:pic {
-                                    Tag_pic:blipFill {
-                                        Tag_a:blip [my Ratt embed] rId$rId {}
-                                    }
-                                    Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
-                                        Tag_a:xfrm {
-                                            my Create $properties(xfrm)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            Tag_w:t $atts {
+                Text [dom clearString -replace $part]
+            }
+            if {$pos < $end} {
+                switch [string index $text $pos] {
+                    "\n" Tag_w:br
+                    "\r" Tag_w:cr
+                    "\t" Tag_w:tab
+                    "\f" {Tag_w:br [my Watt type] "page" {}}
                 }
             }
+            incr pos
         }
-        my CheckRemainingOpts
     }
-    
+
     method append {text args} {
         OptVal $args "text"
         set p [my LastParagraph]
@@ -974,9 +851,137 @@ oo::class create ooxml::docx::docx {
                 }
             }
         } errMsg]} {
-            uplevel error [list $errMsg]
+            return -code error $errMsg
         }
         my CheckRemainingOpts
+    }
+    
+    method configure {args} {
+        my variable docs
+
+        OptVal $args
+        set coreroot [$docs(docProps/core.xml) documentElement]
+        $coreroot appendFromScript {
+            foreach elem {
+                cp:category
+                cp:contentStatus
+                dcterms:created
+                dc:creator
+                dc:description
+                dc:identifier
+                cp:keywords
+                dc:language
+                cp:lastModifiedBy
+                cp:lastPrinted
+                dcterms:modified
+                cp:revision
+                dc:subject
+                dc:title
+                cp:version
+            } {
+                lassign [split $elem :] prefix option
+                set value [my EatOption -$option]
+                if {$value ne ""} {
+                    set attlist ""
+                    if {$prefix eq "dcterms"} {
+                        set value [W3CDTF $value]
+                        lappend attlist xsi:type dcterms:W3CDTF
+                    }
+                    foreach currentnode [$coreroot selectNodes {*[local-name()=$option]}] {
+                        $currentnode delete
+                    }
+                    ::tdom::fsnewNode $elem $attlist {Text $value}
+                }
+            }
+        }
+        my CheckRemainingOpts
+    }
+    
+    method image {file args} {
+        my variable media
+        variable ::ooxml::docx::properties
+        
+        if {[catch {
+            OptVal $args "file"
+            lappend media $file
+            set rId [my Add2Relationships image media/$file]
+            set p [my LastParagraph]
+            $p appendFromScript {
+                Tag_w:r {
+                    Tag_w:drawing {
+                        Tag_wp:anchor {
+                            Tag_a:graphic {
+                                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                                    Tag_pic:pic {
+                                        Tag_pic:blipFill {
+                                            Tag_a:blip [my Ratt embed] rId$rId {}
+                                        }
+                                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
+                                            Tag_a:xfrm {
+                                                my Create $properties(xfrm)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        my CheckRemainingOpts
+    }
+
+    method import {what docxfile} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+
+        ::ooxml::ZipOpen $docxfile
+        set rId ""
+        try {
+            switch -glob $what {
+                "styles" {
+                    set what "word/styles.xml"
+                }
+                "numbering" {
+                    set what "word/numbering.xml"
+                }
+                "header*" -
+                "footer*" {
+                    set what "word/$what.xml"
+                }
+            }
+            set thisdoc [::ooxml::ZipReadParse $what]
+            set target [string range $what 5 end]
+            if {[info exists docs($what)]} {
+                $docs($what) delete
+                if {[string range $what 0 4] eq "word/"} {
+                    set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+                    set rId [$relsRoot selectNodes -namespaces [list r $xmlns(rel)] {
+                        string(r:Relationship[@Target=$target])
+                    }]
+                }
+            } elseif {[string range $what 0 4] eq "word/"} {
+                set thisrels [::ooxml::ZipReadParse "word/_rels/document.xml.rels"]
+                set relsroot [$thisrels documentElement]
+                set typeurl [$relsroot selectNodes -namespaces [list r $xmlns(rel)] {
+                    string(r:Relationship[@Target=$target]/@Type)
+                }]
+                # The typeurl starts with
+                # http://schemas.openxmlformats.org/officeDocument/2006/relationships/
+                set rId [my Add2Relationships [string range $typeurl 68 end] $target]
+                $thisrels delete
+            }
+            set docs($what) $thisdoc
+            if {$what eq "word/document.xml"} {
+                my ResetPageSetup
+            }
+        } finally {
+            ::ooxml::ZipClose
+        }
+        return $rId
     }
 
     method numbering {cmd args} {
@@ -996,36 +1001,40 @@ oo::class create ooxml::docx::docx {
                 if {$style ne ""} {
                     error "abstractNum style id $id already exists"
                 }
-                $numbering appendFromScript {
-                    Tag_w:abstractNum [my Watt abstractNumId] $id {
-                        set levelnr 0
-                        foreach level $levelData {
-                            OptVal $level "option"
-                            Tag_w:lvl [my Watt ilvl] $levelnr {
-                                set start [my EatOption -start]
-                                if {$start ne ""} {
-                                    ST_DecimalNumber $start
-                                } else {
-                                    set start 1
+                if {[catch {
+                    $numbering appendFromScript {
+                        Tag_w:abstractNum [my Watt abstractNumId] $id {
+                            set levelnr 0
+                            foreach level $levelData {
+                                OptVal $level "option"
+                                Tag_w:lvl [my Watt ilvl] $levelnr {
+                                    set start [my EatOption -start]
+                                    if {$start ne ""} {
+                                        ST_DecimalNumber $start
+                                    } else {
+                                        set start 1
+                                    }
+                                    Tag_w:start [my Watt val] $start {}
+                                    my Create $properties(abstractNumStyle)
+                                    Tag_w:pPr {
+                                        my Create $properties(styleparagraph)
+                                    }
+                                    Tag_w:rPr {
+                                        my Create $properties(stylerun)
+                                    }
                                 }
-                                Tag_w:start [my Watt val] $start {}
-                                my Create $properties(abstractNumStyle)
-                                Tag_w:pPr {
-                                    my Create $properties(styleparagraph)
+                                if {[catch {my CheckRemainingOpts} errMsg]} {
+                                    error "level definition $levelnr: $errMsg"
                                 }
-                                Tag_w:rPr {
-                                    my Create $properties(stylerun)
-                                }
+                                incr levelnr
                             }
-                            if {[catch {my CheckRemainingOpts} errMsg]} {
-                                error "level definition $levelnr: $errMsg"
-                            }
-                            incr levelnr
+                        }
+                        Tag_w:num [my Watt numId] $id {
+                            Tag_w:abstractNumId [my Watt val] $id {}
                         }
                     }
-                    Tag_w:num [my Watt numId] $id {
-                        Tag_w:abstractNumId [my Watt val] $id {}
-                    }
+                } errMsg]} {
+                    return -code error $errMsg
                 }
             }
             "abstractNumIds" {
@@ -1059,199 +1068,6 @@ oo::class create ooxml::docx::docx {
         }
     }
     
-    method style {cmd args} {
-        my variable docs
-        variable ::ooxml::docx::properties
-
-        set styles [$docs(word/styles.xml) documentElement]
-        switch $cmd {
-            "paragraphdefault" {
-                set docDefaults [my GetDocDefault $styles]
-                set pdefault [$docDefaults selectNodes w:pPrDefault]
-                foreach this $pdefault {
-                    $pdefault delete
-                }
-                # docDefaults has two childs in the order:
-                # rPrDefault pPrDefault
-                OptVal $args "paragraphdefault"
-                $docDefaults appendFromScript {
-                    Tag_w:pPrDefault {
-                        Tag_w:pPr {
-                            Tag_w:pBdr {
-                                my Create $properties(paragraphBorders)
-                            }
-                            my Create $properties(styleparagraph)
-                        }
-                    }
-                }
-                my CheckRemainingOpts
-            }
-            "characterdefault" {
-                set docDefaults [my GetDocDefault $styles]
-                set rdefault [$docDefaults selectNodes w:rPrDefault]
-                foreach this $rdefault {
-                    $rdefault delete
-                }
-                # docDefaults has two childs in the order:
-                # rPrDefault pPrDefault
-                OptVal $args "characterdefault"
-                $docDefaults insertBeforeFromScript {
-                    Tag_w:rPrDefault {
-                        Tag_w:rPr {
-                            my Create $properties(stylerun)
-                        }
-                    }
-                } [$docDefaults firstChild]
-                my CheckRemainingOpts
-            }
-            "character" -
-            "paragraph" -
-            "table" {
-                if {![llength $args]} {
-                    error "missing the style name argument"
-                }
-                set name [lindex $args 0]
-                OptVal [lrange $args 1 end] $cmd
-                set style [$styles selectNodes {
-                    w:style[@w:type=$cmd and @w:styleId=$name]
-                }]
-                if {$style ne ""} {
-                    error "$cmd style \"$name\" already exists"
-                }
-                set basedon [my EatOption -basedon]
-                $styles appendFromScript {
-                    Tag_w:style [my Watt type] $cmd [my Watt styleId] $name {
-                        Tag_w:name [my Watt val] $name {}
-                        Tag_w:basedOn [my Watt val] $basedon {}
-                        if {$cmd eq "table"} {
-                            Tag_w:tblPr {
-                                Tag_w:tblBorders {
-                                    my Create $properties(tableBorders)
-                                }
-                            }
-                        } else {
-                            if {$cmd eq "paragraph"} {
-                                Tag_w:pPr {
-                                    Tag_w:pBdr {
-                                        my Create $properties(paragraphBorders)
-                                    }
-                                    my Create $properties(styleparagraph)
-                                }
-                            }
-                            Tag_w:rPr {
-                                my Create $properties(stylerun)
-                            }
-                        }
-                    }
-                }
-                my CheckRemainingOpts
-            }
-            "ids" {
-                if {[llength $args] != 1} {
-                    error "wrong number of arguments, expectecd the style type"
-                }
-                set type [lindex $args 0]
-                return [$styles selectNodes -list {w:style[@w:type=$type] string(@w:styleId)}]
-            }
-            "delete" {
-                if {[llength $args] != 2} {
-                    error "wrong number of arguments for the subcommand \"delete\", expected\
-                           the style type and the style ID"
-                }
-                lassign $args type name
-                if {$type ni {paragraph paragraphdefault character characterdefault}} {
-                    error "unknown style type \"type\""
-                }
-                switch $type {
-                    "paragraphdefault" {
-                        foreach node [$styles selectNodes w:docDefaults/w:pPrDefault] {
-                            $node delete
-                        }
-                    }
-                    "characterdefault" {
-                        foreach node [$styles selectNodes w:docDefaults/w:rPrDefault] {
-                            $node delete
-                        }
-                    }
-                    default {
-                        foreach node [$styles selectNodes {
-                            w:style[@w:type=$type and @w:styleId=$name]
-                        }] {
-                            $node delete
-                        }
-                    }
-                }
-            }
-            default {
-                error "invalid subcommand \"$cmd\""
-            }
-        }
-    }
-
-    method EatOption {option} {
-        upvar opts opts
-        if {[info exists opts($option)]} {
-            set value $opts($option)
-            unset opts($option)
-            return $value
-        }
-        return ""
-    }
-
-    method simpletable {tabledata args} {
-        my variable body
-        variable ::ooxml::docx::properties
-
-        OptVal $args "tabledata"
-        set style [my EatOption -style]
-        $body appendFromScript {
-            Tag_w:tbl {
-                Tag_w:tblPr {
-                    if {$style ne ""} {
-                        Tag_w:tblStyle [my Watt val] $style {}
-                    }
-                    Tag_w:tblBorders {
-                        my Create $properties(tableBorders)
-                    }
-                }
-                set widths [my EatOption -columnwidths]
-                if {[llength $widths]} {
-                    Tag_w:tblGrid {
-                        foreach width $widths {
-                            Tag_w:gridCol [my Watt w] [ST_TwipsMeasure $width] {}
-                        }
-                    }
-                }
-                foreach row $tabledata {
-                    Tag_w:tr {
-                        foreach cell $row {
-                            Tag_w:tc {
-                                # Tag_w:tcPr {
-                                #     Tag_w:tcW w:w 200 w:type "dxa"
-                                # }
-                                Tag_w:p {
-                                    Tag_w:r {my Wt $cell}
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        my CheckRemainingOpts
-    }
-
-    method SectionCommon {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-
-        my Create $properties(sectionsetup1)
-        Tag_w:pgBorders {
-            my Create $properties(sectionBorders)
-        }
-        my Create $properties(sectionsetup2)
-    }
-    
     # WordprocessingML has no concept of a page. Rather it groups
     # paragraphs (the main building block) into "sections". The page
     # setup of a section is located within the w:p subtree of the last
@@ -1268,10 +1084,63 @@ oo::class create ooxml::docx::docx {
         $setuproot appendFromScript Tag_w:sectPr
         set pagesetup [$setuproot lastChild]
         array set opts $args
-        $pagesetup appendFromScript {
-            my SectionCommon
+        if {[catch {
+            $pagesetup appendFromScript {
+                my SectionCommon
+            }
+        } errMsg]} {
+            return -code error $errMsg
         }
         my CheckRemainingOpts
+    }
+
+    method paragraph {text args} {
+        my variable body
+        variable ::ooxml::docx::properties
+        
+        if {[catch {
+            OptVal $args "text"
+            $body appendFromScript {
+                Tag_w:p {
+                    Tag_w:pPr {
+                        Tag_w:numPr {
+                            my Create $properties(numbering)
+                        }
+                        Tag_w:pBdr {
+                            my Create $properties(paragraphBorders)
+                        }
+                        Tag_w:tabs {
+                            my Tabs [my EatOption -tabs]
+                        }
+                        my Create $properties(paragraph)
+                    }
+                    Tag_w:r {
+                        my Wt $text
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        my CheckRemainingOpts
+    }
+    
+    method readpart {what file} {
+        my variable docs
+
+        set fd [::tdom::xmlOpenFile $file]
+        if {[catch {set doc [dom parse -channel $fd]} errMsg]} {
+            close $fd
+            error $errMsg
+        }
+        close $fd
+        if {[info exists docs($what)]} {
+            $docs($what) delete
+        }
+        set docs($what) $doc
+        if {$what eq "word/document.xml"} {
+            my ResetPageSetup
+        }
     }
 
     method sectionstart {args} {
@@ -1294,9 +1163,13 @@ oo::class create ooxml::docx::docx {
         }
         $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
         array set opts $args
-        $sectionsetup appendFromScript {
-            my SectionCommon
-        }
+        if {[catch {
+            $sectionsetup appendFromScript {
+                my SectionCommon
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }            
         my CheckRemainingOpts
     }
 
@@ -1318,44 +1191,198 @@ oo::class create ooxml::docx::docx {
         set sectionsetup ""
     }
 
-    method Add2Relationships {type target} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
+    method simpletable {tabledata args} {
+        my variable body
+        variable ::ooxml::docx::properties
 
-        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-        # The following is perhaps over-complicated:
-        # set relsns http://schemas.openxmlformats.org/package/2006/relationships
-        # set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
-        #              -list {r:Relationship string(@Id)}]
-        # set rId 1
-        # foreach id $ids {
-        #     set nr [string range $id 3 end]
-        #     if {[string range $id 0 2] eq "rId"
-        #         && [string is integer -strict $nr]
-        #     } {
-        #         if {$nr > $rId} {
-        #             set rId $nr
-        #         }
-        #     }
-        # }
-        # At least for documents we build up from scratch this should
-        # work reliable enough (and work faster)
-        set lastchild [$relsRoot lastChild]
-        set rId [string range [$lastchild @Id] 3 end]
-        incr rId
-        set attlist [list \
-             Id rId$rId \
-             Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type \
-             Target $target]
-        if {$type eq "hyperlink"} {
-            lappend attlist TargetMode External
+        OptVal $args "tabledata"
+        if {[catch {
+            set style [my EatOption -style]
+            $body appendFromScript {
+                Tag_w:tbl {
+                    Tag_w:tblPr {
+                        if {$style ne ""} {
+                            Tag_w:tblStyle [my Watt val] $style {}
+                        }
+                        Tag_w:tblBorders {
+                            my Create $properties(tableBorders)
+                        }
+                    }
+                    set widths [my EatOption -columnwidths]
+                    if {[llength $widths]} {
+                        Tag_w:tblGrid {
+                            foreach width $widths {
+                                Tag_w:gridCol [my Watt w] [ST_TwipsMeasure $width] {}
+                            }
+                        }
+                    }
+                    foreach row $tabledata {
+                        Tag_w:tr {
+                            foreach cell $row {
+                                Tag_w:tc {
+                                    # Tag_w:tcPr {
+                                    #     Tag_w:tcW w:w 200 w:type "dxa"
+                                    # }
+                                    Tag_w:p {
+                                        Tag_w:r {my Wt $cell}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
         }
-        $relsRoot appendFromScript {
-            Tag_Relationship {*}$attlist 
-        }
-        return $rId
+        my CheckRemainingOpts
     }
-    
+
+    method style {cmd args} {
+        my variable docs
+        variable ::ooxml::docx::properties
+
+        if {[catch {
+            set styles [$docs(word/styles.xml) documentElement]
+            switch $cmd {
+                "paragraphdefault" {
+                    set docDefaults [my GetDocDefault $styles]
+                    set pdefault [$docDefaults selectNodes w:pPrDefault]
+                    foreach this $pdefault {
+                        $pdefault delete
+                    }
+                    # docDefaults has two childs in the order:
+                    # rPrDefault pPrDefault
+                    OptVal $args "paragraphdefault"
+                    $docDefaults appendFromScript {
+                        Tag_w:pPrDefault {
+                            Tag_w:pPr {
+                                Tag_w:pBdr {
+                                    my Create $properties(paragraphBorders)
+                                }
+                                my Create $properties(styleparagraph)
+                            }
+                        }
+                    }
+                    my CheckRemainingOpts
+                }
+                "characterdefault" {
+                    set docDefaults [my GetDocDefault $styles]
+                    set rdefault [$docDefaults selectNodes w:rPrDefault]
+                    foreach this $rdefault {
+                        $rdefault delete
+                    }
+                    # docDefaults has two childs in the order:
+                    # rPrDefault pPrDefault
+                    OptVal $args "characterdefault"
+                    $docDefaults insertBeforeFromScript {
+                        Tag_w:rPrDefault {
+                            Tag_w:rPr {
+                                my Create $properties(stylerun)
+                            }
+                        }
+                    } [$docDefaults firstChild]
+                    my CheckRemainingOpts
+                }
+                "character" -
+                "paragraph" -
+                "table" {
+                    if {![llength $args]} {
+                        error "missing the style name argument"
+                    }
+                    set name [lindex $args 0]
+                    OptVal [lrange $args 1 end] $cmd
+                    set style [$styles selectNodes {
+                        w:style[@w:type=$cmd and @w:styleId=$name]
+                    }]
+                    if {$style ne ""} {
+                        error "$cmd style \"$name\" already exists"
+                    }
+                    set basedon [my EatOption -basedon]
+                    $styles appendFromScript {
+                        Tag_w:style [my Watt type] $cmd [my Watt styleId] $name {
+                            Tag_w:name [my Watt val] $name {}
+                            Tag_w:basedOn [my Watt val] $basedon {}
+                            if {$cmd eq "table"} {
+                                Tag_w:tblPr {
+                                    Tag_w:tblBorders {
+                                        my Create $properties(tableBorders)
+                                    }
+                                }
+                            } else {
+                                if {$cmd eq "paragraph"} {
+                                    Tag_w:pPr {
+                                        Tag_w:pBdr {
+                                            my Create $properties(paragraphBorders)
+                                        }
+                                        my Create $properties(styleparagraph)
+                                    }
+                                }
+                                Tag_w:rPr {
+                                    my Create $properties(stylerun)
+                                }
+                            }
+                        }
+                    }
+                    my CheckRemainingOpts
+                }
+                "ids" {
+                    if {[llength $args] != 1} {
+                        error "wrong number of arguments, expectecd the style type"
+                    }
+                    set type [lindex $args 0]
+                    return [$styles selectNodes -list {w:style[@w:type=$type] string(@w:styleId)}]
+                }
+                "delete" {
+                    if {[llength $args] != 2} {
+                        error "wrong number of arguments for the subcommand \"delete\", expected\
+                           the style type and the style ID"
+                    }
+                    lassign $args type name
+                    if {$type ni {paragraph paragraphdefault character characterdefault}} {
+                        error "unknown style type \"type\""
+                    }
+                    switch $type {
+                        "paragraphdefault" {
+                            foreach node [$styles selectNodes w:docDefaults/w:pPrDefault] {
+                                $node delete
+                            }
+                        }
+                        "characterdefault" {
+                            foreach node [$styles selectNodes w:docDefaults/w:rPrDefault] {
+                                $node delete
+                            }
+                        }
+                        default {
+                            foreach node [$styles selectNodes {
+                                w:style[@w:type=$type and @w:styleId=$name]
+                            }] {
+                                $node delete
+                            }
+                        }
+                    }
+                }
+                default {
+                    error "invalid subcommand \"$cmd\""
+                }
+            } 
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    method writepart {what file} {
+        my variable docs
+
+        if {![info exists docs($what)]} {
+            error "unknown part $what"
+        }
+        set fd [open $file w+]
+        fconfigure $fd -encoding utf-8
+        $docs($what) asXML -channel $fd
+        close $fd
+    }
+            
     method url {text url args} {
         my variable docs
         variable ::ooxml::docx::xmlns
@@ -1375,7 +1402,7 @@ oo::class create ooxml::docx::docx {
                 }
             }
         } errMsg]} {
-            uplevel error [list $errMsg]
+            return -code error [list $errMsg]
         }
         my CheckRemainingOpts
     }

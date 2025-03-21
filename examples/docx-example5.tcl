@@ -30,13 +30,14 @@ $docx numbering abstractNum 3 {
         -numberFormat upperRoman
         -levelText "%1."
         -start 3
-        -indentation {start 1cm hanging 0.5cm}
+        -align start
+        -indentation {start 2cm hanging 0.5cm}
         -fontsize 18pt
     }
     {
         -numberFormat chicago
         -levelText "%2"
-        -indentation {start 2cm hanging 0.5cm}
+        -indentation {start 3cm hanging 0.5cm}
         -fontsize 8pt
     }
 }
@@ -45,8 +46,9 @@ puts [$docx numbering abstractNumIds]
 $docx paragraph "First" -numberingStyle 3
 $docx paragraph "Second" -numberingStyle 3 -level 0
 $docx paragraph "Sub Second frist" -numberingStyle 3 -level 1
-$docx paragraph "Sub Second second" -numberingStyle 3 -level 1 -style mystyle
-$docx paragraph "Third" -numberingStyle 3 -level 0
+#$docx paragraph "Sub Second second" -numberingStyle 3 -level 1 -style mystyle
+$docx paragraph "Sub Second second" -numberingStyle 3 -level 1 
+$docx paragraph "Third" -numberingStyle 3 -level 0 
 
 
 $docx write docx-example5.docx

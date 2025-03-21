@@ -71,7 +71,7 @@ namespace eval ::ooxml::docx {
         -font {w:rFonts NoCheck RFonts}
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
         -italic {{w:i w:iCs} CT_OnOff}
-        -strict {w:strike CT_OnOff}
+        -strike {w:strike CT_OnOff}
         -underline {w:u ST_Underline}
     }
     set properties(run) [concat $properties(stylerun) {-style {w:rStyle RStyle}}]
@@ -617,7 +617,7 @@ oo::class create ooxml::docx::docx {
                         if {[string index $attname 0] eq "-"} {
                             lappend attlist [string range $attname 1 end] $ooxmlvalue
                         } else {
-                            lappend attlist [my Watt $attname] $ooxmlvalue
+                            lappend attlist w:$attname $ooxmlvalue
                         }
                         unset atts($key)
                     }
@@ -739,10 +739,6 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
     
-    method Ratt {attname} {
-        list http://schemas.openxmlformats.org/officeDocument/2006/relationships r:$attname
-    }
-
     method ResetPageSetup {} {
         my variable docs
         variable ::ooxml::docx::xmlns
@@ -760,10 +756,10 @@ oo::class create ooxml::docx::docx {
     
     method RFonts {value} {
         Tag_w:rFonts \
-            [my Watt ascii] $value \
-            [my Watt hAnsi] $value \
-            [my Watt eastAsia] $value \
-            [my Watt cs] $value
+            w:ascii $value \
+            w:hAnsi $value \
+            w:eastAsia $value \
+            w:cs $value
     }
     
     method RStyle {value} {
@@ -805,10 +801,6 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method Watt {attname} {
-        list http://schemas.openxmlformats.org/wordprocessingml/2006/main w:$attname
-    }
-
     method Wt {text} {
         # Just not exactly that easy.
         # Handle at least \n \r \t and \f special
@@ -831,7 +823,7 @@ oo::class create ooxml::docx::docx {
                     "\n" Tag_w:br
                     "\r" Tag_w:cr
                     "\t" Tag_w:tab
-                    "\f" {Tag_w:br [my Watt type] "page" {}}
+                    "\f" {Tag_w:br w:type "page" {}}
                 }
             }
             incr pos
@@ -914,7 +906,7 @@ oo::class create ooxml::docx::docx {
                                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                                     Tag_pic:pic {
                                         Tag_pic:blipFill {
-                                            Tag_a:blip [my Ratt embed] rId$rId {}
+                                            Tag_a:blip r:embed rId$rId {}
                                         }
                                         Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
                                             Tag_a:xfrm {
@@ -1003,18 +995,18 @@ oo::class create ooxml::docx::docx {
                 }
                 if {[catch {
                     $numbering appendFromScript {
-                        Tag_w:abstractNum [my Watt abstractNumId] $id {
+                        Tag_w:abstractNum w:abstractNumId $id {
                             set levelnr 0
                             foreach level $levelData {
                                 OptVal $level "option"
-                                Tag_w:lvl [my Watt ilvl] $levelnr {
+                                Tag_w:lvl w:ilvl $levelnr {
                                     set start [my EatOption -start]
                                     if {$start ne ""} {
                                         ST_DecimalNumber $start
                                     } else {
                                         set start 1
                                     }
-                                    Tag_w:start [my Watt val] $start {}
+                                    Tag_w:start w:val $start {}
                                     my Create $properties(abstractNumStyle)
                                     Tag_w:pPr {
                                         my Create $properties(styleparagraph)
@@ -1029,8 +1021,8 @@ oo::class create ooxml::docx::docx {
                                 incr levelnr
                             }
                         }
-                        Tag_w:num [my Watt numId] $id {
-                            Tag_w:abstractNumId [my Watt val] $id {}
+                        Tag_w:num w:numId $id {
+                            Tag_w:abstractNumId w:val $id {}
                         }
                     }
                 } errMsg]} {
@@ -1040,7 +1032,7 @@ oo::class create ooxml::docx::docx {
             "abstractNumIds" {
                 return [lsort -integer \
                             [$numbering selectNodes -list {
-                                w:abstractNum @w:abstractNumId
+                                w:abstractNum string(@w:abstractNumId)
                             }]]
             }
             "delete" {
@@ -1202,7 +1194,7 @@ oo::class create ooxml::docx::docx {
                 Tag_w:tbl {
                     Tag_w:tblPr {
                         if {$style ne ""} {
-                            Tag_w:tblStyle [my Watt val] $style {}
+                            Tag_w:tblStyle w:val $style {}
                         }
                         Tag_w:tblBorders {
                             my Create $properties(tableBorders)
@@ -1212,7 +1204,7 @@ oo::class create ooxml::docx::docx {
                     if {[llength $widths]} {
                         Tag_w:tblGrid {
                             foreach width $widths {
-                                Tag_w:gridCol [my Watt w] [ST_TwipsMeasure $width] {}
+                                Tag_w:gridCol w:w [ST_TwipsMeasure $width] {}
                             }
                         }
                     }
@@ -1300,9 +1292,9 @@ oo::class create ooxml::docx::docx {
                     }
                     set basedon [my EatOption -basedon]
                     $styles appendFromScript {
-                        Tag_w:style [my Watt type] $cmd [my Watt styleId] $name {
-                            Tag_w:name [my Watt val] $name {}
-                            Tag_w:basedOn [my Watt val] $basedon {}
+                        Tag_w:style w:type $cmd w:styleId $name {
+                            Tag_w:name w:val $name {}
+                            Tag_w:basedOn w:val $basedon {}
                             if {$cmd eq "table"} {
                                 Tag_w:tblPr {
                                     Tag_w:tblBorders {

@@ -39,7 +39,7 @@ foreach textOnOff {
         bold
         dstrike
         italic 
-        strict
+        strike
 } {
     $docx append "$textOnOff " -$textOnOff on
 }
@@ -51,7 +51,7 @@ foreach text {Serveral kinds of underline} underline {
     thick
     dotted
 } {
-    $docx append "$text " -underline $underline
+    $docx append "$text $text " -underline $underline
 }
 
 $docx append " or fontsize " -fontsize 18pt

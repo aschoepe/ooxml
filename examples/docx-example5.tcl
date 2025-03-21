@@ -40,6 +40,7 @@ $docx numbering abstractNum 3 {
         -fontsize 8pt
     }
 }
+puts [$docx numbering abstractNumIds]
 # Use it
 $docx paragraph "First" -numberingStyle 3
 $docx paragraph "Second" -numberingStyle 3 -level 0

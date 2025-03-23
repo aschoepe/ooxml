@@ -807,16 +807,14 @@ oo::class create ooxml::docx::docx {
         set pos 0
         set end [string length $text]
         foreach part [split $text "\n\r\t\f"] {
-            if {$pos == [incr pos [string length $part]]} {
-                incr pos
-                continue
-            }
-            set atts ""
-            if {[string index $part 0] eq " " || [string index $part end] eq " "} {
-                lappend atts xml:space preserve
-            }
-            Tag_w:t $atts {
-                Text [dom clearString -replace $part]
+            if {[string length $part]} {
+                set atts ""
+                if {[string index $part 0] eq " " || [string index $part end] eq " "} {
+                    lappend atts xml:space preserve
+                }
+                Tag_w:t $atts {
+                    Text [dom clearString -replace $part]
+                }
             }
             if {$pos < $end} {
                 switch [string index $text $pos] {
@@ -892,7 +890,15 @@ oo::class create ooxml::docx::docx {
     method field {field} {
         my variable docs
 
+        # TODO: field formating / switches
         set nfield [string toupper $field]
+        # libreoffice doesn't seem to support
+        # AUTHOR
+        # FILESIZE
+        # SAVEDATE
+        # SECTION
+        # although the spec say it should.
+        # TODO: check what word does
         set values {
             AUTHOR
             CREATEDATE
@@ -910,14 +916,21 @@ oo::class create ooxml::docx::docx {
                                 out of [AllowedValues $values]"
         }
         set p [my LastParagraph]
-        if {[catch {
-            $p appendFromScript {
-                Tag_w:fldSimple w:instr $nfield {
-                    Tag_w:r 
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:fldChar w:fldCharType "begin"
+            }
+            Tag_w:r {
+                Tag_w:instrText {
+                    Text $nfield
                 }
             }
-        } errMsg]} {
-            return -code error $errMsg
+            Tag_w:r {
+                Tag_w:fldChar w:fldCharType "separate"
+            }
+            Tag_w:r {
+                Tag_w:fldChar w:fldCharType "end"
+            }
         }
     }
     

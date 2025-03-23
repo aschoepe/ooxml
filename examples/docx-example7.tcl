@@ -21,19 +21,21 @@ set fields {
 }
   
 set docx [docx new -creator foo -created 2025-02-10]
+$docx sectionstart
 $docx paragraph $loreipsum\n
 foreach field $fields {
-    $docx append " $field "
+    $docx append "\n"
+    $docx append "$field "
     $docx field $field
-    $docx append " \n"
 }
 $docx append $loreipsum\n
-$docx pagebreak
+$docx sectionstart
 $docx paragraph "$loreipsum"
 $docx field PAGE
+$docx field SECTION
 $docx pagebreak
 $docx paragraph "$loreipsum"
-$docx field author
+$docx field page
 
 $docx configure -creator bar -title "ooxml-docx Example File"
 

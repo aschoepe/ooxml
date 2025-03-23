@@ -622,7 +622,7 @@ oo::class create ooxml::docx::docx {
                         unset atts($key)
                     }
                     foreach tag $tags {
-                        Tag_$tag {*}$attlist {}
+                        Tag_$tag {*}$attlist
                     }
                     unset opts($opt)                    
                     # Check if there are unknown keys left in the key
@@ -807,23 +807,21 @@ oo::class create ooxml::docx::docx {
         set pos 0
         set end [string length $text]
         foreach part [split $text "\n\r\t\f"] {
-            if {$pos == [incr pos [string length $part]]} {
-                incr pos
-                continue
-            }
-            set atts ""
-            if {[string index $part 0] eq " " || [string index $part end] eq " "} {
-                lappend atts xml:space preserve
-            }
-            Tag_w:t $atts {
-                Text [dom clearString -replace $part]
+            if {[string length $part]} {
+                set atts ""
+                if {[string index $part 0] eq " " || [string index $part end] eq " "} {
+                    lappend atts xml:space preserve
+                }
+                Tag_w:t $atts {
+                    Text [dom clearString -replace $part]
+                }
             }
             if {$pos < $end} {
                 switch [string index $text $pos] {
                     "\n" Tag_w:br
                     "\r" Tag_w:cr
                     "\t" Tag_w:tab
-                    "\f" {Tag_w:br w:type "page" {}}
+                    "\f" {Tag_w:br w:type "page"}
                 }
             }
             incr pos
@@ -888,6 +886,53 @@ oo::class create ooxml::docx::docx {
         }
         my CheckRemainingOpts
     }
+
+    method field {field} {
+        my variable docs
+
+        # TODO: field formating / switches
+        set nfield [string toupper $field]
+        # libreoffice doesn't seem to support
+        # AUTHOR
+        # FILESIZE
+        # SAVEDATE
+        # SECTION
+        # although the spec say it should.
+        # TODO: check what word does
+        set values {
+            AUTHOR
+            CREATEDATE
+            DATE
+            FILESIZE
+            PAGE
+            SAVEDATE
+            SECTION
+            TIME
+            TITLE
+            USERNAME
+        }
+        if {$nfield ni $values} {
+            return -code error "Unknown field type '$field', expected one\
+                                out of [AllowedValues $values]"
+        }
+        set p [my LastParagraph]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:fldChar w:fldCharType "begin"
+            }
+            Tag_w:r {
+                Tag_w:instrText {
+                    Text $nfield
+                }
+            }
+            Tag_w:r {
+                Tag_w:fldChar w:fldCharType "separate"
+            }
+            Tag_w:r {
+                Tag_w:fldChar w:fldCharType "end"
+            }
+        }
+    }
     
     method image {file args} {
         my variable media
@@ -906,7 +951,7 @@ oo::class create ooxml::docx::docx {
                                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                                     Tag_pic:pic {
                                         Tag_pic:blipFill {
-                                            Tag_a:blip r:embed rId$rId {}
+                                            Tag_a:blip r:embed rId$rId
                                         }
                                         Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
                                             Tag_a:xfrm {
@@ -1006,7 +1051,7 @@ oo::class create ooxml::docx::docx {
                                     } else {
                                         set start 1
                                     }
-                                    Tag_w:start w:val $start {}
+                                    Tag_w:start w:val $start
                                     my Create $properties(abstractNumStyle)
                                     Tag_w:pPr {
                                         my Create $properties(styleparagraph)
@@ -1022,7 +1067,7 @@ oo::class create ooxml::docx::docx {
                             }
                         }
                         Tag_w:num w:numId $id {
-                            Tag_w:abstractNumId w:val $id {}
+                            Tag_w:abstractNumId w:val $id
                         }
                     }
                 } errMsg]} {
@@ -1056,6 +1101,18 @@ oo::class create ooxml::docx::docx {
             }
             default {
                 error "invalid subcommand \"$cmd\""
+            }
+        }
+    }
+
+    method pagebreak {} {
+        my variable body
+
+        $body appendFromScript {
+            Tag_w:p {
+                Tag_w:r {
+                    Tag_w:br w:type "page"
+                }
             }
         }
     }
@@ -1135,6 +1192,24 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method sectionend {} {
+        my variable body
+        my variable pagesetup
+        my variable sectionsetup
+        
+        if {$sectionsetup eq ""} {
+            error "no section started"
+        }
+        $body appendFromScript {
+            Tag_w:p {
+                Tag_w:pPr {
+                    ::tdom::fsinsertNode $sectionsetup
+                }
+            }
+        }
+        set sectionsetup ""
+    }
+
     method sectionstart {args} {
         my variable docs
         my variable body
@@ -1165,24 +1240,6 @@ oo::class create ooxml::docx::docx {
         my CheckRemainingOpts
     }
 
-    method sectionend {} {
-        my variable body
-        my variable pagesetup
-        my variable sectionsetup
-        
-        if {$sectionsetup eq ""} {
-            error "no section started"
-        }
-        $body appendFromScript {
-            Tag_w:p {
-                Tag_w:pPr {
-                    ::tdom::fsinsertNode $sectionsetup
-                }
-            }
-        }
-        set sectionsetup ""
-    }
-
     method simpletable {tabledata args} {
         my variable body
         variable ::ooxml::docx::properties
@@ -1194,7 +1251,7 @@ oo::class create ooxml::docx::docx {
                 Tag_w:tbl {
                     Tag_w:tblPr {
                         if {$style ne ""} {
-                            Tag_w:tblStyle w:val $style {}
+                            Tag_w:tblStyle w:val $style
                         }
                         Tag_w:tblBorders {
                             my Create $properties(tableBorders)
@@ -1204,7 +1261,7 @@ oo::class create ooxml::docx::docx {
                     if {[llength $widths]} {
                         Tag_w:tblGrid {
                             foreach width $widths {
-                                Tag_w:gridCol w:w [ST_TwipsMeasure $width] {}
+                                Tag_w:gridCol w:w [ST_TwipsMeasure $width]
                             }
                         }
                     }
@@ -1293,8 +1350,8 @@ oo::class create ooxml::docx::docx {
                     set basedon [my EatOption -basedon]
                     $styles appendFromScript {
                         Tag_w:style w:type $cmd w:styleId $name {
-                            Tag_w:name w:val $name {}
-                            Tag_w:basedOn w:val $basedon {}
+                            Tag_w:name w:val $name
+                            Tag_w:basedOn w:val $basedon
                             if {$cmd eq "table"} {
                                 Tag_w:tblPr {
                                     Tag_w:tblBorders {
@@ -1363,6 +1420,30 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method url {text url args} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+
+        OptVal $args "text url"
+        set rId [my Add2Relationships hyperlink $url]
+        set p [my LastParagraph]
+        if {[catch {
+            $p appendFromScript {
+                Tag_w:hyperlink r:id rId$rId {
+                    Tag_w:r {
+                        Tag_w:rPr {
+                            my Create $::ooxml::docx::properties(run)
+                        }
+                        my Wt $text
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        my CheckRemainingOpts
+    }
+    
     method writepart {what file} {
         my variable docs
 
@@ -1375,30 +1456,6 @@ oo::class create ooxml::docx::docx {
         close $fd
     }
             
-    method url {text url args} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
-
-        OptVal $args "text url"
-        set rId [my Add2Relationships hyperlink $url]
-        set p [my LastParagraph]
-        if {[catch {
-            $p appendFromScript {
-                Tag_w:hyperlink [list $xmlns(r) r:id] rId$rId {
-                    Tag_w:r {
-                        Tag_w:rPr {
-                            my Create $::ooxml::docx::properties(run)
-                        }
-                        my Wt $text
-                    }
-                }
-            }
-        } errMsg]} {
-            return -code error [list $errMsg]
-        }
-        my CheckRemainingOpts
-    }
-    
     method write {file} {
         my variable body
         my variable docs

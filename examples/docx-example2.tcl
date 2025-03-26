@@ -8,8 +8,13 @@ source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
 
+set defaultHeader [$docx header {
+    $docx field page
+}]
+
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}
+
 # And a heading style
 $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 
@@ -17,7 +22,9 @@ $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 #$docx pagesetup 
 $docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
     -margins {left 1cm right 1cm top 1cm bottom 1cm} \
-    -topBorder {type dashed borderwidth 10}
+    -topBorder {type dashed borderwidth 10} \
+    -defaultHeader $defaultHeader
+
 
 $docx paragraph "Chapter one" -style Heading1
 # Add two paragraphs

@@ -460,7 +460,7 @@ oo::class create ooxml::docx::docx {
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
         }
-        set document [dom createDocument w:document]
+        set document [dom createDocumentNS $xmlns(w) w:document]
         set docs(word/document.xml) $document
         $document documentElement root
         foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
@@ -485,6 +485,10 @@ oo::class create ooxml::docx::docx {
         # necessary XML namespaces to that wie do not have unnecessary
         # XML namespaces declarations in the serialized docx.
         set setuproot [$document createElementNS $xmlns(w) w:umbrella]
+        foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
+            $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
+        }
+        $setuproot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         set pagesetup ""
         set sectionsetup ""
 
@@ -692,7 +696,41 @@ oo::class create ooxml::docx::docx {
         return $docDefaults
     }
 
-    method LastParagraph {{returnEmpty 0}} {
+    method HeaderFooter {what script} {
+        my variable docs
+        my variable body
+        variable ::ooxml::docx::xmlns
+
+        set footer [lsort -dictionary [array names docs word/footer*]]
+        if {![llength $footer]} {
+            set nr 1
+        } else {
+            set nr [string range $footer 11 end]
+            incr nr
+        }
+        set rId [my Add2Relationships image word/footer$nr]
+        set document [dom createDocumentNS $xmlns(w) w:ftr]
+        set docs(word/footer$nr) $document
+        $document documentElement root
+        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+            $root setAttributeNS {} xmlns:$ns $xmlns($ns)
+        }
+        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+        set savedbody $body
+        set body $root
+        $body appendFromScript {
+            Tag_w:p r:rId foo
+        }
+        puts [$document asXML]
+        if {[catch {uplevel 2 [list eval $script]} errMsg]} {
+            set body $savedbody
+            return -code error $errMsg
+        }
+        set body $savedbody
+        return $rId
+    }
+    
+    method LastParagraph {{create 0}} {
         my variable body
         
         set p [$body lastChild]
@@ -709,9 +747,14 @@ oo::class create ooxml::docx::docx {
             }
             break
         }
-        if {$p eq "" && !$returnEmpty} {
-            # Or create a new one?
-            error "no paragraph to append to in the document"
+        if {$p eq ""} {
+            if {!$create} {
+                error "no paragraph to append to in the document"
+            }
+            $body appendFromScript {
+                Tag_w:p
+            }
+            set p [$body lastChild]
         }
         return $p
     }
@@ -776,6 +819,17 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::properties
         upvar opts opts
 
+        puts "SectionCommon"
+        foreach what {Header Footer} {
+            foreach type {even default first} {
+                puts "EatOption -$type$what"
+                set value [my EatOption -$type$what]
+                if {$value eq ""} {
+                    continue
+                }
+                Tag_w:[string tolower $what]Reference w:type $type r:id $value
+            }
+        }
         my Create $properties(sectionsetup1)
         Tag_w:pgBorders {
             my Create $properties(sectionBorders)
@@ -915,7 +969,7 @@ oo::class create ooxml::docx::docx {
             return -code error "Unknown field type '$field', expected one\
                                 out of [AllowedValues $values]"
         }
-        set p [my LastParagraph]
+        set p [my LastParagraph 1]
         $p appendFromScript {
             Tag_w:r {
                 Tag_w:fldChar w:fldCharType "begin"
@@ -932,6 +986,14 @@ oo::class create ooxml::docx::docx {
                 Tag_w:fldChar w:fldCharType "end"
             }
         }
+    }
+
+    method footer {script} {
+        my HeaderFooter footer $script
+    }
+    
+    method header {script} {
+        my HeaderFooter header $script
     }
     
     method image {file args} {
@@ -1426,7 +1488,7 @@ oo::class create ooxml::docx::docx {
 
         OptVal $args "text url"
         set rId [my Add2Relationships hyperlink $url]
-        set p [my LastParagraph]
+        set p [my LastParagraph 1]
         if {[catch {
             $p appendFromScript {
                 Tag_w:hyperlink r:id rId$rId {

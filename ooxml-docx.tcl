@@ -463,7 +463,7 @@ oo::class create ooxml::docx::docx {
         set document [dom createDocumentNS $xmlns(w) w:document]
         set docs(word/document.xml) $document
         $document documentElement root
-        foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
             $root setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
         $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
@@ -473,18 +473,19 @@ oo::class create ooxml::docx::docx {
 
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
-        # the last paragraph it seemed handy to not realy insert that
+        # the last paragraph it seems handy to not realy insert that
         # into the tree at the moment the user calls pagesetup but
         # just before serializing - as the user consecutive add
         # content we can just append to the w:body without looking at
         # every place if there is already a page setup child and we
-        # have to insert new content before that element. Long story
-        # short - and yes it smells like a hack, there should be a
-        # more simpler and natural way, perhaps there is a reason for
-        # this overlong comment - wie need an umbrella node with the
-        # necessary XML namespaces to that wie do not have unnecessary
-        # XML namespaces declarations in the serialized docx.
-        set setuproot [$document createElementNS $xmlns(w) w:umbrella]
+        # have to insert new content before that element. The current
+        # pagesetup/sectionsetup user definition is storend in
+        # according variables to be applied later. To give the user
+        # error feedback at the place he provides commands an
+        # auxiliary document is used and the definition is "tested"
+        # with that.
+        set setupdoc [dom createDocumentNS $xmlns(w) w:umbrella]
+        set setuproot [$setupdoc documentElement]
         foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
             $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
@@ -497,10 +498,12 @@ oo::class create ooxml::docx::docx {
 
     destructor {
         my variable docs
+        my variable setuproot
 
         foreach part [array names docs] {
             $docs($part) delete
         }
+        [$setuproot ownerDocument] delete
     }
 
     method Add2Relationships {type target} {
@@ -782,21 +785,6 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
     
-    method ResetPageSetup {} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
-
-        # If pagesetup or sectionsetup are not empty they stored a
-        # node out of the fragment list of document and they are
-        # now gone with the deletion of document
-        my variable setuproot
-        my variable pagesetup
-        my variable sectionsetup
-        set setuproot [$docs(word/document.xml) createElementNS $xmlns(w) w:umbrella]
-        set pagesetup ""
-        set sectionsetup ""
-    }
-    
     method RFonts {value} {
         Tag_w:rFonts \
             w:ascii $value \
@@ -819,30 +807,31 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::properties
         upvar opts opts
 
-        puts "SectionCommon"
-        foreach what {Header Footer} {
-            foreach type {even default first} {
-                puts "EatOption -$type$what"
-                set value [my EatOption -$type$what]
-                if {$value eq ""} {
-                    continue
+        Tag_w:sectPr {
+            foreach what {Header Footer} {
+                foreach type {even default first} {
+                    puts "EatOption -$type$what"
+                    set value [my EatOption -$type$what]
+                    if {$value eq ""} {
+                        continue
+                    }
+                    Tag_w:[string tolower $what]Reference w:type $type r:id $value
                 }
-                Tag_w:[string tolower $what]Reference w:type $type r:id $value
             }
+            my Create $properties(sectionsetup1)
+            Tag_w:pgBorders {
+                my Create $properties(sectionBorders)
+            }
+            my Create $properties(sectionsetup2)
         }
-        my Create $properties(sectionsetup1)
-        Tag_w:pgBorders {
-            my Create $properties(sectionBorders)
-        }
-        my Create $properties(sectionsetup2)
     }
     
     method Tabs {tabsdata} {
         foreach tabstop $tabsdata {
             if {[llength $tabstop] == 1} {
-                OptVal [list -tabs [list pos $tabstop type "start"]] "" 
+                OptVal [list -tabs [list pos $tabstop type "start"]]
             } else {
-                OptVal [list -tabs [list $tabstop]] ""
+                OptVal [list -tabs [list $tabstop]]
             }
             my Create {
                 -tabs {w:tab {
@@ -851,6 +840,7 @@ oo::class create ooxml::docx::docx {
                     {type val} ST_TabJc
                 }}
             }
+            my CheckRemainingOpts
             unset opts
         }
     }
@@ -1074,9 +1064,6 @@ oo::class create ooxml::docx::docx {
                 $thisrels delete
             }
             set docs($what) $thisdoc
-            if {$what eq "word/document.xml"} {
-                my ResetPageSetup
-            }
         } finally {
             ::ooxml::ZipClose
         }
@@ -1189,20 +1176,17 @@ oo::class create ooxml::docx::docx {
         my variable setuproot
         my variable pagesetup
 
-        if {$pagesetup ne ""} {
-            $pagesetup delete
-        }
-        $setuproot appendFromScript Tag_w:sectPr
-        set pagesetup [$setuproot lastChild]
-        array set opts $args
+        OptVal $args
         if {[catch {
-            $pagesetup appendFromScript {
+            $setuproot appendFromScript {
                 my SectionCommon
             }
         } errMsg]} {
             return -code error $errMsg
         }
         my CheckRemainingOpts
+        [$setuproot lastChild] delete
+        set pagesetup $args
     }
 
     method paragraph {text args} {
@@ -1249,57 +1233,67 @@ oo::class create ooxml::docx::docx {
             $docs($what) delete
         }
         set docs($what) $doc
-        if {$what eq "word/document.xml"} {
-            my ResetPageSetup
-        }
     }
 
     method sectionend {} {
         my variable body
-        my variable pagesetup
         my variable sectionsetup
         
         if {$sectionsetup eq ""} {
             error "no section started"
         }
-        $body appendFromScript {
-            Tag_w:p {
-                Tag_w:pPr {
-                    ::tdom::fsinsertNode $sectionsetup
+        OptVal $sectionsetup
+        if {[catch {
+            $body appendFromScript {
+                Tag_w:p {
+                    Tag_w:pPr {
+                        my SectionCommon
+                    }
                 }
             }
+        } errMsg]} {
+            return -code error $errMsg
         }
         set sectionsetup ""
     }
 
     method sectionstart {args} {
-        my variable docs
         my variable body
         my variable pagesetup
         my variable sectionsetup
-        variable ::ooxml::docx::xmlns
+        my variable setuproot
 
-        $body appendFromScript {
-            Tag_w:p {
-                Tag_w:pPr {
-                    if {$sectionsetup ne ""} {
-                        ::tdom::fsinsertNode $sectionsetup
-                    } elseif {$pagesetup ne ""} {
-                        ::tdom::fsinsertNode [$pagesetup clone -deep]
+        if {$sectionsetup ne "" || $pagesetup ne ""} {
+            if {$sectionsetup ne ""} {
+                OptVal $sectionsetup
+            } else {
+                OptVal $pagesetup
+            }
+            if {[catch {
+                $body appendFromScript {
+                    Tag_w:p {
+                        Tag_w:pPr {
+                            my SectionCommon
+                        }
                     }
                 }
-            }
+            } errMsg]} {
+                return -code error $errMsg
+            }            
         }
-        $docs(word/document.xml) createElementNS $xmlns(w) w:sectPr sectionsetup
-        array set opts $args
+        OptVal $args
         if {[catch {
-            $sectionsetup appendFromScript {
+            $setuproot appendFromScript {
                 my SectionCommon
             }
         } errMsg]} {
             return -code error $errMsg
-        }            
+        }
         my CheckRemainingOpts
+        foreach child [$setuproot childNodes] {
+            $child delete
+        }
+        set sectionsetup $args
     }
 
     method simpletable {tabledata args} {
@@ -1528,17 +1522,30 @@ oo::class create ooxml::docx::docx {
 
         # Finalize section and do pagesetup
         if {$sectionsetup ne ""} {
-            set p [my LastParagraph 1]
-            if {$p ne ""} {
-                $p appendChild $sectionsetup
-                set sectionsetup ""
-            } else {
-                $sectionsetup delete
+            OptVal $sectionsetup
+            if {[catch {
+                $body appendFromScript {
+                    Tag_w:p {
+                        Tag_w:pPr {
+                            my SectionCommon
+                        }
+                    }
+                }
+            } errMsg]} {
+                return -code error $errMsg
             }
         }
+        set sectionsetup ""
         set appendedPageSetup ""
         if {$pagesetup ne ""} {
-            $body appendChild [$pagesetup clone -deep]
+            OptVal $pagesetup
+            if {[catch {
+                $body appendFromScript {
+                    my SectionCommon
+                }
+            } errMsg]} {
+                return -code error $errMsg
+            }
             set appendedPageSetup [$body lastChild]
         }
         
@@ -1564,7 +1571,7 @@ oo::class create ooxml::docx::docx {
         }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than
-        # writen again.
+        # written again.
         if {$appendedPageSetup ne ""} {
             $appendedPageSetup delete
         }

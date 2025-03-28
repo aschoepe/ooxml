@@ -11,7 +11,11 @@ set docx [docx new]
 set defaultHeader [$docx header {
     $docx field page
 }]
-
+set evenHeader [$docx header {
+    $docx paragraph "even page " -align end
+    $docx field page
+}]
+    
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}
 
@@ -23,7 +27,8 @@ $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 $docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
     -margins {left 1cm right 1cm top 1cm bottom 1cm} \
     -topBorder {type dashed borderwidth 10} \
-    -defaultHeader $defaultHeader
+    -defaultHeader $defaultHeader \
+    -evenHeader $evenHeader 
 
 
 $docx paragraph "Chapter one" -style Heading1
@@ -51,6 +56,12 @@ $docx sectionend
 $docx paragraph "Chapter three" -style Heading1
 # Add two paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
+$docx paragraph "The next paragraph: $loreipsum"
+$docx pagebreak
+$docx paragraph "The next paragraph: $loreipsum"
+$docx pagebreak
+$docx paragraph "The next paragraph: $loreipsum"
+$docx pagebreak
 $docx paragraph "The next paragraph: $loreipsum"
 
 $docx write docx-example2.docx

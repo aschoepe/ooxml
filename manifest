@@ -1,5 +1,5 @@
-C Added\ssupport\sfor\sheader\sand\sfooter.\sGeneral\simprovements.
-D 2025-03-29T01:56:32.787
+C Added\sstarting\snotes\sto\sa\sdevelopers\sguide\sto\sooxml-docx.
+D 2025-03-29T16:04:08.583
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -10,6 +10,7 @@ F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
 F configure 22702eb42175ba7df531f881f7340b3c7ddf31d59b2c7c43c32d4505838eb5cb x
 F configure.ac 4bc3734c61273c016a5b0c264fc31baefd2bab71816626d551d245048f41e4c8
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
+F doc/ooxml-docx-dev.md ace69339089eeb517f26ec9fd4d90827532e5764b472aa342d5f693c4dbca173
 F doc/ooxml-docx.md c10ebdc2101a92301b377149719c49359794b9f654bf7fde6bf77ca15ae20156
 F doc/ooxml.md 8e9af22574db8fdd0de01894d6f0cdb06a975c7e01bad5a024425d7fc0cf1c44
 F docxtest.tcl d55c5fbee8d7e3d7fcb7193578abf8d554c99f87c2d3eabc2d94b61856636f38
@@ -95,9 +96,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 53fe03a2fea09562034e821b0c903300bd103c297058dc0a13813bc48275ed0b 29430752eb0d7c05ba46070a317e6b0dfb6657b6febf29c4e498fca8a4481b93
-R 8c11df8ef0f1258eae3ae1d33fe66b39
-T +closed 29430752eb0d7c05ba46070a317e6b0dfb6657b6febf29c4e498fca8a4481b93
+P 516be814bd415b9d31dd510faef7a387f66724c14f448615b608725757e6b26c
+R e3ce2bc07bcb7f2f543229d46ebee9c8
 U rolf
-Z 7fce6061548874fb6136fe8c06009781
+Z 988b2d1fa6c9da4c842edce757e27cf9
 # Remove this line to create a well-formed Fossil manifest.

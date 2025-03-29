@@ -236,6 +236,7 @@ namespace eval ::ooxml::docx {
                 <w:zoom w:val="bestFit" w:percent="228"/>
                 <w:defaultTabStop w:val="709"/>
                 <w:autoHyphenation w:val="true"/>
+                <w:evenAndOddHeaders/>
                 <w:compat>
                     <w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/>
                 </w:compat>
@@ -486,6 +487,10 @@ oo::class create ooxml::docx::docx {
         # with that.
         set setupdoc [dom createDocumentNS $xmlns(w) w:umbrella]
         set setuproot [$setupdoc documentElement]
+        foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
+            $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
+        }
+        $setuproot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         set pagesetup ""
         set sectionsetup ""
 
@@ -525,10 +530,10 @@ oo::class create ooxml::docx::docx {
         # At least for documents we build up from scratch this should
         # work reliable enough (and work faster)
         set lastchild [$relsRoot lastChild]
-        set rId [string range [$lastchild @Id] 3 end]
-        incr rId
+        set nr [string range [$lastchild @Id] 3 end]
+        incr nr
         set attlist [list \
-             Id rId$rId \
+             Id rId$nr \
              Type http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type \
              Target $target]
         if {$type eq "hyperlink"} {
@@ -537,7 +542,7 @@ oo::class create ooxml::docx::docx {
         $relsRoot appendFromScript {
             Tag_Relationship {*}$attlist 
         }
-        return $rId
+        return rId$nr
     }
     
     method CallType {type value errtext} {
@@ -673,6 +678,19 @@ oo::class create ooxml::docx::docx {
         uplevel [list error $text]
     }
 
+    method CheckrId {type rId} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+        
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        set type "$xmlns(r)/$type"
+        if {![$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
+            count(rel:Relationship[@Id=$rId and @Type=$type])
+        }]} {
+            error "invalid rId $rId"
+        }
+    }
+    
     method EatOption {option} {
         upvar opts opts
         if {[info exists opts($option)]} {
@@ -695,7 +713,43 @@ oo::class create ooxml::docx::docx {
         return $docDefaults
     }
 
-    method LastParagraph {{returnEmpty 0}} {
+    method HeaderFooter {what script} {
+        my variable docs
+        my variable body
+        variable ::ooxml::docx::xmlns
+
+        set have [lsort -dictionary [array names docs word/$what*]]
+        if {![llength $have]} {
+            set nr 1
+        } else {
+            set last [string range [lindex $have end] 0 end-4]
+            set nr [string range $last [expr {5 + [string length $what]}] end]
+            incr nr
+        }
+        set rId [my Add2Relationships $what $what$nr.xml]
+        if {$what eq "header"} {
+            set elnName "hdr"
+        } else {
+            set elnName "ftr"
+        }
+        set document [dom createDocumentNS $xmlns(w) w:$elnName]
+        set docs(word/$what$nr.xml) $document
+        $document documentElement root
+        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+            $root setAttributeNS {} xmlns:$ns $xmlns($ns)
+        }
+        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+        set savedbody $body
+        set body $root
+        if {[catch {uplevel 2 [list eval $script]} errMsg]} {
+            set body $savedbody
+            return -code error $errMsg
+        }
+        set body $savedbody
+        return $rId
+    }
+    
+    method LastParagraph {{create 0}} {
         my variable body
         
         set p [$body lastChild]
@@ -712,9 +766,14 @@ oo::class create ooxml::docx::docx {
             }
             break
         }
-        if {$p eq "" && !$returnEmpty} {
-            # Or create a new one?
-            error "no paragraph to append to in the document"
+        if {$p eq ""} {
+            if {!$create} {
+                error "no paragraph to append to in the document"
+            }
+            $body appendFromScript {
+                Tag_w:p
+            }
+            set p [$body lastChild]
         }
         return $p
     }
@@ -765,6 +824,16 @@ oo::class create ooxml::docx::docx {
         upvar opts opts
 
         Tag_w:sectPr {
+            foreach what {Header Footer} {
+                foreach type {even default first} {
+                    set value [my EatOption -$type$what]
+                    if {$value eq ""} {
+                        continue
+                    }
+                    my CheckrId [string tolower $what] $value
+                    Tag_w:[string tolower $what]Reference w:type $type r:id $value
+                }
+            }
             my Create $properties(sectionsetup1)
             Tag_w:pgBorders {
                 my Create $properties(sectionBorders)
@@ -831,10 +900,10 @@ oo::class create ooxml::docx::docx {
                     my Wt $text
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
     
     method configure {args} {
@@ -906,7 +975,7 @@ oo::class create ooxml::docx::docx {
             return -code error "Unknown field type '$field', expected one\
                                 out of [AllowedValues $values]"
         }
-        set p [my LastParagraph]
+        set p [my LastParagraph 1]
         $p appendFromScript {
             Tag_w:r {
                 Tag_w:fldChar w:fldCharType "begin"
@@ -923,6 +992,20 @@ oo::class create ooxml::docx::docx {
                 Tag_w:fldChar w:fldCharType "end"
             }
         }
+    }
+
+    method footer {script {returnvar ""}} {
+        if {$returnvar ne ""} {
+            upvar $returnvar result
+        }
+        set result [my HeaderFooter footer $script]
+    }
+    
+    method header {script {returnvar ""}} {
+        if {$returnvar ne ""} {
+            upvar $returnvar result
+        }
+        set result [my HeaderFooter header $script]
     }
     
     method image {file args} {
@@ -942,7 +1025,7 @@ oo::class create ooxml::docx::docx {
                                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                                     Tag_pic:pic {
                                         Tag_pic:blipFill {
-                                            Tag_a:blip r:embed rId$rId
+                                            Tag_a:blip r:embed $rId
                                         }
                                         Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
                                             Tag_a:xfrm {
@@ -956,10 +1039,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
 
     method import {what docxfile} {
@@ -1120,10 +1203,10 @@ oo::class create ooxml::docx::docx {
             $setuproot appendFromScript {
                 my SectionCommon
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
         [$setuproot lastChild] delete
         set pagesetup $args
     }
@@ -1153,10 +1236,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
     
     method readpart {what file} {
@@ -1225,10 +1308,10 @@ oo::class create ooxml::docx::docx {
             $setuproot appendFromScript {
                 my SectionCommon
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
         foreach child [$setuproot childNodes] {
             $child delete
         }
@@ -1276,10 +1359,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
 
     method style {cmd args} {
@@ -1421,10 +1504,10 @@ oo::class create ooxml::docx::docx {
 
         OptVal $args "text url"
         set rId [my Add2Relationships hyperlink $url]
-        set p [my LastParagraph]
+        set p [my LastParagraph 1]
         if {[catch {
             $p appendFromScript {
-                Tag_w:hyperlink r:id rId$rId {
+                Tag_w:hyperlink r:id $rId {
                     Tag_w:r {
                         Tag_w:rPr {
                             my Create $::ooxml::docx::properties(run)
@@ -1433,10 +1516,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
     
     method writepart {what file} {

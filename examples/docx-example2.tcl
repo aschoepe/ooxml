@@ -8,8 +8,26 @@ source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
 
+# The rId returned by the header/footer methods is needed later. You
+# may store it like:
+set defaultHeader [$docx header {
+    $docx field page
+}]
+
+# Or you use the optional last argument pointing to a variable to
+# store the rId into:
+$docx header {
+    $docx paragraph "even page " -align end
+    $docx field page
+} evenHeader
+$docx footer {
+    $docx paragraph "footer default " -align center
+    $docx field page
+} defaultFooter
+
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}
+
 # And a heading style
 $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 
@@ -17,7 +35,11 @@ $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 #$docx pagesetup 
 $docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
     -margins {left 1cm right 1cm top 1cm bottom 1cm} \
-    -topBorder {type dashed borderwidth 10}
+    -topBorder {type dashed borderwidth 10} \
+    -defaultHeader $defaultHeader \
+    -evenHeader $evenHeader \
+    -firstHeader $defaultHeader \
+    -defaultFooter $defaultFooter
 
 $docx paragraph "Chapter one" -style Heading1
 # Add two paragraphs
@@ -44,6 +66,12 @@ $docx sectionend
 $docx paragraph "Chapter three" -style Heading1
 # Add two paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
+$docx paragraph "The next paragraph: $loreipsum"
+$docx pagebreak
+$docx paragraph "The next paragraph: $loreipsum"
+$docx pagebreak
+$docx paragraph "The next paragraph: $loreipsum"
+$docx pagebreak
 $docx paragraph "The next paragraph: $loreipsum"
 
 $docx write docx-example2.docx

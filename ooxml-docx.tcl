@@ -678,6 +678,19 @@ oo::class create ooxml::docx::docx {
         uplevel [list error $text]
     }
 
+    method CheckrId {type rId} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+        
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        set type "$xmlns(r)/$type"
+        if {![$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
+            count(rel:Relationship[@Id=$rId and @Type=$type])
+        }]} {
+            error "invalid rId $rId"
+        }
+    }
+    
     method EatOption {option} {
         upvar opts opts
         if {[info exists opts($option)]} {
@@ -817,16 +830,15 @@ oo::class create ooxml::docx::docx {
                     if {$value eq ""} {
                         continue
                     }
+                    my CheckrId [string tolower $what] $value
                     Tag_w:[string tolower $what]Reference w:type $type r:id $value
                 }
             }
-            Tag_w:type w:val "nextPage"
             my Create $properties(sectionsetup1)
             Tag_w:pgBorders {
                 my Create $properties(sectionBorders)
             }
             my Create $properties(sectionsetup2)
-            Tag_w:titlePg
         }
     }
     
@@ -888,10 +900,10 @@ oo::class create ooxml::docx::docx {
                     my Wt $text
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
     
     method configure {args} {
@@ -982,12 +994,18 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method footer {script} {
-        my HeaderFooter footer $script
+    method footer {script {returnvar ""}} {
+        if {$returnvar ne ""} {
+            upvar $returnvar result
+        }
+        set result [my HeaderFooter footer $script]
     }
     
-    method header {script} {
-        my HeaderFooter header $script
+    method header {script {returnvar ""}} {
+        if {$returnvar ne ""} {
+            upvar $returnvar result
+        }
+        set result [my HeaderFooter header $script]
     }
     
     method image {file args} {
@@ -1021,10 +1039,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
 
     method import {what docxfile} {
@@ -1185,10 +1203,10 @@ oo::class create ooxml::docx::docx {
             $setuproot appendFromScript {
                 my SectionCommon
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
         [$setuproot lastChild] delete
         set pagesetup $args
     }
@@ -1218,10 +1236,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
     
     method readpart {what file} {
@@ -1290,10 +1308,10 @@ oo::class create ooxml::docx::docx {
             $setuproot appendFromScript {
                 my SectionCommon
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
         foreach child [$setuproot childNodes] {
             $child delete
         }
@@ -1341,10 +1359,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
 
     method style {cmd args} {
@@ -1498,10 +1516,10 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
     
     method writepart {what file} {

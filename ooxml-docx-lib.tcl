@@ -206,6 +206,33 @@ proc ::ooxml::docx::lib::ST_HexColor {value} {
     return $value
 }
 
+proc ::ooxml::docx::lib::ST_HighlightColor {value} {
+    set values {
+        black
+        blue
+        cyan
+        green
+        magenta
+        red
+        yellow
+        white
+        darkBlue
+        darkCyan
+        darkGreen
+        darkMagenta
+        darkRed
+        darkYellow
+        darkGray
+        lightGray
+        none
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown highlight color value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_EighthPointMeasure {value} {
     if {[string is integer -strict $value] && $value >= 0} {
         return $value

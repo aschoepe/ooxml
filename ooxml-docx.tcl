@@ -70,6 +70,7 @@ namespace eval ::ooxml::docx {
         -dstrike {w:dstrike CT_OnOff}
         -font {w:rFonts NoCheck RFonts}
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
+        -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} CT_OnOff}
         -strike {w:strike CT_OnOff}
         -underline {w:u ST_Underline}
@@ -811,7 +812,7 @@ oo::class create ooxml::docx::docx {
     
     method RStyle {value} {
         my variable docs
-        
+
         set styles [$docs(word/styles.xml) documentElement]
         if {[$styles selectNodes {w:style[@w:type="character" and @w:styleId=$value]}] eq ""} {
             error "unknown character style \"$value\""

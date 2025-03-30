@@ -55,6 +55,7 @@ foreach text {Serveral kinds of underline} underline {
 }
 
 $docx append " or fontsize " -fontsize 18pt
+$docx append " or highlight color " -highlight green
 $docx append " and you can freely combine them " -fontsize 15pt \
     -underline double -color ff0000
 $docx append " which isn't so important because using them all would be ugly.\

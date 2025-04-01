@@ -77,10 +77,21 @@ namespace eval ::ooxml::docx {
         -underline {w:u ST_Underline}
     }
 
-    set properties(paragraph2) {
+    set properties(paragraph1) {
         -textframe {w:framePr {
-            width ST_TwipsMeasure
-            w ST_TwipsMeasure
+            {width w} ST_TwipsMeasure
+            {height h} ST_TwipsMeasure
+            wrap ST_Wrap
+            vAnchor ST_Anchor
+            hAnchor ST_Anchor
+            xAlign ST_XAlign
+            yAlign ST_YAlign
+            dropCap ST_DropCap
+            lines ST_DecimalNumber
+            vSpace ST_TwipsMeasure
+            hSpace ST_TwipsMeasure
+            hrule ST_HeightRule
+            anchorLock ST_OnOff
         }}
     }
         
@@ -656,7 +667,7 @@ oo::class create ooxml::docx::docx {
                                the value \"$value\" of the option \"$opt\",\
                                the expected keys are [AllowedValues $keys]"
                     } else {
-                        error "unknown keys [AllowedValues $remainigKeys] in\
+                        error "unknown keys [AllowedValues $remainigKeys and] in\
                                the value \"$value\" of the option \"$opt\",\
                                the expected keys are [AllowedValues $keys]"
                     }
@@ -814,8 +825,7 @@ oo::class create ooxml::docx::docx {
         upvar opts opts
 
         $tag {
-            # Tag_w:framePr {
-            # }
+            my Create $properties(paragraph1)
             Tag_w:numPr {
                 my Create $properties(numbering)
             }

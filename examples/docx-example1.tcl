@@ -86,5 +86,7 @@ $docx paragraph $loreipsum -style withBorder
 
 $docx paragraph "Tabs test $loreipsum" -tabs {3cm 6cm 9cm 12cm}
 
+$docx paragraph "This is a text frame." -textframe {width 3500 height 3500 wrap auto vAnchor page hAnchor page xAlign right yAlign top}
+
 $docx write docx-example1.docx
 $docx destroy

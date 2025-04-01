@@ -1,5 +1,5 @@
-C Added\sparagraphs\sas\stext\sframes.
-D 2025-04-01T22:20:58.053
+C Shuffled\scode\saround\sfor\shousekeeping.
+D 2025-04-01T22:36:55.856
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -38,7 +38,7 @@ F examples/xlsx-writeRowsAutoIncr.tcl 871b86577f1602025f28387b50110c3b31fbb16496
 F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3335eacfb6d1013fc70e x
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
-F ooxml-docx-lib.tcl 256037906cfecb8431d62a3e598fcdb072dd85a4a1d9208d4acdcfd7c4537543
+F ooxml-docx-lib.tcl 24ebc7f5d9664c5e6e46f800c4cfc2a0eacd808226965a9d4dec44f0ce78fbb1
 F ooxml-docx.tcl d13670edd9a5f3f6e53308d6d69b61f1d5638563bd37d3d941c4859ca17a879b
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 0c16e0b67626c2876ed848d691c3276c680c32c8a7951728e54d9aefc4f6bcb8
@@ -96,9 +96,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P f5e5a58974f62fa5ac9e80d874f8328aa22197ada149bc8292fa31796f4c1a66 08dd059233c41b07430df743e212b2cc3a060e172d080345022bc221aca4d2c0
-R de06a8c30f8b7b1d66ee6248c8f807f7
-T +closed 08dd059233c41b07430df743e212b2cc3a060e172d080345022bc221aca4d2c0
+P c55f14058578cc0bbee3a49da0397edfac88b0cf7a197b9caad1d55ea4bd64f3
+R 31058d2ee471837c29c5f20ea7d69a21
 U rolf
-Z e7735b27dc27b3e88965487be22191a9
+Z 2e2aa0cb9ad25a4177472e10fd5d4850
 # Remove this line to create a well-formed Fossil manifest.

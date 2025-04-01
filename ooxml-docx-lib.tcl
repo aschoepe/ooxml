@@ -59,25 +59,38 @@ proc ::ooxml::docx::lib::NoCheck {value} {
     return $value
 }
 
-proc ::ooxml::docx::lib::ST_Emu {value} {
-    if {[string is integer -strict $value] && $value >= 0} {
+proc ::ooxml::docx::lib::ST_Anchor {value} {
+    set values {
+        text
+        margin
+        page
+    }
+    if {$value in $values} {
         return $value
     }
-    if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must be an\
-                   integer or match the regular expression\
-                   \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+    error "unknown vAnchor or hAnchor type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_BlackWhiteMode {value} {
+    set values {
+        auto
+        black
+        blackGray
+        blackWhite
+        clr
+        gray
+        grayWhite
+        hidden
+        invGray
+        ltGray
+        white
     }
-    scan $value "%f%s" value unit
-    switch $unit {
-        mm {set factor 36000}
-        cm {set factor 360000}
-        in {set factor 914400}
-        pt {set factor 12700}
-        pc {set factor 152400}
-        pi {set factor 152400}
+    if {$value in $values} {
+        return $value
     }
-    return [expr {round($value*$factor)}]
+    error "unknown back and white mode \"$value\", expected one of\
+            [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_Border {value} {
@@ -118,17 +131,20 @@ proc ::ooxml::docx::lib::ST_Border {value} {
     error "unknown border type value \"$value\", expected one of:\
                [AllowedValues $values]"
 }
-
-
-proc ::ooxml::docx::lib::CT_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
+ 
+proc ::ooxml::docx::lib::ST_ChapterSep {value} {
+    set values {
+        hyphen
+        period
+        colon
+        emDash
+        enDash
     }
-    if {$value} {
-        return "on"
-    } else {
-        return "off"
+    if {$value in $values} {
+        return $value
     }
+    error "unknown section separator character \"$value\", expected one of\
+            [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_DecimalNumber {value} {
@@ -138,61 +154,46 @@ proc ::ooxml::docx::lib::ST_DecimalNumber {value} {
     return $value
 }
 
-# ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
-# The difference is only the interpretation of the integer (only)
-# values. For ST_HpsMeasure the number specifies half points
-# (1/144 of an inch), for ST_TwipsMeasure the number specifies
-# twentieths of a point (equivalent to 1/1440th of an inch).
-proc ::ooxml::docx::lib::ST_TwipsMeasure {value} {
-    if {[string is integer -strict $value] && $value >= 0} {
-        return $value
-    }
-    if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-    }
-    return $value
-}
-
-proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {
-    if {[string is integer -strict $value]} {
-        return $value
-    }
-    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-    }
-    return $value
-}
-
-proc ::ooxml::docx::lib::ST_PageOrientation {value} {
-    if {$value ni {landscape portrait}} {
-        error "unknown symbol \"$value\", expected \"landscape\"\
-                   or \"portrait\""
-    }
-    return $value
-}
-
-proc ::ooxml::docx::lib::ST_Jc {value} {
+proc ::ooxml::docx::lib::ST_DropCap {value} {
     set values {
-        start
-        center
-        end
-        both
-        mediumKashida
-        distribute
-        numTab
-        highKashida
-        lowKashida
-        thaiDistribute
-        left
-        right
+        none
+        drop
+        margin
     }
     if {$value in $values} {
         return $value
     }
-    error "unknown align value \"$value\", expected one of:\
-               [AllowedValues $values]"
+    error "unknown dropCap type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_EighthPointMeasure {value} {
+    if {[string is integer -strict $value] && $value >= 0} {
+        return $value
+    }
+    error "\"$value\" is not a valid measure value - value must be an\
+               integer"
+}
+
+proc ::ooxml::docx::lib::ST_Emu {value} {
+    if {[string is integer -strict $value] && $value >= 0} {
+        return $value
+    }
+    if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+        error "\"$value\" is not a valid measure value - value must be an\
+                   integer or match the regular expression\
+                   \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+    }
+    scan $value "%f%s" value unit
+    switch $unit {
+        mm {set factor 36000}
+        cm {set factor 360000}
+        in {set factor 914400}
+        pt {set factor 12700}
+        pc {set factor 152400}
+        pi {set factor 152400}
+    }
+    return [expr {round($value*$factor)}]
 }
 
 proc ::ooxml::docx::lib::ST_HexColor {value} {
@@ -233,69 +234,37 @@ proc ::ooxml::docx::lib::ST_HighlightColor {value} {
                [AllowedValues $values]"
 }
 
-proc ::ooxml::docx::lib::ST_EighthPointMeasure {value} {
-    if {[string is integer -strict $value] && $value >= 0} {
-        return $value
-    }
-    error "\"$value\" is not a valid measure value - value must be an\
-               integer"
-}
-
-proc ::ooxml::docx::lib::ST_PointMeasure {value} {
-    if {[string is integer -strict $value] && $value >= 0} {
-        return $value
-    }
-    error "\"$value\" is not a valid measure value - value must be an\
-               integer"
-}
-
-proc ::ooxml::docx::lib::ST_Underline {value} {
+proc ::ooxml::docx::lib::ST_Jc {value} {
     set values {
-        single
-        words
-        double
-        thick
-        dotted
-        dottedHeavy
-        dash
-        dashedHeavy
-        dashLong
-        dashLongHeavy
-        dotDash
-        dashDotHeavy
-        dotDotDash
-        dashDotDotHeavy
-        wave
-        wavyHeavy
-        wavyDouble
-        none
-    }
-    if {$value ni $values} {
-        error "unkown underline value \"$value\", expected one of\
-                  [AllowedValues $values]"
-    }
-    return $value
-}
-
-proc ::ooxml::docx::lib::ST_BlackWhiteMode {value} {
-    set values {
-        auto
-        black
-        blackGray
-        blackWhite
-        clr
-        gray
-        grayWhite
-        hidden
-        invGray
-        ltGray
-        white
+        start
+        center
+        end
+        both
+        mediumKashida
+        distribute
+        numTab
+        highKashida
+        lowKashida
+        thaiDistribute
+        left
+        right
     }
     if {$value in $values} {
         return $value
     }
-    error "unknown back and white mode \"$value\", expected one of\
-            [AllowedValues $values]"
+    error "unknown align value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::CT_OnOff {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return "on"
+    } else {
+        return "off"
+    }
 }
 
 proc ::ooxml::docx::lib::ST_NumberFormat {value} {
@@ -371,19 +340,31 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
             [AllowedValues $values]"
 }
 
-proc ::ooxml::docx::lib::ST_ChapterSep {value} {
-    set values {
-        hyphen
-        period
-        colon
-        emDash
-        enDash
+proc ::ooxml::docx::lib::ST_PageOrientation {value} {
+    if {$value ni {landscape portrait}} {
+        error "unknown symbol \"$value\", expected \"landscape\"\
+                   or \"portrait\""
     }
-    if {$value in $values} {
+    return $value
+}
+
+proc ::ooxml::docx::lib::ST_PointMeasure {value} {
+    if {[string is integer -strict $value] && $value >= 0} {
         return $value
     }
-    error "unknown section separator character \"$value\", expected one of\
-            [AllowedValues $values]"
+    error "\"$value\" is not a valid measure value - value must be an\
+               integer"
+}
+
+proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {
+    if {[string is integer -strict $value]} {
+        return $value
+    }
+    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+        error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+    }
+    return $value
 }
 
 proc ::ooxml::docx::lib::ST_TabJc {value} {
@@ -405,6 +386,66 @@ proc ::ooxml::docx::lib::ST_TabJc {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_TabTlc {value} {
+    set values {
+        none
+        dot
+        hyphen
+        underscore
+        heavy
+        middleDot
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown tab fill type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+# ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
+# The difference is only the interpretation of the integer (only)
+# values. For ST_HpsMeasure the number specifies half points
+# (1/144 of an inch), for ST_TwipsMeasure the number specifies
+# twentieths of a point (equivalent to 1/1440th of an inch).
+proc ::ooxml::docx::lib::ST_TwipsMeasure {value} {
+    if {[string is integer -strict $value] && $value >= 0} {
+        return $value
+    }
+    if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+        error "\"$value\" is not a valid measure value - value must match\
+               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
+    }
+    return $value
+}
+
+proc ::ooxml::docx::lib::ST_Underline {value} {
+    set values {
+        single
+        words
+        double
+        thick
+        dotted
+        dottedHeavy
+        dash
+        dashedHeavy
+        dashLong
+        dashLongHeavy
+        dotDash
+        dashDotHeavy
+        dotDotDash
+        dashDotDotHeavy
+        wave
+        wavyHeavy
+        wavyDouble
+        none
+    }
+    if {$value ni $values} {
+        error "unkown underline value \"$value\", expected one of\
+                  [AllowedValues $values]"
+    }
+    return $value
+}
+
 proc ::ooxml::docx::lib::ST_Wrap {value} {
     set values {
         auto
@@ -420,20 +461,6 @@ proc ::ooxml::docx::lib::ST_Wrap {value} {
     error "unknown wrap type \"$value\", expected one of\
             [AllowedValues $values]"
 }
-
-proc ::ooxml::docx::lib::ST_Anchor {value} {
-    set values {
-        text
-        margin
-        page
-    }
-    if {$value in $values} {
-        return $value
-    }
-    error "unknown vAnchor or hAnchor type \"$value\", expected one of\
-            [AllowedValues $values]"
-}
-
 proc ::ooxml::docx::lib::ST_XAlign {value} {
     set values {
         left
@@ -462,35 +489,6 @@ proc ::ooxml::docx::lib::ST_YAlign {value} {
         return $value
     }
     error "unknown yAlign type \"$value\", expected one of\
-            [AllowedValues $values]"
-}
-
-proc ::ooxml::docx::lib::ST_DropCap {value} {
-    set values {
-        none
-        drop
-        margin
-    }
-    if {$value in $values} {
-        return $value
-    }
-    error "unknown dropCap type \"$value\", expected one of\
-            [AllowedValues $values]"
-}
-
-proc ::ooxml::docx::lib::ST_TabTlc {value} {
-    set values {
-        none
-        dot
-        hyphen
-        underscore
-        heavy
-        middleDot
-    }
-    if {$value in $values} {
-        return $value
-    }
-    error "unknown tab fill type \"$value\", expected one of\
             [AllowedValues $values]"
 }
 

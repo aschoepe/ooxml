@@ -405,6 +405,79 @@ proc ::ooxml::docx::lib::ST_TabJc {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_Wrap {value} {
+    set values {
+        auto
+        notBeside
+        around
+        tight
+        through
+        none
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown wrap type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Anchor {value} {
+    set values {
+        text
+        margin
+        page
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown vAnchor or hAnchor type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_XAlign {value} {
+    set values {
+        left
+        center
+        right
+        inside
+        outside
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown xAlign type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_YAlign {value} {
+    set values {
+        inline
+        top
+        center
+        bottom
+        inside
+        outside
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown yAlign type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_DropCap {value} {
+    set values {
+        none
+        drop
+        margin
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown dropCap type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_TabTlc {value} {
     set values {
         none

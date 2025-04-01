@@ -81,11 +81,17 @@ namespace eval ::ooxml::docx {
         -textframe {w:framePr {
             {width w} ST_TwipsMeasure
             {height h} ST_TwipsMeasure
-            wrap NoCheck
-            vAnchor NoCheck
-            hAnchor NoCheck
-            xAlign NoCheck
-            yAlign NoCheck
+            wrap ST_Wrap
+            vAnchor ST_Anchor
+            hAnchor ST_Anchor
+            xAlign ST_XAlign
+            yAlign ST_YAlign
+            dropCap ST_DropCap
+            lines ST_DecimalNumber
+            vSpace ST_TwipsMeasure
+            hSpace ST_TwipsMeasure
+            hrule ST_HeightRule
+            anchorLock ST_OnOff
         }}
     }
         

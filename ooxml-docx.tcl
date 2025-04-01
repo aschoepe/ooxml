@@ -64,7 +64,7 @@ namespace eval ::ooxml::docx {
     # Exceptions are locally noted.
 
     # Unspecified order
-    set properties(stylerun) {
+    set properties(run) {
         -bold {{w:b w:bCs} CT_OnOff}
         -color {w:color ST_HexColor}
         -dstrike {w:dstrike CT_OnOff}
@@ -73,11 +73,19 @@ namespace eval ::ooxml::docx {
         -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} CT_OnOff}
         -strike {w:strike CT_OnOff}
+        -style {w:rStyle RStyle}
         -underline {w:u ST_Underline}
     }
-    set properties(run) [concat $properties(stylerun) {-style {w:rStyle RStyle}}]
 
-    set properties(styleparagraph) {
+    set properties(paragraph2) {
+        -textframe {w:framePr {
+            width ST_TwipsMeasure
+            w ST_TwipsMeasure
+        }}
+    }
+        
+    set properties(paragraph2) {
+        -style {w:pStyle PStyle}
         -spacing {w:spacing {
             after ST_TwipsMeasure
             before ST_TwipsMeasure
@@ -93,7 +101,6 @@ namespace eval ::ooxml::docx {
             startChars ST_DecimalNumber}}
         -align {w:jc ST_Jc}
     }
-    set properties(paragraph) [concat {-style {w:pStyle PStyle}} $properties(styleparagraph)]
 
     set properties(xfrm) {
         -dimension {a:ext {
@@ -801,6 +808,26 @@ oo::class create ooxml::docx::docx {
         }
         return [list $attname $ooxmlvalue]
     }
+
+    method ParagraphStyle {{tag Tag_w:pPr}} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        $tag {
+            # Tag_w:framePr {
+            # }
+            Tag_w:numPr {
+                my Create $properties(numbering)
+            }
+            Tag_w:pBdr {
+                my Create $properties(paragraphBorders)
+            }
+            Tag_w:tabs {
+                my Tabs [my EatOption -tabs]
+            }
+            my Create $properties(paragraph2)
+        }
+    }
     
     method RFonts {value} {
         Tag_w:rFonts \
@@ -1125,11 +1152,9 @@ oo::class create ooxml::docx::docx {
                                     }
                                     Tag_w:start w:val $start
                                     my Create $properties(abstractNumStyle)
-                                    Tag_w:pPr {
-                                        my Create $properties(styleparagraph)
-                                    }
+                                    my ParagraphStyle
                                     Tag_w:rPr {
-                                        my Create $properties(stylerun)
+                                        my Create $properties(run)
                                     }
                                 }
                                 if {[catch {my CheckRemainingOpts} errMsg]} {
@@ -1192,8 +1217,8 @@ oo::class create ooxml::docx::docx {
     # WordprocessingML has no concept of a page. Rather it groups
     # paragraphs (the main building block) into "sections". The page
     # setup of a section is located within the w:p subtree of the last
-    # paragraph of the section. And that settings reach out _back_
-    # over all w:p subtrees without page setup.
+    # paragraph of the section. And that settings reach out back over
+    # all w:p subtrees without page setup.
     method pagesetup {args} {
         my variable body
         my variable setuproot
@@ -1220,18 +1245,7 @@ oo::class create ooxml::docx::docx {
             OptVal $args "text"
             $body appendFromScript {
                 Tag_w:p {
-                    Tag_w:pPr {
-                        Tag_w:numPr {
-                            my Create $properties(numbering)
-                        }
-                        Tag_w:pBdr {
-                            my Create $properties(paragraphBorders)
-                        }
-                        Tag_w:tabs {
-                            my Tabs [my EatOption -tabs]
-                        }
-                        my Create $properties(paragraph)
-                    }
+                    my ParagraphStyle
                     Tag_w:r {
                         my Wt $text
                     }
@@ -1383,14 +1397,7 @@ oo::class create ooxml::docx::docx {
                     # rPrDefault pPrDefault
                     OptVal $args "paragraphdefault"
                     $docDefaults appendFromScript {
-                        Tag_w:pPrDefault {
-                            Tag_w:pPr {
-                                Tag_w:pBdr {
-                                    my Create $properties(paragraphBorders)
-                                }
-                                my Create $properties(styleparagraph)
-                            }
-                        }
+                        my ParagraphStyle Tag_w:pPrDefault
                     }
                     my CheckRemainingOpts
                 }
@@ -1406,7 +1413,7 @@ oo::class create ooxml::docx::docx {
                     $docDefaults insertBeforeFromScript {
                         Tag_w:rPrDefault {
                             Tag_w:rPr {
-                                my Create $properties(stylerun)
+                                my Create $properties(run)
                             }
                         }
                     } [$docDefaults firstChild]
@@ -1439,15 +1446,10 @@ oo::class create ooxml::docx::docx {
                                 }
                             } else {
                                 if {$cmd eq "paragraph"} {
-                                    Tag_w:pPr {
-                                        Tag_w:pBdr {
-                                            my Create $properties(paragraphBorders)
-                                        }
-                                        my Create $properties(styleparagraph)
-                                    }
+                                    my ParagraphStyle
                                 }
                                 Tag_w:rPr {
-                                    my Create $properties(stylerun)
+                                    my Create $properties(run)
                                 }
                             }
                         }

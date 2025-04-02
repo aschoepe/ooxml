@@ -102,5 +102,35 @@ $docx table {
 }
 $docx paragraph ""
 
+$docx pagebreak
+
+$docx paragraph "Cell spanning"
+$docx table {
+    $docx tablerow {
+        $docx tablecell {
+            $docx paragraph "A normal paragraph with all paragraph styling" -fontsize 18pt
+        }
+        $docx tablecell {
+            $docx paragraph "Fill grid"
+        }
+        $docx tablecell {
+            $docx paragraph "Fill grid"
+        }
+    }
+    $docx tablerow {
+        $docx tablecell {
+            $docx paragraph ""
+        }
+        $docx tablecell -span 2 {
+            $docx paragraph "Another cell spaning acroll cells $loreipsum" \
+                -underline single
+        }
+        # $docx tablecell {
+        #     $docx paragraph "Fill grid"
+        # }
+    }
+}
+$docx paragraph ""
+
 $docx write docx-example3.docx
 $docx destroy

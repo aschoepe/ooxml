@@ -81,6 +81,7 @@ namespace eval ::ooxml::docx {
         -width {w:tcW {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
+        -span {w:gridSpan ST_DecimalNumber}
     }
     
     set properties(paragraph1) {

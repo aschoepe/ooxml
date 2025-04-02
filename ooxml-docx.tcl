@@ -119,6 +119,14 @@ namespace eval ::ooxml::docx {
             {height -cy} ST_Emu
         }}
     }
+
+    set properties(table1) {
+        -style {w:tblStyle TStyle}
+    }
+
+    set properties(table2) {
+        -caption {w:tblCaption NoCheck}
+    }
     
     set properties(sectionsetup1) {
         -sizeAndOrientaion {w:pgSz {
@@ -801,13 +809,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method PStyle {value} {
-        my variable docs
-        
-        set styles [$docs(word/styles.xml) documentElement]
-        if {[$styles selectNodes {w:style[@w:type="paragraph" and @w:styleId=$value]}] eq ""} {
-            error "unknown paragraph style \"$value\""
-        }
-        return $value
+        return [my StyleCheck paragraph $value]
     }
 
     method Option {option attname type {default ""}} {
@@ -851,13 +853,7 @@ oo::class create ooxml::docx::docx {
     }
     
     method RStyle {value} {
-        my variable docs
-
-        set styles [$docs(word/styles.xml) documentElement]
-        if {[$styles selectNodes {w:style[@w:type="character" and @w:styleId=$value]}] eq ""} {
-            error "unknown character style \"$value\""
-        }
-        return $value
+        return [my StyleCheck character $value]
     }
 
     method SectionCommon {} {
@@ -882,6 +878,16 @@ oo::class create ooxml::docx::docx {
             my Create $properties(sectionsetup2)
         }
     }
+
+    method StyleCheck {type value} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        if {[$styles selectNodes {w:style[@w:type=$type and @w:styleId=$value]}] eq ""} {
+            error "unknown $type style \"$value\""
+        }
+        return $value
+    }
     
     method Tabs {tabsdata} {
         foreach tabstop $tabsdata {
@@ -902,6 +908,10 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method TStyle {value} {
+        return [my StyleCheck table $value]
+    }
+    
     method Wt {text} {
         # Just not exactly that easy.
         # Handle at least \n \r \t and \f special
@@ -1352,18 +1362,16 @@ oo::class create ooxml::docx::docx {
 
         OptVal $args "tabledata"
         if {[catch {
-            set style [my EatOption -style]
             set firstStyle [my EatOption -firstStyle]
             set lastStyle [my EatOption -lastStyle]
             $body appendFromScript {
                 Tag_w:tbl {
                     Tag_w:tblPr {
-                        if {$style ne ""} {
-                            Tag_w:tblStyle w:val $style
-                        }
+                        my Create $properties(table1)
                         Tag_w:tblBorders {
                             my Create $properties(tableBorders)
                         }
+                        my Create $properties(table2)
                     }
                     set widths [my EatOption -columnwidths]
                     if {[llength $widths]} {

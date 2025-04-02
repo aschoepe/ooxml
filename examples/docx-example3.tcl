@@ -45,7 +45,6 @@ $docx paragraph "A table with -style"
 $docx simpletable $simpledata -style myTable
 
 
-
 $docx style paragraph tableFirstRow -align center -bold on
 $docx style paragraph tableLastRow -align end
 $docx paragraph "A simple table with other style in first and last row."

@@ -267,6 +267,22 @@ proc ::ooxml::docx::lib::CT_OnOff {value} {
     }
 }
 
+proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {
+    if {[string is integer -strict $value]} {
+        return $value
+    }
+    if {[regexp -- {-?[0-9]+(\.[0-9]+)?%} $value]} {
+        return $value
+    }
+    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
+        error "\"$value\" is not a valid measure or perent value - value must\
+              be an integer or a numeric value directly followed either a\
+              percent sign (%) or one of the units mm, cm, in, pt, pc or pi"
+    }
+    return $value
+
+}
+
 proc ::ooxml::docx::lib::ST_NumberFormat {value} {
     set values {
         decimal
@@ -399,6 +415,38 @@ proc ::ooxml::docx::lib::ST_TabTlc {value} {
         return $value
     }
     error "unknown tab fill type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TblLayoutType {value} {
+    set values {
+        fixed
+        autofit
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown table layout type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TblWidth {value} {
+    set values {
+        nil
+        pct
+        percent
+        dxa
+        measure
+        auto
+    }
+    if {$value in $values} {
+        switch $value {
+            "percent" {return pct}
+            "measure" {return dxa}
+            default {return $value}
+        }
+    }
+    error "unknown table width value type \"$value\", expected one of\
             [AllowedValues $values]"
 }
 

@@ -73,10 +73,16 @@ namespace eval ::ooxml::docx {
         -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} CT_OnOff}
         -strike {w:strike CT_OnOff}
-        -style {w:rStyle RStyle}
+        -cstyle {w:rStyle RStyle}
         -underline {w:u ST_Underline}
     }
 
+    set properties(cell) {
+        -width {w:tcW {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+    }
+    
     set properties(paragraph1) {
         -textframe {w:framePr {
             {width w} ST_TwipsMeasure
@@ -96,7 +102,7 @@ namespace eval ::ooxml::docx {
     }
         
     set properties(paragraph2) {
-        -style {w:pStyle PStyle}
+        -pstyle {w:pStyle PStyle}
         -spacing {w:spacing {
             after ST_TwipsMeasure
             before ST_TwipsMeasure
@@ -122,7 +128,9 @@ namespace eval ::ooxml::docx {
 
     set properties(table1) {
         -style {w:tblStyle TStyle}
-        -width {w:tblW ST_TwipsMeasure}
+        -width {w:tblW {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
     }
 
     set properties(table2) {
@@ -158,6 +166,7 @@ namespace eval ::ooxml::docx {
         paragraphBorders {top left bottom right between bar}
         sectionBorders {top left bottom right}
         tableBorders {top start left bottom end right insideH insideV}
+        cellBorders {top start left bottom end right insideH insideV tl2br tr2bl}
     } {
         foreach option $borderOptions {
             lappend properties($property) \
@@ -422,7 +431,7 @@ namespace eval ::ooxml::docx {
         w:tblInd w:tblLayout w:tblLook w:tblOverlap w:tblpPr
         w:tblPrChange w:tblPrEx w:tblPrExChange w:tblStyle
         w:tblStyleColBandSize w:tblStylePr w:tblStyleRowBandSize
-        w:tblW w:tc w:tcBorders w:tcFitText w:tcMar w:tcPr
+        w:tblW w:tc w:tcFitText w:tcMar
         w:tcPrChange w:tcW w:temporary w:text w:textAlignment
         w:textboxTightWrap w:textDirection w:textInput w:themeFontLang
         w:title w:titlePg w:tl2br w:tmpl w:top w:topLinePunct w:tr
@@ -442,7 +451,7 @@ namespace eval ::ooxml::docx {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) elementNode Tag_$tag
     }
     foreach tag {
-        w:tabs w:pPr w:rPr w:tblBorders w:tblPr w:numPr w:pBdr
+        w:tabs w:pPr w:rPr w:tblBorders w:tcBorders w:tcPr w:tblPr w:numPr w:pBdr
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
     }
@@ -611,15 +620,8 @@ oo::class create ooxml::docx::docx {
                         set ooxmlvalue [my CallType $attdefs $value \
                                             "the value \"$value\" given to the \"$opt\"\
                                               option is invalid"]
-                        if {$tags in {
-                            w:tblW
-                        }} {
-                            set thisattname w:w
-                        } else {
-                            set thisattname w:val
-                        }
                         foreach tag $tags {
-                            Tag_$tag $thisattname $ooxmlvalue
+                            Tag_$tag w:val $ooxmlvalue
                         }
                         unset opts($opt)
                         continue
@@ -1382,6 +1384,10 @@ oo::class create ooxml::docx::docx {
                         Tag_w:tblBorders {
                             my Create $properties(tableBorders)
                         }
+                        set type [my EatOption -layout ST_TblLayoutType]
+                        if {$type ne ""} {
+                            Tag_w:tblLayout w:type $type
+                        }
                         my Create $properties(table2)
                     }
                     set widths [my EatOption -columnwidths]
@@ -1576,9 +1582,7 @@ oo::class create ooxml::docx::docx {
                             }
                         }
                     }
-                    if {[catch {uplevel [list eval $script]} errMsg]} {
-                        return -code error $errMsg
-                    }
+                    uplevel [list eval $script]
                 }
             }
             my CheckRemainingOpts
@@ -1587,25 +1591,37 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method tablecell {script} {
+    method tablecell {args} {
         my variable body
+        variable ::ooxml::docx::properties
 
+        set script [lindex $args end]
+        OptVal [lrange $args 0 end-1]
         Tag_w:tc {
+            Tag_w:tcPr {
+                my Create $properties(cell)
+                Tag_w:tcBorders {
+                    my Create $properties(cellBorders)
+                }
+            }
             set savedbody $body
             set body [dom fromScriptContext]
-            if {[catch {uplevel [list eval $script]} errMsg]} {
+            try {
+                uplevel [list eval $script]
+            } finally {
                 set body $savedbody
-                return -code error $errMsg
             }
-            set body $savedbody
         }
     }
     
-    method tablerow {script} {
+    method tablerow {args} {
+        my variable body
+        variable ::ooxml::docx::properties
+
+        set script [lindex $args end]
+        OptVal [lrange $args 0 end-1]
         Tag_w:tr {
-            if {[catch {uplevel [list eval $script]} errMsg]} {
-                return -code error $errMsg
-            }
+            uplevel [list eval $script]
         }
     }
     

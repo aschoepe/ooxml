@@ -14,7 +14,7 @@ $docx style paragraphdefault -spacing {before 240 after 120}
 
 $docx paragraph "Covered simple tables."
 $docx paragraph "A very simple table:"
-$docx simpletable $simpledata
+$docx simpletable $simpledata -columnwidths {30pt 40pt 50pt}
 
 $docx paragraph "Something more verbose please."
 set table [list]
@@ -42,7 +42,7 @@ $docx style table myTable \
     -startBorder {type single borderwidth 320} \
     -endBorder {type single borderwidth 320} 
 $docx paragraph "A table with -style"
-$docx simpletable $simpledata -style myTable
+$docx simpletable $simpledata -style myTable -width 100pt
 
 
 $docx style paragraph tableFirstRow -align center -bold on
@@ -50,6 +50,26 @@ $docx style paragraph tableLastRow -align end
 $docx paragraph "A simple table with other style in first and last row."
 $docx simpletable $simpledata -firstStyle tableFirstRow \
     -lastStyle tableLastRow
+
+$docx paragraph "A first start of a complex table"
+$docx table {
+    $docx tablerow {
+        $docx tablecell {
+            $docx paragraph "A normal paragraph with all paragraph styling" -fontsize 18pt
+        }
+        $docx tablecell {
+            $docx paragraph "Another cell" -underline single
+        }
+    }
+    $docx tablerow {
+        $docx tablecell {
+            $docx simpletable $simpledata -columnwidths {30pt 40pt 50pt}
+        }
+        $docx tablecell {
+            $docx paragraph "Fill grid"
+        }
+    }
+}
 
 $docx write docx-example3.docx
 $docx destroy

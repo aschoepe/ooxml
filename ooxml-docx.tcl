@@ -122,6 +122,7 @@ namespace eval ::ooxml::docx {
 
     set properties(table1) {
         -style {w:tblStyle TStyle}
+        -width {w:tblW ST_TwipsMeasure}
     }
 
     set properties(table2) {
@@ -610,8 +611,15 @@ oo::class create ooxml::docx::docx {
                         set ooxmlvalue [my CallType $attdefs $value \
                                             "the value \"$value\" given to the \"$opt\"\
                                               option is invalid"]
+                        if {$tags in {
+                            w:tblW
+                        }} {
+                            set thisattname w:w
+                        } else {
+                            set thisattname w:val
+                        }
                         foreach tag $tags {
-                            Tag_$tag w:val $ooxmlvalue
+                            Tag_$tag $thisattname $ooxmlvalue
                         }
                         unset opts($opt)
                         continue
@@ -1270,6 +1278,9 @@ oo::class create ooxml::docx::docx {
                 Tag_w:p {
                     my ParagraphStyle
                     Tag_w:r {
+                        Tag_w:rPr {
+                            my Create $::ooxml::docx::properties(run)
+                        }
                         my Wt $text
                     }
                 }
@@ -1475,7 +1486,9 @@ oo::class create ooxml::docx::docx {
                     $styles appendFromScript {
                         Tag_w:style w:type $cmd w:styleId $name {
                             Tag_w:name w:val $name
-                            Tag_w:basedOn w:val $basedon
+                            if {$basedon ne ""} {
+                                Tag_w:basedOn w:val $basedon
+                            }
                             if {$cmd eq "table"} {
                                 Tag_w:tblPr {
                                     Tag_w:tblBorders {
@@ -1539,6 +1552,63 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method table {args} {
+        my variable body
+        variable ::ooxml::docx::properties
+
+        set script [lindex $args end]
+        OptVal [lrange $args 0 end-1]
+        if {[catch {
+            $body appendFromScript {
+                Tag_w:tbl {
+                    Tag_w:tblPr {
+                        my Create $properties(table1)
+                        Tag_w:tblBorders {
+                            my Create $properties(tableBorders)
+                        }
+                        my Create $properties(table2)
+                    }
+                    set widths [my EatOption -columnwidths]
+                    if {[llength $widths]} {
+                        Tag_w:tblGrid {
+                            foreach width $widths {
+                                Tag_w:gridCol w:w [ST_TwipsMeasure $width]
+                            }
+                        }
+                    }
+                    if {[catch {uplevel [list eval $script]} errMsg]} {
+                        return -code error $errMsg
+                    }
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    method tablecell {script} {
+        my variable body
+
+        Tag_w:tc {
+            set savedbody $body
+            set body [dom fromScriptContext]
+            if {[catch {uplevel [list eval $script]} errMsg]} {
+                set body $savedbody
+                return -code error $errMsg
+            }
+            set body $savedbody
+        }
+    }
+    
+    method tablerow {script} {
+        Tag_w:tr {
+            if {[catch {uplevel [list eval $script]} errMsg]} {
+                return -code error $errMsg
+            }
+        }
+    }
+    
     method url {text url args} {
         my variable docs
         variable ::ooxml::docx::xmlns

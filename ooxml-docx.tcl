@@ -710,10 +710,13 @@ oo::class create ooxml::docx::docx {
         }
     }
     
-    method EatOption {option} {
+    method EatOption {option {type ""}} {
         upvar opts opts
         if {[info exists opts($option)]} {
             set value $opts($option)
+            if {$type ne ""} {
+                set value [my CallType $type $value "option $option"]
+            }
             unset opts($option)
             return $value
         }
@@ -820,11 +823,11 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
 
-    method ParagraphStyle {{tag Tag_w:pPr}} {
+    method ParagraphStyle {} {
         variable ::ooxml::docx::properties
         upvar opts opts
 
-        $tag {
+        Tag_w:pPr {
             my Create $properties(paragraph1)
             Tag_w:numPr {
                 my Create $properties(numbering)
@@ -1350,6 +1353,8 @@ oo::class create ooxml::docx::docx {
         OptVal $args "tabledata"
         if {[catch {
             set style [my EatOption -style]
+            set firstStyle [my EatOption -firstStyle]
+            set lastStyle [my EatOption -lastStyle]
             $body appendFromScript {
                 Tag_w:tbl {
                     Tag_w:tblPr {
@@ -1368,14 +1373,22 @@ oo::class create ooxml::docx::docx {
                             }
                         }
                     }
-                    foreach row $tabledata {
+                    set lastrow [expr {[llength $tabledata] - 1}]
+                    for {set i 0} {$i <= $lastrow} {incr i} {
+                        set row [lindex $tabledata $i]
                         Tag_w:tr {
                             foreach cell $row {
                                 Tag_w:tc {
-                                    # Tag_w:tcPr {
-                                    #     Tag_w:tcW w:w 200 w:type "dxa"
-                                    # }
                                     Tag_w:p {
+                                        if {$i == 0 && $firstStyle ne ""} {
+                                            Tag_w:pPr {
+                                                Tag_w:pStyle w:val $firstStyle
+                                            }
+                                        } elseif {$i == $lastrow && $lastStyle ne ""} {
+                                            Tag_w:pPr {
+                                                Tag_w:pStyle w:val $lastStyle
+                                            }
+                                        }
                                         Tag_w:r {my Wt $cell}
                                     }
                                 }
@@ -1407,7 +1420,14 @@ oo::class create ooxml::docx::docx {
                     # rPrDefault pPrDefault
                     OptVal $args "paragraphdefault"
                     $docDefaults appendFromScript {
-                        my ParagraphStyle Tag_w:pPrDefault
+                        Tag_w:rPrDefault {
+                            Tag_w:rPr {
+                                my Create $properties(run)
+                            }
+                        }
+                        Tag_w:pPrDefault {
+                            my ParagraphStyle
+                        }
                     }
                     my CheckRemainingOpts
                 }

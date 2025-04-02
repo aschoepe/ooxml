@@ -12,6 +12,7 @@ set simpledata {{a b c} {1 2 3} {I II III}}
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}
 
+$docx paragraph "Covered simple tables."
 $docx paragraph "A very simple table:"
 $docx simpletable $simpledata
 
@@ -42,6 +43,14 @@ $docx style table myTable \
     -endBorder {type single borderwidth 320} 
 $docx paragraph "A table with -style"
 $docx simpletable $simpledata -style myTable
+
+
+
+$docx style paragraph tableFirstRow -align center -bold on
+$docx style paragraph tableLastRow -align end
+$docx paragraph "A simple table with other style in first and last row."
+$docx simpletable $simpledata -firstStyle tableFirstRow \
+    -lastStyle tableLastRow
 
 $docx write docx-example3.docx
 $docx destroy

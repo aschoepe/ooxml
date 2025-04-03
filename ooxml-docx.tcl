@@ -135,6 +135,8 @@ namespace eval ::ooxml::docx {
     }
 
     set properties(table2) {
+        -layout {w:tblLayout {
+            type ST_TblLayoutType}}
         -caption {w:tblCaption NoCheck}
     }
     
@@ -627,10 +629,24 @@ oo::class create ooxml::docx::docx {
                         unset opts($opt)
                         continue
                     }
-                    # If we stumble about a tag with just one
+                    # This handles the (rare) case of tags with just one
                     # attribute to set and that attribute is not w:val
-                    # this case has to be handled here.
-                    #
+                    if {[llength $attdefs] == 2} {
+                        lassign $attdefs attname atttype
+                        set ooxmlvalue [my CallType $atttype $value \
+                                            "the value \"$value\" given to the \"$opt\"\
+                                              option is invalid"]
+                        if {[string index $attname 0] eq "-"} {
+                            set attname [string range $attname 1 end]
+                        } else {
+                            set attname w:$attname
+                        }
+                        foreach tag $tags {
+                            Tag_$tag $attname $ooxmlvalue
+                        }
+                        unset opts($opt)
+                        continue
+                    }
                     # For now the code assumes always several atts
                     # and therefore the value to the option is always
                     # handled as a key value pairs list.
@@ -1384,10 +1400,6 @@ oo::class create ooxml::docx::docx {
                         my Create $properties(table1)
                         Tag_w:tblBorders {
                             my Create $properties(tableBorders)
-                        }
-                        set type [my EatOption -layout ST_TblLayoutType]
-                        if {$type ne ""} {
-                            Tag_w:tblLayout w:type $type
                         }
                         my Create $properties(table2)
                     }

@@ -125,6 +125,8 @@ $docx table {
             $docx paragraph "Another cell spaning acroll cells $loreipsum" \
                 -underline single
         }
+        # You must not provide the spanned cell values to make the
+        # span in place
         # $docx tablecell {
         #     $docx paragraph "Fill grid"
         # }

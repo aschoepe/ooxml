@@ -214,7 +214,41 @@ $docx table {
     }
     createrow $docx 4
 }
-$docx paragraph ""
+
+$docx paragraph "Complex table inside cell of complex table"
+$docx table {
+    createrow $docx 1
+    $docx tablerow {
+        $docx tablecell {
+            $docx table {
+                $docx tablerow {
+                    $docx tablecell {
+                        $docx paragraph "sub 1.1"
+                    }
+                    $docx tablecell {
+                        $docx paragraph "sub 1.2"
+                    }
+                }
+                $docx tablerow {
+                    $docx tablecell {
+                        $docx paragraph "sub 2.1"
+                    }
+                    $docx tablecell {
+                        $docx paragraph "sub 2.2"
+                    }
+                }
+            }
+            $docx paragraph ""
+        }
+        $docx tablecell {
+            $docx paragraph "2.2"
+        }
+        $docx tablecell {
+            $docx paragraph "2.3"
+        }
+    }
+}
+$docx paragraph "Back to normal context addition"
 
 $docx write docx-example3.docx
 $docx destroy

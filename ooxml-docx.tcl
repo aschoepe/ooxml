@@ -493,6 +493,7 @@ oo::class create ooxml::docx::docx {
         my variable setuproot
         my variable pagesetup
         my variable sectionsetup
+        my variable tablecontext
         
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::staticDocx
@@ -535,7 +536,8 @@ oo::class create ooxml::docx::docx {
         $setuproot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         set pagesetup ""
         set sectionsetup ""
-
+        set tablecontext ""
+        
         my configure {*}$args
     }
 
@@ -1575,10 +1577,12 @@ oo::class create ooxml::docx::docx {
 
     method table {args} {
         my variable body
+        my variable tablecontext
         variable ::ooxml::docx::properties
 
         set script [lindex $args end]
         OptVal [lrange $args 0 end-1]
+        set tablecontext "table"
         if {[catch {
             $body appendFromScript {
                 Tag_w:tbl {
@@ -1602,41 +1606,61 @@ oo::class create ooxml::docx::docx {
             }
             my CheckRemainingOpts
         } errMsg]} {
+            set tablecontext ""
             return -code error $errMsg
         }
+        set tablecontext ""
     }
 
     method tablecell {args} {
         my variable body
+        my variable tablecontext
         variable ::ooxml::docx::properties
 
+        if {$tablecontext ne "row"} {
+            error "method tablecell called outside of table row script context"
+        }
         set script [lindex $args end]
         OptVal [lrange $args 0 end-1]
-        Tag_w:tc {
-            Tag_w:tcPr {
-                my Create $properties(cell)
-                Tag_w:tcBorders {
-                    my Create $properties(cellBorders)
+        set tablecontext ""
+        try {
+            Tag_w:tc {
+                Tag_w:tcPr {
+                    my Create $properties(cell)
+                    Tag_w:tcBorders {
+                        my Create $properties(cellBorders)
+                    }
+                }
+                set savedbody $body
+                set body [dom fromScriptContext]
+                try {
+                    uplevel [list eval $script]
+                } finally {
+                    set body $savedbody
                 }
             }
-            set savedbody $body
-            set body [dom fromScriptContext]
-            try {
-                uplevel [list eval $script]
-            } finally {
-                set body $savedbody
-            }
+        } finally {
+            set tablecontext "row"
         }
     }
     
     method tablerow {args} {
         my variable body
+        my variable tablecontext
         variable ::ooxml::docx::properties
 
+        if {$tablecontext ne "table"} {
+            return -code error "method tablerow called outside of table script context"
+        }
+        set tablecontext "row"
         set script [lindex $args end]
         OptVal [lrange $args 0 end-1]
-        Tag_w:tr {
-            uplevel [list eval $script]
+        try {
+            Tag_w:tr {
+                uplevel [list eval $script]
+            }
+        } finally {
+            set tablecontext "table"
         }
     }
     

@@ -82,6 +82,8 @@ namespace eval ::ooxml::docx {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
         -span {w:gridSpan ST_DecimalNumber}
+        -hspan {w:hMerge ST_Merge}
+        -vspan {w:vMerge ST_Merge}
     }
     
     set properties(paragraph1) {

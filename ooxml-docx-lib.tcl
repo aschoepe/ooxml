@@ -283,6 +283,18 @@ proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {
 
 }
 
+proc ::ooxml::docx::lib::ST_Merge {value} {
+    set values {
+        continue
+        restart
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown merge value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_NumberFormat {value} {
     set values {
         decimal

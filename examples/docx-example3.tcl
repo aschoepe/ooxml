@@ -104,7 +104,7 @@ $docx paragraph ""
 
 $docx pagebreak
 
-$docx paragraph "Cell spanning"
+$docx paragraph "Horizontal cell spanning"
 $docx table {
     $docx tablerow {
         $docx tablecell {
@@ -131,6 +131,88 @@ $docx table {
         #     $docx paragraph "Fill grid"
         # }
     }
+}
+
+$docx paragraph "Vertical cell spanning"
+proc createrow {docx nr} {
+    $docx tablerow {
+        $docx tablecell {
+            $docx paragraph "$nr.1"
+        }
+        $docx tablecell {
+            $docx paragraph "$nr.2"
+        }
+        $docx tablecell {
+            $docx paragraph "$nr.3"
+        }
+    }
+}
+$docx table {
+    createrow $docx 1
+    $docx tablerow {
+        $docx tablecell -vspan restart {
+            $docx paragraph "2.1"
+        }
+        $docx tablecell {
+            $docx paragraph "2.2"
+        }
+        $docx tablecell {
+            $docx paragraph "2.3"
+        }
+    }
+    $docx tablerow {
+        $docx tablecell -vspan continue {
+            $docx paragraph "3.1"
+        }
+        $docx tablecell {
+            $docx paragraph "3.2"
+        }
+        $docx tablecell {
+            $docx paragraph "3.3"
+        }
+    }
+    createrow $docx 4
+}
+
+$docx paragraph "Horizontal and vertical cell spanning combined"
+proc createrow {docx nr} {
+    $docx tablerow {
+        $docx tablecell {
+            $docx paragraph "$nr.1"
+        }
+        $docx tablecell {
+            $docx paragraph "$nr.2"
+        }
+        $docx tablecell {
+            $docx paragraph "$nr.3"
+        }
+    }
+}
+$docx table {
+    createrow $docx 1
+    $docx tablerow {
+        $docx tablecell -vspan restart -hspan restart {
+            $docx paragraph "2.1"
+        }
+        $docx tablecell -hspan continue {
+            $docx paragraph "2.2"
+        }
+        $docx tablecell {
+            $docx paragraph "2.3"
+        }
+    }
+    $docx tablerow {
+        $docx tablecell -vspan continue {
+            $docx paragraph "3.1"
+        }
+        $docx tablecell {
+            $docx paragraph "3.2"
+        }
+        $docx tablecell {
+            $docx paragraph "3.3"
+        }
+    }
+    createrow $docx 4
 }
 $docx paragraph ""
 

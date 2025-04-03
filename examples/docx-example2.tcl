@@ -41,7 +41,7 @@ $docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
     -firstHeader $defaultHeader \
     -defaultFooter $defaultFooter
 
-$docx paragraph "Chapter one" -style Heading1
+$docx paragraph "Chapter one" -pstyle Heading1
 # Add two paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
 $docx paragraph "The next paragraph: $loreipsum"
@@ -52,7 +52,7 @@ $docx sectionstart -sizeAndOrientaion {width 12240 height 15840} \
     -leftBorder {type thick borderwidth 20 color 00ff00 space 20} \
     -pageNumbering {fmt upperRoman start 222}
 
-$docx paragraph "Chapter two" -style Heading1
+$docx paragraph "Chapter two" -pstyle Heading1
 # Add some paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
 for {set i 0} {$i < 8} {incr i} {
@@ -63,7 +63,7 @@ for {set i 0} {$i < 8} {incr i} {
 $docx sectionend
 
 # We are back to the pagesetup
-$docx paragraph "Chapter three" -style Heading1
+$docx paragraph "Chapter three" -pstyle Heading1
 # Add two paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
 $docx paragraph "The next paragraph: $loreipsum"

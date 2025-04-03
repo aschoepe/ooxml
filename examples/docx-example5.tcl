@@ -17,7 +17,7 @@ $docx style paragraph mystyle -color 00FF00 -fontsize 8pt
 $docx paragraph "First" -numberingStyle 1 
 $docx paragraph "Second" -numberingStyle 1 -level 0
 $docx paragraph "Sub Second frist" -numberingStyle 1 -level 1
-$docx paragraph "Sub Second second" -numberingStyle 1 -level 1 -style mystyle
+$docx paragraph "Sub Second second" -numberingStyle 1 -level 1 -pstyle mystyle
 $docx paragraph "Third" -numberingStyle 1 -level 0
 
 # Add some space
@@ -46,7 +46,7 @@ puts [$docx numbering abstractNumIds]
 $docx paragraph "First" -numberingStyle 3
 $docx paragraph "Second" -numberingStyle 3 -level 0
 $docx paragraph "Sub Second frist" -numberingStyle 3 -level 1
-#$docx paragraph "Sub Second second" -numberingStyle 3 -level 1 -style mystyle
+#$docx paragraph "Sub Second second" -numberingStyle 3 -level 1 -pstyle mystyle
 $docx paragraph "Sub Second second" -numberingStyle 3 -level 1 
 $docx paragraph "Third" -numberingStyle 3 -level 0 
 

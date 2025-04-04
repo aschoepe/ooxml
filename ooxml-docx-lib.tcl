@@ -256,6 +256,21 @@ proc ::ooxml::docx::lib::ST_Jc {value} {
                [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_JcTable {value} {
+    set values {
+        center
+        end
+        left
+        right
+        start
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown table align value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::CT_OnOff {value} {
     if {![string is boolean -strict $value]} {
         error "expected a Tcl boolean value"

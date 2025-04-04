@@ -250,5 +250,11 @@ $docx table {
 }
 $docx paragraph "Back to normal context addition"
 
+$docx simpletable $simpledata -align center -width {type measure value 100pt}
+$docx paragraph ""
+$docx style table myTable1 -basedon myTable -align center
+$docx simpletable $simpledata -style myTable1 -width {type measure value 100pt}
+$docx paragraph ""
+
 $docx write docx-example3.docx
 $docx destroy

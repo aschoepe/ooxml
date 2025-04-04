@@ -134,6 +134,7 @@ namespace eval ::ooxml::docx {
         -width {w:tblW {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
+        -align {w:jc ST_JcTable}
     }
 
     set properties(table2) {
@@ -839,6 +840,20 @@ oo::class create ooxml::docx::docx {
         return $p
     }
 
+    method TblPr {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:tblPr {
+            my Create $properties(table1)
+            Tag_w:tblBorders {
+                my Create $properties(tableBorders)
+            }
+            my Create $properties(table2)
+        }
+
+    }
+    
     method PStyle {value} {
         return [my StyleCheck paragraph $value]
     }
@@ -1400,13 +1415,7 @@ oo::class create ooxml::docx::docx {
             set lastStyle [my EatOption -lastStyle]
             $body appendFromScript {
                 Tag_w:tbl {
-                    Tag_w:tblPr {
-                        my Create $properties(table1)
-                        Tag_w:tblBorders {
-                            my Create $properties(tableBorders)
-                        }
-                        my Create $properties(table2)
-                    }
+                    my TblPr
                     set widths [my EatOption -columnwidths]
                     if {[llength $widths]} {
                         Tag_w:tblGrid {
@@ -1513,11 +1522,7 @@ oo::class create ooxml::docx::docx {
                                 Tag_w:basedOn w:val $basedon
                             }
                             if {$cmd eq "table"} {
-                                Tag_w:tblPr {
-                                    Tag_w:tblBorders {
-                                        my Create $properties(tableBorders)
-                                    }
-                                }
+                                my TblPr
                             } else {
                                 if {$cmd eq "paragraph"} {
                                     my ParagraphStyle
@@ -1586,13 +1591,7 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             $body appendFromScript {
                 Tag_w:tbl {
-                    Tag_w:tblPr {
-                        my Create $properties(table1)
-                        Tag_w:tblBorders {
-                            my Create $properties(tableBorders)
-                        }
-                        my Create $properties(table2)
-                    }
+                    my TblPr
                     set widths [my EatOption -columnwidths]
                     if {[llength $widths]} {
                         Tag_w:tblGrid {

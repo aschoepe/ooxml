@@ -252,7 +252,12 @@ $docx paragraph "Back to normal context addition"
 
 $docx simpletable $simpledata -align center -width {type measure value 100pt}
 $docx paragraph ""
-$docx style table myTable1 -basedon myTable -align center
+$docx style table tableBase \
+    -topBorder {type single borderwidth 10} \
+    -bottomBorder {type single borderwidth 10} 
+
+$docx style table myTable1 -basedon tableBase \
+    -cellMarginStart {type percent value 140%}
 $docx simpletable $simpledata -style myTable1 -width {type measure value 100pt}
 $docx paragraph ""
 

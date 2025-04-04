@@ -63,20 +63,12 @@ namespace eval ::ooxml::docx {
     # (and to care that new options are inserted at the right place).
     # Exceptions are locally noted.
 
-    # Unspecified order
-    set properties(run) {
-        -bold {{w:b w:bCs} CT_OnOff}
-        -color {w:color ST_HexColor}
-        -dstrike {w:dstrike CT_OnOff}
-        -font {w:rFonts NoCheck RFonts}
-        -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
-        -highlight {w:highlight ST_HighlightColor}
-        -italic {{w:i w:iCs} CT_OnOff}
-        -strike {w:strike CT_OnOff}
-        -cstyle {w:rStyle RStyle}
-        -underline {w:u ST_Underline}
+    set properties(abstractNumStyle) {
+        -numberFormat {w:numFmt ST_NumberFormat}
+        -levelText {w:lvlText NoCheck}
+        -align {w:lvlJc ST_Jc}
     }
-
+    
     set properties(cell) {
         -width {w:tcW {
             type ST_TblWidth
@@ -85,7 +77,33 @@ namespace eval ::ooxml::docx {
         -hspan {w:hMerge ST_Merge}
         -vspan {w:vMerge ST_Merge}
     }
+
+    set properties(cellMargins) {
+        -cellMarginTop {w:top {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -cellMarginStart {w:start {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -cellMarginLeft {w:left {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -cellMarginBottom {w:bottom {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -cellMarginEnd {w:end {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -cellMarginRight {w:right {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+    }            
     
+    set properties(numbering) {
+        -level {w:ilvl ST_DecimalNumber}
+        -numberingStyle {w:numId ST_DecimalNumber}
+    }
+
     set properties(paragraph1) {
         -textframe {w:framePr {
             {width w} ST_TwipsMeasure
@@ -122,27 +140,20 @@ namespace eval ::ooxml::docx {
         -align {w:jc ST_Jc}
     }
 
-    set properties(xfrm) {
-        -dimension {a:ext {
-            {width -cx} ST_Emu
-            {height -cy} ST_Emu
-        }}
+    # Unspecified order
+    set properties(run) {
+        -bold {{w:b w:bCs} CT_OnOff}
+        -color {w:color ST_HexColor}
+        -dstrike {w:dstrike CT_OnOff}
+        -font {w:rFonts NoCheck RFonts}
+        -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
+        -highlight {w:highlight ST_HighlightColor}
+        -italic {{w:i w:iCs} CT_OnOff}
+        -strike {w:strike CT_OnOff}
+        -cstyle {w:rStyle RStyle}
+        -underline {w:u ST_Underline}
     }
 
-    set properties(table1) {
-        -style {w:tblStyle TStyle}
-        -width {w:tblW {
-            type ST_TblWidth
-            {value w} ST_MeasurementOrPercent}}
-        -align {w:jc ST_JcTable}
-    }
-
-    set properties(table2) {
-        -layout {w:tblLayout {
-            type ST_TblLayoutType}}
-        -caption {w:tblCaption NoCheck}
-    }
-    
     set properties(sectionsetup1) {
         -sizeAndOrientaion {w:pgSz {
             {height h} ST_TwipsMeasure
@@ -162,6 +173,44 @@ namespace eval ::ooxml::docx {
         }}
     }
 
+    set properties(sectionsetup2) {
+        -pageNumbering {w:pgNumType {
+            chapSep ST_ChapterSep
+            chapStyle ST_DecimalNumber
+            fmt ST_NumberFormat
+            start ST_DecimalNumber
+        }}
+    }
+    
+    set properties(table1) {
+        -style {w:tblStyle TStyle}
+        -width {w:tblW {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -align {w:jc ST_JcTable}
+    }
+
+    set properties(table2) {
+        -layout {w:tblLayout {
+            type ST_TblLayoutType}}
+    }
+
+    set properties(table3) {
+        -caption {w:tblCaption NoCheck}
+    }
+    
+    set properties(xfrm) {
+        -dimension {a:ext {
+            {width -cx} ST_Emu
+            {height -cy} ST_Emu
+        }}
+    }
+
+    # This creates
+    # properties(paragraphBorders)
+    # properties(sectionBorders)
+    # properties(tableBorders)
+    # properties(cellBorders)
     set BorderOpts {
         color ST_HexColor
         {borderwidth sz} ST_EighthPointMeasure
@@ -180,26 +229,6 @@ namespace eval ::ooxml::docx {
         }
     }
 
-    set properties(sectionsetup2) {
-        -pageNumbering {w:pgNumType {
-            chapSep ST_ChapterSep
-            chapStyle ST_DecimalNumber
-            fmt ST_NumberFormat
-            start ST_DecimalNumber
-        }}
-    }
-    
-    set properties(numbering) {
-        -level {w:ilvl ST_DecimalNumber}
-        -numberingStyle {w:numId ST_DecimalNumber}
-    }
-
-    set properties(abstractNumStyle) {
-        -numberFormat {w:numFmt ST_NumberFormat}
-        -levelText {w:lvlText NoCheck}
-        -align {w:lvlJc ST_Jc}
-    }
-    
     foreach {name xml} {
         [Content_Types].xml {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -394,14 +423,13 @@ namespace eval ::ooxml::docx {
         w:noPunctuationKerning w:noResizeAllowed w:noSpaceRaiseLower
         w:noTabHangInd w:notTrueType w:noWrap w:nsid w:num w:numbering
         w:numberingChange w:numFmt w:numId w:numIdMacAtCleanup
-        w:numPicBullet w:numRestart w:numStart w:numStyleLink
-        w:object w:objectEmbed w:objectLink w:odso w:oMath
-        w:optimizeForBrowser w:outline w:outlineLvl w:overflowPunct
-        w:p w:pageBreakBefore w:panose1 w:paperSrc w:permEnd
-        w:permStart w:personal w:personalCompose w:personalReply
-        w:pgBorders w:pgMar w:pgNum w:pgNumType w:pgSz w:pict
-        w:picture w:pitch w:pixelsPerInch w:placeholder w:pos
-        w:position w:pPrChange w:pPrDefault
+        w:numPicBullet w:numRestart w:numStart w:numStyleLink w:object
+        w:objectEmbed w:objectLink w:odso w:oMath w:optimizeForBrowser
+        w:outline w:outlineLvl w:overflowPunct w:p w:pageBreakBefore
+        w:panose1 w:paperSrc w:permEnd w:permStart w:personal
+        w:personalCompose w:personalReply w:pgBorders w:pgMar w:pgNum
+        w:pgNumType w:pgSz w:pict w:picture w:pitch w:pixelsPerInch
+        w:placeholder w:pos w:position w:pPrChange w:pPrDefault
         w:printBodyTextBeforeHeader w:printColBlack w:printerSettings
         w:printFormsData w:printFractionalCharacterWidth
         w:printPostScriptOverText w:printTwoOnOne w:proofErr
@@ -431,56 +459,62 @@ namespace eval ::ooxml::docx {
         w:suppressSpacingAtTopOfPage w:suppressSpBfAfterPgBrk
         w:suppressTopSpacing w:suppressTopSpacingWP
         w:swapBordersFacingPages w:sym w:sz w:szCs w:t w:tab
-        w:tabIndex w:table w:tag w:targetScreenSz w:tbl
-        w:tblCaption w:tblCellMar w:tblCellSpacing
-        w:tblDescription w:tblGrid w:tblGridChange w:tblHeader
-        w:tblInd w:tblLayout w:tblLook w:tblOverlap w:tblpPr
-        w:tblPrChange w:tblPrEx w:tblPrExChange w:tblStyle
+        w:tabIndex w:table w:tag w:targetScreenSz w:tbl w:tblCaption
+        w:tblCellSpacing w:tblDescription w:tblGrid w:tblGridChange
+        w:tblHeader w:tblInd w:tblLayout w:tblLook w:tblOverlap
+        w:tblpPr w:tblPrChange w:tblPrEx w:tblPrExChange w:tblStyle
         w:tblStyleColBandSize w:tblStylePr w:tblStyleRowBandSize
-        w:tblW w:tc w:tcFitText w:tcMar
-        w:tcPrChange w:tcW w:temporary w:text w:textAlignment
-        w:textboxTightWrap w:textDirection w:textInput w:themeFontLang
-        w:title w:titlePg w:tl2br w:tmpl w:top w:topLinePunct w:tr
-        w:tr2bl w:trackRevisions w:trHeight w:trPr w:trPrChange
-        w:truncateFontHeightsLikeWP6 w:txbxContent w:type w:types w:u
-        w:udl w:uiPriority w:ulTrailSpace w:underlineTabInNumList
-        w:unhideWhenUsed w:uniqueTag w:updateFields
-        w:useAltKinsokuLineBreakRules w:useAnsiKerningPairs
-        w:useFELayout w:useNormalStyleForList w:usePrinterMetrics
-        w:useSingleBorderforContiguousCells w:useWord97LineBreakRules
-        w:useWord2002TableStyleRules w:useXSLTWhenSaving w:vAlign
-        w:vanish w:vertAlign w:view w:viewMergedData w:vMerge w:w
-        w:wAfter w:wBefore w:webHidden w:webSettings w:widowControl
-        w:wordWrap w:wpJustification w:wpSpaceWidth w:wrapTrailSpaces
-        w:writeProtection w:yearLong w:yearShort w:zoom
+        w:tblW w:tc w:tcFitText w:tcPrChange w:tcW w:temporary
+        w:text w:textAlignment w:textboxTightWrap w:textDirection
+        w:textInput w:themeFontLang w:title w:titlePg w:tl2br w:tmpl
+        w:top w:topLinePunct w:tr w:tr2bl w:trackRevisions w:trHeight
+        w:trPr w:trPrChange w:truncateFontHeightsLikeWP6 w:txbxContent
+        w:type w:types w:u w:udl w:uiPriority w:ulTrailSpace
+        w:underlineTabInNumList w:unhideWhenUsed w:uniqueTag
+        w:updateFields w:useAltKinsokuLineBreakRules
+        w:useAnsiKerningPairs w:useFELayout w:useNormalStyleForList
+        w:usePrinterMetrics w:useSingleBorderforContiguousCells
+        w:useWord97LineBreakRules w:useWord2002TableStyleRules
+        w:useXSLTWhenSaving w:vAlign w:vanish w:vertAlign w:view
+        w:viewMergedData w:vMerge w:w w:wAfter w:wBefore w:webHidden
+        w:webSettings w:widowControl w:wordWrap w:wpJustification
+        w:wpSpaceWidth w:wrapTrailSpaces w:writeProtection w:yearLong
+        w:yearShort w:zoom
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) elementNode Tag_$tag
     }
+    
     foreach tag {
-        w:tabs w:pPr w:rPr w:tblBorders w:tcBorders w:tcPr w:tblPr w:numPr w:pBdr
+        w:tabs w:pPr w:rPr w:tblCellMar w:tblBorders w:tblPr w:tcBorders
+        w:tcMar w:tcPr w:numPr w:pBdr
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
     }
+    
     foreach tag {
         Relationships Relationship
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(rel) elementNode Tag_$tag
     }
+    
     foreach tag {
         wp:anchor
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
+    
     foreach tag {
         a:graphic a:graphicData a:blip a:stretch a:fillRect a:xfrm a:ext a:off
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
-    }        
+    }
+    
     foreach tag {
         pic:pic pic:blipFill pic:nvPicPr pic:cNvPr pic:cNvPicPr pic:spPr
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(pic) elementNode Tag_$tag
-    }        
+    }
+    
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
 }
@@ -850,6 +884,10 @@ oo::class create ooxml::docx::docx {
                 my Create $properties(tableBorders)
             }
             my Create $properties(table2)
+            Tag_w:tblCellMar {
+                my Create $properties(cellMargins)
+            }
+            my Create $properties(table3)
         }
 
     }
@@ -1628,6 +1666,9 @@ oo::class create ooxml::docx::docx {
                     my Create $properties(cell)
                     Tag_w:tcBorders {
                         my Create $properties(cellBorders)
+                    }
+                    Tag_w:tcMar {
+                        my Create $properties(cellMargins)
                     }
                 }
                 set savedbody $body

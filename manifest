@@ -1,5 +1,5 @@
-C Merged\sfrom\sdt-regexp
-D 2025-03-28T05:52:52.216
+C ScanDateTime\sEvaluation\sUTC\sflag\sfor\sdate\s>\s1970
+D 2025-04-04T10:05:03.701
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -28,7 +28,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
-F ooxml.tcl 63da3fa75c3fd1b5bf27e5dcc73ac7e5963893fe251452da96c55e17bdcf104f
+F ooxml.tcl 8f0e12a748430584203eb3ca730bd7c5703985622fc78e065079ce8593323890
 F pkgIndex.tcl.in b6b469557e5c2b7ac66be3986672ab44e1ee3407f120cd6c9fe94b14f600c0bf
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -83,9 +83,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 985e4947bc06226eba85f7b93ae559ce9e60c718d3354ea89a166b7dc4043c3c 2eac2192d01e64f89d97c53e4c683bdac0cd13148050e91b3826bca053ba74bd
-R fbbe26c47530a1f17104da4fb8bf211f
-T +closed 2eac2192d01e64f89d97c53e4c683bdac0cd13148050e91b3826bca053ba74bd
+P bf71decd52d3f7ffa53b8d528b7ebb95fe24af6e9747dc6768ed8265e264027e
+R bd572fa537f2f55c69b57fd6e554414e
 U alex
-Z e0464c6751f2e363af76d11491ede32b
+Z 8d73b5510cf0c423f602783a80cfe537
 # Remove this line to create a well-formed Fossil manifest.

@@ -704,6 +704,17 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
       set M [format %02u $M]
       set S [format %02u $S]
 
+      if {$z eq {Z} && $Y >= 1970} {
+        set utc [clock scan ${Y}-${m}-${d}T${H}:${M}:${S} -gmt 1]
+        set Y [clock format $utc -format %Y]
+        set y [clock format $utc -format %y]
+        set m [clock format $utc -format %m]
+        set d [clock format $utc -format %d]
+        set H [clock format $utc -format %H]
+        set M [clock format $utc -format %M]
+        set S [clock format $utc -format %S]
+      }
+
       if {$iso8601} {
         return [list ${Y}-${m}-${d}T${H}:${M}:${S}]
       }

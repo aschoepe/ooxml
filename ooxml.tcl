@@ -3049,7 +3049,7 @@ oo::class create ooxml::xl_write {
 
     # [self object] -> my
     if {[info exists a(sheets)]} {
-      foreach sheet $a(sheets) {
+      foreach sheet [lsort -integer $a(sheets)] {
         if {[set currentSheet [my worksheet $a($sheet,n)]] > -1} {
           dict set a(sheetmap) $sheet $currentSheet
           foreach item [lsort -dictionary [array names a $sheet,v,*]] {

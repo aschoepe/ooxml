@@ -99,11 +99,6 @@ namespace eval ::ooxml::docx {
             {value w} ST_MeasurementOrPercent}}
     }            
     
-    set properties(numbering) {
-        -level {w:ilvl ST_DecimalNumber}
-        -numberingStyle {w:numId ST_DecimalNumber}
-    }
-
     set properties(paragraph1) {
         -textframe {w:framePr {
             {width w} ST_TwipsMeasure
@@ -120,6 +115,10 @@ namespace eval ::ooxml::docx {
             hrule ST_HeightRule
             anchorLock ST_OnOff
         }}
+        +w:numPr {
+            -level {w:ilvl ST_DecimalNumber}
+            -numberingStyle {w:numId ST_DecimalNumber}
+        }
     }
         
     set properties(paragraph2) {
@@ -649,6 +648,12 @@ oo::class create ooxml::docx::docx {
         upvar opts opts
         
         foreach {opt optdata} $switchActionList {
+            if {[string index $opt 0] eq "+"} {
+                Tag_[string range $opt 1 end] {
+                    my Create $optdata
+                }
+                continue
+            }
             if {![info exists opts($opt)]} {
                 continue
             }
@@ -915,9 +920,6 @@ oo::class create ooxml::docx::docx {
 
         Tag_w:pPr {
             my Create $properties(paragraph1)
-            Tag_w:numPr {
-                my Create $properties(numbering)
-            }
             Tag_w:pBdr {
                 my Create $properties(paragraphBorders)
             }
@@ -1355,7 +1357,7 @@ oo::class create ooxml::docx::docx {
                     my ParagraphStyle
                     Tag_w:r {
                         Tag_w:rPr {
-                            my Create $::ooxml::docx::properties(run)
+                            my Create $properties(run)
                         }
                         my Wt $text
                     }
@@ -1559,15 +1561,14 @@ oo::class create ooxml::docx::docx {
                             if {$basedon ne ""} {
                                 Tag_w:basedOn w:val $basedon
                             }
+                            if {$cmd in {paragraph table}} {
+                                my ParagraphStyle
+                            }
+                            Tag_w:rPr {
+                                my Create $properties(run)
+                            }
                             if {$cmd eq "table"} {
                                 my TblPr
-                            } else {
-                                if {$cmd eq "paragraph"} {
-                                    my ParagraphStyle
-                                }
-                                Tag_w:rPr {
-                                    my Create $properties(run)
-                                }
                             }
                         }
                     }

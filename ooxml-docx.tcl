@@ -37,7 +37,7 @@ package require ::ooxml::docx::lib
 
 namespace eval ::ooxml::docx {
 
-    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF
+    namespace export docx OptVal NoCheck ST_* W3CDTF
     
     variable xmlns
 
@@ -146,7 +146,7 @@ namespace eval ::ooxml::docx {
         -wAfter {w:wAfter {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
-        -cantSpit {w:cantSplit CT_OnOff}
+        -cantSpit {w:cantSplit ST_OnOff}
         -rowHeight {w:trHeight {
             {value val} ST_TwipsMeasure
             hRule ST_HeightRule}}
@@ -154,14 +154,14 @@ namespace eval ::ooxml::docx {
     
     # Unspecified order
     set properties(run) {
-        -bold {{w:b w:bCs} CT_OnOff}
+        -bold {{w:b w:bCs} ST_OnOff}
         -color {w:color ST_HexColor}
-        -dstrike {w:dstrike CT_OnOff}
+        -dstrike {w:dstrike ST_OnOff}
         -font {w:rFonts NoCheck RFonts}
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
         -highlight {w:highlight ST_HighlightColor}
-        -italic {{w:i w:iCs} CT_OnOff}
-        -strike {w:strike CT_OnOff}
+        -italic {{w:i w:iCs} ST_OnOff}
+        -strike {w:strike ST_OnOff}
         -cstyle {w:rStyle RStyle}
         -underline {w:u ST_Underline}
     }
@@ -208,6 +208,14 @@ namespace eval ::ooxml::docx {
     }
 
     set properties(table3) {
+        -look {w:tblLook {
+            firstRow ST_OnOff
+            lastRow ST_OnOff
+            firstColumn ST_OnOff
+            lastColumn ST_OnOff
+            noHBand ST_OnOff
+            noVBand ST_OnOff
+        }}
         -caption {w:tblCaption NoCheck}
     }
     
@@ -910,6 +918,18 @@ oo::class create ooxml::docx::docx {
 
     }
 
+    method TblStylePr {conditionData} {
+        foreach {types styledata} $conditionData {
+            foreach type $types {
+                Tag_w:tblStylePr w:type $type {
+                    my TblPr
+                    my TrPr
+                    my TcPr
+                }
+            }
+        }
+    }
+    
     method TcPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
@@ -973,6 +993,15 @@ oo::class create ooxml::docx::docx {
             w:hAnsi $value \
             w:eastAsia $value \
             w:cs $value
+    }
+
+    method RPr {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:rPr {
+            my Create $properties(run)
+        }
     }
     
     method RStyle {value} {
@@ -1068,9 +1097,7 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             $p appendFromScript {
                 Tag_w:r {
-                    Tag_w:rPr {
-                        my Create $::ooxml::docx::properties(run)
-                    }
+                    my RPr
                     my Wt $text
                 }
             }
@@ -1299,9 +1326,7 @@ oo::class create ooxml::docx::docx {
                                     Tag_w:start w:val $start
                                     my Create $properties(abstractNumStyle)
                                     my ParagraphStyle
-                                    Tag_w:rPr {
-                                        my Create $properties(run)
-                                    }
+                                    my RPr
                                 }
                                 if {[catch {my CheckRemainingOpts} errMsg]} {
                                     error "level definition $levelnr: $errMsg"
@@ -1393,9 +1418,7 @@ oo::class create ooxml::docx::docx {
                 Tag_w:p {
                     my ParagraphStyle
                     Tag_w:r {
-                        Tag_w:rPr {
-                            my Create $properties(run)
-                        }
+                        my RPr
                         my Wt $text
                     }
                 }
@@ -1549,9 +1572,7 @@ oo::class create ooxml::docx::docx {
                     OptVal $args "paragraphdefault"
                     $docDefaults appendFromScript {
                         Tag_w:rPrDefault {
-                            Tag_w:rPr {
-                                my Create $properties(run)
-                            }
+                            my RPr
                         }
                         Tag_w:pPrDefault {
                             my ParagraphStyle
@@ -1570,9 +1591,7 @@ oo::class create ooxml::docx::docx {
                     OptVal $args "characterdefault"
                     $docDefaults insertBeforeFromScript {
                         Tag_w:rPrDefault {
-                            Tag_w:rPr {
-                                my Create $properties(run)
-                            }
+                            my RPr
                         }
                     } [$docDefaults firstChild]
                     my CheckRemainingOpts
@@ -1601,13 +1620,12 @@ oo::class create ooxml::docx::docx {
                             if {$cmd in {paragraph table}} {
                                 my ParagraphStyle
                             }
-                            Tag_w:rPr {
-                                my Create $properties(run)
-                            }
+                            my RPr
                             if {$cmd eq "table"} {
                                 my TblPr
                                 my TrPr
                                 my TcPr
+                                my TblStylePr [my EatOption -conditional]
                             }
                         }
                     }
@@ -1748,9 +1766,7 @@ oo::class create ooxml::docx::docx {
             $p appendFromScript {
                 Tag_w:hyperlink r:id $rId {
                     Tag_w:r {
-                        Tag_w:rPr {
-                            my Create $::ooxml::docx::properties(run)
-                        }
+                        my RPr
                         my Wt $text
                     }
                 }

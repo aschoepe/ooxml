@@ -270,8 +270,16 @@ $docx simpletable $simpledata -style myTable1 -width {type measure value 100pt}
 $docx paragraph ""
 
 $docx style table myTable2  \
-      -bold true
-$docx simpletable $simpledata2 -style myTable2
+      -bold true \
+      -conditional {
+    firstRow {
+        -color ff000
+    }
+    lastRow {
+        -color 00ff00
+    }}
+$docx simpletable $simpledata2 -style myTable2 \
+      -look {firstRow true lastRow true}
 
 $docx write docx-example3.docx
 $docx destroy

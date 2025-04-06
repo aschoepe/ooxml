@@ -38,7 +38,7 @@ namespace eval ::ooxml::docx {
 
 namespace eval ::ooxml::docx::lib {
 
-    namespace export docx OptVal NoCheck CT_* ST_* W3CDTF AllowedValues
+    namespace export docx OptVal NoCheck ST_* W3CDTF AllowedValues
 
 }
 
@@ -284,17 +284,6 @@ proc ::ooxml::docx::lib::ST_JcTable {value} {
                [AllowedValues $values]"
 }
 
-proc ::ooxml::docx::lib::CT_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
-    }
-    if {$value} {
-        return "on"
-    } else {
-        return "off"
-    }
-}
-
 proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {
     if {[string is integer -strict $value]} {
         return $value
@@ -394,6 +383,17 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
     }
     error "unknown numbering format \"$value\", expected one of\
             [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_OnOff {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return "on"
+    } else {
+        return "off"
+    }
 }
 
 proc ::ooxml::docx::lib::ST_PageOrientation {value} {

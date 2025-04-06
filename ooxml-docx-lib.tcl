@@ -196,6 +196,19 @@ proc ::ooxml::docx::lib::ST_Emu {value} {
     return [expr {round($value*$factor)}]
 }
 
+proc ::ooxml::docx::lib::ST_HeightRule {value} {
+    set values {
+        auto
+        exact
+        atLeast
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown height rule value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_HexColor {value} {
     if {$value ne "auto"} {
         return $value

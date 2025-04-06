@@ -9,6 +9,14 @@ namespace import ::ooxml::docx::docx
 set docx [docx new]
 
 set simpledata {{a b c} {1 2 3} {I II III}}
+set simpledata2 {
+    {a b c e f}
+    {1 2 3 4 5}
+    {I II III IV V}
+    {one two three four five}
+    {foo bar baz grill boo}
+}
+
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}
 
@@ -260,6 +268,10 @@ $docx style table myTable1 -basedon tableBase \
     -cellMarginStart {type percent value 140%}
 $docx simpletable $simpledata -style myTable1 -width {type measure value 100pt}
 $docx paragraph ""
+
+$docx style table myTable2  \
+      -bold true
+$docx simpletable $simpledata2 -style myTable2
 
 $docx write docx-example3.docx
 $docx destroy

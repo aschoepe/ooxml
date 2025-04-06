@@ -70,7 +70,7 @@ namespace eval ::ooxml::docx {
     }
     
     set properties(cell) {
-        -width {w:tcW {
+        -cellWidth {w:tcW {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
         -span {w:gridSpan ST_DecimalNumber}
@@ -138,7 +138,20 @@ namespace eval ::ooxml::docx {
             startChars ST_DecimalNumber}}
         -align {w:jc ST_Jc}
     }
-
+    
+    set properties(row) {
+        -wBefore {w:wBefore {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -wAfter {w:wAfter {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -cantSpit {w:cantSplit CT_OnOff}
+        -rowHeight {w:trHeight {
+            {value val} ST_TwipsMeasure
+            hRule ST_HeightRule}}
+    }
+    
     # Unspecified order
     set properties(run) {
         -bold {{w:b w:bCs} CT_OnOff}
@@ -467,7 +480,7 @@ namespace eval ::ooxml::docx {
         w:text w:textAlignment w:textboxTightWrap w:textDirection
         w:textInput w:themeFontLang w:title w:titlePg w:tl2br w:tmpl
         w:top w:topLinePunct w:tr w:tr2bl w:trackRevisions w:trHeight
-        w:trPr w:trPrChange w:truncateFontHeightsLikeWP6 w:txbxContent
+        w:trPrChange w:truncateFontHeightsLikeWP6 w:txbxContent
         w:type w:types w:u w:udl w:uiPriority w:ulTrailSpace
         w:underlineTabInNumList w:unhideWhenUsed w:uniqueTag
         w:updateFields w:useAltKinsokuLineBreakRules
@@ -485,7 +498,7 @@ namespace eval ::ooxml::docx {
     
     foreach tag {
         w:tabs w:pPr w:rPr w:tblCellMar w:tblBorders w:tblPr w:tcBorders
-        w:tcMar w:tcPr w:numPr w:pBdr
+        w:tcMar w:tcPr w:trPr w:numPr w:pBdr
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
     }
@@ -896,7 +909,31 @@ oo::class create ooxml::docx::docx {
         }
 
     }
-    
+
+    method TcPr {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:tcPr {
+            my Create $properties(cell)
+            Tag_w:tcBorders {
+                my Create $properties(cellBorders)
+            }
+            Tag_w:tcMar {
+                my Create $properties(cellMargins)
+            }
+        }
+    }
+
+    method TrPr {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:trPr {
+            my Create $properties(row)
+        }
+    }
+        
     method PStyle {value} {
         return [my StyleCheck paragraph $value]
     }
@@ -1569,6 +1606,8 @@ oo::class create ooxml::docx::docx {
                             }
                             if {$cmd eq "table"} {
                                 my TblPr
+                                my TrPr
+                                my TcPr
                             }
                         }
                     }
@@ -1663,15 +1702,7 @@ oo::class create ooxml::docx::docx {
         set tablecontext ""
         try {
             Tag_w:tc {
-                Tag_w:tcPr {
-                    my Create $properties(cell)
-                    Tag_w:tcBorders {
-                        my Create $properties(cellBorders)
-                    }
-                    Tag_w:tcMar {
-                        my Create $properties(cellMargins)
-                    }
-                }
+                my TcPr
                 set savedbody $body
                 set body [dom fromScriptContext]
                 try {
@@ -1698,6 +1729,7 @@ oo::class create ooxml::docx::docx {
         OptVal [lrange $args 0 end-1]
         try {
             Tag_w:tr {
+                my TrPr
                 uplevel [list eval $script]
             }
         } finally {

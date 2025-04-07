@@ -210,11 +210,11 @@ proc ::ooxml::docx::lib::ST_HeightRule {value} {
 }
 
 proc ::ooxml::docx::lib::ST_HexColor {value} {
-    if {$value ne "auto"} {
+    if {$value eq "auto"} {
         return $value
     }
-    if {[string length $value] != 6 || ![string is xdigit]} {
-        error "unknown color value \"$value\", should be \"auto\" or a hex value in\
+    if {[string length $value] != 6 || ![string is xdigit $value]} {
+        error "invalid color value \"$value\", should be \"auto\" or a hex value in\
                    RRGGBB format."
     }
     return $value

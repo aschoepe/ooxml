@@ -272,14 +272,21 @@ $docx paragraph ""
 $docx style table myTable2  \
       -bold true \
       -conditional {
+    firstCol {
+        -color ffff00
+        -bold off
+    }
+    lastCol {
+        -color 00ffff
+    }
     firstRow {
-        -color ff000
+        -color ff0000
     }
     lastRow {
-        -color 00ff00
+        -bold off
     }}
 $docx simpletable $simpledata2 -style myTable2 \
-      -look {firstRow true lastRow true}
+      -look {lastRow true}
 
 $docx write docx-example3.docx
 $docx destroy

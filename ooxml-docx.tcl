@@ -919,13 +919,36 @@ oo::class create ooxml::docx::docx {
     }
 
     method TblStylePr {conditionData} {
+        set values {
+            wholeTable
+            firstRow
+            lastRow
+            firstCol
+            lastCol
+            band1Vert
+            band2Vert
+            band1Horz
+            band2Horz
+            neCell
+            nwCell
+            seCell
+            swCell
+        }
         foreach {types styledata} $conditionData {
             foreach type $types {
+                if {$type ni $values} {
+                    error "unknown table overwrite style \"$type\", expected\
+                           one of [AllowedValues $values]"
+                }
+                OptVal $styledata
                 Tag_w:tblStylePr w:type $type {
+                    my ParagraphStyle
+                    my RPr
                     my TblPr
                     my TrPr
                     my TcPr
                 }
+                my CheckRemainingOpts
             }
         }
     }

@@ -1,5 +1,5 @@
-C More\swork\son\stables:\sStarted\srow\sspecific\ssettings.\sFactored\sout\scell\sspecific\ssettings.\sAdded\srow\sand\scell\sspecific\ssettings\sto\stable\sstyle\sdefinition.
-D 2025-04-06T23:12:08.008
+C Turns\sout\sthat\sMS\sword\son\swindows\sdoesn't\sdigest\swell\sdocuments\swith\sword/numbering.xml\sjust\sthe\sempty\sdocument\selement\s(although\sthe\swml.xsd\sclearly\sallows\sthis).\sFixed\sby\sadding\sword/numbering.xml\sonly\sif\sit\shas\scontent.
+D 2025-04-09T12:13:45.327
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -40,7 +40,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 0327fa94df68f392409aafe506b24236fb30f3acfe7b30e8c7f85cddbc26ec7a
-F ooxml-docx.tcl ebadb9d88cde47cfb864b6065f17c8891ce9cb60dacb850cc3b1128a352143ef
+F ooxml-docx.tcl 490cc290654f27f2a147719eec1b39c46b538e387ebddad3e92bcbbf935246e6
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 0c16e0b67626c2876ed848d691c3276c680c32c8a7951728e54d9aefc4f6bcb8
 F pkgIndex.tcl.in fa6ba3133c31834da951d0a53112052fded69b443d4f63897a7c22c26e10460d
@@ -97,8 +97,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 9d0626940bf40c71cd222a76e3dfefb62d23470b48b4b9cd1aaa06b5ee3ed986
-R a99f2c6fa3d4a68f0346f84e9a692e19
+P 31d26cf6bfb023b3831d9404958910cf1ae61c12ede546150e99d65f9cb1611e
+R fc5262bd6bce010ca680f63edecf78d7
 U rolf
-Z 5db5ad36b2e1d0a756ef6d2f79c6f560
+Z 12f065e3b7ea076df2a3405c34427947
 # Remove this line to create a well-formed Fossil manifest.

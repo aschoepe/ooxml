@@ -270,7 +270,6 @@ namespace eval ::ooxml::docx {
                 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
                 <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/fontTable" Target="fontTable.xml"/>
                 <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
-                <Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
             </Relationships>
         }
         docProps/app.xml {
@@ -311,9 +310,6 @@ namespace eval ::ooxml::docx {
                     <w:pitch w:val="variable"/>
                 </w:font>
             </w:fonts>
-        }
-        word/numbering.xml {
-            <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
         }
         word/settings.xml {
             <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -1270,6 +1266,18 @@ oo::class create ooxml::docx::docx {
         my variable docs
         variable ::ooxml::docx::properties
 
+        if {![info exists docs(word/numbering.xml)]} {
+            if {$cmd in {"abstractNumIds" "delete"}} {
+                return
+            }
+            if {$cmd ne "abstractNum"} {
+                return -code error "invalid subcommand \"$cmd\""
+            }
+            my Add2Relationships numbering numbering.xml
+            set docs(word/numbering.xml) [dom parse {
+                <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
+            }]
+        }
         set numbering [$docs(word/numbering.xml) documentElement]
         switch $cmd {
             "abstractNum" {

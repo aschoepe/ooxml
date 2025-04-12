@@ -32,9 +32,8 @@ proc unzip {zipfile dir} {
         fcopy $in $out
         close $in
         close $out
-        #puts [file join $dir $target]
-        #puts $target
     }
+    zipfs unmount $base
 }
 
 proc pp {xmlfile} {

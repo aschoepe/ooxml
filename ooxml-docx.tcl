@@ -260,7 +260,7 @@ namespace eval ::ooxml::docx {
         }
         _rels/.rels {
             <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officedocument/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
                 <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
                 <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
             </Relationships>
@@ -274,10 +274,27 @@ namespace eval ::ooxml::docx {
         }
         docProps/app.xml {
             <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+                <Template/>
+                <TotalTime>0</TotalTime>
+                <Application>LibreOffice/7.0.4.2$Linux_X86_64 LibreOffice_project/00$Build-2</Application>
+                <AppVersion>15.0000</AppVersion>
+                <Pages>1</Pages>
+                <Words>0</Words>
+                <Characters>0</Characters>
+                <CharactersWithSpaces>0</CharactersWithSpaces>
+                <Paragraphs>0</Paragraphs>
             </Properties>
         }
         docProps/core.xml {
             <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <dcterms:created xsi:type="dcterms:W3CDTF">2025-04-13T00:45:59Z</dcterms:created>
+                <dc:creator/>
+                <dc:description/>
+                <dc:language>en-US</dc:language>
+                <cp:lastModifiedBy/>
+                <cp:revision>0</cp:revision>
+                <dc:subject/>
+                <dc:title/>
             </cp:coreProperties>
         }
         word/fontTable.xml {        
@@ -323,7 +340,99 @@ namespace eval ::ooxml::docx {
             </w:settings>
         }
         word/styles.xml {
-            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14"/>
+            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14">
+                <w:docDefaults>
+                    <w:rPrDefault>
+                        <w:rPr>
+                            <w:rFonts w:ascii="Liberation Serif" w:hAnsi="Liberation Serif" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
+                            <w:kern w:val="2"/>
+                            <w:sz w:val="24"/>
+                            <w:szCs w:val="24"/>
+                            <w:lang w:val="en-US" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
+                        </w:rPr>
+                    </w:rPrDefault>
+                    <w:pPrDefault>
+                        <w:pPr>
+                            <w:widowControl/>
+                            <w:suppressAutoHyphens w:val="true"/>
+                        </w:pPr>
+                    </w:pPrDefault>
+                </w:docDefaults>
+                <w:style w:type="paragraph" w:styleId="Normal">
+                    <w:name w:val="Normal"/>
+                    <w:qFormat/>
+                    <w:pPr>
+                        <w:widowControl/>
+                        <w:bidi w:val="0"/>
+                    </w:pPr>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Liberation Serif" w:hAnsi="Liberation Serif" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
+                        <w:color w:val="auto"/>
+                        <w:kern w:val="2"/>
+                        <w:sz w:val="24"/>
+                        <w:szCs w:val="24"/>
+                        <w:lang w:val="en-US" w:eastAsia="zh-CN" w:bidi="hi-IN"/>
+                    </w:rPr>
+                </w:style>
+                <w:style w:type="paragraph" w:styleId="Heading">
+                    <w:name w:val="Heading"/>
+                    <w:basedOn w:val="Normal"/>
+                    <w:next w:val="TextBody"/>
+                    <w:qFormat/>
+                    <w:pPr>
+                        <w:keepNext w:val="true"/>
+                        <w:spacing w:before="240" w:after="120"/>
+                    </w:pPr>
+                    <w:rPr>
+                        <w:rFonts w:ascii="Liberation Sans" w:hAnsi="Liberation Sans" w:eastAsia="AR PL KaitiM GB" w:cs="FreeSans"/>
+                        <w:sz w:val="28"/>
+                        <w:szCs w:val="28"/>
+                    </w:rPr>
+                </w:style>
+                <w:style w:type="paragraph" w:styleId="TextBody">
+                    <w:name w:val="Body Text"/>
+                    <w:basedOn w:val="Normal"/>
+                    <w:pPr>
+                        <w:spacing w:lineRule="auto" w:line="276" w:before="0" w:after="140"/>
+                    </w:pPr>
+                    <w:rPr/>
+                </w:style>
+                <w:style w:type="paragraph" w:styleId="List">
+                    <w:name w:val="List"/>
+                    <w:basedOn w:val="TextBody"/>
+                    <w:pPr/>
+                    <w:rPr>
+                        <w:rFonts w:cs="FreeSans"/>
+                    </w:rPr>
+                </w:style>
+                <w:style w:type="paragraph" w:styleId="Caption">
+                    <w:name w:val="Caption"/>
+                    <w:basedOn w:val="Normal"/>
+                    <w:qFormat/>
+                    <w:pPr>
+                        <w:suppressLineNumbers/>
+                        <w:spacing w:before="120" w:after="120"/>
+                    </w:pPr>
+                    <w:rPr>
+                        <w:rFonts w:cs="FreeSans"/>
+                        <w:i/>
+                        <w:iCs/>
+                        <w:sz w:val="24"/>
+                        <w:szCs w:val="24"/>
+                    </w:rPr>
+                </w:style>
+                <w:style w:type="paragraph" w:styleId="Index">
+                    <w:name w:val="Index"/>
+                    <w:basedOn w:val="Normal"/>
+                    <w:qFormat/>
+                    <w:pPr>
+                        <w:suppressLineNumbers/>
+                    </w:pPr>
+                    <w:rPr>
+                        <w:rFonts w:cs="FreeSans"/>
+                    </w:rPr>
+                </w:style>
+            </w:styles>                        
         }
     } {
         set ::ooxml::docx::staticDocx($name) $xml

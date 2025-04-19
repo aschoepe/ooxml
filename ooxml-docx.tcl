@@ -43,6 +43,7 @@ namespace eval ::ooxml::docx {
 
     array set xmlns {
         a http://schemas.openxmlformats.org/drawingml/2006/main
+        ct http://schemas.openxmlformats.org/package/2006/content-types
         mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
         pic http://schemas.openxmlformats.org/drawingml/2006/picture
@@ -522,6 +523,12 @@ namespace eval ::ooxml::docx {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(pic) elementNode Tag_$tag
     }
+
+    foreach tag {
+        Override
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
+    }
     
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
@@ -594,28 +601,94 @@ oo::class create ooxml::docx::docx {
         [$setuproot ownerDocument] delete
     }
 
+    method Add2Content_Types {file} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+
+        if {[string index $file 0] ne "/"} {
+            error "file paths to be added to \[ContentType\].xml must start\
+                   with a slash (/)"
+        }
+        set ctRoot [$docs(\[Content_Types\].xml) documentElement]
+        set present [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+            count(Override[@Partname=$file])
+        }]
+        if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+            count(ct:Override[@Partname=$file])
+        }] > 0} {
+            return
+        }
+        switch -glob $file {
+            "/_rels/.rels" {
+                set type "application/vnd.openxmlformats-package.relationships+xml"
+            }
+            "/docProps/core.xml" {
+                set type "application/vnd.openxmlformats-package.core-properties+xml"
+            }
+            "/docProps/app.xml" {
+                set type "application/vnd.openxmlformats-officedocument.extended-properties+xml"
+            }
+            "/word/_rels/document.xml.rels" {
+                set type "application/vnd.openxmlformats-package.relationships+xml"
+            }
+            "/word/comments.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml"
+            }
+            "/word/document.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
+            }
+            "/word/endnotes.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml"
+            }
+            "/word/fontTable.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.fontTable+xml"
+            }
+            "/word/footnotes.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"
+            }
+            "/word/footer*.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"
+            }
+            "/word/header*.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"
+            }
+            "/word/media/*" {
+                return
+            }
+            "/word/numbering.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"
+            }
+            "/word/settings.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"
+            }
+            "/word/styles.xml" {
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"
+            }
+            "/word/stylesWithEffects.xml" {
+                set type "application/vnd.ms-word.stylesWithEffects+xml"
+            }
+            "/word/theme/theme1.xml" {
+                set type "application/vnd.openxmlformats-officedocument.theme+xml"
+            }
+            "/word/webSettings.xml" {
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.webSettings+xml"
+            }
+            default {
+                error "cannot find the ContentType for '$file'"
+            }
+        }
+        $ctRoot appendFromScript {
+            Tag_Override PartName $file ContentType $type
+        }
+    }
+    
     method Add2Relationships {type target} {
         my variable docs
         variable ::ooxml::docx::xmlns
 
         set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-        # The following is perhaps over-complicated:
-        # set relsns http://schemas.openxmlformats.org/package/2006/relationships
-        # set ids [$relsRoot selectNodes -namespaces [list r $relsns] \
-        #              -list {r:Relationship string(@Id)}]
-        # set rId 1
-        # foreach id $ids {
-        #     set nr [string range $id 3 end]
-        #     if {[string range $id 0 2] eq "rId"
-        #         && [string is integer -strict $nr]
-        #     } {
-        #         if {$nr > $rId} {
-        #             set rId $nr
-        #         }
-        #     }
-        # }
         # At least for documents we build up from scratch this should
-        # work reliable enough (and work faster)
+        # work reliable enough
         set lastchild [$relsRoot lastChild]
         set nr [string range [$lastchild @Id] 3 end]
         incr nr
@@ -629,6 +702,7 @@ oo::class create ooxml::docx::docx {
         $relsRoot appendFromScript {
             Tag_Relationship {*}$attlist 
         }
+        my Add2Content_Types "/word/$target"
         return rId$nr
     }
     

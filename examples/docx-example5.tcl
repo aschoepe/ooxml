@@ -50,6 +50,24 @@ $docx paragraph "Sub Second frist" -numberingStyle 3 -level 1
 $docx paragraph "Sub Second second" -numberingStyle 3 -level 1 
 $docx paragraph "Third" -numberingStyle 3 -level 0 
 
+$docx numbering abstractNum 4 {
+    {
+        -numberFormat upperRoman
+        -levelText "%1."
+        -start 3
+        -indentation {start 1cm hanging 0.5cm}
+    }
+    {
+        -numberFormat chicago
+        -levelText "%2"
+        -indentation {start 2cm hanging 0.5cm}
+    }
+}
+$docx paragraph "First" -numberingStyle 1
+$docx paragraph "Second" -numberingStyle 1 -level 0
+$docx paragraph "Sub Second frist" -numberingStyle 1 -level 1
+$docx paragraph "Sub Second second" -numberingStyle 1 -level 1 -pstyle mystyle
+$docx paragraph "Third" -numberingStyle 1 -level 0
 
 $docx write docx-example5.docx
 $docx destroy

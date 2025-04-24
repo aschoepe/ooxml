@@ -687,6 +687,17 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::xmlns
 
         set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+
+        # If there is already an entry for this type and target just
+        # return the rId
+        set fqtype http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type
+        set result [$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
+            string(rel:Relationship[@Type=$fqtype and @Target=$target]/@Id)
+        }]
+        if {$result ne ""} {
+            return $result
+        }
+
         # At least for documents we build up from scratch this should
         # work reliable enough
         set lastchild [$relsRoot lastChild]
@@ -1296,8 +1307,19 @@ oo::class create ooxml::docx::docx {
         
         if {[catch {
             OptVal $args "file"
-            lappend media $file
-            set rId [my Add2Relationships image media/$file]
+            set file [file normalize $file]
+            set ind [lsearch -exact $media $file]
+            if {$ind < 0} {
+                lappend media $file
+                set ind [llength $media]
+            } else {
+                # Tcl indexes count from 0, the image numbering from 1
+                incr ind
+            }
+            set imagename image${ind}[file extension $file]
+            # Todo: Check if this extension has an entry in
+            # [Content_Types].xml and create one, if not.
+            set rId [my Add2Relationships image media/$imagename]
             set p [my LastParagraph]
             $p appendFromScript {
                 Tag_w:r {
@@ -1946,9 +1968,12 @@ oo::class create ooxml::docx::docx {
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
+        set nr 1
         foreach this $media {
-            append cd [::ooxml::add_file_with_path_to_archive $zf word/media/[file tail $this] $this]
+            set medianame word/media/image${nr}[file extension $this]
+            append cd [::ooxml::add_file_with_path_to_archive $zf $medianame $this]
             incr count
+            incr nr
         }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than

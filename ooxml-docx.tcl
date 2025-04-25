@@ -248,7 +248,7 @@ namespace eval ::ooxml::docx {
                 <Default Extension="xml" ContentType="application/xml"/>
                 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
                 <Default Extension="png" ContentType="image/png"/>
-                <Default Extension="jpeg" ContentType="image/jpeg"/>
+                <Default Extension="jpg" ContentType="image/jpeg"/>
                 <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
                 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
                 <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
@@ -507,13 +507,15 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        wp:anchor
+        wp:align wp:anchor wp:docPr wp:extent wp:positionH
+        wp:positionV wp:posOffset wp:simplePos
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
     
     foreach tag {
-        a:graphic a:graphicData a:blip a:stretch a:fillRect a:xfrm a:ext a:off
+        a:blip a:ext a:fillRect a:graphic a:graphicData a:off
+        a:picLocks a:stretch a:xfrm
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
     }
@@ -796,9 +798,8 @@ oo::class create ooxml::docx::docx {
                             lappend keys [lindex $attdata 0]
                         }
                         error "the value given to the \"$opt\" option is\
-                           invalid, expected ist a key value pairs\
-                           list with keys out of\
-                           [AllowedValues $keys]"
+                           invalid, expected is a key value pairs list with\
+                           keys out of [AllowedValues $keys]"
                     }
                     foreach {attdata type} $attdefs {
                         if {[llength $attdata] == 2} {
@@ -882,15 +883,22 @@ oo::class create ooxml::docx::docx {
             error "invalid rId $rId"
         }
     }
-    
-    method EatOption {option {type ""}} {
+
+    method PeekOption {option {type ""}} {
+        upvar opts opts
+        return [my EatOption $option $type 0]
+    }
+        
+    method EatOption {option {type ""} {deleteOption 1}} {
         upvar opts opts
         if {[info exists opts($option)]} {
             set value $opts($option)
             if {$type ne ""} {
                 set value [my CallType $type $value "option $option"]
             }
-            unset opts($option)
+            if {$deleteOption} {
+                unset opts($option)
+            }
             return $value
         }
         return ""
@@ -1324,10 +1332,29 @@ oo::class create ooxml::docx::docx {
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:drawing {
-                        Tag_wp:anchor {
+                        Tag_wp:anchor behindDoc "0" distT "0" distB "0" distL "0" distR "0" simplePos "0" locked "0" layoutInCell "0" allowOverlap "1" relativeHeight "2" {
+                            Tag_wp:simplePos x 0 y 0
+                            Tag_wp:positionH relativeFrom column {
+                                Tag_wp:align {Text "center"}
+                            }
+                            Tag_wp:positionV relativeFrom paragraph {
+                                Tag_wp:posOffset {Text "635"}
+                            }
+                            array set dimensions [my PeekOption -dimension]
+                            set cx $dimensions(width)
+                            set cy $dimensions(height)
+                            #Tag_wp:extent cx $cx cy $cy
+                            Tag_wp:extent cx "1080000" cy "1080000" 
+                            Tag_wp:docPr id [llength $media] name [file tail $file]
                             Tag_a:graphic {
                                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                                     Tag_pic:pic {
+                                        Tag_pic:nvPicPr {
+                                            Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                                            Tag_pic:cNvPicPr {
+                                                Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
+                                            }
+                                        }
                                         Tag_pic:blipFill {
                                             Tag_a:blip r:embed $rId
                                         }

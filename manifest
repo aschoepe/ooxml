@@ -1,5 +1,5 @@
-C Follow\sthe\sconvention\sto\smonotony\snumbering\sthe\sadded\simages\s(which\sat\sleast\sword\senforces\sas\smandatoriy).
-D 2025-04-24T00:15:53.423
+C wip
+D 2025-04-25T11:43:14.483
 F .fossil-settings/ignore-glob bb3e5e811b00e13ba7f3e5a358606c61de17e069f0220917940da64bf7fc9a32
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -23,7 +23,7 @@ F examples/docx-example3.tcl b25feee0d70e6b6f9ed975055bb54a6f5a9c263d8b22c814cd0
 F examples/docx-example4-in.docx 3ae216f142325eca22df5a5a624451e39e20005b06d3fcdaca8419b977e599e5
 F examples/docx-example4.tcl 4f8aae61a164b88638e2de8e39df8c0dc397d16420e3f6659d8c9d7b325278a2 x
 F examples/docx-example5.tcl 1556b7db7723d370598d830f4585c00cf7fdbc0b0cecdf589390cf7eb017247f x
-F examples/docx-example6.tcl 20d70ffa4bd14fb0ad1d7209045b61845aec24da511c61294e630515722d7357 x
+F examples/docx-example6.tcl 1ad5982b22162d6202e3192a275fa3fa4868cf0bd22f0fca303c33088ac9607c x
 F examples/docx-example7.tcl 29d6dd9b19f299ab4813ea67c2054db64c08d4892673a298b713e617f94e9b0b x
 F examples/form8.xlsx a95d57f14fbd46188dbe504e025914b14a2118a303e2cd952e85a7d3a807e4f1
 F examples/original_excel.xlsx e560157e92837ef3b6be15e730b344117fd46acae74f16881d42c60538bfc964
@@ -41,7 +41,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 0327fa94df68f392409aafe506b24236fb30f3acfe7b30e8c7f85cddbc26ec7a
-F ooxml-docx.tcl 8486b42ce618e417218f59919f83a1a3cf0a845bd655dc56d2a92a30e24f1d62
+F ooxml-docx.tcl c365b3aaa43a70a93bc6a208f1045ef0bb0ab659fe597ac09df5cd51ee287ea3
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 0c16e0b67626c2876ed848d691c3276c680c32c8a7951728e54d9aefc4f6bcb8
 F pkgIndex.tcl.in fa6ba3133c31834da951d0a53112052fded69b443d4f63897a7c22c26e10460d
@@ -98,8 +98,11 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 16f02187d540da41aa7c0872c3a89882421c58e97d622dda4caa75c7aa04e3fb
-R 7110071d04024d8c18f61a98bb55af34
+P b1e64c05f0a1d2cfd2cccd2142ab6e4c180e40f7224b65b4ce0a967cb06b08da
+R 164288ff43c94aecaab5bbde33f39650
+T *branch * docx-image-wip
+T *sym-docx-image-wip *
+T -sym-docx-image *
 U rolf
-Z 790c149f014845844162a158a2368388
+Z cc8e1eae09ada32613fd893c659e60db
 # Remove this line to create a well-formed Fossil manifest.

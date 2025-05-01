@@ -507,15 +507,15 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        wp:align wp:anchor wp:docPr wp:extent wp:positionH
-        wp:positionV wp:posOffset wp:simplePos
+        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent wp:positionH
+        wp:positionV wp:posOffset wp:simplePos wp:wrapNone
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
     
     foreach tag {
-        a:blip a:ext a:fillRect a:graphic a:graphicData a:off
-        a:picLocks a:stretch a:xfrm
+        a:avLst a:blip a:ext a:fillRect a:graphic a:graphicData a:off
+        a:picLocks a:prstGeom a:stretch a:xfrm
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
     }
@@ -1344,7 +1344,8 @@ oo::class create ooxml::docx::docx {
                             set cx $dimensions(width)
                             set cy $dimensions(height)
                             #Tag_wp:extent cx $cx cy $cy
-                            Tag_wp:extent cx "1080000" cy "1080000" 
+                            Tag_wp:extent cx "1080000" cy "1080000"
+                            Tag_wp:wrapNone
                             Tag_wp:docPr id [llength $media] name [file tail $file]
                             Tag_a:graphic {
                                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
@@ -1360,7 +1361,11 @@ oo::class create ooxml::docx::docx {
                                         }
                                         Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
                                             Tag_a:xfrm {
+                                                Tag_a:off x 0 y 0
                                                 my Create $properties(xfrm)
+                                            }
+                                            Tag_a:prstGeom prst "rect" {
+                                                Tag_a:avLst
                                             }
                                         }
                                     }

@@ -247,8 +247,6 @@ namespace eval ::ooxml::docx {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
                 <Default Extension="xml" ContentType="application/xml"/>
                 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Default Extension="png" ContentType="image/png"/>
-                <Default Extension="jpg" ContentType="image/jpeg"/>
                 <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
                 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
                 <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
@@ -527,7 +525,7 @@ namespace eval ::ooxml::docx {
     }
 
     foreach tag {
-        Override
+        Default Override
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
     }
@@ -612,13 +610,18 @@ oo::class create ooxml::docx::docx {
                    with a slash (/)"
         }
         set ctRoot [$docs(\[Content_Types\].xml) documentElement]
-        set present [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-            count(Override[@Partname=$file])
-        }]
         if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
             count(ct:Override[@Partname=$file])
         }] > 0} {
             return
+        }
+        if {[string range $file 0 11] eq "/word/media/"} {
+            set suffix [file extension $file]
+            if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+                count(ct:Default[@Extenxtion=$suffix])
+            }] > 0} {
+                return
+            }
         }
         switch -glob $file {
             "/_rels/.rels" {
@@ -655,6 +658,21 @@ oo::class create ooxml::docx::docx {
                 set type "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"
             }
             "/word/media/*" {
+                set suffix [string range [file extension $file] 1 end]
+                switch $suffix {
+                    "jpeg" -
+                    "jpg" {
+                        set ContentType "image/jpeg"
+                    }
+                    "png" {
+                        set ContentType "image/png"
+                    }
+                }
+                $ctRoot insertBeforeFromScript {
+                    Tag_Default Extension $suffix ContentType $ContentType
+                } [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+                    ct:Override[1]
+                }]
                 return
             }
             "/word/numbering.xml" {
@@ -739,6 +757,62 @@ oo::class create ooxml::docx::docx {
         }
         return $ooxmlvalue
     }
+
+    method CheckedAttlist {optionValue attdefs option} {
+        set attlist ""
+        if {[catch {array set atts $optionValue}]} {
+            set keys ""
+            foreach {attdata type} $attdefs {
+                lappend keys [lindex $attdata 0]
+            }
+            error "the value \"$optionValue\" given to the \"$option\" \
+                           option is invalid, expected is a key value pairs\
+                           list with keys out of [AllowedValues $keys]"
+        }
+        foreach {attdata type} $attdefs {
+            if {[llength $attdata] == 2} {
+                lassign $attdata key attname
+            } else {
+                set key $attdata
+                set attname $key
+            }
+            if {![info exists atts($key)]} {
+                continue
+            }
+            set ooxmlvalue [my CallType $type $atts($key) \
+                                "the argument \"$optionValue\" given to the
+                                \"$option\" option is invalid: the value\
+                                given to the key \"$key\" in the argument\
+                                is invalid"]
+            if {[string index $attname 0] eq "-"} {
+                lappend attlist [string range $attname 1 end] $ooxmlvalue
+            } else {
+                lappend attlist w:$attname $ooxmlvalue
+            }
+            unset atts($key)
+        }
+        # Check if there are unknown keys left in the key
+        # values list
+        set remainigKeys [array names atts]
+        if {[llength $remainigKeys] != 0} {
+            set keys ""
+            foreach {attdata type} $attdefs {
+                lappend keys [lindex $attdata 0]
+            }
+            if {[llength $remainigKeys] == 1} {
+                error "unknown key \"[lindex $remainigKeys 0]\" in\
+                                the value \"$optionValue\" of the option\
+                                \"$option\", the expected keys are\
+                                [AllowedValues $keys]"
+            } else {
+                error "unknown keys [AllowedValues $remainigKeys and] in\
+                               the value \"$optionValue\" of the option\
+                               \"$option\", the expected keys are\
+                               [AllowedValues $keys]"
+            }
+        }
+        return $attlist
+    }
     
     method Create switchActionList {
         upvar opts opts
@@ -790,61 +864,11 @@ oo::class create ooxml::docx::docx {
                     # For now the code assumes always several atts
                     # and therefore the value to the option is always
                     # handled as a key value pairs list.
-                    set attlist ""
-                    array unset atts
-                    if {[catch {array set atts $value}]} {
-                        set keys ""
-                        foreach {attdata type} $attdefs {
-                            lappend keys [lindex $attdata 0]
-                        }
-                        error "the value given to the \"$opt\" option is\
-                           invalid, expected is a key value pairs list with\
-                           keys out of [AllowedValues $keys]"
-                    }
-                    foreach {attdata type} $attdefs {
-                        if {[llength $attdata] == 2} {
-                            lassign $attdata key attname
-                        } else {
-                            set key $attdata
-                            set attname $key
-                        }
-                        if {![info exists atts($key)]} {
-                            continue
-                        }
-                        set ooxmlvalue [my CallType $type $atts($key) \
-                                            "the argument \"$value\" given to the \"$opt\"\
-                             option is invalid: the value given to the key\
-                             \"$key\" in the argument is invalid"]
-                        if {[string index $attname 0] eq "-"} {
-                            lappend attlist [string range $attname 1 end] $ooxmlvalue
-                        } else {
-                            lappend attlist w:$attname $ooxmlvalue
-                        }
-                        unset atts($key)
-                    }
+                    set attlist [my CheckedAttlist $value $attdefs $opt]
                     foreach tag $tags {
                         Tag_$tag {*}$attlist
                     }
-                    unset opts($opt)                    
-                    # Check if there are unknown keys left in the key
-                    # values list
-                    set remainigKeys [array names atts]
-                    if {[llength $remainigKeys] == 0} {
-                        continue
-                    }
-                    set keys ""
-                    foreach {attdata type} $attdefs {
-                        lappend keys [lindex $attdata 0]
-                    }
-                    if {[llength $remainigKeys] == 1} {
-                        error "unknown key \"[lindex $remainigKeys 0]\" in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [AllowedValues $keys]"
-                    } else {
-                        error "unknown keys [AllowedValues $remainigKeys and] in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [AllowedValues $keys]"
-                    }
+                    unset opts($opt)
                 }
                 3 {
                     my [lindex $optdata 2] $value
@@ -1325,8 +1349,6 @@ oo::class create ooxml::docx::docx {
                 incr ind
             }
             set imagename image${ind}[file extension $file]
-            # Todo: Check if this extension has an entry in
-            # [Content_Types].xml and create one, if not.
             set rId [my Add2Relationships image media/$imagename]
             set p [my LastParagraph]
             $p appendFromScript {
@@ -1340,11 +1362,12 @@ oo::class create ooxml::docx::docx {
                             Tag_wp:positionV relativeFrom paragraph {
                                 Tag_wp:posOffset {Text "635"}
                             }
-                            array set dimensions [my PeekOption -dimension]
-                            set cx $dimensions(width)
-                            set cy $dimensions(height)
-                            #Tag_wp:extent cx $cx cy $cy
-                            Tag_wp:extent cx "1080000" cy "1080000"
+                            set thisOptionValue [my PeekOption -dimension]
+                            set attlist [my CheckedAttlist $thisOptionValue {
+                                {width -cx} ST_Emu
+                                {height -cy} ST_Emu
+                            } -dimension]
+                            Tag_wp:extent {*}$attlist
                             Tag_wp:wrapNone
                             Tag_wp:docPr id [llength $media] name [file tail $file]
                             Tag_a:graphic {

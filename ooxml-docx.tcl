@@ -976,6 +976,54 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
+    method Image_anchor {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+        
+        Tag_wp:anchor behindDoc "0" distT "0" distB "0" distL "0" distR "0" simplePos "0" locked "0" layoutInCell "0" allowOverlap "1" relativeHeight "2" {
+            Tag_wp:simplePos x 0 y 0
+            Tag_wp:positionH relativeFrom column {
+                Tag_wp:align {Text "center"}
+            }
+            Tag_wp:positionV relativeFrom paragraph {
+                Tag_wp:posOffset {Text "635"}
+            }
+            set thisOptionValue [my PeekOption -dimension]
+            set attlist [my CheckedAttlist $thisOptionValue {
+                {width -cx} ST_Emu
+                {height -cy} ST_Emu
+            } -dimension]
+            Tag_wp:extent {*}$attlist
+            Tag_wp:wrapNone
+            Tag_wp:docPr id [llength $media] name [file tail $file]
+            Tag_a:graphic {
+                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                    Tag_pic:pic {
+                        Tag_pic:nvPicPr {
+                            Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                            Tag_pic:cNvPicPr {
+                                Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
+                            }
+                        }
+                        Tag_pic:blipFill {
+                            Tag_a:blip r:embed $rId
+                        }
+                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
+                            Tag_a:xfrm {
+                                Tag_a:off x 0 y 0
+                                my Create $properties(xfrm)
+                            }
+                            Tag_a:prstGeom prst "rect" {
+                                Tag_a:avLst
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     # For now only a debuging and developing helper method, not
     # exposed.
     method initWord {docxfile} {
@@ -1333,10 +1381,16 @@ oo::class create ooxml::docx::docx {
         set result [my HeaderFooter header $script]
     }
     
-    method image {file args} {
+    method image {file type args} {
         my variable media
         variable ::ooxml::docx::properties
-        
+
+        if {![file isfile $file] || ![file readable $file]} {
+            error "çannot read file \"$file\""
+        }
+        if {$type ni {inline anchor}} {
+            error "invalid type \"$type\" (expected \"inline\" or \"anchor\")"
+        }
         if {[catch {
             OptVal $args "file"
             set file [file normalize $file]
@@ -1354,47 +1408,7 @@ oo::class create ooxml::docx::docx {
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:drawing {
-                        Tag_wp:anchor behindDoc "0" distT "0" distB "0" distL "0" distR "0" simplePos "0" locked "0" layoutInCell "0" allowOverlap "1" relativeHeight "2" {
-                            Tag_wp:simplePos x 0 y 0
-                            Tag_wp:positionH relativeFrom column {
-                                Tag_wp:align {Text "center"}
-                            }
-                            Tag_wp:positionV relativeFrom paragraph {
-                                Tag_wp:posOffset {Text "635"}
-                            }
-                            set thisOptionValue [my PeekOption -dimension]
-                            set attlist [my CheckedAttlist $thisOptionValue {
-                                {width -cx} ST_Emu
-                                {height -cy} ST_Emu
-                            } -dimension]
-                            Tag_wp:extent {*}$attlist
-                            Tag_wp:wrapNone
-                            Tag_wp:docPr id [llength $media] name [file tail $file]
-                            Tag_a:graphic {
-                                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
-                                    Tag_pic:pic {
-                                        Tag_pic:nvPicPr {
-                                            Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
-                                            Tag_pic:cNvPicPr {
-                                                Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
-                                            }
-                                        }
-                                        Tag_pic:blipFill {
-                                            Tag_a:blip r:embed $rId
-                                        }
-                                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
-                                            Tag_a:xfrm {
-                                                Tag_a:off x 0 y 0
-                                                my Create $properties(xfrm)
-                                            }
-                                            Tag_a:prstGeom prst "rect" {
-                                                Tag_a:avLst
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        my Image_$type $rId $file
                     }
                 }
             }

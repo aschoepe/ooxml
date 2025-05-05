@@ -505,8 +505,8 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent wp:positionH
-        wp:positionV wp:posOffset wp:simplePos wp:wrapNone
+        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent wp:inline
+        wp:positionH wp:positionV wp:posOffset wp:simplePos wp:wrapNone
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
@@ -996,6 +996,46 @@ oo::class create ooxml::docx::docx {
             } -dimension]
             Tag_wp:extent {*}$attlist
             Tag_wp:wrapNone
+            Tag_wp:docPr id [llength $media] name [file tail $file]
+            Tag_a:graphic {
+                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                    Tag_pic:pic {
+                        Tag_pic:nvPicPr {
+                            Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                            Tag_pic:cNvPicPr {
+                                Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
+                            }
+                        }
+                        Tag_pic:blipFill {
+                            Tag_a:blip r:embed $rId
+                        }
+                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
+                            Tag_a:xfrm {
+                                Tag_a:off x 0 y 0
+                                my Create $properties(xfrm)
+                            }
+                            Tag_a:prstGeom prst "rect" {
+                                Tag_a:avLst
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    method Image_inline {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_wp:inline {
+            set thisOptionValue [my PeekOption -dimension]
+            set attlist [my CheckedAttlist $thisOptionValue {
+                {width -cx} ST_Emu
+                {height -cy} ST_Emu
+            } -dimension]
+            Tag_wp:extent {*}$attlist
             Tag_wp:docPr id [llength $media] name [file tail $file]
             Tag_a:graphic {
                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {

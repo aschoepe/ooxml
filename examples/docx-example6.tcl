@@ -10,6 +10,14 @@ namespace import ::ooxml::docx::docx
 set docx [docx new]
 $docx paragraph $loreipsum
 $docx image book.jpg anchor -dimension {width 3cm height 3cm} -bwMode black
+$docx append $loreipsum
+
+$docx pagebreak
+
+$docx paragraph $loreipsum
+$docx image book.jpg inline -dimension {width 3cm height 3cm} -bwMode black
+$docx append $loreipsum
+
 # $docx paragraph "A new paragraph"
 # $docx image book.jpg -dimension {width 3cm height 3cm} -bwMode black
 

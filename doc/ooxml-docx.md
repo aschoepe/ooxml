@@ -25,7 +25,19 @@ A simple "Hello, World" example is:
     
 The style and appearance of the content is determined in order by
 local setting, by referencing to a defined style or finaly by the
-default setting.
+default settings.
+
+The methods of a docx object typically expect, if ever, a few
+arguments required in order and after that option value pairs. The
+options may appear in any order. An unknown option is reported as
+error. If an option is given more than one time then the last one
+wins. 
+
+The value of an option is - depending on the option - either a
+single value or a key value list. In the second case the key value
+pairs may be in any order. If a key is given more than one time then
+the last one wins. An unknown key is reported as error. In almost any
+case 
 
 The created docx object commands currently support the
 following methods:

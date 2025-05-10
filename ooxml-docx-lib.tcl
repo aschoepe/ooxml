@@ -549,6 +549,21 @@ proc ::ooxml::docx::lib::ST_Wrap {value} {
     error "unknown wrap type \"$value\", expected one of\
             [AllowedValues $values]"
 }
+
+proc ::ooxml::docx::lib::ST_WrapText {value} {
+    set values {
+        bothSides
+        left
+        right
+        largest
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown wrapText value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_XAlign {value} {
     set values {
         left

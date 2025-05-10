@@ -505,8 +505,9 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent wp:inline
-        wp:positionH wp:positionV wp:posOffset wp:simplePos wp:wrapNone
+        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent
+        wp:inline wp:positionH wp:positionV wp:posOffset wp:simplePos
+        wp:wrapNone wp:wrapSquare wp:wrapTopAndBottom
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
@@ -763,7 +764,7 @@ oo::class create ooxml::docx::docx {
         if {[catch {array set atts $optionValue}]} {
             set keys ""
             foreach {attdata type} $attdefs {
-                lappend keys [lindex $attdata 0]
+                lappend keys [string trimleft [lindex $attdata 0] -]
             }
             error "the value \"$optionValue\" given to the \"$option\" \
                            option is invalid, expected is a key value pairs\
@@ -773,8 +774,12 @@ oo::class create ooxml::docx::docx {
             if {[llength $attdata] == 2} {
                 lassign $attdata key attname
             } else {
-                set key $attdata
-                set attname $key
+                if {[string index $attdata 0] eq "-"} {
+                    set key [string range $attdata 1 end]
+                } else {
+                    set key $attdata
+                }
+                set attname $attdata
             }
             if {![info exists atts($key)]} {
                 continue
@@ -983,11 +988,24 @@ oo::class create ooxml::docx::docx {
         
         Tag_wp:anchor behindDoc "0" distT "0" distB "0" distL "0" distR "0" simplePos "0" locked "0" layoutInCell "0" allowOverlap "1" relativeHeight "2" {
             Tag_wp:simplePos x 0 y 0
-            Tag_wp:positionH relativeFrom column {
-                Tag_wp:align {Text "center"}
+            Tag_wp:positionH relativeFrom [my Option -positionH ST_RelFromH "column"] {
+                set alignH [my Option -alignH ST_AlignH]
+                set posOffsetH [my Option -posOffsetH]
+                if {$alignH ne "" && $posOffsetH ne ""} {
+                    error "the options -alignH and -posOffsetH are mutually exclusive"
+                }
+                if {$alignH eq "" && $posOffsetH eq ""} {
+                    set alignH "center"
+                }
+                foreach value [list $alignH $posOffsetH] tag {Tag_wp:align Tag_wp:posOffset} {
+                    if {$value ne ""} {
+                        $tag {Text $value}
+                        break
+                    }
+                }
             }
-            Tag_wp:positionV relativeFrom paragraph {
-                Tag_wp:posOffset {Text "635"}
+            Tag_wp:positionV relativeFrom [my Option -positionV ST_RelFromV "paragraph"] {
+                Tag_wp:posOffset {Text [my Option -posOffset ST_DecimalNumber 1]}
             }
             set thisOptionValue [my PeekOption -dimension]
             set attlist [my CheckedAttlist $thisOptionValue {
@@ -995,7 +1013,28 @@ oo::class create ooxml::docx::docx {
                 {height -cy} ST_Emu
             } -dimension]
             Tag_wp:extent {*}$attlist
-            Tag_wp:wrapNone
+            switch [my EatOption -wrapMode] {
+                "" -
+                "none" {
+                    if {[my EatOption -wrapData] ne ""} {
+                        error "the option \"-wrapMode none does not expect \"-wrapData\""
+                    }
+                    Tag_wp:wrapNone
+                }
+                "square" {
+                    set attlist [my CheckedAttlist [my EatOption -wrapData] {
+                        -wrapText ST_WrapText
+                        -distT ST_Emu
+                        -distB ST_Emu
+                        -distL ST_Emu
+                        -distR ST_Emu
+                    } -wrapData]
+                    Tag_wp:wrapSquare {*}$attlist
+                }
+                "topBottom" {
+                    Tag_wp:wrapTopAndBottom 
+                }
+            }
             Tag_wp:docPr id [llength $media] name [file tail $file]
             Tag_a:graphic {
                 Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
@@ -1062,6 +1101,13 @@ oo::class create ooxml::docx::docx {
                 }
             }
         }
+    }
+    
+    method Image_inline {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
     }
     
     # For now only a debuging and developing helper method, not

@@ -24,9 +24,9 @@ $docx append $loreipsum
 
 $docx pagebreak
 
-$docx paragraph $loreipsum
-$docx image book.jpg inline -dimension {width 3cm height 3cm} -bwMode black
-$docx append $loreipsum
+# $docx paragraph $loreipsum
+# $docx image book.jpg inline -dimension {width 3cm height 3cm} -bwMode black
+# $docx append $loreipsum
 
 # $docx paragraph "A new paragraph"
 # $docx image book.jpg -dimension {width 8cm height 8cm} -bwMode black

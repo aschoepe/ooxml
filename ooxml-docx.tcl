@@ -985,12 +985,25 @@ oo::class create ooxml::docx::docx {
         my variable media
         variable ::ooxml::docx::properties
         upvar opts opts
-        
-        Tag_wp:anchor behindDoc "0" distT "0" distB "0" distL "0" distR "0" simplePos "0" locked "0" layoutInCell "0" allowOverlap "1" relativeHeight "2" {
+
+        array set anchorAtts {
+            behindDoc 0
+            distT 0
+            distB 0
+            distL 0
+            distR 0
+            hidden 0
+            simplePos 0
+            locked 0
+            layoutInCell 0
+            allowOverlap 1
+            relativeHeight 1
+        }
+        Tag_wp:anchor [array get anchorAtts] {
             Tag_wp:simplePos x 0 y 0
-            Tag_wp:positionH relativeFrom [my Option -positionH ST_RelFromH "column"] {
-                set alignH [my Option -alignH ST_AlignH]
-                set posOffsetH [my Option -posOffsetH ST_Emu]
+            Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
+                set alignH [my EatOption -alignH ST_AlignH]
+                set posOffsetH [my EatOption -posOffsetH ST_Emu]
                 if {$alignH ne "" && $posOffsetH ne ""} {
                     error "the options -alignH and -posOffsetH are mutually exclusive"
                 }
@@ -1004,9 +1017,9 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
-            Tag_wp:positionV relativeFrom [my Option -positionV ST_RelFromV "paragraph"] {
-                set alignV [my Option -alignV ST_AlignV]
-                set posOffsetV [my Option -posOffsetV ST_Emu]
+            Tag_wp:positionV [my Option -positionV relativeFrom ST_RelFromV "paragraph"] {
+                set alignV [my EatOption -alignV ST_AlignV]
+                set posOffsetV [my EatOption -posOffsetV ST_Emu]
                 if {$alignV ne "" && $posOffsetV ne ""} {
                     error "the options -alignV and -posOffsetV are mutually exclusive"
                 }

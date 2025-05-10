@@ -990,7 +990,7 @@ oo::class create ooxml::docx::docx {
             Tag_wp:simplePos x 0 y 0
             Tag_wp:positionH relativeFrom [my Option -positionH ST_RelFromH "column"] {
                 set alignH [my Option -alignH ST_AlignH]
-                set posOffsetH [my Option -posOffsetH]
+                set posOffsetH [my Option -posOffsetH ST_Emu]
                 if {$alignH ne "" && $posOffsetH ne ""} {
                     error "the options -alignH and -posOffsetH are mutually exclusive"
                 }
@@ -1005,7 +1005,20 @@ oo::class create ooxml::docx::docx {
                 }
             }
             Tag_wp:positionV relativeFrom [my Option -positionV ST_RelFromV "paragraph"] {
-                Tag_wp:posOffset {Text [my Option -posOffset ST_DecimalNumber 1]}
+                set alignV [my Option -alignV ST_AlignV]
+                set posOffsetV [my Option -posOffsetV ST_Emu]
+                if {$alignV ne "" && $posOffsetV ne ""} {
+                    error "the options -alignV and -posOffsetV are mutually exclusive"
+                }
+                if {$alignV eq "" && $posOffsetV eq ""} {
+                    set alignV "center"
+                }
+                foreach value [list $alignV $posOffsetV] tag {Tag_wp:align Tag_wp:posOffset} {
+                    if {$value ne ""} {
+                        $tag {Text $value}
+                        break
+                    }
+                }
             }
             set thisOptionValue [my PeekOption -dimension]
             set attlist [my CheckedAttlist $thisOptionValue {

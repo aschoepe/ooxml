@@ -59,6 +59,36 @@ proc ::ooxml::docx::lib::NoCheck {value} {
     return $value
 }
 
+proc ::ooxml::docx::lib::ST_AlignH {value} {
+    set values {
+        left
+        right
+        center
+        inside
+        outside
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown alignH value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_AlignV {value} {
+    set values {
+        top
+        bottom
+        center
+        inside
+        outside
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown alignV value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_Anchor {value} {
     set values {
         text

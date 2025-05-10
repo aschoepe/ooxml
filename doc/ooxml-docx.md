@@ -37,10 +37,10 @@ The value of an option is - depending on the option - either a
 single value or a key value list. In the second case the key value
 pairs may be in any order. If a key is given more than one time then
 the last one wins. An unknown key is reported as error. In almost any
-case 
+case the value given to the option or key will be type checked.
 
-The created docx object commands currently support the
-following methods:
+The created docx object commands currently support the following
+methods:
 
 **append** *text* *?-option value ...?*
 

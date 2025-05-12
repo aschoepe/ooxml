@@ -993,14 +993,24 @@ oo::class create ooxml::docx::docx {
             distL 0
             distR 0
             hidden 0
-            simplePos 0
             locked 0
             layoutInCell 0
             allowOverlap 1
             relativeHeight 1
         }
+        array set simplePosAtts {x 0 y 0}
+        set simplePos [my EatOption -simplePos]
+        if {$simplePos eq ""} {
+            set anchorAtts(simplePos) 0
+        } else {
+            set anchorAtts(simplePos) 1
+            array set simplePosAtts [my CheckedAttlist $simplePos {
+                -x ST_Emu
+                -y ST_Emu
+            } -simplePos]
+        }  
         Tag_wp:anchor [array get anchorAtts] {
-            Tag_wp:simplePos x 0 y 0
+            Tag_wp:simplePos {*}[array get simplePosAtts]
             Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
                 set alignH [my EatOption -alignH ST_AlignH]
                 set posOffsetH [my EatOption -posOffsetH ST_Emu]

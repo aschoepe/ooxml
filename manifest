@@ -1,5 +1,5 @@
-C Method\spresetsheets\sensure\sthat\sthe\ssheets\sare\sread\sin\sthe\scorrect\sorder.
-D 2025-04-04T11:47:07.292
+C updated\sarchive\soptions:\star\s--no-xattrs\s--no-mac-metadata\s--disable-copyfile\sand\smore\sexcludes
+D 2025-05-13T09:33:22.262
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -47,7 +47,7 @@ F tests/xlsx-namedfmts.test a256cebeef32996f0280a3071b941a961d7dbca9e709945394b4
 F tests/xlsx-printarea.test b786b6320be430c00225650963596bee80b66e0fcf968d261d9283fefe8648c8
 F tests/xlsx-readerror.test 28d07b6f22f1ac0d9fdd4bdcfc9161afd716d87f5e0a62a76403de3d36577e5c
 F tests/xlsx-simple.test 88cd5283edd5564ff0c5f41104f463267171c188f273e9b210f3a533649daf15
-F tools/archive.sh 12f30715c3ad5f758004d318e2d61639a47adb9d5b44eae4c4bd65c6a101a0c3 x
+F tools/archive.sh a3480600c3a5c54ec353d97c7ed777fefad5bddef3a091b9b8cec15c4e2a9a35 x
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
@@ -83,8 +83,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P aecda805949ec6b65d3e4d8ed4c45b35cfdda94fe128f3dd5f0a3918da06e9fc
-R 0580cc0c71888c0b189925f538ba5539
+P 4075d8cdf9b5b8403fe752cc1a0499bccd7f25f588e16a0c69a68d096ba30136
+R 3de5e1e9127eba7cbb3615977f99c207
 U alex
-Z 99e608d33a1e681695a6837a11b6b462
+Z 42d8f8bbca5017e0f17a4daacd3884cb
 # Remove this line to create a well-formed Fossil manifest.

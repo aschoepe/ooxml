@@ -24,11 +24,33 @@ $docx append $loreipsum
 
 $docx pagebreak
 
-$docx paragraph foobar
-# $docx image book.jpg anchor -dimension {width 3cm height 3cm} -simplePos {x 0 y 0}
-# $docx image book.jpg anchor -dimension {width 3cm height 3cm} -simplePos {x 1cm y 1cm}
-# $docx image book.jpg anchor -dimension {width 3cm height 3cm} -simplePos {x 2cm y 2cm}
-$docx image book.jpg anchor -dimension {width 3cm height 3cm} -simplePos {x 3cm y 3cm}
+$docx paragraph $loreipsum
+$docx image book.jpg anchor -dimension {width 3cm height 3cm} \
+      -positionH page \
+      -posOffsetH 0cm \
+      -positionV page \
+      -posOffsetV 0cm \
+      -wrapMode square \
+      -wrapData {wrapText bothSides}
+$docx append $loreipsum
+$docx image book.jpg anchor -dimension {width 3cm height 3cm} \
+      -positionH page \
+      -posOffsetH 3cm \
+      -positionV page \
+      -posOffsetV 3cm \
+      -wrapMode square \
+      -wrapData {wrapText bothSides}
+$docx append $loreipsum
+$docx image book.jpg anchor -dimension {width 3cm height 3cm} \
+      -positionH page \
+      -posOffsetH 6cm \
+      -positionV page \
+      -posOffsetV 6cm \
+      -wrapMode square \
+      -wrapData {wrapText bothSides}
+$docx append $loreipsum
+
+
 
 # $docx paragraph $loreipsum
 # $docx image book.jpg inline -dimension {width 3cm height 3cm} -bwMode black

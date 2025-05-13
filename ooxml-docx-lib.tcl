@@ -442,6 +442,42 @@ proc ::ooxml::docx::lib::ST_PointMeasure {value} {
                integer"
 }
 
+proc ::ooxml::docx::lib::ST_RelFromH {value} {
+    set values {
+        margin
+        page
+        column
+        character
+        leftMargin
+        rightMargin
+        insideMargin
+        outsideMargin
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown horizonal relative from value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_RelFromV {value} {
+    set values {
+        margin
+        page
+        paragraph
+        line
+        topMargin
+        bottomMargin
+        insideMargin
+        outsideMargin
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown vertical relative from value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {
     if {[string is integer -strict $value]} {
         return $value

@@ -716,11 +716,12 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
   set M  0
   set S  0
   set F  0
+  set z  {}
 
-  if {[regexp {^(\d+)\.(\d+)\.(\d+)T?\s*(\d+)?:?(\d+)?:?(\d+)?\.?(\d+)?\s*([+-])?(\d+)?:?(\d+)?$} $scan all d m y H M S F x a b] ||
-      [regexp {^(\d+)-(\d+)-(\d+)T?\s*(\d+)?:?(\d+)?:?(\d+)?\.?(\d+)?\s*([+-])?(\d+)?:?(\d+)?$} $scan all y m d H M S F x a b] ||
-      [regexp {^(\d+)-(\w+)-(\d+)T?\s*(\d+)?:?(\d+)?:?(\d+)?\.?(\d+)?\s*([+-])?(\d+)?:?(\d+)?$} $scan all d ml y H M S F x a b] ||
-      [regexp {^(\d+)/(\d+)/(\d+)T?\s*(\d+)?:?(\d+)?:?(\d+)?\.?(\d+)?\s*([+-])?(\d+)?:?(\d+)?$} $scan all m d y H M S F x a b]} {
+  if {[regexp {^(\d{1,2})\.(\d{1,2})\.(\d{2,4})(?:[ T]|$)(?:(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?(?:([+-])(\d{1,2}):(\d{1,2})|(Z))?)?)?$} $scan all d m y H M S F x a b z] ||
+      [regexp {^(\d{2,4})-(\d{2})-(\d{2})(?:[ T]|$)(?:(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?(?:([+-])(\d{2}):(\d{2})|(Z)$)?)?)?$} $scan all y m d H M S F x a b z] ||
+      [regexp {^(\d{1,2})-(\w+)-(\d{2,4})(?:[ T]|$)(?:(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?(?:([+-])(\d{1,2}):(\d{1,2})|(Z))?)?)?$} $scan all d ml y H M S F x a b z] ||
+      [regexp {^(\d{1,2})/(\d{1,2})/(\d{2,4})(?:[ T]|$)(?:(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?(?:([+-])(\d{1,2}):(\d{1,2})|(Z))?)?)?$} $scan all m d y H M S F x a b z]} {
     scan $y %u y
 
     if {[string is integer -strict $y] && $y >= 0 && $y <= 2038} {
@@ -805,6 +806,17 @@ proc ::ooxml::ScanDateTime { scan {iso8601 0} } {
       set H [format %02u $H]
       set M [format %02u $M]
       set S [format %02u $S]
+
+      if {$z eq {Z} && $Y >= 1970} {
+        set utc [clock scan ${Y}-${m}-${d}T${H}:${M}:${S} -gmt 1]
+        set Y [clock format $utc -format %Y]
+        set y [clock format $utc -format %y]
+        set m [clock format $utc -format %m]
+        set d [clock format $utc -format %d]
+        set H [clock format $utc -format %H]
+        set M [clock format $utc -format %M]
+        set S [clock format $utc -format %S]
+      }
 
       if {$iso8601} {
         return [list ${Y}-${m}-${d}T${H}:${M}:${S}]
@@ -3140,7 +3152,7 @@ oo::class create ooxml::xl_write {
 
     # [self object] -> my
     if {[info exists a(sheets)]} {
-      foreach sheet $a(sheets) {
+      foreach sheet [lsort -integer $a(sheets)] {
         if {[set currentSheet [my worksheet $a($sheet,n)]] > -1} {
           dict set a(sheetmap) $sheet $currentSheet
           foreach item [lsort -dictionary [array names a $sheet,v,*]] {

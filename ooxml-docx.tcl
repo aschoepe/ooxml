@@ -986,6 +986,7 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::properties
         upvar opts opts
 
+        # Defaults
         array set anchorAtts {
             behindDoc 0
             distT 0
@@ -997,20 +998,23 @@ oo::class create ooxml::docx::docx {
             layoutInCell 0
             allowOverlap 1
             relativeHeight 1
+            simplePos 0
         }
-        array set simplePosAtts {x 0 y 0}
-        set simplePos [my EatOption -simplePos]
-        if {$simplePos eq ""} {
-            set anchorAtts(simplePos) 0
-        } else {
-            set anchorAtts(simplePos) 1
-            array set simplePosAtts [my CheckedAttlist $simplePos {
-                -x ST_Emu
-                -y ST_Emu
-            } -simplePos]
-        }  
+        # Updated by optional user provided values
+        array set anchorAtts [my CheckedAttlist [my EatOption -anchorData] {
+            -behindDoc CT_Boolean
+            -distT ST_Emu
+            -distB ST_Emu
+            -distL ST_Emu
+            -distR ST_Emu
+            -hidden CT_Boolean
+            -locked CT_Boolean
+            -layoutInCell CT_Boolean
+            -allowOverlap CT_Boolean
+            -relativeHeight CT_UnsignedInt
+        } -anchorData] 
         Tag_wp:anchor [array get anchorAtts] {
-            Tag_wp:simplePos {*}[array get simplePosAtts]
+            Tag_wp:simplePos x 0 y 0
             Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
                 set alignH [my EatOption -alignH ST_AlignH]
                 set posOffsetH [my EatOption -posOffsetH ST_Emu]
@@ -1048,6 +1052,10 @@ oo::class create ooxml::docx::docx {
                 {width -cx} ST_Emu
                 {height -cy} ST_Emu
             } -dimension]
+            if {[llength $attlist] != 4} {
+                error "the -dimension option expects both keys \"width\" and\
+                      \"height\" to be given"
+            }
             Tag_wp:extent {*}$attlist
             switch [my EatOption -wrapMode] {
                 "" -
@@ -1072,26 +1080,34 @@ oo::class create ooxml::docx::docx {
                 }
             }
             Tag_wp:docPr id [llength $media] name [file tail $file]
-            Tag_a:graphic {
-                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
-                    Tag_pic:pic {
-                        Tag_pic:nvPicPr {
-                            Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
-                            Tag_pic:cNvPicPr {
-                                Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
-                            }
+            my Image_graphic $rId $file
+        }
+    }
+
+    method Image_graphic {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_a:graphic {
+            Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                Tag_pic:pic {
+                    Tag_pic:nvPicPr {
+                        Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                        Tag_pic:cNvPicPr {
+                            Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
                         }
-                        Tag_pic:blipFill {
-                            Tag_a:blip r:embed $rId
+                    }
+                    Tag_pic:blipFill {
+                        Tag_a:blip r:embed $rId
+                    }
+                    Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
+                        Tag_a:xfrm {
+                            Tag_a:off x 0 y 0
+                            my Create $properties(xfrm)
                         }
-                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
-                            Tag_a:xfrm {
-                                Tag_a:off x 0 y 0
-                                my Create $properties(xfrm)
-                            }
-                            Tag_a:prstGeom prst "rect" {
-                                Tag_a:avLst
-                            }
+                        Tag_a:prstGeom prst "rect" {
+                            Tag_a:avLst
                         }
                     }
                 }
@@ -1110,40 +1126,14 @@ oo::class create ooxml::docx::docx {
                 {width -cx} ST_Emu
                 {height -cy} ST_Emu
             } -dimension]
+            if {[llength $attlist] != 4} {
+                error "the -dimension option expects both keys \"width\" and\
+                      \"height\" to be given"
+            }
             Tag_wp:extent {*}$attlist
             Tag_wp:docPr id [llength $media] name [file tail $file]
-            Tag_a:graphic {
-                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
-                    Tag_pic:pic {
-                        Tag_pic:nvPicPr {
-                            Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
-                            Tag_pic:cNvPicPr {
-                                Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
-                            }
-                        }
-                        Tag_pic:blipFill {
-                            Tag_a:blip r:embed $rId
-                        }
-                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
-                            Tag_a:xfrm {
-                                Tag_a:off x 0 y 0
-                                my Create $properties(xfrm)
-                            }
-                            Tag_a:prstGeom prst "rect" {
-                                Tag_a:avLst
-                            }
-                        }
-                    }
-                }
-            }
+            my Image_graphic $rId $file
         }
-    }
-    
-    method Image_inline {rId file} {
-        my variable media
-        variable ::ooxml::docx::properties
-        upvar opts opts
-
     }
     
     # For now only a debuging and developing helper method, not
@@ -1511,7 +1501,7 @@ oo::class create ooxml::docx::docx {
             error "çannot read file \"$file\""
         }
         if {$type ni {inline anchor}} {
-            error "invalid type \"$type\" (expected \"inline\" or \"anchor\")"
+            error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
         }
         if {[catch {
             OptVal $args "file"
@@ -1526,7 +1516,7 @@ oo::class create ooxml::docx::docx {
             }
             set imagename image${ind}[file extension $file]
             set rId [my Add2Relationships image media/$imagename]
-            set p [my LastParagraph]
+            set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:drawing {

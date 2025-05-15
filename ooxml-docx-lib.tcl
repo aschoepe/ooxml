@@ -47,6 +47,35 @@ proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
     return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
 }
 
+proc ::ooxml::docx::lib::CT_Boolean {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+proc ::ooxml::docx::lib::CT_OnOff {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return "on"
+    } else {
+        return "off"
+    }
+}
+
+proc ::ooxml::docx::lib::CT_UnsignedInt {value} {
+    if {![regexp {[-9]+} $value]} {
+        error "expected an unsigned integer"
+    }
+    return $value
+}
+
 proc ::ooxml::docx::lib::OptVal {arglist {prefix ""}} {
     if {[llength $arglist] % 2 != 0} {
         if {$prefix ne ""} {append prefix " "}
@@ -312,17 +341,6 @@ proc ::ooxml::docx::lib::ST_JcTable {value} {
     }
     error "unknown table align value \"$value\", expected one of:\
                [AllowedValues $values]"
-}
-
-proc ::ooxml::docx::lib::CT_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
-    }
-    if {$value} {
-        return "on"
-    } else {
-        return "off"
-    }
 }
 
 proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {

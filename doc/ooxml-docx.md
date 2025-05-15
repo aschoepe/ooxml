@@ -49,6 +49,16 @@ methods:
   within the paragraph. See [CHARACTER OPTIONS](#character) for the
   valid options and the type of their argument.
 
+**image** *file* *anchor|inline* *?-option value ...?*
+
+An *inline* image is part of the text, like a character (and therefore
+may change the line hight). An *anchor* image is also anchored at an
+exact place within the text (which determines the page at which the
+image is shown) but can be freely placed at the page.
+
+Both types of images share the following options:
+
+
 **import** *part* *docx*
 
 : Imports the given *part* from the file *docx* into the docx object,
@@ -127,6 +137,8 @@ does not have the suffix ".docx" it will be appended to the name.
 **-font** *font familiy name*
 
 **-fontsize** *measure*
+
+If the value has no unit the integer means twentieths of a point.
 
 **-italic** *onOffValue*
 

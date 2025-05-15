@@ -25,10 +25,22 @@ A simple "Hello, World" example is:
     
 The style and appearance of the content is determined in order by
 local setting, by referencing to a defined style or finaly by the
-default setting.
+default settings.
 
-The created docx object commands currently support the
-following methods:
+The methods of a docx object typically expect, if ever, a few
+arguments required in order and after that option value pairs. The
+options may appear in any order. An unknown option is reported as
+error. If an option is given more than one time then the last one
+wins. 
+
+The value of an option is - depending on the option - either a
+single value or a key value list. In the second case the key value
+pairs may be in any order. If a key is given more than one time then
+the last one wins. An unknown key is reported as error. In almost any
+case the value given to the option or key will be type checked.
+
+The created docx object commands currently support the following
+methods:
 
 **append** *text* *?-option value ...?*
 
@@ -36,6 +48,16 @@ following methods:
   The option/value pairs control locally the appearance of the *text*
   within the paragraph. See [CHARACTER OPTIONS](#character) for the
   valid options and the type of their argument.
+
+**image** *file* *anchor|inline* *?-option value ...?*
+
+An *inline* image is part of the text, like a character (and therefore
+may change the line hight). An *anchor* image is also anchored at an
+exact place within the text (which determines the page at which the
+image is shown) but can be freely placed at the page.
+
+Both types of images share the following options:
+
 
 **import** *part* *docx*
 
@@ -115,6 +137,8 @@ does not have the suffix ".docx" it will be appended to the name.
 **-font** *font familiy name*
 
 **-fontsize** *measure*
+
+If the value has no unit the integer means twentieths of a point.
 
 **-italic** *onOffValue*
 

@@ -82,7 +82,7 @@ $docx table -width {type dxa value 9638} -columnwidths {4819 4819} {
         }
         $docx tablecell -width {type dxa value 4819} {
             $docx paragraph "Another cell" -underline single
-            $docx image book.jpg -dimension {width 3cm height 3cm} -bwMode black
+            $docx image book.jpg anchor -dimension {width 3cm height 3cm} -bwMode black
         }
     }
 }
@@ -104,7 +104,7 @@ $docx table {
         }
         $docx tablecell {
             $docx paragraph "Another cell" -underline single
-            $docx image book.jpg -dimension {width 3cm height 3cm} -bwMode black
+            $docx image book.jpg anchor -dimension {width 3cm height 3cm} -bwMode black
         }
     }
 }

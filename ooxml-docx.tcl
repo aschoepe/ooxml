@@ -247,8 +247,6 @@ namespace eval ::ooxml::docx {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
                 <Default Extension="xml" ContentType="application/xml"/>
                 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Default Extension="png" ContentType="image/png"/>
-                <Default Extension="jpeg" ContentType="image/jpeg"/>
                 <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
                 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
                 <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
@@ -507,13 +505,16 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        wp:anchor
+        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent
+        wp:inline wp:positionH wp:positionV wp:posOffset wp:simplePos
+        wp:wrapNone wp:wrapSquare wp:wrapTopAndBottom
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
     
     foreach tag {
-        a:graphic a:graphicData a:blip a:stretch a:fillRect a:xfrm a:ext a:off
+        a:avLst a:blip a:ext a:fillRect a:graphic a:graphicData a:off
+        a:picLocks a:prstGeom a:stretch a:xfrm
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
     }
@@ -525,7 +526,7 @@ namespace eval ::ooxml::docx {
     }
 
     foreach tag {
-        Override
+        Default Override
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
     }
@@ -610,13 +611,18 @@ oo::class create ooxml::docx::docx {
                    with a slash (/)"
         }
         set ctRoot [$docs(\[Content_Types\].xml) documentElement]
-        set present [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-            count(Override[@Partname=$file])
-        }]
         if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
             count(ct:Override[@Partname=$file])
         }] > 0} {
             return
+        }
+        if {[string range $file 0 11] eq "/word/media/"} {
+            set suffix [file extension $file]
+            if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+                count(ct:Default[@Extenxtion=$suffix])
+            }] > 0} {
+                return
+            }
         }
         switch -glob $file {
             "/_rels/.rels" {
@@ -653,6 +659,21 @@ oo::class create ooxml::docx::docx {
                 set type "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"
             }
             "/word/media/*" {
+                set suffix [string range [file extension $file] 1 end]
+                switch $suffix {
+                    "jpeg" -
+                    "jpg" {
+                        set ContentType "image/jpeg"
+                    }
+                    "png" {
+                        set ContentType "image/png"
+                    }
+                }
+                $ctRoot insertBeforeFromScript {
+                    Tag_Default Extension $suffix ContentType $ContentType
+                } [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+                    ct:Override[1]
+                }]
                 return
             }
             "/word/numbering.xml" {
@@ -687,6 +708,17 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::xmlns
 
         set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+
+        # If there is already an entry for this type and target just
+        # return the rId
+        set fqtype http://schemas.openxmlformats.org/officeDocument/2006/relationships/$type
+        set result [$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
+            string(rel:Relationship[@Type=$fqtype and @Target=$target]/@Id)
+        }]
+        if {$result ne ""} {
+            return $result
+        }
+
         # At least for documents we build up from scratch this should
         # work reliable enough
         set lastchild [$relsRoot lastChild]
@@ -725,6 +757,66 @@ oo::class create ooxml::docx::docx {
             }
         }
         return $ooxmlvalue
+    }
+
+    method CheckedAttlist {optionValue attdefs option} {
+        set attlist ""
+        if {[catch {array set atts $optionValue}]} {
+            set keys ""
+            foreach {attdata type} $attdefs {
+                lappend keys [string trimleft [lindex $attdata 0] -]
+            }
+            error "the value \"$optionValue\" given to the \"$option\" \
+                           option is invalid, expected is a key value pairs\
+                           list with keys out of [AllowedValues $keys]"
+        }
+        foreach {attdata type} $attdefs {
+            if {[llength $attdata] == 2} {
+                lassign $attdata key attname
+            } else {
+                if {[string index $attdata 0] eq "-"} {
+                    set key [string range $attdata 1 end]
+                } else {
+                    set key $attdata
+                }
+                set attname $attdata
+            }
+            if {![info exists atts($key)]} {
+                continue
+            }
+            set ooxmlvalue [my CallType $type $atts($key) \
+                                "the argument \"$optionValue\" given to the
+                                \"$option\" option is invalid: the value\
+                                given to the key \"$key\" in the argument\
+                                is invalid"]
+            if {[string index $attname 0] eq "-"} {
+                lappend attlist [string range $attname 1 end] $ooxmlvalue
+            } else {
+                lappend attlist w:$attname $ooxmlvalue
+            }
+            unset atts($key)
+        }
+        # Check if there are unknown keys left in the key
+        # values list
+        set remainigKeys [array names atts]
+        if {[llength $remainigKeys] != 0} {
+            set keys ""
+            foreach {attdata type} $attdefs {
+                lappend keys [lindex $attdata 0]
+            }
+            if {[llength $remainigKeys] == 1} {
+                error "unknown key \"[lindex $remainigKeys 0]\" in\
+                                the value \"$optionValue\" of the option\
+                                \"$option\", the expected keys are\
+                                [AllowedValues $keys]"
+            } else {
+                error "unknown keys [AllowedValues $remainigKeys and] in\
+                               the value \"$optionValue\" of the option\
+                               \"$option\", the expected keys are\
+                               [AllowedValues $keys]"
+            }
+        }
+        return $attlist
     }
     
     method Create switchActionList {
@@ -777,62 +869,11 @@ oo::class create ooxml::docx::docx {
                     # For now the code assumes always several atts
                     # and therefore the value to the option is always
                     # handled as a key value pairs list.
-                    set attlist ""
-                    array unset atts
-                    if {[catch {array set atts $value}]} {
-                        set keys ""
-                        foreach {attdata type} $attdefs {
-                            lappend keys [lindex $attdata 0]
-                        }
-                        error "the value given to the \"$opt\" option is\
-                           invalid, expected ist a key value pairs\
-                           list with keys out of\
-                           [AllowedValues $keys]"
-                    }
-                    foreach {attdata type} $attdefs {
-                        if {[llength $attdata] == 2} {
-                            lassign $attdata key attname
-                        } else {
-                            set key $attdata
-                            set attname $key
-                        }
-                        if {![info exists atts($key)]} {
-                            continue
-                        }
-                        set ooxmlvalue [my CallType $type $atts($key) \
-                                            "the argument \"$value\" given to the \"$opt\"\
-                             option is invalid: the value given to the key\
-                             \"$key\" in the argument is invalid"]
-                        if {[string index $attname 0] eq "-"} {
-                            lappend attlist [string range $attname 1 end] $ooxmlvalue
-                        } else {
-                            lappend attlist w:$attname $ooxmlvalue
-                        }
-                        unset atts($key)
-                    }
+                    set attlist [my CheckedAttlist $value $attdefs $opt]
                     foreach tag $tags {
                         Tag_$tag {*}$attlist
                     }
-                    unset opts($opt)                    
-                    # Check if there are unknown keys left in the key
-                    # values list
-                    set remainigKeys [array names atts]
-                    if {[llength $remainigKeys] == 0} {
-                        continue
-                    }
-                    set keys ""
-                    foreach {attdata type} $attdefs {
-                        lappend keys [lindex $attdata 0]
-                    }
-                    if {[llength $remainigKeys] == 1} {
-                        error "unknown key \"[lindex $remainigKeys 0]\" in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [AllowedValues $keys]"
-                    } else {
-                        error "unknown keys [AllowedValues $remainigKeys and] in\
-                               the value \"$value\" of the option \"$opt\",\
-                               the expected keys are [AllowedValues $keys]"
-                    }
+                    unset opts($opt)
                 }
                 3 {
                     my [lindex $optdata 2] $value
@@ -871,15 +912,22 @@ oo::class create ooxml::docx::docx {
             error "invalid rId $rId"
         }
     }
-    
-    method EatOption {option {type ""}} {
+
+    method PeekOption {option {type ""}} {
+        upvar opts opts
+        return [my EatOption $option $type 0]
+    }
+        
+    method EatOption {option {type ""} {deleteOption 1}} {
         upvar opts opts
         if {[info exists opts($option)]} {
             set value $opts($option)
             if {$type ne ""} {
                 set value [my CallType $type $value "option $option"]
             }
-            unset opts($option)
+            if {$deleteOption} {
+                unset opts($option)
+            }
             return $value
         }
         return ""
@@ -933,6 +981,161 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
+    method Image_anchor {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        # Defaults
+        array set anchorAtts {
+            behindDoc 0
+            distT 0
+            distB 0
+            distL 0
+            distR 0
+            hidden 0
+            locked 0
+            layoutInCell 0
+            allowOverlap 1
+            relativeHeight 1
+            simplePos 0
+        }
+        # Updated by optional user provided values
+        array set anchorAtts [my CheckedAttlist [my EatOption -anchorData] {
+            -behindDoc CT_Boolean
+            -distT ST_Emu
+            -distB ST_Emu
+            -distL ST_Emu
+            -distR ST_Emu
+            -hidden CT_Boolean
+            -locked CT_Boolean
+            -layoutInCell CT_Boolean
+            -allowOverlap CT_Boolean
+            -relativeHeight CT_UnsignedInt
+        } -anchorData] 
+        Tag_wp:anchor [array get anchorAtts] {
+            Tag_wp:simplePos x 0 y 0
+            Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
+                set alignH [my EatOption -alignH ST_AlignH]
+                set posOffsetH [my EatOption -posOffsetH ST_Emu]
+                if {$alignH ne "" && $posOffsetH ne ""} {
+                    error "the options -alignH and -posOffsetH are mutually exclusive"
+                }
+                if {$alignH eq "" && $posOffsetH eq ""} {
+                    set alignH "center"
+                }
+                foreach value [list $alignH $posOffsetH] tag {Tag_wp:align Tag_wp:posOffset} {
+                    if {$value ne ""} {
+                        $tag {Text $value}
+                        break
+                    }
+                }
+            }
+            Tag_wp:positionV [my Option -positionV relativeFrom ST_RelFromV "paragraph"] {
+                set alignV [my EatOption -alignV ST_AlignV]
+                set posOffsetV [my EatOption -posOffsetV ST_Emu]
+                if {$alignV ne "" && $posOffsetV ne ""} {
+                    error "the options -alignV and -posOffsetV are mutually exclusive"
+                }
+                if {$alignV eq "" && $posOffsetV eq ""} {
+                    set alignV "center"
+                }
+                foreach value [list $alignV $posOffsetV] tag {Tag_wp:align Tag_wp:posOffset} {
+                    if {$value ne ""} {
+                        $tag {Text $value}
+                        break
+                    }
+                }
+            }
+            set thisOptionValue [my PeekOption -dimension]
+            set attlist [my CheckedAttlist $thisOptionValue {
+                {width -cx} ST_Emu
+                {height -cy} ST_Emu
+            } -dimension]
+            if {[llength $attlist] != 4} {
+                error "the -dimension option expects both keys \"width\" and\
+                      \"height\" to be given"
+            }
+            Tag_wp:extent {*}$attlist
+            switch [my EatOption -wrapMode] {
+                "" -
+                "none" {
+                    if {[my EatOption -wrapData] ne ""} {
+                        error "the option \"-wrapMode none does not expect \"-wrapData\""
+                    }
+                    Tag_wp:wrapNone
+                }
+                "square" {
+                    set attlist [my CheckedAttlist [my EatOption -wrapData] {
+                        -wrapText ST_WrapText
+                        -distT ST_Emu
+                        -distB ST_Emu
+                        -distL ST_Emu
+                        -distR ST_Emu
+                    } -wrapData]
+                    Tag_wp:wrapSquare {*}$attlist
+                }
+                "topBottom" {
+                    Tag_wp:wrapTopAndBottom 
+                }
+            }
+            Tag_wp:docPr id [llength $media] name [file tail $file]
+            my Image_graphic $rId $file
+        }
+    }
+
+    method Image_graphic {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_a:graphic {
+            Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
+                Tag_pic:pic {
+                    Tag_pic:nvPicPr {
+                        Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                        Tag_pic:cNvPicPr {
+                            Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
+                        }
+                    }
+                    Tag_pic:blipFill {
+                        Tag_a:blip r:embed $rId
+                    }
+                    Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
+                        Tag_a:xfrm {
+                            Tag_a:off x 0 y 0
+                            my Create $properties(xfrm)
+                        }
+                        Tag_a:prstGeom prst "rect" {
+                            Tag_a:avLst
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    method Image_inline {rId file} {
+        my variable media
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_wp:inline {
+            set thisOptionValue [my PeekOption -dimension]
+            set attlist [my CheckedAttlist $thisOptionValue {
+                {width -cx} ST_Emu
+                {height -cy} ST_Emu
+            } -dimension]
+            if {[llength $attlist] != 4} {
+                error "the -dimension option expects both keys \"width\" and\
+                      \"height\" to be given"
+            }
+            Tag_wp:extent {*}$attlist
+            Tag_wp:docPr id [llength $media] name [file tail $file]
+            my Image_graphic $rId $file
+        }
+    }
+    
     # For now only a debuging and developing helper method, not
     # exposed.
     method initWord {docxfile} {
@@ -1290,34 +1493,34 @@ oo::class create ooxml::docx::docx {
         set result [my HeaderFooter header $script]
     }
     
-    method image {file args} {
+    method image {file type args} {
         my variable media
         variable ::ooxml::docx::properties
-        
+
+        if {![file isfile $file] || ![file readable $file]} {
+            error "çannot read file \"$file\""
+        }
+        if {$type ni {inline anchor}} {
+            error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
+        }
         if {[catch {
             OptVal $args "file"
-            lappend media $file
-            set rId [my Add2Relationships image media/$file]
-            set p [my LastParagraph]
+            set file [file normalize $file]
+            set ind [lsearch -exact $media $file]
+            if {$ind < 0} {
+                lappend media $file
+                set ind [llength $media]
+            } else {
+                # Tcl indexes count from 0, the image numbering from 1
+                incr ind
+            }
+            set imagename image${ind}[file extension $file]
+            set rId [my Add2Relationships image media/$imagename]
+            set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:r {
                     Tag_w:drawing {
-                        Tag_wp:anchor {
-                            Tag_a:graphic {
-                                Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
-                                    Tag_pic:pic {
-                                        Tag_pic:blipFill {
-                                            Tag_a:blip r:embed $rId
-                                        }
-                                        Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
-                                            Tag_a:xfrm {
-                                                my Create $properties(xfrm)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        my Image_$type $rId $file
                     }
                 }
             }
@@ -1946,9 +2149,12 @@ oo::class create ooxml::docx::docx {
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
+        set nr 1
         foreach this $media {
-            append cd [::ooxml::add_file_with_path_to_archive $zf word/media/[file tail $this] $this]
+            set medianame word/media/image${nr}[file extension $this]
+            append cd [::ooxml::add_file_with_path_to_archive $zf $medianame $this]
             incr count
+            incr nr
         }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than

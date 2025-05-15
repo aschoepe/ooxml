@@ -47,6 +47,35 @@ proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
     return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
 }
 
+proc ::ooxml::docx::lib::CT_Boolean {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+proc ::ooxml::docx::lib::CT_OnOff {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return "on"
+    } else {
+        return "off"
+    }
+}
+
+proc ::ooxml::docx::lib::CT_UnsignedInt {value} {
+    if {![regexp {[-9]+} $value]} {
+        error "expected an unsigned integer"
+    }
+    return $value
+}
+
 proc ::ooxml::docx::lib::OptVal {arglist {prefix ""}} {
     if {[llength $arglist] % 2 != 0} {
         if {$prefix ne ""} {append prefix " "}
@@ -57,6 +86,36 @@ proc ::ooxml::docx::lib::OptVal {arglist {prefix ""}} {
 
 proc ::ooxml::docx::lib::NoCheck {value} {
     return $value
+}
+
+proc ::ooxml::docx::lib::ST_AlignH {value} {
+    set values {
+        left
+        right
+        center
+        inside
+        outside
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown alignH value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_AlignV {value} {
+    set values {
+        top
+        bottom
+        center
+        inside
+        outside
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown alignV value \"$value\", expected one of\
+            [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_Anchor {value} {
@@ -284,17 +343,6 @@ proc ::ooxml::docx::lib::ST_JcTable {value} {
                [AllowedValues $values]"
 }
 
-proc ::ooxml::docx::lib::CT_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
-    }
-    if {$value} {
-        return "on"
-    } else {
-        return "off"
-    }
-}
-
 proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {
     if {[string is integer -strict $value]} {
         return $value
@@ -410,6 +458,42 @@ proc ::ooxml::docx::lib::ST_PointMeasure {value} {
     }
     error "\"$value\" is not a valid measure value - value must be an\
                integer"
+}
+
+proc ::ooxml::docx::lib::ST_RelFromH {value} {
+    set values {
+        margin
+        page
+        column
+        character
+        leftMargin
+        rightMargin
+        insideMargin
+        outsideMargin
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown horizonal relative from value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_RelFromV {value} {
+    set values {
+        margin
+        page
+        paragraph
+        line
+        topMargin
+        bottomMargin
+        insideMargin
+        outsideMargin
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown vertical relative from value \"$value\", expected one of:\
+               [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {
@@ -549,6 +633,21 @@ proc ::ooxml::docx::lib::ST_Wrap {value} {
     error "unknown wrap type \"$value\", expected one of\
             [AllowedValues $values]"
 }
+
+proc ::ooxml::docx::lib::ST_WrapText {value} {
+    set values {
+        bothSides
+        left
+        right
+        largest
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown wrapText value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_XAlign {value} {
     set values {
         left

@@ -1317,10 +1317,13 @@ oo::class create ooxml::docx::docx {
         my variable docs
         
         set styles [$docs(word/styles.xml) documentElement]
-        if {[$styles selectNodes {w:style[@w:type=$type and @w:styleId=$value]}] eq ""} {
+        set style [$styles selectNodes {
+            w:style[@w:type=$type][w:name[@w:val=$value]]
+        }]
+        if {![llength $style]} {
             error "unknown $type style \"$value\""
         }
-        return $value
+        return [[lindex $style 0] selectNodes string(@w:styleId)]
     }
     
     method Tabs {tabsdata} {
@@ -1858,6 +1861,7 @@ oo::class create ooxml::docx::docx {
         my variable docs
         variable ::ooxml::docx::properties
 
+        set result ""
         if {[catch {
             set styles [$docs(word/styles.xml) documentElement]
             switch $cmd {
@@ -1909,7 +1913,7 @@ oo::class create ooxml::docx::docx {
                     set name [lindex $args 0]
                     OptVal [lrange $args 1 end] $cmd
                     set style [$styles selectNodes {
-                        w:style[@w:type=$cmd and @w:styleId=$name]
+                        w:style[@w:type=$cmd][w:name=$name]
                     }]
                     if {$style ne ""} {
                         error "$cmd style \"$name\" already exists"
@@ -1941,7 +1945,20 @@ oo::class create ooxml::docx::docx {
                         error "wrong number of arguments, expectecd the style type"
                     }
                     set type [lindex $args 0]
-                    return [$styles selectNodes -list {w:style[@w:type=$type] string(@w:styleId)}]
+                    set result [$styles selectNodes -list {
+                        w:style[@w:type=$type]
+                        string(@w:styleId)
+                    }]
+                }
+                "names" {
+                    if {[llength $args] != 1} {
+                        error "wrong number of arguments, expectecd the style type"
+                    }
+                    set type [lindex $args 0]
+                    set result [$styles selectNodes -list {
+                        w:style[@w:type=$type]
+                        string(w:name/@w:val)
+                    }]
                 }
                 "delete" {
                     if {[llength $args] != 2} {
@@ -1977,8 +1994,10 @@ oo::class create ooxml::docx::docx {
                 }
             } 
         } errMsg]} {
+            puts "style catch"
             return -code error $errMsg
         }
+        return $result
     }
 
     method table {args} {

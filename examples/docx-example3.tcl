@@ -82,7 +82,7 @@ $docx table -width {type dxa value 9638} -columnwidths {4819 4819} {
         }
         $docx tablecell -width {type dxa value 4819} {
             $docx paragraph "Another cell" -underline single
-            $docx image book.jpg anchor -dimension {width 3cm height 3cm} -bwMode black
+            $docx image book.jpg anchor -anchorData {layoutInCell 1} -dimension {width 3cm height 3cm} -bwMode black
         }
     }
 }
@@ -288,5 +288,8 @@ $docx style table myTable2  \
 $docx simpletable $simpledata2 -style myTable2 \
       -look {lastRow true}
 
+if {[lsearch [$docx style names paragraph] tableFirstRow] < 0} {
+    error "miss tableFirstRow style"
+}
 $docx write docx-example3.docx
 $docx destroy

@@ -104,7 +104,7 @@ $docx table {
         }
         $docx tablecell {
             $docx paragraph "Another cell" -underline single
-            $docx image book.jpg anchor -dimension {width 3cm height 3cm} -bwMode black
+            $docx image book.jpg anchor -anchorData {layoutInCell 1} -dimension {width 3cm height 3cm} -bwMode black
         }
     }
 }
@@ -270,8 +270,24 @@ $docx simpletable $simpledata -style myTable1 -width {type measure value 100pt}
 $docx paragraph ""
 
 $docx style table myTable2  \
-      -bold true
-$docx simpletable $simpledata2 -style myTable2
+      -bold true \
+      -conditional {
+    firstCol {
+        -color ffff00
+        -bold off
+        -background ff0000
+    }
+    lastCol {
+        -color 00ffff
+    }
+    firstRow {
+        -color ff0000
+    }
+    lastRow {
+        -bold off
+    }}
+$docx simpletable $simpledata2 -style myTable2 \
+      -look {lastRow true}
 
 if {[lsearch [$docx style names paragraph] tableFirstRow] < 0} {
     error "miss tableFirstRow style"

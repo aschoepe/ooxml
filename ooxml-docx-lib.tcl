@@ -269,11 +269,11 @@ proc ::ooxml::docx::lib::ST_HeightRule {value} {
 }
 
 proc ::ooxml::docx::lib::ST_HexColor {value} {
-    if {$value ne "auto"} {
+    if {$value eq "auto"} {
         return $value
     }
-    if {[string length $value] != 6 || ![string is xdigit]} {
-        error "unknown color value \"$value\", should be \"auto\" or a hex value in\
+    if {[string length $value] != 6 || ![string is xdigit $value]} {
+        error "invalid color value \"$value\", should be \"auto\" or a hex value in\
                    RRGGBB format."
     }
     return $value
@@ -442,6 +442,17 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
     }
     error "unknown numbering format \"$value\", expected one of\
             [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_OnOff {value} {
+    if {![string is boolean -strict $value]} {
+        error "expected a Tcl boolean value"
+    }
+    if {$value} {
+        return "on"
+    } else {
+        return "off"
+    }
 }
 
 proc ::ooxml::docx::lib::ST_PageOrientation {value} {

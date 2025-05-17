@@ -70,7 +70,7 @@ namespace eval ::ooxml::docx {
         -align {w:lvlJc ST_Jc}
     }
     
-    set properties(cell) {
+    set properties(cell1) {
         -cellWidth {w:tcW {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
@@ -1269,9 +1269,13 @@ oo::class create ooxml::docx::docx {
         upvar opts opts
 
         Tag_w:tcPr {
-            my Create $properties(cell)
+            my Create $properties(cell1)
             Tag_w:tcBorders {
                 my Create $properties(cellBorders)
+            }
+            set value [my EatOption -background ST_HexColor]
+            if {$value ne ""} {
+                Tag_w:shd w:val "clear" w:fill $value
             }
             Tag_w:tcMar {
                 my Create $properties(cellMargins)

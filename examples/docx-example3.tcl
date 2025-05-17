@@ -104,7 +104,7 @@ $docx table {
         }
         $docx tablecell {
             $docx paragraph "Another cell" -underline single
-            $docx image book.jpg anchor -dimension {width 3cm height 3cm} -bwMode black
+            $docx image book.jpg anchor -anchorData {layoutInCell 1} -dimension {width 3cm height 3cm} -bwMode black
         }
     }
 }
@@ -275,6 +275,7 @@ $docx style table myTable2  \
     firstCol {
         -color ffff00
         -bold off
+        -background ff0000
     }
     lastCol {
         -color 00ffff

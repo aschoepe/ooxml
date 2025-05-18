@@ -157,14 +157,15 @@ namespace eval ::ooxml::docx {
     set properties(run) {
         -bold {{w:b w:bCs} ST_OnOff}
         -color {w:color ST_HexColor}
+        -cstyle {w:rStyle RStyle}
         -dstrike {w:dstrike ST_OnOff}
         -font {w:rFonts NoCheck RFonts}
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
         -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} ST_OnOff}
         -strike {w:strike ST_OnOff}
-        -cstyle {w:rStyle RStyle}
         -underline {w:u ST_Underline}
+        -verticalAlign {w:vertAlign ST_VerticalAlignRun}
     }
 
     set properties(sectionsetup1) {
@@ -827,6 +828,32 @@ oo::class create ooxml::docx::docx {
         return $attlist
     }
     
+    method CheckRemainingOpts {} {
+        upvar opts opts
+
+        set nrRemainigOpts [llength [array names opts]]
+        if {$nrRemainigOpts == 0} return
+        if {$nrRemainigOpts == 1} {
+            set text "unknown option: [lindex [array names opts] 0]"
+        } else {
+            set text "unknown options: [AllowedValues [array names opts] and]"
+        }
+        uplevel [list error $text]
+    }
+
+    method CheckrId {type rId} {
+        my variable docs
+        variable ::ooxml::docx::xmlns
+        
+        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        set type "$xmlns(r)/$type"
+        if {![$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
+            count(rel:Relationship[@Id=$rId and @Type=$type])
+        }]} {
+            error "invalid rId $rId"
+        }
+    }
+
     method Create switchActionList {
         upvar opts opts
         
@@ -895,37 +922,6 @@ oo::class create ooxml::docx::docx {
         }
     }
     
-    method CheckRemainingOpts {} {
-        upvar opts opts
-
-        set nrRemainigOpts [llength [array names opts]]
-        if {$nrRemainigOpts == 0} return
-        if {$nrRemainigOpts == 1} {
-            set text "unknown option: [lindex [array names opts] 0]"
-        } else {
-            set text "unknown options: [AllowedValues [array names opts] and]"
-        }
-        uplevel [list error $text]
-    }
-
-    method CheckrId {type rId} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
-        
-        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
-        set type "$xmlns(r)/$type"
-        if {![$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
-            count(rel:Relationship[@Id=$rId and @Type=$type])
-        }]} {
-            error "invalid rId $rId"
-        }
-    }
-
-    method PeekOption {option {type ""}} {
-        upvar opts opts
-        return [my EatOption $option $type 0]
-    }
-        
     method EatOption {option {type ""} {deleteOption 1}} {
         upvar opts opts
         if {[info exists opts($option)]} {
@@ -1024,11 +1020,8 @@ oo::class create ooxml::docx::docx {
         Tag_wp:anchor [array get anchorAtts] {
             Tag_wp:simplePos x 0 y 0
             Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
-                set alignH [my EatOption -alignH ST_AlignH]
-                set posOffsetH [my EatOption -posOffsetH ST_Emu]
-                if {$alignH ne "" && $posOffsetH ne ""} {
-                    error "the options -alignH and -posOffsetH are mutually exclusive"
-                }
+                lassign [my OneOff {-alignH ST_AlignH} {-posOffsetH ST_Emu}] \
+                    alignH posOffsetH
                 if {$alignH eq "" && $posOffsetH eq ""} {
                     set alignH "center"
                 }
@@ -1040,11 +1033,8 @@ oo::class create ooxml::docx::docx {
                 }
             }
             Tag_wp:positionV [my Option -positionV relativeFrom ST_RelFromV "paragraph"] {
-                set alignV [my EatOption -alignV ST_AlignV]
-                set posOffsetV [my EatOption -posOffsetV ST_Emu]
-                if {$alignV ne "" && $posOffsetV ne ""} {
-                    error "the options -alignV and -posOffsetV are mutually exclusive"
-                }
+                lassign [my OneOff {-alignV ST_AlignV} {-posOffsetV ST_Emu}] \
+                    alignV posOffsetV
                 if {$alignV eq "" && $posOffsetV eq ""} {
                     set alignV "center"
                 }
@@ -1211,6 +1201,132 @@ oo::class create ooxml::docx::docx {
         return $p
     }
 
+    method OneOff {opta optb} {
+        upvar opts opts
+        lassign $opta optiona typea
+        lassign $optb optionb typeb
+        set a [my EatOption $optiona $typea]
+        set b [my EatOption $optionb $typeb]
+        if {$a ne "" && $b ne ""} {
+            error "the options $optiona and $optionb are mutually exclusive"
+        }
+        return [list $a $b]
+    }
+    
+    method Option {option attname type {default ""}} {
+        upvar opts opts
+        if {[info exists opts($option)]} {
+            set ooxmlvalue [my CallType $type $opts($option) \
+                                "the value given to the \"$option\" option\
+                                 is invalid"]
+            unset opts($option)
+        } else {
+            set ooxmlvalue $default
+        }
+        return [list $attname $ooxmlvalue]
+    }
+
+    method ParagraphStyle {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:pPr {
+            my Create $properties(paragraph1)
+            Tag_w:pBdr {
+                my Create $properties(paragraphBorders)
+            }
+            Tag_w:tabs {
+                my Tabs [my EatOption -tabs]
+            }
+            my Create $properties(paragraph2)
+        }
+    }
+    
+    method PeekOption {option {type ""}} {
+        upvar opts opts
+        return [my EatOption $option $type 0]
+    }
+        
+    method PStyle {value} {
+        return [my StyleCheck paragraph $value]
+    }
+
+    method RFonts {value} {
+        Tag_w:rFonts \
+            w:ascii $value \
+            w:hAnsi $value \
+            w:eastAsia $value \
+            w:cs $value
+    }
+
+    method RPr {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:rPr {
+            my Create $properties(run)
+        }
+    }
+    
+    method RStyle {value} {
+        return [my StyleCheck character $value]
+    }
+
+    method SectionCommon {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+
+        Tag_w:sectPr {
+            foreach what {Header Footer} {
+                foreach type {even default first} {
+                    set value [my EatOption -$type$what]
+                    if {$value eq ""} {
+                        continue
+                    }
+                    my CheckrId [string tolower $what] $value
+                    Tag_w:[string tolower $what]Reference w:type $type r:id $value
+                }
+            }
+            my Create $properties(sectionsetup1)
+            Tag_w:pgBorders {
+                my Create $properties(sectionBorders)
+            }
+            my Create $properties(sectionsetup2)
+        }
+    }
+
+    method StyleCheck {type value} {
+        my variable docs
+        
+        set styles [$docs(word/styles.xml) documentElement]
+        set style [$styles selectNodes {
+            w:style[@w:type=$type][w:name[@w:val=$value]]
+        }]
+        if {![llength $style]} {
+            error "unknown $type style \"$value\""
+        }
+        return [[lindex $style 0] selectNodes string(@w:styleId)]
+    }
+    
+    method Tabs {tabsdata} {
+        foreach tabstop $tabsdata {
+            if {[llength $tabstop] == 1} {
+                OptVal [list -tabs [list pos $tabstop type "start"]]
+            } else {
+                OptVal [list -tabs [list $tabstop]]
+            }
+            my Create {
+                -tabs {w:tab {
+                    leader ST_TabTlc
+                    pos ST_SignedTwipsMeasure
+                    {type val} ST_TabJc
+                }}
+            }
+            my CheckRemainingOpts
+            unset opts
+        }
+    }
+
     method TblPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
@@ -1292,115 +1408,6 @@ oo::class create ooxml::docx::docx {
         }
     }
         
-    method PStyle {value} {
-        return [my StyleCheck paragraph $value]
-    }
-
-    method Option {option attname type {default ""}} {
-        upvar opts opts
-        if {[info exists opts($option)]} {
-            set ooxmlvalue [my CallType $type $opts($option) \
-                                "the value given to the \"$option\" option\
-                                 is invalid"]
-            unset opts($option)
-        } else {
-            set ooxmlvalue $default
-        }
-        return [list $attname $ooxmlvalue]
-    }
-
-    method ParagraphStyle {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-
-        Tag_w:pPr {
-            my Create $properties(paragraph1)
-            Tag_w:pBdr {
-                my Create $properties(paragraphBorders)
-            }
-            Tag_w:tabs {
-                my Tabs [my EatOption -tabs]
-            }
-            my Create $properties(paragraph2)
-        }
-    }
-    
-    method RFonts {value} {
-        Tag_w:rFonts \
-            w:ascii $value \
-            w:hAnsi $value \
-            w:eastAsia $value \
-            w:cs $value
-    }
-
-    method RPr {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-
-        Tag_w:rPr {
-            my Create $properties(run)
-        }
-    }
-    
-    method RStyle {value} {
-        return [my StyleCheck character $value]
-    }
-
-    method SectionCommon {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-
-        Tag_w:sectPr {
-            foreach what {Header Footer} {
-                foreach type {even default first} {
-                    set value [my EatOption -$type$what]
-                    if {$value eq ""} {
-                        continue
-                    }
-                    my CheckrId [string tolower $what] $value
-                    Tag_w:[string tolower $what]Reference w:type $type r:id $value
-                }
-            }
-            my Create $properties(sectionsetup1)
-            Tag_w:pgBorders {
-                my Create $properties(sectionBorders)
-            }
-            my Create $properties(sectionsetup2)
-        }
-    }
-
-    method StyleCheck {type value} {
-        my variable docs
-        
-        set styles [$docs(word/styles.xml) documentElement]
-        set style [$styles selectNodes {
-            w:style[@w:type=$type][w:name[@w:val=$value]]
-        }]
-        if {![llength $style]} {
-            error "unknown $type style \"$value\""
-        }
-        return [[lindex $style 0] selectNodes string(@w:styleId)]
-    }
-    
-    method Tabs {tabsdata} {
-        foreach tabstop $tabsdata {
-            if {[llength $tabstop] == 1} {
-                OptVal [list -tabs [list pos $tabstop type "start"]]
-            } else {
-                OptVal [list -tabs [list $tabstop]]
-            }
-            my Create {
-                -tabs {w:tab {
-                    leader ST_TabTlc
-                    pos ST_SignedTwipsMeasure
-                    {type val} ST_TabJc
-                }}
-            }
-            my CheckRemainingOpts
-            unset opts
-        }
-    }
-
     method TStyle {value} {
         return [my StyleCheck table $value]
     }

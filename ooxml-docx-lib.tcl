@@ -645,6 +645,19 @@ proc ::ooxml::docx::lib::ST_Wrap {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_VerticalAlignRun {value} {
+    set values {
+        baseline
+        superscript
+        subscript
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown vertical align value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_WrapText {value} {
     set values {
         bothSides

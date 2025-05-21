@@ -830,6 +830,7 @@ oo::class create ooxml::docx::docx {
     
     method CheckRemainingOpts {} {
         upvar opts opts
+        upvar optsknown optsknown
 
         set nrRemainigOpts [llength [array names opts]]
         if {$nrRemainigOpts == 0} return
@@ -837,6 +838,15 @@ oo::class create ooxml::docx::docx {
             set text "unknown option: [lindex [array names opts] 0]"
         } else {
             set text "unknown options: [AllowedValues [array names opts] and]"
+        }
+        set knownOps [lsort [array names optsknown]]
+        set knownOpsLen [llength $knownOps]
+        if {$knownOpsLen} {
+            if {$knownOpsLen > 1} {
+                append text ", known options are [AllowedValues $knownOps and]"
+            } else {
+                append text ", known option is $knownOps"
+            }
         }
         uplevel [list error $text]
     }
@@ -856,6 +866,7 @@ oo::class create ooxml::docx::docx {
 
     method Create switchActionList {
         upvar opts opts
+        upvar optsknown optsknown
         
         foreach {opt optdata} $switchActionList {
             if {[string index $opt 0] eq "+"} {
@@ -864,6 +875,7 @@ oo::class create ooxml::docx::docx {
                 }
                 continue
             }
+            set optsknown($opt) ""
             if {![info exists opts($opt)]} {
                 continue
             }
@@ -924,6 +936,9 @@ oo::class create ooxml::docx::docx {
     
     method EatOption {option {type ""} {deleteOption 1}} {
         upvar opts opts
+        upvar optsknown optsknown
+
+        set optsknown($option) ""
         if {[info exists opts($option)]} {
             set value $opts($option)
             if {$type ne ""} {
@@ -989,6 +1004,7 @@ oo::class create ooxml::docx::docx {
         my variable media
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         # Defaults
         array set anchorAtts {
@@ -1086,6 +1102,7 @@ oo::class create ooxml::docx::docx {
         my variable media
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_a:graphic {
             Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
@@ -1117,6 +1134,7 @@ oo::class create ooxml::docx::docx {
         my variable media
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_wp:inline {
             set thisOptionValue [my PeekOption -dimension]
@@ -1203,6 +1221,8 @@ oo::class create ooxml::docx::docx {
 
     method OneOff {opta optb} {
         upvar opts opts
+        upvar optsknown optsknown
+        
         lassign $opta optiona typea
         lassign $optb optionb typeb
         set a [my EatOption $optiona $typea]
@@ -1215,6 +1235,9 @@ oo::class create ooxml::docx::docx {
     
     method Option {option attname type {default ""}} {
         upvar opts opts
+        upvar optsknown optsknown
+
+        set optsknown($option) ""
         if {[info exists opts($option)]} {
             set ooxmlvalue [my CallType $type $opts($option) \
                                 "the value given to the \"$option\" option\
@@ -1229,6 +1252,7 @@ oo::class create ooxml::docx::docx {
     method ParagraphStyle {} {
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_w:pPr {
             my Create $properties(paragraph1)
@@ -1244,6 +1268,7 @@ oo::class create ooxml::docx::docx {
     
     method PeekOption {option {type ""}} {
         upvar opts opts
+        upvar optsknown optsknown
         return [my EatOption $option $type 0]
     }
         
@@ -1262,6 +1287,7 @@ oo::class create ooxml::docx::docx {
     method RPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_w:rPr {
             my Create $properties(run)
@@ -1275,6 +1301,7 @@ oo::class create ooxml::docx::docx {
     method SectionCommon {} {
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_w:sectPr {
             foreach what {Header Footer} {
@@ -1322,7 +1349,6 @@ oo::class create ooxml::docx::docx {
                     {type val} ST_TabJc
                 }}
             }
-            my CheckRemainingOpts
             unset opts
         }
     }
@@ -1330,6 +1356,7 @@ oo::class create ooxml::docx::docx {
     method TblPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_w:tblPr {
             my Create $properties(table1)
@@ -1368,6 +1395,7 @@ oo::class create ooxml::docx::docx {
                            one of [AllowedValues $values]"
                 }
                 OptVal $styledata
+                array unset optsknown
                 Tag_w:tblStylePr w:type $type {
                     my ParagraphStyle
                     my RPr
@@ -1383,6 +1411,7 @@ oo::class create ooxml::docx::docx {
     method TcPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_w:tcPr {
             my Create $properties(cell1)
@@ -1402,6 +1431,7 @@ oo::class create ooxml::docx::docx {
     method TrPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
+        upvar optsknown optsknown
 
         Tag_w:trPr {
             my Create $properties(row)
@@ -1675,6 +1705,7 @@ oo::class create ooxml::docx::docx {
                         Tag_w:abstractNum w:abstractNumId $id {
                             set levelnr 0
                             foreach level $levelData {
+                                array unset optsknown
                                 OptVal $level "option"
                                 Tag_w:lvl w:ilvl $levelnr {
                                     set start [my EatOption -start]

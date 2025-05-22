@@ -520,16 +520,18 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        wp:align wp:anchor wp:docPr wp:effectExtent wp:extent
-        wp:inline wp:positionH wp:positionV wp:posOffset wp:simplePos
-        wp:wrapNone wp:wrapSquare wp:wrapTopAndBottom
+        wp:align wp:anchor wp:cNvGraphicFramePr wp:docPr
+        wp:effectExtent wp:extent wp:inline wp:positionH wp:positionV
+        wp:posOffset wp:simplePos wp:wrapNone wp:wrapSquare
+        wp:wrapTopAndBottom
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
     
     foreach tag {
-        a:avLst a:blip a:ext a:fillRect a:graphic a:graphicData a:off
-        a:picLocks a:prstGeom a:stretch a:xfrm
+        a:avLst a:blip a:ext a:fillRect a:graphic a:graphicData
+        a:graphicFrameLocks a:off a:picLocks a:prstGeom a:stretch
+        a:xfrm
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
     }
@@ -1077,6 +1079,7 @@ oo::class create ooxml::docx::docx {
                       \"height\" to be given"
             }
             Tag_wp:extent {*}$attlist
+            Tag_wp:effectExtent l 0 t 0 r 0 b 0
             switch [my EatOption -wrapMode] {
                 "" -
                 "none" {
@@ -1100,6 +1103,9 @@ oo::class create ooxml::docx::docx {
                 }
             }
             Tag_wp:docPr id [llength $media] name [file tail $file]
+            Tag_wp:cNvGraphicFramePr {
+                Tag_a:graphicFrameLocks noChangeAspect 1
+            }
             my Image_graphic $rId $file
         }
     }
@@ -1121,6 +1127,9 @@ oo::class create ooxml::docx::docx {
                     }
                     Tag_pic:blipFill {
                         Tag_a:blip r:embed $rId
+                        Tag_a:stretch {
+                            Tag_a:fillRect
+                        }
                     }
                     Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
                         Tag_a:xfrm {

@@ -1,5 +1,5 @@
-C Added\sbasic\sbidi/right\sto\sleft\ssupport\sand\sother\sminor\sparagraph\ssettings.
-D 2025-05-22T10:11:57.519
+C Fixed\simage\sdisplay\swith\sMS\sWord\s2016.
+D 2025-05-22T23:42:31.153
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -41,7 +41,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl c371a7b04e9b79d533d34f958d5ce506a9acf668e32d5ba44fc16e4bbe9e6462
-F ooxml-docx.tcl dcd1724de13e305623362946190640b6b5f468fcba4d78a3c809bfa5cf0f4693
+F ooxml-docx.tcl dbb7b282a0bff63a5600f74d94578195facab8de8ba1c982c2382ddb24791bb5
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
 F pkgIndex.tcl.in fa6ba3133c31834da951d0a53112052fded69b443d4f63897a7c22c26e10460d
@@ -99,8 +99,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P e5f085f76e1af33b05d5af785b9cb897f9efe856495cf0ba96db5868f6f057f8
-R f7fd9808351eef38ac1addaad06a3806
+P df47e10ed61d0b5cc6f381d4c00b5eff6787f4128f0dc65b0b914bef072d509f
+R fbea0ba8292adb7faf21a8e6c54642a7
 U rolf
-Z 431d0902d8c2e11b14a92a5326a2c17f
+Z 4561abed9caa9c061ccb21cc72171329
 # Remove this line to create a well-formed Fossil manifest.

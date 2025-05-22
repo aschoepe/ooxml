@@ -101,6 +101,10 @@ namespace eval ::ooxml::docx {
     }            
     
     set properties(paragraph1) {
+        -pstyle {w:pStyle PStyle}
+        -keepNext {w:keepNext CT_OnOff}
+        -keepLines {w:keepLines CT_OnOff}
+        -pageBreakBefore {w:pageBreakBefore CT_OnOff}
         -textframe {w:framePr {
             {width w} ST_TwipsMeasure
             {height h} ST_TwipsMeasure
@@ -114,16 +118,17 @@ namespace eval ::ooxml::docx {
             vSpace ST_TwipsMeasure
             hSpace ST_TwipsMeasure
             hrule ST_HeightRule
-            anchorLock ST_OnOff
-        }}
+            anchorLock ST_OnOff}}
+        -widowControl {w:widowControl CT_OnOff}
         +w:numPr {
             -level {w:ilvl ST_DecimalNumber}
             -numberingStyle {w:numId ST_DecimalNumber}
         }
+        -suppressLineNumbers {w:suppressLineNumbers CT_OnOff}
     }
         
     set properties(paragraph2) {
-        -pstyle {w:pStyle PStyle}
+        -bidi {w:bidi CT_OnOff}
         -spacing {w:spacing {
             after ST_TwipsMeasure
             before ST_TwipsMeasure
@@ -163,6 +168,7 @@ namespace eval ::ooxml::docx {
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
         -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} ST_OnOff}
+        -rtl {w:rtl CT_OnOff}
         -strike {w:strike ST_OnOff}
         -underline {w:u ST_Underline}
         -verticalAlign {w:vertAlign ST_VerticalAlignRun}

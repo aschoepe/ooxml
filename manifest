@@ -1,5 +1,5 @@
-C Enriched\sthe\serror\smessage\sin\scase\sof\sunknown\soption:\slist\sthe\sknown\soptions\sin\sthe\smessage.
-D 2025-05-21T00:40:37.311
+C Added\sbasic\sbidi/right\sto\sleft\ssupport\sand\sother\sminor\sparagraph\ssettings.
+D 2025-05-22T10:11:57.519
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -41,7 +41,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl c371a7b04e9b79d533d34f958d5ce506a9acf668e32d5ba44fc16e4bbe9e6462
-F ooxml-docx.tcl 40a4b03fc77e1d3377b17fbe1266b17d9324bdac9e723af7bdca3f4b1c8a715d
+F ooxml-docx.tcl dcd1724de13e305623362946190640b6b5f468fcba4d78a3c809bfa5cf0f4693
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
 F pkgIndex.tcl.in fa6ba3133c31834da951d0a53112052fded69b443d4f63897a7c22c26e10460d
@@ -99,8 +99,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 78e9c04db40d39aa36b6de66d3c23940f4ccaeee5367bf7ca3c50ef5cb7649b9
-R 8518c0eaa97a63485ae2cbd77f457e5e
+P e5f085f76e1af33b05d5af785b9cb897f9efe856495cf0ba96db5868f6f057f8
+R f7fd9808351eef38ac1addaad06a3806
 U rolf
-Z 0dc9a17804fb871c5e64848dd23e0ba5
+Z 431d0902d8c2e11b14a92a5326a2c17f
 # Remove this line to create a well-formed Fossil manifest.

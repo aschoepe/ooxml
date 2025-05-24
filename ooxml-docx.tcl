@@ -32,7 +32,7 @@
 package require Tcl 8.6.7-
 package require tdom 0.9.6-
 package require ooxml
-source [file join [file dir [info script]] ooxml-docx-lib.tcl]
+catch {source [file join [file dir [info script]] ooxml-docx-lib.tcl]}
 package require ::ooxml::docx::lib
 
 namespace eval ::ooxml::docx {
@@ -562,7 +562,9 @@ oo::class create ooxml::docx::docx {
         my variable pagesetup
         my variable sectionsetup
         my variable tablecontext
-        
+        my variable links
+        my variable markid
+
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::staticDocx
 
@@ -605,6 +607,7 @@ oo::class create ooxml::docx::docx {
         set pagesetup ""
         set sectionsetup ""
         set tablecontext ""
+        set markid 0
         
         my configure {*}$args
     }
@@ -1686,6 +1689,20 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
+    method jump {name args} {
+        
+        
+    }
+    
+    method mark {name} {
+        my variable markid
+        my variable links
+        Tag_w:bookmarkStart w:id $markid w:name $name
+        Tag_w:bookmarkEnd w:id $markid
+        set links($name) 1
+        incr markid
+    }
+    
     method numbering {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties
@@ -2288,4 +2305,4 @@ oo::class create ooxml::docx::docx {
     }
 }
 
-package provide ::ooxml::docx 1.8.1
+package provide ::ooxml::docx 0.6

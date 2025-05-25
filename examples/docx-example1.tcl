@@ -63,8 +63,9 @@ $docx append " normal text "
 $docx append " and you can freely combine them " -fontsize 15pt \
     -underline double -color ff0000
 $docx append " which isn't so important because using them all would be ugly.\
-               Rest of the paragraph $loreipsum"
-
+               $loreipsum "
+$docx mark mymark
+$docx append "At the start of this sentence is a jump mark."
 
 # Style heritage:
 $docx style paragraph Base -font "Latin Modern Mono Caps" -color 101010 -fontsize 12pt
@@ -89,6 +90,14 @@ $docx paragraph $loreipsum -pstyle withBorder
 $docx paragraph $loreipsum -pstyle withBorder
 
 $docx paragraph "Tabs test $loreipsum" -tabs {3cm 6cm 9cm 12cm}
+$docx url "Link zu fefe." https://blog.fefe.de -underline single
+$docx append " "
+$docx jumpto "This is a link to a place inside the document." mymark -underline double
+$docx append " "
+$docx url "The url method also allows mailto links." mailto:pointsman@gmx.net -color 0000ff
+$docx append " "
+$docx url "The url method also allows mailto links with pre-set subject." "mailto:pointsman@gmx.net?subject=Feeback to your silly example document" -color 0000ff
+
 
 $docx paragraph "This is a text frame. $loreipsum" -textframe {
     width 3500
@@ -108,6 +117,7 @@ $docx style character my_c_style -highlight green \
       -fontsize 15pt \
       -underline double \
       -color ff0000
+
 
 $docx paragraph $loreipsum -pstyle my_p_style -cstyle my_c_style
 $docx write docx-example1.docx

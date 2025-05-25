@@ -754,6 +754,9 @@ oo::class create ooxml::docx::docx {
         $relsRoot appendFromScript {
             Tag_Relationship {*}$attlist 
         }
+        if {$type eq "hyperlink"} {
+            return rId$nr
+        }        
         my Add2Content_Types "/word/$target"
         return rId$nr
     }
@@ -1689,16 +1692,36 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
-    method jump {name args} {
-        
-        
+    method jumpto {text name args} {
+        my variable links
+        OptVal $args "text mark"
+        set p [my LastParagraph 1]
+        if {[catch {
+            $p appendFromScript {
+                Tag_w:hyperlink w:anchor $name {
+                    Tag_w:r {
+                        my RPr
+                        my Wt $text
+                    }
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        if {![info exists links($name)]} {
+            set links($name) 0
+        }
     }
     
     method mark {name} {
         my variable markid
         my variable links
-        Tag_w:bookmarkStart w:id $markid w:name $name
-        Tag_w:bookmarkEnd w:id $markid
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:bookmarkStart w:id $markid w:name $name
+            Tag_w:bookmarkEnd w:id $markid
+        }
         set links($name) 1
         incr markid
     }
@@ -2195,9 +2218,6 @@ oo::class create ooxml::docx::docx {
     }
     
     method url {text url args} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
-
         OptVal $args "text url"
         set rId [my Add2Relationships hyperlink $url]
         set p [my LastParagraph 1]

@@ -713,4 +713,4 @@ proc ::ooxml::docx::lib::W3CDTF {value} {
     return $value
 }
 
-package provide ::ooxml::docx::lib 1.8.1
+package provide ::ooxml::docx::lib 0.6

@@ -2,4 +2,5 @@
 # Tcl package index file
 #
 package ifneeded @PACKAGE_NAME@ @PACKAGE_VERSION@ [list source [file join $dir @PACKAGE_NAME@.tcl]]
-package ifneeded @PACKAGE_NAME@::docx @PACKAGE_VERSION@ [list source [file join $dir @PACKAGE_NAME@-docx.tcl]]
+package ifneeded @PACKAGE_NAME@::docx 0.6 [list source [file join $dir @PACKAGE_NAME@-docx.tcl]]
+package ifneeded @PACKAGE_NAME@::docx::lib 0.6 [list source [file join $dir @PACKAGE_NAME@-docx-lib.tcl]]

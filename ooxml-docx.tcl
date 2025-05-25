@@ -32,7 +32,7 @@
 package require Tcl 8.6.7-
 package require tdom 0.9.6-
 package require ooxml
-source [file join [file dir [info script]] ooxml-docx-lib.tcl]
+catch {source [file join [file dir [info script]] ooxml-docx-lib.tcl]}
 package require ::ooxml::docx::lib
 
 namespace eval ::ooxml::docx {
@@ -562,7 +562,9 @@ oo::class create ooxml::docx::docx {
         my variable pagesetup
         my variable sectionsetup
         my variable tablecontext
-        
+        my variable links
+        my variable markid
+
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::staticDocx
 
@@ -605,6 +607,7 @@ oo::class create ooxml::docx::docx {
         set pagesetup ""
         set sectionsetup ""
         set tablecontext ""
+        set markid 0
         
         my configure {*}$args
     }
@@ -751,6 +754,9 @@ oo::class create ooxml::docx::docx {
         $relsRoot appendFromScript {
             Tag_Relationship {*}$attlist 
         }
+        if {$type eq "hyperlink"} {
+            return rId$nr
+        }        
         my Add2Content_Types "/word/$target"
         return rId$nr
     }
@@ -1686,6 +1692,40 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
+    method jumpto {text name args} {
+        my variable links
+        OptVal $args "text mark"
+        set p [my LastParagraph 1]
+        if {[catch {
+            $p appendFromScript {
+                Tag_w:hyperlink w:anchor $name {
+                    Tag_w:r {
+                        my RPr
+                        my Wt $text
+                    }
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        if {![info exists links($name)]} {
+            set links($name) 0
+        }
+    }
+    
+    method mark {name} {
+        my variable markid
+        my variable links
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:bookmarkStart w:id $markid w:name $name
+            Tag_w:bookmarkEnd w:id $markid
+        }
+        set links($name) 1
+        incr markid
+    }
+    
     method numbering {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties
@@ -2178,9 +2218,6 @@ oo::class create ooxml::docx::docx {
     }
     
     method url {text url args} {
-        my variable docs
-        variable ::ooxml::docx::xmlns
-
         OptVal $args "text url"
         set rId [my Add2Relationships hyperlink $url]
         set p [my LastParagraph 1]
@@ -2288,4 +2325,4 @@ oo::class create ooxml::docx::docx {
     }
 }
 
-package provide ::ooxml::docx 1.8.1
+package provide ::ooxml::docx 0.6

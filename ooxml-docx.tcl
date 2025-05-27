@@ -1918,24 +1918,35 @@ oo::class create ooxml::docx::docx {
         my variable sectionsetup
         my variable setuproot
 
-        if {$sectionsetup ne "" || $pagesetup ne ""} {
-            if {$sectionsetup ne ""} {
-                OptVal $sectionsetup
-            } else {
-                OptVal $pagesetup
-            }
-            if {[catch {
-                $body appendFromScript {
-                    Tag_w:p {
-                        Tag_w:pPr {
-                            my SectionCommon
-                        }
+        
+        # This way in any case a (maybe empty) w:sectPr tag (via
+        # SectionCommon) and helps to keep things sane in case there
+        # was no pagesetup and no other section before.
+        if {$sectionsetup ne ""} {
+            OptVal $sectionsetup
+        } elseif {$pagesetup ne ""} {
+            OptVal $pagesetup
+        } else {
+            OptVal ""
+        }
+        if {[catch {
+            $body appendFromScript {
+                Tag_w:p {
+                    Tag_w:pPr {
+                        my SectionCommon
                     }
                 }
-            } errMsg]} {
-                return -code error $errMsg
-            }            
+            }
+            # No need for CheckRemainingOpts here because only the
+            # already validated options stored in
+            # pagesetup/sectionsetup are used.
+        } errMsg]} {
+            return -code error $errMsg
         }
+        # Instead of just storing the arguments actually "evaluate" it
+        # her for test to have the error message pointing to the line
+        # with the error and not at the place the given arguments are
+        # evaluated.
         OptVal $args
         if {[catch {
             $setuproot appendFromScript {
@@ -2283,6 +2294,12 @@ oo::class create ooxml::docx::docx {
                 return -code error $errMsg
             }
             set appendedPageSetup [$body lastChild]
+        } else {
+            # This keeps things sane in case there was no pagesetup
+            # but sections inbetween.
+            $body appendFromScript {
+                Tag_w:sectPr
+            }
         }
         
         # Initialize zip file

@@ -164,6 +164,7 @@ namespace eval ::ooxml::docx {
         -color {w:color ST_HexColor}
         -cstyle {w:rStyle RStyle}
         -dstrike {w:dstrike ST_OnOff}
+        -emboss {w:emboss ST_OnOff}
         -font {w:rFonts NoCheck RFonts}
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
         -highlight {w:highlight ST_HighlightColor}
@@ -1920,8 +1921,9 @@ oo::class create ooxml::docx::docx {
 
         
         # This way in any case a (maybe empty) w:sectPr tag (via
-        # SectionCommon) and helps to keep things sane in case there
-        # was no pagesetup and no other section before.
+        # SectionCommon) will be created which helps to keep things
+        # sane in case there was no pagesetup and no other section
+        # before.
         if {$sectionsetup ne ""} {
             OptVal $sectionsetup
         } elseif {$pagesetup ne ""} {

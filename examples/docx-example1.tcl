@@ -60,6 +60,7 @@ $docx append " superscript " -verticalAlign superscript
 $docx append " normal text "
 $docx append " subscript " -verticalAlign subscript
 $docx append " normal text "
+$docx append " emboss text " -emboss true
 $docx append " and you can freely combine them " -fontsize 15pt \
     -underline double -color ff0000
 $docx append " which isn't so important because using them all would be ugly.\

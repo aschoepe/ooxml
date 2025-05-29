@@ -939,6 +939,35 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
+
+    method CreateComment {} {
+        my variable docs
+        my variable id
+
+        upvar opts opts
+        if {![info exists docs(word/comments.xml)]} {
+            my Add2Relationships comments comments.xml
+            set docs(word/comments.xml) [dom parse {
+                <w:comments xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
+            }]
+        }
+        if {[catch {
+            set comments [$docs(word/comments.xml) documentElement]
+            $comments appendFromScript {
+                set author [my EatOption -author]
+                if {$author eq ""} {
+                    set author "Unknown"
+                }
+                Tag_w:comment w:id [incr id(comments)] \
+                    w:date [my EatOption -date ST_DateTime] \
+                    w:author $author \
+                    w:initials [my EatOption -initals NoCheck]
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        return [list [$comments lastChild] $id(comments)]
+    }
     
     method EatOption {option {type ""} {deleteOption 1}} {
         upvar opts opts
@@ -1262,7 +1291,7 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
 
-    method ParagraphStyle {} {
+    method PPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
         upvar optsknown optsknown
@@ -1410,7 +1439,7 @@ oo::class create ooxml::docx::docx {
                 OptVal $styledata
                 array unset optsknown
                 Tag_w:tblStylePr w:type $type {
-                    my ParagraphStyle
+                    my PPr
                     my RPr
                     my TblPr
                     my TrPr
@@ -1498,6 +1527,36 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method comment {args} {
+        my variable body
+
+        if {[catch {
+            OptVal [lrange $args 0 end-1]
+            lassign [my CreateComment] comment id
+            my CheckRemainingOpts
+            set script [lindex $args end]
+            set savedbody $body
+            set body $comment
+            # The nested catch is needed to ensure body is set back
+            if {[catch {
+                uplevel [list eval $script]
+            } errMsg]} {
+                set body $savedbody
+                return -code error $errMsg
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        set body $savedbody
+        # Add the comment mark to the document
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:commentReference w:id $id
+            }
+        }
+    }
+    
     method configure {args} {
         my variable docs
 
@@ -1762,7 +1821,7 @@ oo::class create ooxml::docx::docx {
                                     }
                                     Tag_w:start w:val $start
                                     my Create $properties(abstractNumStyle)
-                                    my ParagraphStyle
+                                    my PPr
                                     my RPr
                                 }
                                 if {[catch {my CheckRemainingOpts} errMsg]} {
@@ -1853,7 +1912,7 @@ oo::class create ooxml::docx::docx {
             OptVal $args "text"
             $body appendFromScript {
                 Tag_w:p {
-                    my ParagraphStyle
+                    my PPr
                     Tag_w:r {
                         my RPr
                         my Wt $text
@@ -1955,44 +2014,27 @@ oo::class create ooxml::docx::docx {
     }
 
     method simplecomment {text args} {
-        my variable body
-        my variable docs
-        my variable id
-        
-        if {![info exists docs(word/comments.xml)]} {
-            my Add2Relationships comments comments.xml
-            set docs(word/comments.xml) [dom parse {
-                <w:comments xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
-            }]
-        }
         if {[catch {
-            OptVal $args
-            set comments [$docs(word/comments.xml) documentElement]
-            $comments appendFromScript {
-                set author [my EatOption -author]
-                if {$author eq ""} {
-                    set author "Unknown"
-                }
-                Tag_w:comment w:id [incr id(comments)] \
-                    w:date [my EatOption -date ST_DateTime] \
-                    w:author $author \
-                    w:initials [my EatOption -initals NoCheck] {
-                        Tag_w:p {
-                            Tag_w:r {
-                                my RPr
-                                my Wt $text
-                            }
-                        }
+            OptVal $args "text"
+            lassign [my CreateComment] comment id
+            $comment appendFromScript {
+                Tag_w:p {
+                    my PPr
+                    Tag_w:r {
+                        my RPr
+                        my Wt $text
                     }
+                }
             }
             my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
+        # Add the comment mark to the document
         set p [my LastParagraph 1]
         $p appendFromScript {
             Tag_w:r {
-                Tag_w:commentReference w:id $id(comments)
+                Tag_w:commentReference w:id $id
             }
         }
     }
@@ -2068,7 +2110,7 @@ oo::class create ooxml::docx::docx {
                             my RPr
                         }
                         Tag_w:pPrDefault {
-                            my ParagraphStyle
+                            my PPr
                         }
                     }
                     my CheckRemainingOpts
@@ -2111,7 +2153,7 @@ oo::class create ooxml::docx::docx {
                                 Tag_w:basedOn w:val $basedon
                             }
                             if {$cmd in {paragraph table}} {
-                                my ParagraphStyle
+                                my PPr
                             }
                             my RPr
                             if {$cmd eq "table"} {
@@ -2187,12 +2229,11 @@ oo::class create ooxml::docx::docx {
     method table {args} {
         my variable body
         my variable tablecontext
-        variable ::ooxml::docx::properties
 
         set script [lindex $args end]
-        OptVal [lrange $args 0 end-1]
         set tablecontext "table"
         if {[catch {
+            OptVal [lrange $args 0 end-1]
             $body appendFromScript {
                 Tag_w:tbl {
                     my TblPr
@@ -2218,7 +2259,6 @@ oo::class create ooxml::docx::docx {
     method tablecell {args} {
         my variable body
         my variable tablecontext
-        variable ::ooxml::docx::properties
 
         if {$tablecontext ne "row"} {
             error "method tablecell called outside of table row script context"
@@ -2245,7 +2285,6 @@ oo::class create ooxml::docx::docx {
     method tablerow {args} {
         my variable body
         my variable tablecontext
-        variable ::ooxml::docx::properties
 
         if {$tablecontext ne "table"} {
             return -code error "method tablerow called outside of table script context"

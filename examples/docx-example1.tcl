@@ -69,7 +69,7 @@ $docx mark mymark
 $docx append "At the start of this sentence is a jump mark."
 
 # Style heritage:
-$docx style paragraph Base -font "Latin Modern Mono Caps" -color 101010 -fontsize 12pt
+$docx style paragraph Base -font "Arial" -color 101010 -fontsize 12pt
 $docx style paragraph H1 -basedon Base -fontsize 18pt
 $docx style paragraph H2 -basedon Base -fontsize 16pt
 
@@ -93,7 +93,15 @@ $docx paragraph $loreipsum -pstyle withBorder
 $docx paragraph $loreipsum -pstyle withBorder
 
 $docx paragraph "Tabs test $loreipsum" -tabs {3cm 6cm 9cm 12cm}
-$docx url "Link zu fefe." https://blog.fefe.de -underline single
+$docx url "Link zu core.tcl-lang.org" https://core.tcl-lang.org -underline single
+$docx comment -author "Document Creator" \
+      -date [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ] \
+      -initals "dc" {
+    $docx paragraph "You have "
+    $docx append "every" -bold 1
+    $docx append " local formating at hand to format the comment text."
+    $docx paragraph "Or several paragraphs. Though no tables. Even if the xsd allows them (if I read it right) neither libreoffice nor word grok this (and doesn't allow it via GUI)." -spacing {before 240}
+}
 $docx append " "
 $docx jumpto "This is a link to a place inside the document." mymark -underline double
 $docx append " "
@@ -107,10 +115,10 @@ $docx paragraph "This is a text frame. $loreipsum" -textframe {
     vSpace 300
     hSpace 300
     wrap auto
-    vAnchor page
-    hAnchor page
-    xAlign right
-    yAlign top
+    vAnchor text
+    hAnchor text
+    xAlign inside
+    yAlign inside
 }
 
 $docx style paragraph my_p_style -align both \

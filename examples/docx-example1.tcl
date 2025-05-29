@@ -78,6 +78,7 @@ $docx paragraph "Second Level Heading 1" -pstyle H2
 $docx paragraph $loreipsum -pstyle Base
 $docx paragraph "Second Level Heading 2" -pstyle H2
 $docx paragraph $loreipsum -pstyle Base
+$docx comment "This is ridiculous." -color 00ff00
 
 
 $docx paragraph $loreipsum -align both \

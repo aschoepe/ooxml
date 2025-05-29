@@ -680,17 +680,9 @@ oo::class create ooxml::docx::docx {
             }
             "/word/media/*" {
                 set suffix [string range [file extension $file] 1 end]
-                switch $suffix {
-                    "jpeg" -
-                    "jpg" {
-                        set ContentType "image/jpeg"
-                    }
-                    "png" {
-                        set ContentType "image/png"
-                    }
-                }
+                set contentType [MimeType $suffix]
                 $ctRoot insertBeforeFromScript {
-                    Tag_Default Extension $suffix ContentType $ContentType
+                    Tag_Default Extension $suffix ContentType $contentType
                 } [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
                     ct:Override[1]
                 }]
@@ -1506,49 +1498,6 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method comment {text args} {
-        my variable body
-        my variable docs
-        my variable id
-        
-        if {![info exists docs(word/comments.xml)]} {
-            my Add2Relationships comments comments.xml
-            set docs(word/comments.xml) [dom parse {
-                <w:comments xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
-            }]
-        }
-        if {[catch {
-            OptVal $args
-            set comments [$docs(word/comments.xml) documentElement]
-            $comments appendFromScript {
-                set author [my EatOption -author]
-                if {$author eq ""} {
-                    set author "Unknown"
-                }
-                Tag_w:comment w:id [incr id(comments)] \
-                    w:date [my EatOption -date ST_DateTime] \
-                    w:author $author \
-                    w:initials [my EatOption -initals NoCheck] {
-                        Tag_w:p {
-                            Tag_w:r {
-                                my RPr
-                                my Wt $text
-                            }
-                        }
-                    }
-            }
-            my CheckRemainingOpts
-        } errMsg]} {
-            return -code error $errMsg
-        }
-        set p [my LastParagraph 1]
-        $p appendFromScript {
-            Tag_w:r {
-                Tag_w:commentReference w:id $id(comments)
-            }
-        }
-    }
-    
     method configure {args} {
         my variable docs
 
@@ -2005,6 +1954,49 @@ oo::class create ooxml::docx::docx {
         set sectionsetup $args
     }
 
+    method simplecomment {text args} {
+        my variable body
+        my variable docs
+        my variable id
+        
+        if {![info exists docs(word/comments.xml)]} {
+            my Add2Relationships comments comments.xml
+            set docs(word/comments.xml) [dom parse {
+                <w:comments xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
+            }]
+        }
+        if {[catch {
+            OptVal $args
+            set comments [$docs(word/comments.xml) documentElement]
+            $comments appendFromScript {
+                set author [my EatOption -author]
+                if {$author eq ""} {
+                    set author "Unknown"
+                }
+                Tag_w:comment w:id [incr id(comments)] \
+                    w:date [my EatOption -date ST_DateTime] \
+                    w:author $author \
+                    w:initials [my EatOption -initals NoCheck] {
+                        Tag_w:p {
+                            Tag_w:r {
+                                my RPr
+                                my Wt $text
+                            }
+                        }
+                    }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:commentReference w:id $id(comments)
+            }
+        }
+    }
+    
     method simpletable {tabledata args} {
         my variable body
         variable ::ooxml::docx::properties

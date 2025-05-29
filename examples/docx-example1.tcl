@@ -78,8 +78,9 @@ $docx paragraph "Second Level Heading 1" -pstyle H2
 $docx paragraph $loreipsum -pstyle Base
 $docx paragraph "Second Level Heading 2" -pstyle H2
 $docx paragraph $loreipsum -pstyle Base
-$docx comment "This is ridiculous." -color 00ff00
-
+$docx simplecomment "This is ridiculous." -color 00ff00 \
+      -date 2025-05-29T14:20:00 \
+      -author "Rolf Ade"
 
 $docx paragraph $loreipsum -align both \
     -indentation {firstLine 3cm hanging 2cm start 1cm end 4cm} \

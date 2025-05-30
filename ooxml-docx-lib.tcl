@@ -1221,6 +1221,19 @@ proc ::ooxml::docx::lib::ST_ChapterSep {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_CharacterSpacing {value} {
+    set values {
+        doNotCompress
+        compressPunctuation
+        compressPunctuationAndJapaneseKana
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown character spacing type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_DateTime {value} {
     if {![::tdom::type::dateTime $value]} {
         error "expected an xsd dateTime value (which closely like the\
@@ -1234,6 +1247,31 @@ proc ::ooxml::docx::lib::ST_DecimalNumber {value} {
         error "expected integer but got \"$value\""
     }
     return $value
+}
+
+proc ::ooxml::docx::lib::ST_DecimalNumberOrPercent {value} {
+    if {[string is integer -strict $value]} {
+        return $value
+    }
+    if {![regexp -- {-?[0-9]+(\.[0-9]+)?%} $value]} {
+        error "expected integer or percent value but got \"$value\""
+    }
+    return $value
+}
+
+proc ::ooxml::docx::lib::ST_DocProtect {value} {
+    set values {
+        none
+        readOnly
+        comments
+        trackedChanges
+        forms
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown document protection edit value \"$value\", expected one of\
+            [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_DropCap {value} {
@@ -1494,6 +1532,18 @@ proc ::ooxml::docx::lib::ST_PointMeasure {value} {
                integer"
 }
 
+proc ::ooxml::docx::lib::ST_Proof {value} {
+    set values {
+        clean
+        dirty
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown proof value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_RelFromH {value} {
     set values {
         margin
@@ -1681,6 +1731,22 @@ proc ::ooxml::docx::lib::ST_VerticalAlignRun {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_View {value} {
+    set values {
+        none
+        print
+        outline
+        masterPages
+        normal
+        web
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown view value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_WrapText {value} {
     set values {
         bothSides
@@ -1723,6 +1789,20 @@ proc ::ooxml::docx::lib::ST_YAlign {value} {
         return $value
     }
     error "unknown yAlign type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Zoom {value} {
+    set values {
+        none
+        fullPage
+        bestFit
+        textFit
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown zoom type \"$value\", expected one of\
             [AllowedValues $values]"
 }
 

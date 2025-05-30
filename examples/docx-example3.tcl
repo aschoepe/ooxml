@@ -8,6 +8,8 @@ source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
 
+$docx settings -zoom {type bestFit percent 50%}
+
 set simpledata {{a b c} {1 2 3} {I II III}}
 set simpledata2 {
     {a b c e f}

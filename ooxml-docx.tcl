@@ -202,6 +202,83 @@ namespace eval ::ooxml::docx {
             start ST_DecimalNumber
         }}
     }
+
+    set properties(settings) {
+        -view {w:view ST_View}
+        -zoom {w:zoom {
+            {type val} ST_Zoom
+            percent ST_DecimalNumberOrPercent
+        }}
+        -removePersonalInformation {w:removePersonalInformation CT_OnOff}
+        -removeDateAndTime {w:removeDateAndTime CT_OnOff}
+        -doNotDisplayPageBoundaries {w:doNotDisplayPageBoundaries CT_OnOff}
+        -displayBackgroundShape {w:displayBackgroundShape CT_OnOff}
+        -printPostScriptOverText {w:printPostScriptOverText CT_OnOff}
+        -printFractionalCharacterWidth {w:printFractionalCharacterWidth CT_OnOff}
+        -printFormsData {w:printFormsData CT_OnOff}
+        -embedTrueTypeFonts {w:embedTrueTypeFonts CT_OnOff}
+        -embedSystemFonts {w:embedSystemFonts CT_OnOff}
+        -saveSubsetFonts {w:saveSubsetFonts CT_OnOff}
+        -saveFormsData {w:saveFormsData CT_OnOff}
+        -mirrorMargins {w:mirrorMargins CT_OnOff}
+        -alignBordersAndEdges {w:alignBordersAndEdges CT_OnOff}
+        -bordersDoNotSurroundHeader {w:bordersDoNotSurroundHeader CT_OnOff}
+        -bordersDoNotSurroundFooter {w:bordersDoNotSurroundFooter CT_OnOff}
+        -gutterAtTop {w:gutterAtTop CT_OnOff}
+        -hideSpellingErrors {w:hideSpellingErrors CT_OnOff}
+        -hideGrammaticalErrors {w:hideGrammaticalErrors CT_OnOff}
+        -proofState {w:proofState {
+            spelling ST_Proof
+            grammar ST_Proof
+        }}
+        -formsDesign {w:formsDesign CT_OnOff}
+        -linkStyles {w:linkStyles CT_OnOff}
+        -trackRevisions {w:trackRevisions CT_OnOff}
+        -doNotTrackMoves {w:doNotTrackMoves CT_OnOff}
+        -doNotTrackFormatting {w:doNotTrackFormatting CT_OnOff}
+        -documentProtection {w:documentProtection {
+            edit ST_DocProtect
+            formating CT_OnOff
+            enforcement CT_OnOff
+        }}
+        -autoFormatOverride {w:autoFormatOverride CT_OnOff}
+        -styleLockTheme {w:styleLockTheme CT_OnOff}
+        -styleLockQFSet {w:styleLockQFSet CT_OnOff}
+        -defaultTabStop {w:defaultTabStop ST_TwipsMeasure}
+        -autoHyphenation {w:autoHyphenation CT_OnOff}
+        -consecutiveHyphenLimit {w:consecutiveHyphenLimit ST_DecimalNumber}
+        -hyphenationZone {w:hyphenationZone ST_TwipsMeasure}
+        -doNotHyphenateCaps {w:doNotHyphenateCaps CT_OnOff}
+        -showEnvelope {w:showEnvelope CT_OnOff}
+        -evenAndOddHeaders {w:evenAndOddHeaders CT_OnOff}
+        -bookFoldRevPrinting {w:bookFoldRevPrinting CT_OnOff}
+        -bookFoldPrinting {w:bookFoldPrinting CT_OnOff}
+        -bookFoldPrintingSheets {w:bookFoldPrintingSheets ST_DecimalNumber}
+        -drawingGridHorizontalSpacing {w:drawingGridHorizontalSpacing ST_TwipsMeasure}
+        -drawingGridVerticalSpacing {w:drawingGridVerticalSpacing ST_TwipsMeasure}
+        -displayHorizontalDrawingGridEvery {w:displayHorizontalDrawingGridEvery ST_DecimalNumber}
+        -displayVerticalDrawingGridEvery {w:displayVerticalDrawingGridEvery ST_DecimalNumber}
+        -doNotUseMarginsForDrawingGridOrigin {w:doNotUseMarginsForDrawingGridOrigin CT_OnOff}
+        -drawingGridHorizontalOrigin {w:drawingGridHorizontalOrigin ST_TwipsMeasure}
+        -drawingGridVerticalOrigin {w:drawingGridVerticalOrigin ST_TwipsMeasure}
+        -doNotShadeFormData {w:doNotShadeFormData CT_OnOff}
+        -noPunctuationKerning {w:noPunctuationKerning CT_OnOff}
+        -characterSpacingControl {w:characterSpacingControl ST_CharacterSpacing}
+        -printTwoOnOne {w:printTwoOnOne CT_OnOff}
+        -strictFirstAndLastChars {w:strictFirstAndLastChars CT_OnOff}
+        -savePreviewPicture {w:savePreviewPicture CT_OnOff}
+        -doNotValidateAgainstSchema {w:doNotValidateAgainstSchema CT_OnOff}
+        -saveInvalidXml {w:saveInvalidXml CT_OnOff}
+        -ignoreMixedContent {w:ignoreMixedContent CT_OnOff}
+        -alwaysShowPlaceholderText {w:alwaysShowPlaceholderText CT_OnOff}
+        -doNotDemarcateInvalidXml {w:doNotDemarcateInvalidXml CT_OnOff}
+        -saveXmlDataOnly {w:saveXmlDataOnly CT_OnOff}
+        -useXSLTWhenSaving {w:useXSLTWhenSaving CT_OnOff}
+        -saveThroughXslt {w:saveThroughXslt CT_OnOff}
+        -showXMLTags {w:showXMLTags CT_OnOff}
+        -alwaysMergeEmptyNamespace {w:alwaysMergeEmptyNamespace CT_OnOff}
+        -updateFields {w:updateFields CT_OnOff}
+    }
     
     set properties(table1) {
         -style {w:tblStyle TStyle}
@@ -2013,6 +2090,30 @@ oo::class create ooxml::docx::docx {
         set sectionsetup $args
     }
 
+    method settings {args} {
+        my variable docs
+        variable ::ooxml::docx::properties
+
+        OptVal $args
+        if {[info exists docs(word/settings.xml)]} {
+            $docs(word/settings.xml) delete
+        } else {
+            my Add2Relationships settings settings.xml
+        }
+        set docs(word/settings.xml) [dom parse {
+                <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
+        }]
+        set settings [$docs(word/settings.xml) documentElement]
+        if {[catch {
+            $settings appendFromScript {
+                my Create $properties(settings)
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+        
     method simplecomment {text args} {
         if {[catch {
             OptVal $args "text"

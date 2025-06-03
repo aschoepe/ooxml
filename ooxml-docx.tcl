@@ -37,7 +37,7 @@ package require ::ooxml::docx::lib
 
 namespace eval ::ooxml::docx {
 
-    namespace export docx OptVal NoCheck ST_* W3CDTF
+    namespace export docx
     
     variable xmlns
 

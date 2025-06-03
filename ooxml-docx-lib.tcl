@@ -38,7 +38,7 @@ namespace eval ::ooxml::docx {
 
 namespace eval ::ooxml::docx::lib {
 
-    namespace export docx OptVal MimeType NoCheck CT_* ST_* W3CDTF AllowedValues
+    namespace export OptVal MimeType NoCheck CT_* ST_* W3CDTF AllowedValues
 
     variable mimeTypes
     # This uses the list found at

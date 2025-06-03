@@ -37,7 +37,7 @@ package require ::ooxml::docx::lib
 
 namespace eval ::ooxml::docx {
 
-    namespace export docx OptVal NoCheck ST_* W3CDTF
+    namespace export docx processdocx
     
     variable xmlns
 
@@ -2515,6 +2515,77 @@ oo::class create ooxml::docx::docx {
         close $zf
         return
     }
+}
+
+proc ::ooxml::docx::ExpandDocx {docxfilename} {
+    set dir [file tempdir]
+    set base [file join [zipfs root] pp]
+    set baselen [string length $base]
+    zipfs mount $docxfilename $base
+    ::fileutil::traverse filesInZip $base
+    filesInZip foreach file {
+        set target [file join $dir [string range $file $baselen+1 end]]
+        if {[file isdirectory $file]} {
+            file mkdir $target
+            continue
+        }
+        set in [open $file rb]
+        set out [open $target wb]
+        fcopy $in $out
+        close $in
+        close $out
+    }
+    zipfs unmount $base
+    return $dir
+}
+
+proc ::ooxml::docx::PackDocx {dir docxoutname} {
+    zipfs mkzip $docxoutname $dir $dir
+}
+
+proc ::ooxml::docx::processdocx {indocx outdocx varns {startMark »} {endMark «}} {
+    package require fileutil::traverse
+
+    set docxdir [ExpandDocx $indocx]
+    set docfd [open $docxdir/word/document.xml r]
+    fconfigure $docfd -encoding utf-8
+    set doc [dom parse -channel $docfd]
+    close $docfd
+    $doc selectNodesNamespaces {w http://schemas.openxmlformats.org/wordprocessingml/2006/main}
+    set lenStart [string length $startMark]
+    set endStart [string length $endMark]
+    foreach runWithRef [$doc selectNodes {//w:t[contains(.,$startMark)
+                                                and contains(.,$endMark)]}] {
+        set thisrun [$runWithRef selectNodes string()]
+        set start 0
+        set resultruntext ""
+        # Allow more than one substition in one run
+        while 1 {
+            set thispos [string first $startMark $thisrun $start]
+            if {$thispos == -1} {
+                break
+            }
+            append resultruntext [string range $thisrun $start $thispos-1]
+            set endpos [string first $endMark $thisrun $thispos+$lenStart]
+            if {$endpos == -1} {
+                return -code error "missing end marker"
+            }
+            set var [string trim [string range $thisrun $thispos+$lenStart $endpos-1]]
+            set var [string range $var 1 end]
+            if {[catch {append resultruntext [set ${varns}::$var]}]} {
+                return -code error "unknown variable reference '$var'"
+            }
+            set start [expr {$endpos + $lenStart}]
+        }
+        set parent [$runWithRef parentNode]
+        $runWithRef appendChild [$doc createTextNode $resultruntext]
+        $runWithRef removeChild [$runWithRef firstChild]
+    }
+    set docfd [open $docxdir/word/document.xml w]
+    fconfigure $docfd -encoding utf-8
+    $doc asXML -indent none -channel $docfd
+    close $docfd
+    PackDocx $docxdir $outdocx
 }
 
 package provide ::ooxml::docx 0.6

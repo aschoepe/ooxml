@@ -169,6 +169,7 @@ namespace eval ::ooxml::docx {
         -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
         -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} ST_OnOff}
+        -noProof {w:noProof ST_OnOff}
         -rtl {w:rtl CT_OnOff}
         -strike {w:strike ST_OnOff}
         -underline {w:u ST_Underline}
@@ -635,6 +636,7 @@ oo::class create ooxml::docx::docx {
     constructor { args } {
         my variable docs
         my variable body
+        my variable context
         my variable media
         my variable setuproot
         my variable pagesetup
@@ -661,6 +663,7 @@ oo::class create ooxml::docx::docx {
         $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
+        set context document
         set media ""
 
         # Since the "general page setup" (WordprocessingML does not
@@ -794,9 +797,16 @@ oo::class create ooxml::docx::docx {
     
     method Add2Relationships {type target} {
         my variable docs
+        my variable context
         variable ::ooxml::docx::xmlns
 
-        set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
+        set thisfile "word/_rels/$context.xml.rels"
+        if {![info exists docs($thisfile)]} {
+            set docs($thisfile) [dom parse {
+                <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>
+            }]
+        }
+        set relsRoot [$docs($thisfile) documentElement]
 
         # If there is already an entry for this type and target just
         # return the rId
@@ -811,7 +821,11 @@ oo::class create ooxml::docx::docx {
         # At least for documents we build up from scratch this should
         # work reliable enough
         set lastchild [$relsRoot lastChild]
-        set nr [string range [$lastchild @Id] 3 end]
+        if {$lastchild eq ""} {
+            set nr 0
+        } else {
+            set nr [string range [$lastchild @Id] 3 end]
+        }
         incr nr
         set attlist [list \
              Id rId$nr \
@@ -937,7 +951,7 @@ oo::class create ooxml::docx::docx {
     method CheckrId {type rId} {
         my variable docs
         variable ::ooxml::docx::xmlns
-        
+
         set relsRoot [$docs(word/_rels/document.xml.rels) documentElement]
         set type "$xmlns(r)/$type"
         if {![$relsRoot selectNodes -namespaces "rel $xmlns(rel)" {
@@ -1079,6 +1093,7 @@ oo::class create ooxml::docx::docx {
     method HeaderFooter {what script} {
         my variable docs
         my variable body
+        my variable context
         variable ::ooxml::docx::xmlns
 
         set have [lsort -dictionary [array names docs word/$what*]]
@@ -1103,12 +1118,16 @@ oo::class create ooxml::docx::docx {
         }
         $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
         set savedbody $body
+        set savedcontext $context
         set body $root
+        set context $what$nr
         if {[catch {uplevel 2 [list eval $script]} errMsg]} {
             set body $savedbody
+            set context $savedcontext
             return -code error $errMsg
         }
         set body $savedbody
+        set context $savedcontext
         return $rId
     }
 
@@ -1282,7 +1301,6 @@ oo::class create ooxml::docx::docx {
         set base [file join [zipfs root] InitWord]
         zipfs mount $docxfile $base
         ::fileutil::traverse filesInDocx $base
-        #puts [filesInDocx files]
         set prefixlen [string length "$base/word/"]
         set pathstart [string length "$base/"]
         set files [list]
@@ -1606,25 +1624,29 @@ oo::class create ooxml::docx::docx {
 
     method comment {args} {
         my variable body
-
+        my variable context
+        
         if {[catch {
             OptVal [lrange $args 0 end-1]
             lassign [my CreateComment] comment id
             my CheckRemainingOpts
             set script [lindex $args end]
             set savedbody $body
+            set savedcontext $context
             set body $comment
             # The nested catch is needed to ensure body is set back
             if {[catch {
                 uplevel [list eval $script]
             } errMsg]} {
                 set body $savedbody
+                set context $savedcontext
                 return -code error $errMsg
             }
         } errMsg]} {
             return -code error $errMsg
         }
         set body $savedbody
+        set context $savedcontext
         # Add the comment mark to the document
         set p [my LastParagraph 1]
         $p appendFromScript {
@@ -1738,7 +1760,6 @@ oo::class create ooxml::docx::docx {
     
     method image {file type args} {
         my variable media
-        variable ::ooxml::docx::properties
 
         if {![file isfile $file] || ![file readable $file]} {
             error "çannot read file \"$file\""
@@ -2321,7 +2342,6 @@ oo::class create ooxml::docx::docx {
                 }
             } 
         } errMsg]} {
-            puts "style catch"
             return -code error $errMsg
         }
         return $result

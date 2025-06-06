@@ -1510,9 +1510,9 @@ proc ::ooxml::docx::lib::ST_OnOff {value} {
         error "expected a Tcl boolean value"
     }
     if {$value} {
-        return "on"
+        return "1"
     } else {
-        return "off"
+        return "0"
     }
 }
 

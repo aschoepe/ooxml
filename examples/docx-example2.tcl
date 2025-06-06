@@ -23,6 +23,8 @@ $docx header {
 $docx footer {
     $docx paragraph "footer default " -align center
     $docx field page
+    $docx append " "
+    $docx image book.jpg inline -dimension {width 1cm height 1cm}
 } defaultFooter
 
 # Set a default style

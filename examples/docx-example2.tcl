@@ -25,6 +25,8 @@ $docx footer {
     $docx field page
     $docx append " "
     $docx image book.jpg inline -dimension {width 1cm height 1cm}
+    $docx append " "
+    $docx field numpages
 } defaultFooter
 
 # Set a default style

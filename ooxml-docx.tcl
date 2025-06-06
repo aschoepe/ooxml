@@ -1715,6 +1715,7 @@ oo::class create ooxml::docx::docx {
             DATE
             FILESIZE
             PAGE
+            NUMPAGES
             SAVEDATE
             SECTION
             TIME

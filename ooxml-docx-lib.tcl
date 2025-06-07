@@ -1202,7 +1202,7 @@ proc ::ooxml::docx::lib::ST_Border {value} {
     if {$value in $values} {
         return $value
     }
-    error "unknown border type value \"$value\", expected one of:\
+    error "unknown border type value \"$value\", expected one of\
                [AllowedValues $values]"
 }
  
@@ -1236,8 +1236,8 @@ proc ::ooxml::docx::lib::ST_CharacterSpacing {value} {
 
 proc ::ooxml::docx::lib::ST_DateTime {value} {
     if {![::tdom::type::dateTime $value]} {
-        error "expected an xsd dateTime value (which closely like the\
-               format of an ISO 8601 date item) integer but got \"$value\""
+        error "expected an xsd dateTime value (which is closely like the\
+               format of an ISO 8601 date item) but got \"$value\""
     }
     return $value
 }

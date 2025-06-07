@@ -2540,10 +2540,10 @@ oo::class create ooxml::docx::docx {
                 }
                 my AddXML [dom fromScriptContext] {
                             <wp14:sizeRelH relativeFrom="margin">
-                                <wp14:pctWidth>0</wp14:pctWidth>
+                                <wp14:pctWidth>40000</wp14:pctWidth>
                             </wp14:sizeRelH>
                             <wp14:sizeRelV relativeFrom="margin">
-                                <wp14:pctHeight>0</wp14:pctHeight>
+                                <wp14:pctHeight>20000</wp14:pctHeight>
                             </wp14:sizeRelV>
                 }                    
             }

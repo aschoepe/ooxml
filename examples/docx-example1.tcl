@@ -11,6 +11,7 @@ set docx [docx new]
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}
 
+if 0 {
 # Add two paragraphs
 $docx paragraph "A very simple monoton paragraph: $loreipsum"
 $docx paragraph "The next paragraph: $loreipsum"
@@ -131,13 +132,15 @@ $docx style character my_c_style -highlight green \
 
 $docx paragraph $loreipsum -pstyle my_p_style -cstyle my_c_style
 $docx pagebreak
+}
 $docx textbox -dimension {width 3cm height 3cm} \
       -anchorData {locked 1} \
       -positionH page \
       -posOffsetH 6cm \
       -positionV page \
       -posOffsetV 6cm \
-      -wrapMode none {
+      -wrapMode square \
+      -wrapData {wrapText bothSides} {
     $docx paragraph "First paragraph in a textbox" -spacing {before 0}
     $docx paragraph "Second paragraph in a textbox" -align center
 }

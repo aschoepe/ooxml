@@ -2498,10 +2498,28 @@ oo::class create ooxml::docx::docx {
                                     set body $savedbody
                                 }
                             }
-                            set atts {
-                                rot "0" spcFirstLastPara "0" vertOverflow "overflow" horzOverflow "overflow" vert "horz" wrap "square" lIns "0" tIns "0" rIns "0" bIns "0" numCol "1" spcCol "0" rtlCol "0" fromWordArt "0" anchor "t" anchorCtr "0" forceAA "0" compatLnSpc "1"
+                            # Defaults
+                            array set bodyPrAtts {
+                                rot 0
+                                spcFirstLastPara 0
+                                vertOverflow "overflow"
+                                horzOverflow "overflow"
+                                vert "horz"
+                                wrap "square"
+                                lIns 0
+                                tIns 0
+                                rIns 0
+                                bIns 0
+                                numCol 1
+                                spcCol 0
+                                rtlCol 0
+                                fromWordArt 0
+                                anchor "t"
+                                anchorCtr 0
+                                forceAA 0
+                                compatLnSpc "1"
                             }
-                            Tag_wps:bodyPr {*}$atts
+                            Tag_wps:bodyPr {*}[array get bodyPrAtts]
                         }
                     }
                 }

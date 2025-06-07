@@ -622,6 +622,12 @@ namespace eval ::ooxml::docx {
     }
 
     foreach tag {
+        wps:bodyPr wps:cNvSpPr wps:spPr wps:txbx wps:wsp        
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(wps) elementNode Tag_$tag
+    }
+    
+    foreach tag {
         Default Override
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
@@ -842,6 +848,114 @@ oo::class create ooxml::docx::docx {
         }        
         my Add2Content_Types "/word/$target"
         return rId$nr
+    }
+
+    method Anchor {name} {
+        my variable id
+        variable ::ooxml::docx::properties
+        upvar opts opts
+        upvar optsknown optsknown
+
+        # Defaults
+        array set anchorAtts {
+            behindDoc 0
+            distT 0
+            distB 0
+            distL 0
+            distR 0
+            hidden 0
+            locked 0
+            layoutInCell 0
+            allowOverlap 1
+            relativeHeight 1
+            simplePos 0
+        }
+        # Updated by optional user provided values
+        array set anchorAtts [my CheckedAttlist [my EatOption -anchorData] {
+            -behindDoc CT_Boolean
+            -distT ST_Emu
+            -distB ST_Emu
+            -distL ST_Emu
+            -distR ST_Emu
+            -hidden CT_Boolean
+            -locked CT_Boolean
+            -layoutInCell CT_Boolean
+            -allowOverlap CT_Boolean
+            -relativeHeight CT_UnsignedInt
+        } -anchorData] 
+        Tag_wp:anchor [array get anchorAtts] {
+            Tag_wp:simplePos x 0 y 0
+            Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
+                lassign [my OneOff {-alignH ST_AlignH} {-posOffsetH ST_Emu}] \
+                    alignH posOffsetH
+                if {$alignH eq "" && $posOffsetH eq ""} {
+                    set alignH "center"
+                }
+                foreach value [list $alignH $posOffsetH] tag {Tag_wp:align Tag_wp:posOffset} {
+                    if {$value ne ""} {
+                        $tag {Text $value}
+                        break
+                    }
+                }
+            }
+            Tag_wp:positionV [my Option -positionV relativeFrom ST_RelFromV "paragraph"] {
+                lassign [my OneOff {-alignV ST_AlignV} {-posOffsetV ST_Emu}] \
+                    alignV posOffsetV
+                if {$alignV eq "" && $posOffsetV eq ""} {
+                    set alignV "center"
+                }
+                foreach value [list $alignV $posOffsetV] tag {Tag_wp:align Tag_wp:posOffset} {
+                    if {$value ne ""} {
+                        $tag {Text $value}
+                        break
+                    }
+                }
+            }
+            set thisOptionValue [my PeekOption -dimension]
+            set attlist [my CheckedAttlist $thisOptionValue {
+                {width -cx} ST_Emu
+                {height -cy} ST_Emu
+            } -dimension]
+            if {[llength $attlist] != 4} {
+                error "the -dimension option expects both keys \"width\" and\
+                      \"height\" to be given"
+            }
+            Tag_wp:extent {*}$attlist
+            Tag_wp:effectExtent l 0 t 0 r 0 b 0
+            set wrapMode [my EatOption -wrapMode]
+            switch $wrapMode {
+                "" -
+                "none" {
+                    if {[my EatOption -wrapData] ne ""} {
+                        error "the option \"-wrapMode none does not expect \"-wrapData\""
+                    }
+                    Tag_wp:wrapNone
+                }
+                "square" {
+                    set attlist [my CheckedAttlist [my EatOption -wrapData] {
+                        -wrapText ST_WrapText
+                        -distT ST_Emu
+                        -distB ST_Emu
+                        -distL ST_Emu
+                        -distR ST_Emu
+                    } -wrapData]
+                    Tag_wp:wrapSquare {*}$attlist
+                }
+                "topBottom" {
+                    Tag_wp:wrapTopAndBottom 
+                }
+                default {
+                    error "unknown -wrapMode option value \"$wrapMode\", expect\
+                         one of [AllowedValues {none square topBottom}]"
+                }
+            }
+            Tag_wp:docPr id [incr id(drawingElements)] name $name
+            Tag_wp:cNvGraphicFramePr {
+                Tag_a:graphicFrameLocks noChangeAspect 1
+            }
+            set anchor [dom fromScriptContext]
+        }
+        return $anchor
     }
     
     method CallType {type value errtext} {
@@ -1137,98 +1251,8 @@ oo::class create ooxml::docx::docx {
         upvar opts opts
         upvar optsknown optsknown
 
-        # Defaults
-        array set anchorAtts {
-            behindDoc 0
-            distT 0
-            distB 0
-            distL 0
-            distR 0
-            hidden 0
-            locked 0
-            layoutInCell 0
-            allowOverlap 1
-            relativeHeight 1
-            simplePos 0
-        }
-        # Updated by optional user provided values
-        array set anchorAtts [my CheckedAttlist [my EatOption -anchorData] {
-            -behindDoc CT_Boolean
-            -distT ST_Emu
-            -distB ST_Emu
-            -distL ST_Emu
-            -distR ST_Emu
-            -hidden CT_Boolean
-            -locked CT_Boolean
-            -layoutInCell CT_Boolean
-            -allowOverlap CT_Boolean
-            -relativeHeight CT_UnsignedInt
-        } -anchorData] 
-        Tag_wp:anchor [array get anchorAtts] {
-            Tag_wp:simplePos x 0 y 0
-            Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
-                lassign [my OneOff {-alignH ST_AlignH} {-posOffsetH ST_Emu}] \
-                    alignH posOffsetH
-                if {$alignH eq "" && $posOffsetH eq ""} {
-                    set alignH "center"
-                }
-                foreach value [list $alignH $posOffsetH] tag {Tag_wp:align Tag_wp:posOffset} {
-                    if {$value ne ""} {
-                        $tag {Text $value}
-                        break
-                    }
-                }
-            }
-            Tag_wp:positionV [my Option -positionV relativeFrom ST_RelFromV "paragraph"] {
-                lassign [my OneOff {-alignV ST_AlignV} {-posOffsetV ST_Emu}] \
-                    alignV posOffsetV
-                if {$alignV eq "" && $posOffsetV eq ""} {
-                    set alignV "center"
-                }
-                foreach value [list $alignV $posOffsetV] tag {Tag_wp:align Tag_wp:posOffset} {
-                    if {$value ne ""} {
-                        $tag {Text $value}
-                        break
-                    }
-                }
-            }
-            set thisOptionValue [my PeekOption -dimension]
-            set attlist [my CheckedAttlist $thisOptionValue {
-                {width -cx} ST_Emu
-                {height -cy} ST_Emu
-            } -dimension]
-            if {[llength $attlist] != 4} {
-                error "the -dimension option expects both keys \"width\" and\
-                      \"height\" to be given"
-            }
-            Tag_wp:extent {*}$attlist
-            Tag_wp:effectExtent l 0 t 0 r 0 b 0
-            switch [my EatOption -wrapMode] {
-                "" -
-                "none" {
-                    if {[my EatOption -wrapData] ne ""} {
-                        error "the option \"-wrapMode none does not expect \"-wrapData\""
-                    }
-                    Tag_wp:wrapNone
-                }
-                "square" {
-                    set attlist [my CheckedAttlist [my EatOption -wrapData] {
-                        -wrapText ST_WrapText
-                        -distT ST_Emu
-                        -distB ST_Emu
-                        -distL ST_Emu
-                        -distR ST_Emu
-                    } -wrapData]
-                    Tag_wp:wrapSquare {*}$attlist
-                }
-                "topBottom" {
-                    Tag_wp:wrapTopAndBottom 
-                }
-            }
-            Tag_wp:docPr id [llength $media] name [file tail $file]
-            Tag_wp:cNvGraphicFramePr {
-                Tag_a:graphicFrameLocks noChangeAspect 1
-            }
+        set anchor [my Anchor [file tail $file]]
+        $anchor appendFromScript {
             my Image_graphic $rId $file
         }
     }
@@ -1255,13 +1279,7 @@ oo::class create ooxml::docx::docx {
                         }
                     }
                     Tag_pic:spPr {*}[my Option -bwMode bwMode ST_BlackWhiteMode "auto"] {
-                        Tag_a:xfrm {
-                            Tag_a:off x 0 y 0
-                            my Create $properties(xfrm)
-                        }
-                        Tag_a:prstGeom prst "rect" {
-                            Tag_a:avLst
-                        }
+                        my SpPr_Content
                     }
                 }
             }
@@ -1456,6 +1474,20 @@ oo::class create ooxml::docx::docx {
                 my Create $properties(sectionBorders)
             }
             my Create $properties(sectionsetup2)
+        }
+    }
+
+    method SpPr_Content {} {
+        variable ::ooxml::docx::properties
+        upvar opts opts
+        upvar optsknown optsknown
+
+        Tag_a:xfrm {
+            Tag_a:off x 0 y 0
+            my Create $properties(xfrm)
+        }
+        Tag_a:prstGeom prst "rect" {
+            Tag_a:avLst
         }
     }
 
@@ -1769,7 +1801,7 @@ oo::class create ooxml::docx::docx {
             error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
         }
         if {[catch {
-            OptVal $args "file"
+            OptVal $args "file type"
             set file [file normalize $file]
             set ind [lsearch -exact $media $file]
             if {$ind < 0} {
@@ -2421,6 +2453,62 @@ oo::class create ooxml::docx::docx {
             }
         } finally {
             set tablecontext "table"
+        }
+    }
+
+    method textbox {args} {
+        my variable body
+        my variable id
+
+        set p [my LastParagraph 1]
+        set script [lindex $args end]
+        if {[catch {
+            OptVal [lrange $args 0 end-1]
+            set name [my EatOption -name]
+            if {$name eq ""} {
+                set name "Textbox [incr id(textboxes)]"
+            }
+            $p appendFromScript {
+                Tag_w:r {
+                    Tag_w:drawing {
+                        set anchor [my Anchor $name]
+                    }
+                }
+            }
+            $anchor appendFromScript {
+                Tag_a:graphic {
+                    Tag_a:graphicData uri "http://schemas.microsoft.com/office/word/2010/wordprocessingShape" {
+                        Tag_wps:wsp {
+                            Tag_wps:cNvSpPr txBox 1
+                            Tag_wps:spPr {
+                                my SpPr_Content
+                            }
+                            # Optional:
+                            # wps:style
+                            # wps:extLst
+                            Tag_wps:txbx {
+                                Tag_w:txbxContent {
+                                    set savedbody $body
+                                    set body [dom fromScriptContext]
+                                    # The nested catch is needed to ensure body is set back
+                                    if {[catch {uplevel [list eval $script]} errMsg]} {
+                                        set body $savedbody
+                                        return -code error $errMsg
+                                    }
+                                    set body $savedbody
+                                }
+                            }
+                            set atts {
+                                rot "0" spcFirstLastPara "0" vertOverflow "overflow" horzOverflow "overflow" vert "horz" wrap "square" lIns "0" tIns "0" rIns "0" bIns "0" numCol "1" spcCol "0" rtlCol "0" fromWordArt "0" anchor "t" anchorCtr "0" forceAA "0" compatLnSpc "1"
+                            }
+                            Tag_wps:bodyPr {*}$atts
+                        }
+                    }
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
         }
     }
     

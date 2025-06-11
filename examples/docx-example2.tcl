@@ -78,5 +78,30 @@ $docx paragraph "The next paragraph: $loreipsum"
 $docx pagebreak
 $docx paragraph "The next paragraph: $loreipsum"
 
+$docx header {
+    $docx paragraph "Header with textbox"
+    $docx textbox -name myTextBox -dimension {width 3cm height 3cm} \
+        -positionH margin \
+        -posOffsetH 3cm \
+        -positionV margin \
+        -posOffsetV 3cm \
+        -wrapMode square \
+        -wrapData {wrapText bothSides} {
+            $docx paragraph "First paragraph in a textbox" -spacing {before 0}
+            $docx paragraph "Second paragraph in a textbox" -align center
+        }
+} headerWithAnchoredTextbox
+$docx pagebreak
+$docx sectionstart \
+    -defaultHeader $headerWithAnchoredTextbox \
+    -evenHeader $headerWithAnchoredTextbox
+
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx sectionend
+
 $docx write docx-example2.docx
 $docx destroy

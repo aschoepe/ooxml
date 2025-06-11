@@ -129,7 +129,25 @@ $docx style character my_c_style -highlight green \
       -underline double \
       -color ff0000
 
-
 $docx paragraph $loreipsum -pstyle my_p_style -cstyle my_c_style
+$docx pagebreak
+
+$docx textbox -dimension {width 3cm height 3cm} \
+      -anchorData {locked 1 distL 1cm distR 1cm distT 1cm} \
+      -positionH page \
+      -posOffsetH 6cm \
+      -positionV page \
+      -posOffsetV 6cm \
+      -wrapMode square \
+      -wrapData {wrapText bothSides} {
+    $docx paragraph "First paragraph in a textbox" -spacing {before 0}
+    $docx paragraph "Second paragraph in a textbox" -align center
+}
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+$docx paragraph "$loreipsum"
+
 $docx write docx-example1.docx
 $docx destroy

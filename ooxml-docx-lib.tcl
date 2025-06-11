@@ -1146,6 +1146,19 @@ proc ::ooxml::docx::lib::ST_Anchor {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_Angle {value} {
+    set values {
+        text
+        margin
+        page
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown vAnchor or hAnchor type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_BlackWhiteMode {value} {
     set values {
         auto
@@ -1202,7 +1215,7 @@ proc ::ooxml::docx::lib::ST_Border {value} {
     if {$value in $values} {
         return $value
     }
-    error "unknown border type value \"$value\", expected one of:\
+    error "unknown border type value \"$value\", expected one of\
                [AllowedValues $values]"
 }
  
@@ -1234,10 +1247,20 @@ proc ::ooxml::docx::lib::ST_CharacterSpacing {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_Coordinate32 {value} {
+    set values {
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown character spacing type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_DateTime {value} {
     if {![::tdom::type::dateTime $value]} {
-        error "expected an xsd dateTime value (which closely like the\
-               format of an ISO 8601 date item) integer but got \"$value\""
+        error "expected an xsd dateTime value (which is closely like the\
+               format of an ISO 8601 date item) but got \"$value\""
     }
     return $value
 }
@@ -1558,7 +1581,7 @@ proc ::ooxml::docx::lib::ST_RelFromH {value} {
     if {$value in $values} {
         return $value
     }
-    error "unknown horizonal relative from value \"$value\", expected one of:\
+    error "unknown horizontal relative from value \"$value\", expected one of:\
                [AllowedValues $values]"
 }
 
@@ -1656,6 +1679,75 @@ proc ::ooxml::docx::lib::ST_TblWidth {value} {
     }
     error "unknown table width value type \"$value\", expected one of\
             [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TextAnchoringType {value} {
+    set values {
+        t
+        ctr
+        b
+        just
+        dist
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown text anchoring type \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TextHorzOverflowType {value} {
+    set values {
+        overflow
+        clip
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown text horizontal overflow type \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TextVerticalType {value} {
+    set values {
+        horz
+        vert
+        vert270
+        wordArtVert
+        eaVert
+        mongolianVert
+        wordArtVertRtl
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown text vertical type \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TextVertOverflowType {value} {
+    set values {
+        overflow
+        ellipsis
+        clip
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown text vertical overflow type \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_TextWrappingType {value} {
+    set values {
+        none
+        square
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown text wrapping type \"$value\", expected one of\
+           [AllowedValues $values]"
 }
 
 # ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.

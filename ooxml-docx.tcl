@@ -2527,25 +2527,10 @@ oo::class create ooxml::docx::docx {
                                 forceAA 0
                                 compatLnSpc "1"
                             }
-                            Tag_wps:bodyPr {*}[array get bodyPrAtts] {
-                                my AddXML [dom fromScriptContext] {
-                                    <a:prstTxWarp prst="textNoShape">
-                                    <a:avLst/>
-                                    </a:prstTxWarp>
-                                    <a:noAutofit/>
-                                }
-                            }
+                            Tag_wps:bodyPr {*}[array get bodyPrAtts] 
                         }
                     }
                 }
-                my AddXML [dom fromScriptContext] {
-                            <wp14:sizeRelH relativeFrom="margin">
-                                <wp14:pctWidth>40000</wp14:pctWidth>
-                            </wp14:sizeRelH>
-                            <wp14:sizeRelV relativeFrom="margin">
-                                <wp14:pctHeight>20000</wp14:pctHeight>
-                            </wp14:sizeRelV>
-                }                    
             }
             my CheckRemainingOpts
         } errMsg]} {

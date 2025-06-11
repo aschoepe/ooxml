@@ -958,14 +958,6 @@ oo::class create ooxml::docx::docx {
         return $anchor
     }
     
-    method AddXML {node xmlstr} {
-        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" mc:Ignorable="w14 wp14">$xmlstr</w:document>}]]
-        foreach child [[$doc documentElement] childNodes] {
-            $node appendChild $child
-        }
-        $doc delete
-    }
-    
     method CallType {type value errtext} {
         # A few value checks need access to the docx object internal
         # data and therefor are implemented as object methods. The
@@ -1646,6 +1638,14 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method addXML {node xmlstr} {
+        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" mc:Ignorable="w14 wp14">$xmlstr</w:document>}]]
+        foreach child [[$doc documentElement] childNodes] {
+            $node appendChild $child
+        }
+        $doc delete
+    }
+    
     method append {text args} {
         OptVal $args "text"
         set p [my LastParagraph]
@@ -2527,6 +2527,26 @@ oo::class create ooxml::docx::docx {
                                 forceAA 0
                                 compatLnSpc "1"
                             }
+                            array set bodyPrAtts [my CheckedAttlist [my EatOption -bodyAtts] {
+                                -rot ST_DecimalNumber
+                                -spcFirstLastPara CT_Boolean
+                                -vertOverflow ST_TextVertOverflowType
+                                -horzOverflow ST_TextHorzOverflowType
+                                -vert ST_TextVerticalType
+                                -wrap ST_TextWrappingType
+                                -lIns ST_Emu
+                                -tIns ST_Emu
+                                -rIns ST_Emu
+                                -bIns ST_Emu
+                                -numCol ST_DecimalNumber
+                                -spcCol ST_Emu
+                                -rtlCol CT_Boolean
+                                -fromWordArt CT_Boolean
+                                -anchor ST_TextAnchoringType
+                                -anchorCtr CT_Boolean
+                                -forceAA CT_Boolean
+                                -compatLnSpc CT_Boolean
+                            } -bodyAtts]
                             Tag_wps:bodyPr {*}[array get bodyPrAtts] 
                         }
                     }

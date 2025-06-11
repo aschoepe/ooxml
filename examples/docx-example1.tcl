@@ -132,7 +132,7 @@ $docx style character my_c_style -highlight green \
 $docx paragraph $loreipsum -pstyle my_p_style -cstyle my_c_style
 $docx pagebreak
 
-$docx textbox -dimension {width 1cm height 1cm} \
+$docx textbox -dimension {width 3cm height 3cm} \
       -anchorData {locked 1 distL 1cm distR 1cm distT 1cm} \
       -positionH page \
       -posOffsetH 6cm \

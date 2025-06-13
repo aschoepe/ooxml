@@ -93,7 +93,7 @@ $docx paragraph $loreipsum -pstyle withBorder
 $docx paragraph $loreipsum -pstyle withBorder
 
 $docx paragraph "Tabs test $loreipsum" -tabs {3cm 6cm 9cm 12cm}
-$docx url "Link zu core.tcl-lang.org" https://core.tcl-lang.org -underline single
+$docx url "link to core.tcl-lang.org" https://core.tcl-lang.org -underline single
 $docx comment -author "Document Creator" \
       -date [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ] \
       -initals "dc" {

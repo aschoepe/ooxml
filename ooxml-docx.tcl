@@ -1005,7 +1005,7 @@ oo::class create ooxml::docx::docx {
                 continue
             }
             set ooxmlvalue [my CallType $type $atts($key) \
-                                "the argument \"$optionValue\" given to the
+                                "the argument \"$optionValue\" given to the\
                                 \"$option\" option is invalid: the value\
                                 given to the key \"$key\" in the argument\
                                 is invalid"]

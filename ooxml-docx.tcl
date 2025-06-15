@@ -1156,20 +1156,16 @@ oo::class create ooxml::docx::docx {
                 <w:comments xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
             }]
         }
-        if {[catch {
-            set comments [$docs(word/comments.xml) documentElement]
-            $comments appendFromScript {
-                set author [my EatOption -author]
-                if {$author eq ""} {
-                    set author "Unknown"
-                }
-                Tag_w:comment w:id [incr id(comments)] \
-                    w:date [my EatOption -date ST_DateTime] \
-                    w:author $author \
-                    w:initials [my EatOption -initals NoCheck]
+        set comments [$docs(word/comments.xml) documentElement]
+        $comments appendFromScript {
+            set author [my EatOption -author]
+            if {$author eq ""} {
+                set author "Unknown"
             }
-        } errMsg]} {
-            return -code error $errMsg
+            Tag_w:comment w:id [incr id(comments)] \
+                w:date [my EatOption -date ST_DateTime] \
+                w:author $author \
+                w:initials [my EatOption -initals NoCheck]
         }
         return [list [$comments lastChild] $id(comments)]
     }
@@ -1680,7 +1676,7 @@ oo::class create ooxml::docx::docx {
             } errMsg]} {
                 set body $savedbody
                 set context $savedcontext
-                return -code error $errMsg
+                error $errMsg
             }
         } errMsg]} {
             return -code error $errMsg
@@ -2501,7 +2497,7 @@ oo::class create ooxml::docx::docx {
                                     # The nested catch is needed to ensure body is set back
                                     if {[catch {uplevel [list eval $script]} errMsg]} {
                                         set body $savedbody
-                                        return -code error $errMsg
+                                        error $errMsg
                                     }
                                     set body $savedbody
                                 }

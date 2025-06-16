@@ -723,9 +723,9 @@ oo::class create ooxml::docx::docx {
             return
         }
         if {[string range $file 0 11] eq "/word/media/"} {
-            set suffix [file extension $file]
+            set suffix [string range [file extension $file] 1 end]
             if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-                count(ct:Default[@Extenxtion=$suffix])
+                count(ct:Default[@Extension=$suffix])
             }] > 0} {
                 return
             }

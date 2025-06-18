@@ -1903,6 +1903,9 @@ oo::class create ooxml::docx::docx {
     method mark {name} {
         my variable id
         my variable links
+        if {[info exists links($name)]} {
+            return -code error "mark \"$name\" is not unique"
+        }
         set p [my LastParagraph 1]
         $p appendFromScript {
             Tag_w:bookmarkStart w:id [incr id(marks)] w:name $name

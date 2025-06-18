@@ -49,6 +49,77 @@ methods:
   within the paragraph. See [CHARACTER OPTIONS](#character) for the
   valid options and the type of their argument.
 
+**comment** *?-option value ...?* *creatingScript*
+
+The allowed options are
+
+-author string
+
+-date <xsd datetime>
+
+-initals string
+
+The content of the comment is determined by the evaluated script given
+as last argument.
+
+**configure** *?-option value ...?*
+
+Set certain document properties. The recogniced options are:
+
+-category
+
+-contentStatus
+
+-erms:created
+
+-creator
+
+-description
+
+-identifier
+
+-keywords
+
+-language
+
+-lastModifiedBy
+
+-lastPrinted
+
+-erms:modified
+
+-revision
+
+-subject
+
+-title
+
+-version
+
+**field** *fieldname*
+
+Appends the given field type to the last paragraph. Recognized
+fieldnames are
+
+            AUTHOR
+            CREATEDATE
+            DATE
+            FILESIZE
+            PAGE
+            NUMPAGES
+            SAVEDATE
+            SECTION
+            TIME
+            TITLE
+            USERNAME
+
+**footer** *creatingScript* ?returnvar?
+**header** *creatingScript* ?returnvar?
+
+Creates a new footer or header by evaluating the creating script.
+The id of the creaded footer or header is returnd and, if given,
+stored in the returnvar.
+
 **image** *file* *anchor|inline* *?-option value ...?*
 
 An *inline* image is part of the text, like a character (and therefore
@@ -68,6 +139,34 @@ Both types of images share the following options:
   The shortcut "styles" may be used for word/styles.xml and
   "numbering" for word/numbering.xml.
 
+**jumpto** *text* *markid* *?-option value ...?*
+
+Appends the text *text* to the last paragraph and if the text is
+clicked as link (typically Ctrl-Button-1) the text processor jumps to
+the mark with the id *markid* inside the document. 
+
+  The option/value pairs control locally the appearance of the *text*
+  within the paragraph. See [CHARACTER OPTIONS](#character) for the
+  valid options and the type of their argument.
+
+**mark** *markid*
+
+Sets the mark *markid* at the end of the last paragraph.
+
+**numberring** *subcmd* *args*
+
+The allowed sub commands are:
+
+*abstractNum*
+
+*abstractNumIds*
+
+*delete*
+
+**pagebreak**
+
+Appends a page break to the document.
+
 **pagesetup** *?-option value ...?*
 
 The allowed options are:
@@ -78,30 +177,47 @@ The allowed options are:
 
 -sizeAndOrientaion keyValueList
 
-**paragraph** *text* *?-style styleid -option value ...?*
+-defaultHeader id
+-defaultFooter id
+-firstHeader id
+-firstFooter id
+-evenHeader id
+-evenFooter id
+
+Set the respectively header or footer. The expeced id has to be return
+from a header oder footer method call.
+
+-border
+
+-pageNumbering
+
+**paragraph** *text* *?-pstyle style? ?-cstyle style? ?-option value ...?*
 
 : Appends *text* as paragraph to the content of the document. If the
-  *-style* option is given, the referenced style will be used. The
-  other options may locally overwrite a style stetting or add more
-  properties. See [PARAGRAPH OPTIONS](#paragraph) and [CHARACTER
-  OPTIONS](#character) for the valid options and the type of their
-  argument.
+  *-pstyle* option is given, the referenced paragraph style will be
+  used. If the *-cstyle* option is given the referenced character
+  style will be used. The values are first searched belong the
+  respective style names and if not found searched belong the
+  respective styles. The other options may locally overwrite a style
+  stetting or add more properties. See [PARAGRAPH OPTIONS](#paragraph)
+  and [CHARACTER OPTIONS](#character) for the valid options and the
+  type of their argument.
 
 **readpart** *part* *filename*
 
-**write** *?filename?*
 
-: Writes the object as WordprocessingML docx file to *filename*. If
-  the argument is ommited then document.docx will be used.
+**sectionend**
 
-**writepart** *part* *filename*
+Ends the last section page settings.
 
 **sectionstart** *?-option value ...?*
 
-The allowed *-option value* pairs are the same as for the *pagesetup*
-method, see there.
+Appends a new section to the document with new page settings. The
+allowed options are the same as for the method pagesetup, see there.
 
-**sectionend**
+**settings** *?-option value ...?*
+
+**simplecomment** *?-option value ...?*
 
 **simpletable** *args*
 
@@ -121,10 +237,46 @@ method, see there.
     
     : **delete** *styletype* *styleid*
 
+**table** *?-option value ...?* *creatingScript*
+
+Creates a table by defining every row and cell individually by the
+*creatingScript*. The recogniced options are
+
+-columnwidths <list of column widths>
+
+-style id
+
+-width keyvalue 
+
+-align (center|end|left|right|start)
+
+-layout
+
+-look
+
+-tableBorders
+
+-cellMarginTop
+-cellMarginStart
+-cellMarginLeftl
+-cellMarginBottom
+-cellMarginEnd
+-cellMarginRight
+
+**tablecell** *?-option value ...?*
+
+**tablerow** *?-option value ...?*
+
+**textbox** *?-option value ...?*
+
+**url** *text* *url* *?-option value ...?*
+
 **write** *?filename?*
 
-Writes the document as ".docx" to the file *filename*. If *filename*
-does not have the suffix ".docx" it will be appended to the name.
+: Writes the object as WordprocessingML docx file to *filename*. If
+  the argument is ommited then document.docx will be used.
+
+**writepart** *part* *filename*
 
 # CHARACTER OPTIONS
 
@@ -132,7 +284,11 @@ does not have the suffix ".docx" it will be appended to the name.
 
 **-color** *auto|RRGGBB hex value*
 
+**-cstyle** *id*
+
 **-dstrike** *onOffValue*
+
+**-emboss** *onOffValue*
 
 **-font** *font familiy name*
 
@@ -140,7 +296,13 @@ does not have the suffix ".docx" it will be appended to the name.
 
 If the value has no unit the integer means twentieths of a point.
 
+**-highlight** (black|blue|cyan|green|magenta|red|yellow|white|darkBlue|darkCyan|darkGreen|darkMagenta|darkRed|darkYellow|darkGray|lightGray|none)
+
 **-italic** *onOffValue*
+
+**-noProof** *onOffValue*
+
+**-rtl** *onOffValue*
 
 **-strict** *onOffValue*
 
@@ -166,6 +328,9 @@ The allowd *kind* values are:
     wavyHeavy
     wavyDouble
     none
+
+**-verticalAlign** *(baseline|superscript|subscript)
+
 
 # PARAGRAPH OPTIONS
 

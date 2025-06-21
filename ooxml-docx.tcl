@@ -411,7 +411,7 @@ namespace eval ::ooxml::docx {
                 <w:autoHyphenation w:val="true"/>
                 <w:evenAndOddHeaders/>
                 <w:compat>
-                    <w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/>
+                    <w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="14"/>
                 </w:compat>
             </w:settings>
         }
@@ -1299,7 +1299,9 @@ oo::class create ooxml::docx::docx {
                       \"height\" to be given"
             }
             Tag_wp:extent {*}$attlist
+            Tag_wp:effectExtent l 0 t 0 r 0 b 0
             Tag_wp:docPr id [llength $media] name [file tail $file]
+            Tag_wp:cNvGraphicFramePr
             my Image_graphic $rId $file
         }
     }
@@ -1944,7 +1946,7 @@ oo::class create ooxml::docx::docx {
                     error "abstractNum style id $id already exists"
                 }
                 if {[catch {
-                    $numbering appendFromScript {
+                    $numbering insertBeforeFromScript {
                         Tag_w:abstractNum w:abstractNumId $id {
                             set levelnr 0
                             foreach level $levelData {
@@ -1968,6 +1970,8 @@ oo::class create ooxml::docx::docx {
                                 incr levelnr
                             }
                         }
+                    } [$numbering selectNodes {w:num[1]}]
+                    $numbering appendFromScript {
                         Tag_w:num w:numId $id {
                             Tag_w:abstractNumId w:val $id
                         }

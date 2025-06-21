@@ -1,5 +1,5 @@
-C Added\ssome\svery\srought\sdocumentation.
-D 2025-06-18T00:24:45.509
+C Fixed\slistings:\sthe\ssequence\smodel\sof\sw:numbering\shas\sall\sw:abstractNum\selements\sbefore\sthe\sw:num\selements.
+D 2025-06-21T22:56:58.052
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -41,7 +41,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 1b06d30a6392232daf6bdb56cd69abb48b60bccfe034bd7d2cea45185d2fbc72
-F ooxml-docx.tcl 80c2d90312bc657140c55cc7dc2d75ebe1fcf7bfb734ba2e838bec55abb9f26c
+F ooxml-docx.tcl b0bd444fc32d78fc8628659de116e25d7c6eb0d864b14975db7fe572ec9256bf
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -99,8 +99,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P cb7e4026440da31560023e68fad1ee8c00d2ca49689774fc4bf686725a25b989
-R 99d4edaec44138dece72c74e690ef4aa
+P fc29503936f098ae228b51a9376402568341c1c0c5c5eb455f55f90a3f2171bb
+R 6e5d1d46f6ea93c1345109221dcffa11
 U rolf
-Z 2e0c69c4b58762ed7397de7d6a105ad4
+Z 8f9db674ca641abbf77446e3c438243a
 # Remove this line to create a well-formed Fossil manifest.

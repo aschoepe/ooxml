@@ -1944,7 +1944,7 @@ oo::class create ooxml::docx::docx {
                     error "abstractNum style id $id already exists"
                 }
                 if {[catch {
-                    $numbering appendFromScript {
+                    $numbering insertBeforeFromScript {
                         Tag_w:abstractNum w:abstractNumId $id {
                             set levelnr 0
                             foreach level $levelData {
@@ -1968,6 +1968,8 @@ oo::class create ooxml::docx::docx {
                                 incr levelnr
                             }
                         }
+                    } [$numbering selectNodes {w:num[1]}]
+                    $numbering appendFromScript {
                         Tag_w:num w:numId $id {
                             Tag_w:abstractNumId w:val $id
                         }

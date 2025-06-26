@@ -865,9 +865,9 @@ oo::class create ooxml::docx::docx {
             distR 0
             hidden 0
             locked 0
-            layoutInCell 0
+            layoutInCell 1
             allowOverlap 1
-            relativeHeight 1
+            relativeHeight 251659264
             simplePos 0
         }
         # Updated by optional user provided values
@@ -951,7 +951,7 @@ oo::class create ooxml::docx::docx {
             }
             Tag_wp:docPr id [incr id(drawingElements)] name $name
             Tag_wp:cNvGraphicFramePr {
-                Tag_a:graphicFrameLocks noChangeAspect 1
+                #Tag_a:graphicFrameLocks noChangeAspect 1
             }
             set anchor [dom fromScriptContext]
         }
@@ -1485,6 +1485,16 @@ oo::class create ooxml::docx::docx {
         Tag_a:prstGeom prst "rect" {
             Tag_a:avLst
         }
+        my addXML [dom fromScriptContext] {
+                                                <a:solidFill>
+                                                    <a:schemeClr val="lt1"/>
+                                                </a:solidFill>
+                                                <a:ln w="6350">
+                                                    <a:solidFill>
+                                                        <a:prstClr val="black"/>
+                                                    </a:solidFill>
+                                                </a:ln>
+        }            
     }
 
     method StyleCheck {type value} {
@@ -2548,7 +2558,14 @@ oo::class create ooxml::docx::docx {
                                 -forceAA CT_Boolean
                                 -compatLnSpc CT_Boolean
                             } -bodyAtts]
-                            Tag_wps:bodyPr {*}[array get bodyPrAtts] 
+                            Tag_wps:bodyPr {*}[array get bodyPrAtts] {
+                                my addXML [dom fromScriptContext] {
+                                                <a:prstTxWarp prst="textNoShape">
+                                                    <a:avLst/>
+                                                </a:prstTxWarp>
+                                                <a:noAutofit/>
+                                }
+                            }
                         }
                     }
                 }

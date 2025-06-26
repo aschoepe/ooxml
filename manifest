@@ -1,5 +1,5 @@
-C Fixed\slistings:\sthe\ssequence\smodel\sof\sw:numbering\shas\sall\sw:abstractNum\selements\sbefore\sthe\sw:num\selements.
-D 2025-06-21T22:56:58.052
+C Made\stextbox\sin\sdocx-example1.tcl\salso\swork\swith\sw365.
+D 2025-06-26T22:25:01.920
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -17,7 +17,7 @@ F docxtest.tcl d55c5fbee8d7e3d7fcb7193578abf8d554c99f87c2d3eabc2d94b61856636f38
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
 F examples/bench.tcl 9b53b74d06da7d4033374941c1fe66b2f341b4e94e60c7177564921deb619c9e
 F examples/book.jpg 89003dbedbef8431de9047390a7a04856029dedaee02ebc2c0ee2472462e8581
-F examples/docx-example1.tcl 0f17e193145b3991c1e79af80225d534842cd06615d99fee7ac0342ac88825a9 x
+F examples/docx-example1.tcl 8ef860ec344668c8d9683a695223ced63bc5d58881c8d9a2d3cb336aeb3e18b4 x
 F examples/docx-example2.tcl 84977f0b5ecbae30f581d3205327628654121405e0c2ac4888a5f425532376c5 x
 F examples/docx-example3.tcl 13b2596128cd6fea49ca173de96570ddb3ba9ab39e74539d808c1227a23b37dd x
 F examples/docx-example4-in.docx 3ae216f142325eca22df5a5a624451e39e20005b06d3fcdaca8419b977e599e5
@@ -99,8 +99,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P fc29503936f098ae228b51a9376402568341c1c0c5c5eb455f55f90a3f2171bb
-R 6e5d1d46f6ea93c1345109221dcffa11
+P 57f3652094c5ba8fab47506b39b0aded4d6db94c0846dcd2dae37c3813014cd7
+R 57f3b5a39adcf8fb45cb7337cfbf2132
 U rolf
-Z 8f9db674ca641abbf77446e3c438243a
+Z f385a08229e5a07c2a9e727d0a9fca27
 # Remove this line to create a well-formed Fossil manifest.

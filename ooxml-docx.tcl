@@ -1798,13 +1798,13 @@ oo::class create ooxml::docx::docx {
     method image {file type args} {
         my variable media
 
-        if {![file isfile $file] || ![file readable $file]} {
-            error "çannot read file \"$file\""
-        }
-        if {$type ni {inline anchor}} {
-            error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
-        }
         if {[catch {
+            if {![file isfile $file] || ![file readable $file]} {
+                error "çannot read file \"$file\""
+            }
+            if {$type ni {inline anchor}} {
+                error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
+            }
             OptVal $args "file type"
             set file [file normalize $file]
             set ind [lsearch -exact $media $file]

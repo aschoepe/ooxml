@@ -66,6 +66,7 @@ namespace eval ::ooxml::docx {
 
     set properties(abstractNumStyle) {
         -numberFormat {w:numFmt ST_NumberFormat}
+        -levelRestart {w:lvlRestart ST_DecimalNumber}
         -levelText {w:lvlText NoCheck}
         -align {w:lvlJc ST_Jc}
     }

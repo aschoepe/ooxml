@@ -1,5 +1,5 @@
-C Improved\serror\sbehaviour\sof\sthe\simage\smethod.
-D 2025-06-26T22:48:23.797
+C Added\srestart\snumbering.
+D 2025-06-28T00:07:38.159
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -41,7 +41,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 1b06d30a6392232daf6bdb56cd69abb48b60bccfe034bd7d2cea45185d2fbc72
-F ooxml-docx.tcl 3a032a819dc3f5bfc59d9d7c585aeffc8f4e467ac754ed21381cf26b26221906
+F ooxml-docx.tcl 14b152392f3f430d3c3234f7de05a57983f1b570dfbba62b04d464698d58541e
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -99,8 +99,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P f2d90cf49f034d6aceb9b930ccb93a9641fddaf19cf48e2c1ff4590d689e5818
-R 9a0141567367cddda75936ece3d630f0
+P ee98709d001f8829eb2b0a23eb68e51eb6dc7d710edbd93c7ab5928276cdeb28
+R 03a001b5cd6943b1ec5eca6aaa3be01c
 U rolf
-Z 5723a30d75dc38dd7c62d6f3c106616b
+Z 24668284baf30284b32804994648d342
 # Remove this line to create a well-formed Fossil manifest.

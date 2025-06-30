@@ -1073,16 +1073,18 @@ proc ::ooxml::docx::lib::CT_OnOff {value} {
 }
 
 proc ::ooxml::docx::lib::CT_UnsignedInt {value} {
-    if {![regexp {[-9]+} $value]} {
+    if {![regexp {[0-9]+} $value]} {
         error "expected an unsigned integer"
     }
     return $value
 }
 
-proc ::ooxml::docx::lib::OptVal {arglist {prefix ""}} {
+proc ::ooxml::docx::lib::OptVal {arglist {prefix ""} {suffix ""}} {
     if {[llength $arglist] % 2 != 0} {
         if {$prefix ne ""} {append prefix " "}
-        error "invalid arguments, expected: ${prefix}?-option value ?-option value? ..?"
+        if {$suffix ne ""} {set suffix " $suffix"}
+        error "invalid arguments, expected: ${prefix}?-option value?\
+               ?-option value? ..$suffix"
     }
     uplevel "array set opts [list $arglist]"
 }
@@ -1239,16 +1241,6 @@ proc ::ooxml::docx::lib::ST_CharacterSpacing {value} {
         doNotCompress
         compressPunctuation
         compressPunctuationAndJapaneseKana
-    }
-    if {$value in $values} {
-        return $value
-    }
-    error "unknown character spacing type \"$value\", expected one of\
-            [AllowedValues $values]"
-}
-
-proc ::ooxml::docx::lib::ST_Coordinate32 {value} {
-    set values {
     }
     if {$value in $values} {
         return $value

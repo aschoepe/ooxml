@@ -2420,7 +2420,7 @@ oo::class create ooxml::docx::docx {
         set script [lindex $args end]
         set tablecontext "table"
         if {[catch {
-            OptVal [lrange $args 0 end-1]
+            OptVal [lrange $args 0 end-1] "table" "script"
             $body appendFromScript {
                 Tag_w:tbl {
                     my TblPr
@@ -2451,7 +2451,7 @@ oo::class create ooxml::docx::docx {
             error "method tablecell called outside of table row script context"
         }
         set script [lindex $args end]
-        OptVal [lrange $args 0 end-1]
+        OptVal [lrange $args 0 end-1] "tablecell" "script"
         set tablecontext ""
         try {
             Tag_w:tc {
@@ -2474,11 +2474,12 @@ oo::class create ooxml::docx::docx {
         my variable tablecontext
 
         if {$tablecontext ne "table"} {
-            return -code error "method tablerow called outside of table script context"
+            return -code error "method tablerow called outside\
+                                of table script context"
         }
         set tablecontext "row"
         set script [lindex $args end]
-        OptVal [lrange $args 0 end-1]
+        OptVal [lrange $args 0 end-1] "tablerow" "script" 
         try {
             Tag_w:tr {
                 my TrPr

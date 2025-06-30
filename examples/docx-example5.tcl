@@ -4,6 +4,7 @@ exec tclsh8.6 "$0" "$@"
 
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
+source strings.tcl
 namespace import ::ooxml::docx::docx
 
 set docx [docx new]
@@ -52,22 +53,23 @@ $docx paragraph "Third" -numberingStyle 3 -level 0
 
 $docx numbering abstractNum 4 {
     {
-        -numberFormat upperRoman
-        -levelText "%1."
+        -numberFormat bullet
+        -levelText ""
         -start 3
-        -indentation {start 1cm hanging 0.5cm}
+        -indentation {start 1cm hanging 1.5cm}
+        -font Symbol
     }
     {
-        -numberFormat chicago
-        -levelText "%2"
+        -numberFormat bullet
+        -levelText "/"
         -indentation {start 2cm hanging 0.5cm}
     }
 }
-$docx paragraph "First" -numberingStyle 1
-$docx paragraph "Second" -numberingStyle 1 -level 0
-$docx paragraph "Sub Second frist" -numberingStyle 1 -level 1
-$docx paragraph "Sub Second second" -numberingStyle 1 -level 1 -pstyle mystyle
-$docx paragraph "Third" -numberingStyle 1 -level 0
+$docx paragraph "First $loreipsum" -numberingStyle 4
+$docx paragraph "Second" -numberingStyle 4 -level 0
+$docx paragraph "Sub Second frist" -numberingStyle 4 -level 1
+$docx paragraph "Sub Second second" -numberingStyle 4 -level 1 -pstyle mystyle
+$docx paragraph "Third" -numberingStyle 4 -level 0
 
 $docx write docx-example5.docx
 $docx destroy

@@ -1232,9 +1232,17 @@ oo::class create ooxml::docx::docx {
         set savedcontext $context
         set body $root
         set context $what$nr
-        if {[catch {uplevel 2 [list eval $script]} errMsg]} {
+        if {[catch {uplevel 2 [list eval $script]} errMsg errVals]} {
             set body $savedbody
             set context $savedcontext
+            set errorinfo [dict get $errVals -errorinfo]
+            set ind [string first "(\"eval\" body line " $errorinfo]
+            if {$ind > -1} {
+                set errMsg [string range $errorinfo 0 $ind-1]
+                if {[regexp {(\d+)} [string range $errorinfo $ind end] --> linenr]} {
+                    append errMsg "($what script body line $linenr)" 
+                }
+            }
             return -code error $errMsg
         }
         set body $savedbody
@@ -1644,9 +1652,9 @@ oo::class create ooxml::docx::docx {
     }
     
     method append {text args} {
-        OptVal $args "text"
-        set p [my LastParagraph]
         if {[catch {
+            OptVal $args "text"
+            set p [my LastParagraph]
             $p appendFromScript {
                 Tag_w:r {
                     my RPr
@@ -1696,42 +1704,46 @@ oo::class create ooxml::docx::docx {
     method configure {args} {
         my variable docs
 
-        OptVal $args
-        set coreroot [$docs(docProps/core.xml) documentElement]
-        $coreroot appendFromScript {
-            foreach elem {
-                cp:category
-                cp:contentStatus
-                dcterms:created
-                dc:creator
-                dc:description
-                dc:identifier
-                cp:keywords
-                dc:language
-                cp:lastModifiedBy
-                cp:lastPrinted
-                dcterms:modified
-                cp:revision
-                dc:subject
-                dc:title
-                cp:version
-            } {
-                lassign [split $elem :] prefix option
-                set value [my EatOption -$option]
-                if {$value ne ""} {
-                    set attlist ""
-                    if {$prefix eq "dcterms"} {
-                        set value [W3CDTF $value]
-                        lappend attlist xsi:type dcterms:W3CDTF
+        if {[catch {
+            OptVal $args
+            set coreroot [$docs(docProps/core.xml) documentElement]
+            $coreroot appendFromScript {
+                foreach elem {
+                    cp:category
+                    cp:contentStatus
+                    dcterms:created
+                    dc:creator
+                    dc:description
+                    dc:identifier
+                    cp:keywords
+                    dc:language
+                    cp:lastModifiedBy
+                    cp:lastPrinted
+                    dcterms:modified
+                    cp:revision
+                    dc:subject
+                    dc:title
+                    cp:version
+                } {
+                    lassign [split $elem :] prefix option
+                    set value [my EatOption -$option]
+                    if {$value ne ""} {
+                        set attlist ""
+                        if {$prefix eq "dcterms"} {
+                            set value [W3CDTF $value]
+                            lappend attlist xsi:type dcterms:W3CDTF
+                        }
+                        foreach currentnode [$coreroot selectNodes {*[local-name()=$option]}] {
+                            $currentnode delete
+                        }
+                        ::tdom::fsnewNode $elem $attlist {Text $value}
                     }
-                    foreach currentnode [$coreroot selectNodes {*[local-name()=$option]}] {
-                        $currentnode delete
-                    }
-                    ::tdom::fsnewNode $elem $attlist {Text $value}
                 }
             }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
         }
-        my CheckRemainingOpts
     }
 
     method field {field} {
@@ -1786,14 +1798,22 @@ oo::class create ooxml::docx::docx {
         if {$returnvar ne ""} {
             upvar $returnvar result
         }
-        set result [my HeaderFooter footer $script]
+        if {[catch {
+            set result [my HeaderFooter footer $script]
+        } errMsg]} {
+            return -code error $errMsg
+        }
     }
     
     method header {script {returnvar ""}} {
         if {$returnvar ne ""} {
             upvar $returnvar result
         }
-        set result [my HeaderFooter header $script]
+        if {[catch {
+            set result [my HeaderFooter header $script]
+        } errMsg]} {
+            return -code error $errMsg
+        }
     }
     
     method image {file type args} {
@@ -1881,9 +1901,10 @@ oo::class create ooxml::docx::docx {
 
     method jumpto {text name args} {
         my variable links
-        OptVal $args "text mark"
-        set p [my LastParagraph 1]
+
         if {[catch {
+            OptVal $args "text mark"
+            set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:hyperlink w:anchor $name {
                     Tag_w:r {
@@ -1904,6 +1925,7 @@ oo::class create ooxml::docx::docx {
     method mark {name} {
         my variable id
         my variable links
+
         if {[info exists links($name)]} {
             return -code error "mark \"$name\" is not unique"
         }
@@ -1935,7 +1957,7 @@ oo::class create ooxml::docx::docx {
         switch $cmd {
             "abstractNum" {
                 if {[llength $args] != 2} {
-                    error "wrong # of argumentes, expecting abstractNumId <list with each element a level description>"
+                    return -code error "wrong # of argumentes, expecting abstractNumId <list with each element a level description>"
                 }
                 lassign $args id levelData
                 set style [$numbering selectNodes {
@@ -1987,12 +2009,13 @@ oo::class create ooxml::docx::docx {
             }
             "delete" {
                 if {[llength $args] != 2} {
-                    error "wrong number of arguments for the subcommand \"delete\", expected\
+                    return -code error "wrong number of arguments\
+                               for the subcommand \"delete\", expected\
                                the style type and the style ID"
                 }
                 lassign $args type id
                 if {$type ni {abstractNum num}} {
-                    error "unknown style type \"type\""
+                    return -code error "unknown style type \"type\""
                 }
                 switch $type {
                     "abstractNum" {
@@ -2005,7 +2028,7 @@ oo::class create ooxml::docx::docx {
                 }
             }
             default {
-                error "invalid subcommand \"$cmd\""
+                return -code error "invalid subcommand \"$cmd\""
             }
         }
     }
@@ -2032,8 +2055,8 @@ oo::class create ooxml::docx::docx {
         my variable setuproot
         my variable pagesetup
 
-        OptVal $args
         if {[catch {
+            OptVal $args
             $setuproot appendFromScript {
                 my SectionCommon
             }
@@ -2086,10 +2109,10 @@ oo::class create ooxml::docx::docx {
         my variable sectionsetup
         
         if {$sectionsetup eq ""} {
-            error "no section started"
+            return -code error "no section started"
         }
-        OptVal $sectionsetup
         if {[catch {
+            OptVal $sectionsetup
             $body appendFromScript {
                 Tag_w:p {
                     Tag_w:pPr {
@@ -2110,18 +2133,18 @@ oo::class create ooxml::docx::docx {
         my variable setuproot
 
         
-        # This way in any case a (maybe empty) w:sectPr tag (via
-        # SectionCommon) will be created which helps to keep things
-        # sane in case there was no pagesetup and no other section
-        # before.
-        if {$sectionsetup ne ""} {
-            OptVal $sectionsetup
-        } elseif {$pagesetup ne ""} {
-            OptVal $pagesetup
-        } else {
-            OptVal ""
-        }
         if {[catch {
+            # This way in any case a (maybe empty) w:sectPr tag (via
+            # SectionCommon) will be created which helps to keep things
+            # sane in case there was no pagesetup and no other section
+            # before.
+            if {$sectionsetup ne ""} {
+                OptVal $sectionsetup
+            } elseif {$pagesetup ne ""} {
+                OptVal $pagesetup
+            } else {
+                OptVal ""
+            }
             $body appendFromScript {
                 Tag_w:p {
                     Tag_w:pPr {
@@ -2139,8 +2162,8 @@ oo::class create ooxml::docx::docx {
         # her for test to have the error message pointing to the line
         # with the error and not at the place the given arguments are
         # evaluated.
-        OptVal $args
         if {[catch {
+            OptVal $args
             $setuproot appendFromScript {
                 my SectionCommon
             }
@@ -2158,7 +2181,6 @@ oo::class create ooxml::docx::docx {
         my variable docs
         variable ::ooxml::docx::properties
 
-        OptVal $args
         if {[info exists docs(word/settings.xml)]} {
             $docs(word/settings.xml) delete
         } else {
@@ -2169,6 +2191,7 @@ oo::class create ooxml::docx::docx {
         }]
         set settings [$docs(word/settings.xml) documentElement]
         if {[catch {
+            OptVal $args
             $settings appendFromScript {
                 my Create $properties(settings)
             }
@@ -2208,8 +2231,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         variable ::ooxml::docx::properties
 
-        OptVal $args "tabledata"
         if {[catch {
+            OptVal $args "tabledata"
             set firstStyle [my EatOption -firstStyle]
             set lastStyle [my EatOption -lastStyle]
             $body appendFromScript {
@@ -2561,10 +2584,10 @@ oo::class create ooxml::docx::docx {
     }
     
     method url {text url args} {
-        OptVal $args "text url"
         set rId [my Add2Relationships hyperlink $url]
         set p [my LastParagraph 1]
         if {[catch {
+            OptVal $args "text url"
             $p appendFromScript {
                 Tag_w:hyperlink r:id $rId {
                     Tag_w:r {

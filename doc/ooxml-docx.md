@@ -184,7 +184,7 @@ The allowed options are:
 -evenHeader id
 -evenFooter id
 
-Set the respectively header or footer. The expeced id has to be return
+Set the respectively header or footer. The expeced id has to be returned
 from a header oder footer method call.
 
 -border

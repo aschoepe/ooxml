@@ -1,5 +1,5 @@
-C Improved\serror\smessages.\sRemoved\snot\sused\stype\scheck.
-D 2025-06-30T23:32:19.161
+C Corrected\stypo.
+D 2025-07-09T08:31:48.301
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -11,7 +11,7 @@ F configure 22702eb42175ba7df531f881f7340b3c7ddf31d59b2c7c43c32d4505838eb5cb x
 F configure.ac 4bc3734c61273c016a5b0c264fc31baefd2bab71816626d551d245048f41e4c8
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml-docx-dev.md ace69339089eeb517f26ec9fd4d90827532e5764b472aa342d5f693c4dbca173
-F doc/ooxml-docx.md f4022c77b07c5aa237b659e2c6077dc973ac549182adbaac4b830798535defc6
+F doc/ooxml-docx.md 61db46812590f9fab5466e1a709e68287d25de3b69fe4eb33e1faf8000c0924d
 F doc/ooxml.md 8e9af22574db8fdd0de01894d6f0cdb06a975c7e01bad5a024425d7fc0cf1c44
 F docxtest.tcl d55c5fbee8d7e3d7fcb7193578abf8d554c99f87c2d3eabc2d94b61856636f38
 F examples/array.tcl 604dc1907b39797a2fa0d065f44b7923cb48af2fff4ce99bda6cd717af94ddbb
@@ -99,8 +99,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 0f268beb70d2fa1cbf1d5e2f5d6e988ca5743ee9292dc0939395f2bb644ea764
-R 94328a4a0903ea8fea022b2e6aa99350
+P 14912390c76c89051e2f879e710606756656a2a97f2ccbbb6946dd1225025be4
+R ab52a404c1e75500f434d8b3b35e3312
 U rolf
-Z f302d3120c3cf65490b964fac437858d
+Z 05a5161d4d9f8fc095bbf86dd3265507
 # Remove this line to create a well-formed Fossil manifest.

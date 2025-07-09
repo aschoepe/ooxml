@@ -1302,6 +1302,18 @@ proc ::ooxml::docx::lib::ST_DropCap {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_EdnPos {value} {
+    set values {
+        sectEnd
+        docEnd
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown endnote position type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_EighthPointMeasure {value} {
     if {[string is integer -strict $value] && $value >= 0} {
         return $value
@@ -1329,6 +1341,20 @@ proc ::ooxml::docx::lib::ST_Emu {value} {
         pi {set factor 152400}
     }
     return [expr {round($value*$factor)}]
+}
+
+proc ::ooxml::docx::lib::ST_FtnPos {value} {
+    set values {
+        pageBottom
+        beneathText
+        sectEnd
+        docEnd
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown footnote position type \"$value\", expected one of\
+            [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_HeightRule {value} {
@@ -1593,6 +1619,19 @@ proc ::ooxml::docx::lib::ST_RelFromV {value} {
     }
     error "unknown vertical relative from value \"$value\", expected one of:\
                [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_RestartNumber {value} {
+    set values {
+        continuous
+        eachSect
+        eachPage
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown foot-/endnote restart numbering type  \"$value\", expected\
+           one of: [AllowedValues $values]"
 }
 
 proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {

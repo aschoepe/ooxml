@@ -178,6 +178,18 @@ namespace eval ::ooxml::docx {
     }
 
     set properties(sectionsetup1) {
+        +w:footnotePr {
+            -fn_pos {w:pos ST_FtnPos}
+            -fn_numFmt {w:numFmt ST_NumberFormat}
+            -fn_numStart {w:numStart ST_DecimalNumber}
+            -fn_numRestart {w:numRestart ST_RestartNumber}
+        }
+        +w:endnotePr {
+            -en_pos {w:pos ST_EdnPos}
+            -en_numFmt {w:numFmt ST_NumberFormat}
+            -en_numStart {w:numStart ST_DecimalNumber}
+            -en_numRestart {w:numRestart ST_RestartNumber}
+        }        
         -sizeAndOrientaion {w:pgSz {
             {height h} ST_TwipsMeasure
             {orientation orient} ST_PageOrientation
@@ -488,12 +500,12 @@ namespace eval ::ooxml::docx {
         w:dropDownList w:dstrike w:dynamicAddress w:eastAsianLayout
         w:effect w:em w:embedBold w:embedBoldItalic w:embedItalic
         w:embedRegular w:embedSystemFonts w:embedTrueTypeFonts
-        w:emboss w:enabled w:encoding w:end w:endnote w:endnotePr
+        w:emboss w:enabled w:encoding w:end w:endnote
         w:endnoteRef w:endnoteReference w:endnotes w:entryMacro
         w:equation w:evenAndOddHeaders w:exitMacro w:family w:ffData
         w:fHdr w:fieldMapData w:fitText w:flatBorders w:fldChar
         w:fldData w:fldSimple w:font w:fonts w:footerReference
-        w:footnote w:footnoteLayoutLikeWW8 w:footnotePr w:footnoteRef
+        w:footnote w:footnoteLayoutLikeWW8 w:footnoteRef
         w:footnoteReference w:footnotes w:forceUpgrade
         w:forgetLastTabAlignment w:format w:formProt w:formsDesign
         w:frame w:frameLayout w:framePr w:frameset w:framesetSplitbar
@@ -587,8 +599,9 @@ namespace eval ::ooxml::docx {
     }
     
     foreach tag {
-        w:tabs w:pPr w:rPr w:tblCellMar w:tblBorders w:tblPr w:tcBorders
-        w:tcMar w:tcPr w:trPr w:numPr w:pBdr
+        w:footnotePr w:endnotePr w:numPr w:pBdr w:pPr w:rPr w:tabs
+        w:tblBorders w:tblCellMar w:tblPr w:tcBorders w:tcMar w:tcPr
+        w:trPr
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
     }
@@ -1151,6 +1164,7 @@ oo::class create ooxml::docx::docx {
         my variable id
 
         upvar opts opts
+        upvar optsknown optsknown
         if {![info exists docs(word/comments.xml)]} {
             my Add2Relationships comments comments.xml
             set docs(word/comments.xml) [dom parse {
@@ -1189,6 +1203,46 @@ oo::class create ooxml::docx::docx {
         return ""
     }
 
+    method FootnoteEndnote {type script} {
+        my variable docs
+        my variable id
+        my variable body
+        variable ::ooxml::docx::xmlns
+
+        set types "${type}s"
+        if {![info exists docs(word/$types.xml)]} {
+            my Add2Relationships $types $types.xml
+            set document [dom createDocumentNS $xmlns(w) w:$types]
+            set docs(word/$types.xml) $document
+            $document documentElement notesroot
+            foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+                $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
+            }
+            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+        } else {
+            set notesroot [$docs(word/$types.xml) documentElement]
+        }
+        $notesroot appendFromScript {
+            Tag_w:$type w:id [incr id($types)]
+        }
+        set savedbody $body
+        set body [$notesroot lastChild]
+        if {[catch {uplevel 2 [list eval $script]} errMsg errVals]} {
+            set body $savedbody
+            set errorinfo [dict get $errVals -errorinfo]
+            set ind [string first "(\"eval\" body line " $errorinfo]
+            if {$ind > -1} {
+                set errMsg [string range $errorinfo 0 $ind-1]
+                if {[regexp {(\d+)} [string range $errorinfo $ind end] --> linenr]} {
+                    append errMsg "($type script body line $linenr)" 
+                }
+            }
+            return -code error $errMsg
+        }
+        set body $savedbody
+        return $id($types)
+    }
+    
     method GetDocDefault {styles} {
         # styles has the content model sequence:
         # docDefaults? latentStyles? styles*
@@ -1746,6 +1800,23 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method endnote {args} {
+        if {[catch {
+            set script [lindex $args end]
+            OptVal [lrange $args 0 end-1] "endnote" "script"
+            set id [my FootnoteEndnote endnote $script]
+            set p [my LastParagraph 1]
+            $p appendFromScript {
+                Tag_w:r {
+                    my RPr
+                    Tag_w:endnoteReference w:id $id
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
     method field {field} {
         my variable docs
 
@@ -1800,6 +1871,23 @@ oo::class create ooxml::docx::docx {
         }
         if {[catch {
             set result [my HeaderFooter footer $script]
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    method footnote {args} {
+        if {[catch {
+            set script [lindex $args end]
+            OptVal [lrange $args 0 end-1] "footnote" "script"
+            set id [my FootnoteEndnote footnote $script]
+            set p [my LastParagraph 1]
+            $p appendFromScript {
+                Tag_w:r {
+                    my RPr
+                    Tag_w:footnoteReference w:id $id
+                }
+            }
         } errMsg]} {
             return -code error $errMsg
         }
@@ -2226,7 +2314,7 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
-    
+
     method simpletable {tabledata args} {
         my variable body
         variable ::ooxml::docx::properties

@@ -1229,14 +1229,7 @@ oo::class create ooxml::docx::docx {
         set body [$notesroot lastChild]
         if {[catch {uplevel 2 [list eval $script]} errMsg errVals]} {
             set body $savedbody
-            set errorinfo [dict get $errVals -errorinfo]
-            set ind [string first "(\"eval\" body line " $errorinfo]
-            if {$ind > -1} {
-                set errMsg [string range $errorinfo 0 $ind-1]
-                if {[regexp {(\d+)} [string range $errorinfo $ind end] --> linenr]} {
-                    append errMsg "($type script body line $linenr)" 
-                }
-            }
+            my ProcessErrorinfo $type
             return -code error $errMsg
         }
         set body $savedbody
@@ -1289,14 +1282,7 @@ oo::class create ooxml::docx::docx {
         if {[catch {uplevel 2 [list eval $script]} errMsg errVals]} {
             set body $savedbody
             set context $savedcontext
-            set errorinfo [dict get $errVals -errorinfo]
-            set ind [string first "(\"eval\" body line " $errorinfo]
-            if {$ind > -1} {
-                set errMsg [string range $errorinfo 0 $ind-1]
-                if {[regexp {(\d+)} [string range $errorinfo $ind end] --> linenr]} {
-                    append errMsg "($what script body line $linenr)" 
-                }
-            }
+            my ProcessErrorinfo $what
             return -code error $errMsg
         }
         set body $savedbody
@@ -1463,6 +1449,20 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
 
+    method ProcessErrorinfo {what} {
+        upvar errMsg errMsg
+        upvar errVals errVals
+
+        set errorinfo [dict get $errVals -errorinfo]
+        set ind [string first "(\"eval\" body line " $errorinfo]
+        if {$ind > -1} {
+            set errMsg [string range $errorinfo 0 $ind-1]
+            if {[regexp {(\d+)} [string range $errorinfo $ind end] --> linenr]} {
+                append errMsg "($what script body line $linenr)" 
+            }
+        }
+    }
+    
     method PPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
@@ -1736,9 +1736,10 @@ oo::class create ooxml::docx::docx {
             # The nested catch is needed to ensure body is set back
             if {[catch {
                 uplevel [list eval $script]
-            } errMsg]} {
+            } errMsg errVals]} {
                 set body $savedbody
                 set context $savedcontext
+                my ProcessErrorinfo "comment"
                 error $errMsg
             }
         } errMsg]} {

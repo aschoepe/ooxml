@@ -2610,8 +2610,9 @@ oo::class create ooxml::docx::docx {
                                     set savedbody $body
                                     set body [dom fromScriptContext]
                                     # The nested catch is needed to ensure body is set back
-                                    if {[catch {uplevel [list eval $script]} errMsg]} {
+                                    if {[catch {uplevel [list eval $script]} errMsg errVals]} {
                                         set body $savedbody
+                                        my ProcessErrorinfo "textbox"
                                         error $errMsg
                                     }
                                     set body $savedbody

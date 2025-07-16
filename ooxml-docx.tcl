@@ -1353,43 +1353,6 @@ oo::class create ooxml::docx::docx {
         }
     }
     
-    # For now only a debuging and developing helper method, not
-    # exposed.
-    method initWord {docxfile} {
-        my variable docs
-
-        package require Tcl 9.0-
-        package require fileutil::traverse
-        
-        set base [file join [zipfs root] InitWord]
-        zipfs mount $docxfile $base
-        ::fileutil::traverse filesInDocx $base
-        set prefixlen [string length "$base/word/"]
-        set pathstart [string length "$base/"]
-        set files [list]
-        filesInDocx foreach file {
-            if {[string range $file 0 $prefixlen-1] ne "$base/word/"} {
-                continue
-            }
-            if {[file isdirectory $file]} {
-                continue
-            }
-            lappend files [string range $file $pathstart end]
-        }
-        zipfs unmount $base
-        ::ooxml::ZipOpen $docxfile
-        foreach file $files {
-            if {$file eq "word/document.xml"} {
-                continue
-            }
-            if {[info exists docs($file)]} {
-                $docs($file) delete
-            }
-            set docs($file) [::ooxml::ZipReadParse $file]
-        }
-        ::ooxml::ZipClose
-    }
-    
     method LastParagraph {{create 0}} {
         my variable body
         
@@ -1988,6 +1951,39 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
+    method initWord {docxfile} {
+        my variable docs
+
+        package require Tcl 9.0-
+        package require fileutil::traverse
+        
+        set base [file join [zipfs root] InitWord]
+        zipfs mount $docxfile $base
+        ::fileutil::traverse filesInDocx $base
+        set prefixlen [string length "$base/word/"]
+        set pathstart [string length "$base/"]
+        set files [list]
+        filesInDocx foreach file {
+            if {[file isdirectory $file]} {
+                continue
+            }
+            lappend files [string range $file $pathstart end]
+        }
+        zipfs unmount $base
+        ::ooxml::ZipOpen $docxfile
+        foreach file $files {
+            if {$file eq "word/document.xml"} {
+                continue
+            }
+            if {[info exists docs($file)]} {
+                $docs($file) delete
+            }
+            # TODO: Should handle media data in template
+            catch {set docs($file) [::ooxml::ZipReadParse $file]}
+        }
+        ::ooxml::ZipClose
+    }
+    
     method jumpto {text name args} {
         my variable links
 

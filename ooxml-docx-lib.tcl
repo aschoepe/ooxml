@@ -1050,6 +1050,13 @@ proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
     return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
 }
 
+if {0} {
+    # Only used to generate documentation stubs for types
+    proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
+        return "===[lindex [info level -1] 0]===[join $values |]"
+    }
+}
+
 proc ::ooxml::docx::lib::CT_Boolean {value} {
     if {![string is boolean -strict $value]} {
         error "expected a Tcl boolean value"
@@ -1939,4 +1946,4 @@ proc ::ooxml::docx::lib::W3CDTF {value} {
     return $value
 }
 
-package provide ::ooxml::docx::lib 0.6
+package provide ooxml::docx::lib 0.6

@@ -33,7 +33,7 @@ package require Tcl 8.6.7-
 package require tdom 0.9.6-
 package require ooxml
 catch {source [file join [file dir [info script]] ooxml-docx-lib.tcl]}
-package require ::ooxml::docx::lib
+package require ooxml::docx::lib
 
 namespace eval ::ooxml::docx {
 
@@ -2784,4 +2784,4 @@ oo::class create ooxml::docx::docx {
     }
 }
 
-package provide ::ooxml::docx 0.6
+package provide ooxml::docx 0.6

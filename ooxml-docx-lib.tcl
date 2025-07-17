@@ -1734,6 +1734,28 @@ proc ::ooxml::docx::lib::ST_TextAnchoringType {value} {
            [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_TextDirection {value} {
+    set values {
+        btLr
+        lr
+        lrTb
+        lrTbV
+        lrV
+        rl
+        rlV
+        tb
+        tbLrV
+        tbRl
+        tbRlV
+        tbV
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown TextDirection value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_TextHorzOverflowType {value} {
     set values {
         overflow

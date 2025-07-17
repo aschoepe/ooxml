@@ -80,6 +80,12 @@ namespace eval ::ooxml::docx {
         -vspan {w:vMerge ST_Merge}
     }
 
+    set properties(cell1) {
+        -textDirection {w:textDirection ST_TextDirection}
+        -tcFitText {w:tcFitText CT_OnOff}
+        -hideMark {w:hideMark CT_OnOff}
+    }
+
     set properties(cellMargins) {
         -cellMarginTop {w:top {
             type ST_TblWidth
@@ -1616,6 +1622,7 @@ oo::class create ooxml::docx::docx {
             Tag_w:tcMar {
                 my Create $properties(cellMargins)
             }
+            my Create $properties(cell2)
         }
     }
 

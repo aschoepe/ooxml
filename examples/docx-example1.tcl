@@ -66,7 +66,10 @@ $docx append " and you can freely combine them " -fontsize 15pt \
 $docx append " which isn't so important because using them all would be ugly.\
                $loreipsum "
 $docx mark mymark
-$docx append "At the start of this sentence is a jump mark."
+$docx append "At the start of this sentence is a jump mark. "
+$docx markstart mymark1
+$docx append "The whole sentence is a mark."
+$docx markend mymark1
 
 # Style heritage:
 $docx style paragraph Base -font "Arial" -color 101010 -fontsize 12pt
@@ -108,6 +111,9 @@ $docx append " "
 $docx url "The url method also allows mailto links." mailto:pointsman@gmx.net -color 0000ff
 $docx append " "
 $docx url "The url method also allows mailto links with pre-set subject." "mailto:pointsman@gmx.net?subject=Feeback to your silly example document" -color 0000ff
+$docx append " "
+$docx jumpto "This is a link to a bookmark content inside the document." mymark1 -underline double
+$docx append " "
 
 
 $docx paragraph "This is a text frame. $loreipsum" -textframe {

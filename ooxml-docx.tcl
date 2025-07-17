@@ -662,7 +662,7 @@ oo::class create ooxml::docx::docx {
         my variable pagesetup
         my variable sectionsetup
         my variable tablecontext
-        my variable links
+        my variable bookmarks
         my variable id
 
         variable ::ooxml::docx::xmlns
@@ -1985,7 +1985,7 @@ oo::class create ooxml::docx::docx {
     }
     
     method jumpto {text name args} {
-        my variable links
+        my variable bookmarks
 
         if {[catch {
             OptVal $args "text mark"
@@ -2002,24 +2002,51 @@ oo::class create ooxml::docx::docx {
         } errMsg]} {
             return -code error $errMsg
         }
-        if {![info exists links($name)]} {
-            set links($name) 0
+        if {![info exists bookmarks($name)]} {
+            set bookmarks($name) 0
         }
     }
     
     method mark {name} {
-        my variable id
-        my variable links
+        if {[catch {
+            my markstart $name
+            my markend $name
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
 
-        if {[info exists links($name)]} {
+    method markend {name} {
+        my variable id
+        my variable bookmarks
+        
+        if {![info exists bookmarks($name)] || $bookmarks($name) == 0} {
+            return -code error "A mark span with the name \"$name\" is\
+                                not started."
+        }
+        if {$bookmarks($name) < 0} {
+            return -code error "The mark with the name \"$name\" is\
+                                already ended."
+        }
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:bookmarkEnd w:id $bookmarks($name)
+        }
+        set bookmarks($name) "-$bookmarks($name)"
+    }
+    
+    method markstart {name} {
+        my variable id
+        my variable bookmarks
+        
+        if {[info exists bookmarks($name)] && $bookmarks($name) > 0} {
             return -code error "mark \"$name\" is not unique"
         }
         set p [my LastParagraph 1]
         $p appendFromScript {
-            Tag_w:bookmarkStart w:id [incr id(marks)] w:name $name
-            Tag_w:bookmarkEnd w:id $id(marks)
+            Tag_w:bookmarkStart w:id [incr id(bookmarks)] w:name $name
         }
-        set links($name) 1
+        set bookmarks($name) $id(bookmarks)
     }
     
     method numbering {cmd args} {

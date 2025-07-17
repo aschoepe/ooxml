@@ -80,7 +80,7 @@ namespace eval ::ooxml::docx {
         -vspan {w:vMerge ST_Merge}
     }
 
-    set properties(cell1) {
+    set properties(cell2) {
         -textDirection {w:textDirection ST_TextDirection}
         -tcFitText {w:tcFitText CT_OnOff}
         -hideMark {w:hideMark CT_OnOff}
@@ -1788,7 +1788,7 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method field {field} {
+    method field {field {switches ""}} {
         my variable docs
 
         # TODO: field formating / switches
@@ -1805,10 +1805,12 @@ oo::class create ooxml::docx::docx {
             CREATEDATE
             DATE
             FILESIZE
-            PAGE
             NUMPAGES
+            PAGE
+            REF
             SAVEDATE
             SECTION
+            SEQ
             TIME
             TITLE
             USERNAME
@@ -1824,7 +1826,7 @@ oo::class create ooxml::docx::docx {
             }
             Tag_w:r {
                 Tag_w:instrText {
-                    Text $nfield
+                    Text "$nfield $switches"
                 }
             }
             Tag_w:r {

@@ -39,7 +39,22 @@ namespace eval ::ooxml::docx {
 
     namespace export docx
     
+    # These are the acually used as namespace variables
     variable xmlns
+    variable properties
+    variable staticDocx
+    # These variables are only used in the namespace setup and
+    # definded here only to avoid changes of possibly global variables
+    # with the same name for Tcl < 9.0
+    # (See   https://core.tcl-lang.org/tips/doc/trunk/tip/278.md
+    # "Fix Variable Name Resolution Quirks"
+    variable BorderOpts
+    variable borderOptions
+    variable property
+    variable option
+    variable name
+    variable xml
+    variable tag
 
     array set xmlns {
         a http://schemas.openxmlformats.org/drawingml/2006/main
@@ -438,7 +453,7 @@ namespace eval ::ooxml::docx {
             <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14"/>
         }
     } {
-        set ::ooxml::docx::staticDocx($name) $xml
+        set staticDocx($name) $xml
     }
 
     foreach tag {

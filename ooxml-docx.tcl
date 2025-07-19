@@ -39,7 +39,7 @@ namespace eval ::ooxml::docx {
 
     namespace export docx
     
-    # These are the acually used as namespace variables
+    # These are acually used as namespace variables
     variable xmlns
     variable properties
     variable staticDocx

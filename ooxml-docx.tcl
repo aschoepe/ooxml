@@ -1880,7 +1880,6 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "footnote" "script"
-            my EatOption -refstyle RStyle
             set id [my FootnoteEndnote footnote \
                         [my EatOption -refstyle RStyle] $script]
             set p [my LastParagraph 1]

@@ -1224,7 +1224,7 @@ oo::class create ooxml::docx::docx {
         return ""
     }
 
-    method FootnoteEndnote {type script} {
+    method FootnoteEndnote {type refstyle script} {
         my variable docs
         my variable id
         my variable body
@@ -1253,6 +1253,15 @@ oo::class create ooxml::docx::docx {
             my ProcessErrorinfo $type
             return -code error $errMsg
         }
+        set firstp [$body selectNodes {w:p[1]}]
+        $firstp insertBeforeFromScript {
+            Tag_w:r {
+                if {$refstyle ne ""} {
+                    Tag_w:rPr w:val $refstyle
+                }
+                Tag_w:${type}Ref
+            }
+        } [$firstp selectNodes {w:r[1]}]
         set body $savedbody
         return $id($types)
     }
@@ -1790,7 +1799,8 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "endnote" "script"
-            set id [my FootnoteEndnote endnote $script]
+            set id [my FootnoteEndnote endnote \
+                        [my EatOption -refstyle RStyle] $script]
             set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:r {
@@ -1868,7 +1878,9 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "footnote" "script"
-            set id [my FootnoteEndnote footnote $script]
+            my EatOption -refstyle RStyle
+            set id [my FootnoteEndnote footnote \
+                        [my EatOption -refstyle RStyle] $script]
             set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:r {

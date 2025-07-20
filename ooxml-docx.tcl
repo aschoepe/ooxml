@@ -1257,7 +1257,9 @@ oo::class create ooxml::docx::docx {
         $firstp insertBeforeFromScript {
             Tag_w:r {
                 if {$refstyle ne ""} {
-                    Tag_w:rPr w:val $refstyle
+                    Tag_w:rPr {
+                        Tag_w:rStyle w:val $refstyle
+                    }
                 }
                 Tag_w:${type}Ref
             }

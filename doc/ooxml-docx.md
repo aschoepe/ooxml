@@ -10,8 +10,8 @@
     
 # DESCRIPTION
 
-The command *::ooxml::docx* creates an ECMA-376 Office Open XML
-WordprocessingML object command and returns that. The object has
+The command *::ooxml::docx* creates an object which is able to create ECMA-376 Office Open XML
+WordprocessingML document returns that object. The object has
 methods to add and style content. The more vulgo named ".docx" files
 created by the object can be read by word processing programs as
 libreOffice or Word.
@@ -39,15 +39,17 @@ pairs may be in any order. If a key is given more than one time then
 the last one wins. An unknown key is reported as error. In almost any
 case the value given to the option or key will be type checked.
 
+Content to the document is added top down.
+
 The created docx object commands currently support the following
 methods:
 
 **append** *text* *?-option value ...?*
 
 : Appends *text* to the last paragraph of the content of the document.
-  The option/value pairs control locally the appearance of the *text*
-  within the paragraph. See [CHARACTER OPTIONS](#character) for the
-  valid options and the type of their argument.
+  The option/value pairs control the appearance of the *text* within
+  the paragraph. See [CHARACTER OPTIONS](#character) for the valid
+  options and the type of their argument.
 
 **comment** *?-option value ...?* *creatingScript*
 
@@ -60,7 +62,7 @@ The allowed options are
 -initals string
 
 The content of the comment is determined by the evaluated script given
-as last argument.
+as last argument. 
 
 **configure** *?-option value ...?*
 

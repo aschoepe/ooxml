@@ -1045,12 +1045,11 @@ namespace eval ::ooxml::docx::lib {
     }
 }
 
-# Method option handling helper procs and value checks
-proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
-    return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
-}
-
-if {0} {
+if {![info exists ::ooxml::docx::docgen] || !$::ooxml::docx::docgen} {
+    proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
+        return "[join [lrange $values 0 end-1] ", "] $word [lindex $values end]"
+    }
+} else {
     # Only used to generate documentation stubs for types
     proc ::ooxml::docx::lib::AllowedValues {values {word "or"}} {
         return "===[lindex [info level -1] 0]===[join $values |]"

@@ -178,6 +178,7 @@ namespace eval ::ooxml::docx {
         -rowHeight {w:trHeight {
             {value val} ST_TwipsMeasure
             hRule ST_HeightRule}}
+        -headerrow {w:tblHeader ST_OnOff}
     }
     
     # Unspecified order

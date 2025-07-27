@@ -1,5 +1,5 @@
-C Added\sthe\s-headerrow\soption\sto\stable\srows,\senabling\srepeated\sheader\srows\son\ssubsequent\spages\sa\stable\sspans\sabout.
-D 2025-07-27T17:12:55.026
+C Added\smore\stable\srow\sproperties.
+D 2025-07-27T22:11:36.994
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -42,7 +42,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl d92b40a0c1104478b93c28ab3f675516339958b5366202155754559fcc8e7517
-F ooxml-docx.tcl fc9d85b548d80c781ccd01988e85f86e9e930b75cd0f673f03585401cfc44f24
+F ooxml-docx.tcl 8e3b34be53ce2654e5026e1f6a3bae55dd7c9ba2b0da72685ef6404a2e66b94f
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -101,8 +101,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 04c9ec5765b9ed748a8e12e83d8cfa4f746a148a0b50ce4827230a66d2a9208d
-R 7ad704085749ebb34b4b4eb68d990845
+P a00ceef10eefc590fd1989e03fc06d6f4c706c51db1c07ec3860fe381a5b1cf1
+R a1098655d5c0585daab77442e1b619c6
 U rolf
-Z 76c23df55966793930d9448c08824616
+Z 4468c54cd0e82dcdf136fa2969860362
 # Remove this line to create a well-formed Fossil manifest.

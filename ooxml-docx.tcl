@@ -179,6 +179,10 @@ namespace eval ::ooxml::docx {
             {value val} ST_TwipsMeasure
             hRule ST_HeightRule}}
         -headerrow {w:tblHeader ST_OnOff}
+        -cellSpacing {w:tblCellSpacing {
+            type ST_TblWidth
+            {value w} ST_MeasurementOrPercent}}
+        -align {w:jc ST_JcTable}
     }
     
     # Unspecified order

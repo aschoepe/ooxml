@@ -1013,7 +1013,11 @@ oo::class create ooxml::docx::docx {
                 set error 1
             }
             if {$error} {
-                error "$errtext: $errMsg"
+                if {[info exists ::ooxml::docx::docgen] && $::ooxml::docx::docgen} {
+                    error "===$type=== $errMsg"
+                } else {
+                    error "$errtext: $errMsg"
+                }
             }
         }
         return $ooxmlvalue

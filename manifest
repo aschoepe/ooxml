@@ -1,5 +1,5 @@
-C Added\smore\stable\srow\sproperties.
-D 2025-07-27T22:11:36.994
+C Work\son\sdocumentation\shelper\sscript.
+D 2025-07-31T22:55:36.812
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -42,7 +42,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl d92b40a0c1104478b93c28ab3f675516339958b5366202155754559fcc8e7517
-F ooxml-docx.tcl 8e3b34be53ce2654e5026e1f6a3bae55dd7c9ba2b0da72685ef6404a2e66b94f
+F ooxml-docx.tcl 68d23474f1a45925c8b568abbc2cfcc78c2b501598a4d7801cce21b4bd146b00
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -67,7 +67,7 @@ F tests/xlsx-simple.test 88cd5283edd5564ff0c5f41104f463267171c188f273e9b210f3a53
 F tools/archive.sh a3480600c3a5c54ec353d97c7ed777fefad5bddef3a091b9b8cec15c4e2a9a35 x
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
-F tools/gendoc.tcl 1a6259f9fbe545933c2f363b9a66c51dd99551109edc4f9305f01d9721ef4ade x
+F tools/gendoc.tcl 23d9305b8730e37bbe3905b8679d9af1b363aabaf1ee16342cce227f3d13d359 x
 F tools/getlanguageinfo.tcl fa7c5c6295d44f20cc34390579fcd8547bba2bc809d0d7d31e99261414d4d501
 F tools/languages/Bok1-norwegisch-no.xlsx afe817c2fd69739c755ec7f7f86defa3c7582de78b42739a0465db27138bcff3
 F tools/languages/Bok1-schwedisch-sv.xlsx 126c011b6c96207c71514dc12b35449a81b992fc16d821ef0ba05aecb3e4329a
@@ -101,8 +101,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P a00ceef10eefc590fd1989e03fc06d6f4c706c51db1c07ec3860fe381a5b1cf1
-R a1098655d5c0585daab77442e1b619c6
+P 36966e624b13eb68c077016fb55c2863110679edb763f3db87437fd2aa0e0961
+R c73e3110c8ad3b0ec904a88b2581120d
 U rolf
-Z 4468c54cd0e82dcdf136fa2969860362
+Z f983844a6a1a0e76fa1f9f195af52ae5
 # Remove this line to create a well-formed Fossil manifest.

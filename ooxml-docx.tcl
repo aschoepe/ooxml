@@ -1760,7 +1760,64 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
-    
+
+    method commenend {id} {
+        my variable body
+        my variable context
+        
+        if {[catch {
+            OptVal [lrange $args 0 end-1]
+            lassign [my CreateComment] comment id
+            my CheckRemainingOpts
+            set script [lindex $args end]
+            set savedbody $body
+            set savedcontext $context
+            set body $comment
+            # The nested catch is needed to ensure body is set back
+            if {[catch {
+                uplevel [list eval $script]
+            } errMsg errVals]} {
+                set body $savedbody
+                set context $savedcontext
+                my ProcessErrorinfo "comment"
+                error $errMsg
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        set body $savedbody
+        set context $savedcontext
+        # Add the comment mark to the document
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:commentReference w:id $id
+            }
+        }
+    }
+
+
+    method commentstart {args} {
+        my variable body
+        my variable context
+        
+        if {[catch {
+            OptVal $args
+            lassign [my CreateComment] comment id
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        # Add the comment range start mark to the document
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:r {
+                Tag_w:commentRangeStart w:id $id
+            }
+        }
+        return $id
+    }
+
     method configure {args} {
         my variable docs
 

@@ -55,6 +55,8 @@ PKG_TCL_SOURCES	= @PKG_TCL_SOURCES@ manifest.txt
 CONFIG_CLEAN_FILES = Makefile pkgIndex.tcl manifest.txt
 CLEANFILES	= @CLEANFILES@
 
+HAVE_PANDOC	= @HAVE_PANDOC@
+
 #========================================================================
 # Start of user-definable TARGETS section
 #========================================================================
@@ -62,16 +64,26 @@ CLEANFILES	= @CLEANFILES@
 manifest.txt: manifest manifest.uuid tools/mkversion.tcl
 	$(TCLSH) tools/mkversion.tcl > $@
 
+havepandoc:
+	@if test "${HAVE_PANDOC}" != "yes" ; then \
+		@echo "No pandoc found in the path. Pandoc is needed to" ;\
+		@echo "build the nroff and html versions of the documentation." ;\
+	fi
+
 doc/ooxml.html: doc/ooxml.md
-	pandoc --standalone -f markdown -t html doc/ooxml.md \
-		--css main.css -o doc/ooxml.html
+	@if test "${HAVE_PANDOC}" = "yes" ; then \
+		pandoc --standalone -f markdown -t html doc/ooxml.md \
+			--css main.css -o doc/ooxml.html ;\
+	fi
 
 doc/ooxml.n: doc/ooxml.md
-	pandoc --standalone -f markdown -t man doc/ooxml.md -o doc/ooxml.n
+	@if test "${HAVE_PANDOC}" = "yes" ; then \
+		pandoc --standalone -f markdown -t man doc/ooxml.md -o doc/ooxml.n ;\
+	fi
 
-doc: doc/ooxml.html doc/ooxml.n
+doc: havepandoc doc/ooxml.html doc/ooxml.n
 
-all: manifest.txt doc/ooxml.html doc/ooxml.n
+all: havepandoc manifest.txt doc/ooxml.html doc/ooxml.n
 
 install: all
 	$(TCLSH) `@CYGPATH@ $(srcdir)/helper.tcl` cp $(PKG_TCL_SOURCES) pkgIndex.tcl $(pkglibdir)

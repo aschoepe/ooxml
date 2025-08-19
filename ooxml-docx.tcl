@@ -601,7 +601,7 @@ namespace eval ::ooxml::docx {
         w:swapBordersFacingPages w:sym w:sz w:szCs w:t w:tab
         w:tabIndex w:table w:tag w:targetScreenSz w:tbl w:tblCaption
         w:tblCellSpacing w:tblDescription w:tblGrid w:tblGridChange
-        w:tblHeader w:tblInd w:tblLayout w:tblLook w:tblOverlap
+        w:tblHeader w:tblInd w:tblLayout w:tblLook w:tblOverlap w:tblPr
         w:tblpPr w:tblPrChange w:tblPrEx w:tblPrExChange w:tblStyle
         w:tblStyleColBandSize w:tblStylePr w:tblStyleRowBandSize
         w:tblW w:tc w:tcFitText w:tcPrChange w:tcW w:temporary
@@ -626,7 +626,7 @@ namespace eval ::ooxml::docx {
     
     foreach tag {
         w:footnotePr w:endnotePr w:numPr w:pBdr w:pPr w:rPr w:tabs
-        w:tblBorders w:tblCellMar w:tblPr w:tcBorders w:tcMar w:tcPr
+        w:tblBorders w:tblCellMar w:tcBorders w:tcMar w:tcPr
         w:trPr
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
@@ -2396,12 +2396,9 @@ oo::class create ooxml::docx::docx {
             $body appendFromScript {
                 Tag_w:tbl {
                     my TblPr
-                    set widths [my EatOption -columnwidths]
-                    if {[llength $widths]} {
-                        Tag_w:tblGrid {
-                            foreach width $widths {
-                                Tag_w:gridCol w:w [ST_TwipsMeasure $width]
-                            }
+                    Tag_w:tblGrid {
+                        foreach width [my EatOption -columnwidths] {
+                            Tag_w:gridCol w:w [ST_TwipsMeasure $width]
                         }
                     }
                     set lastrow [expr {[llength $tabledata] - 1}]
@@ -2582,12 +2579,9 @@ oo::class create ooxml::docx::docx {
             $body appendFromScript {
                 Tag_w:tbl {
                     my TblPr
-                    set widths [my EatOption -columnwidths]
-                    if {[llength $widths]} {
-                        Tag_w:tblGrid {
-                            foreach width $widths {
-                                Tag_w:gridCol w:w [ST_TwipsMeasure $width]
-                            }
+                    Tag_w:tblGrid {
+                        foreach width [my EatOption -columnwidths] {
+                            Tag_w:gridCol w:w [ST_TwipsMeasure $width]
                         }
                     }
                     uplevel [list eval $script]

@@ -3607,7 +3607,7 @@ oo::class create ooxml::xl_write {
     dom createDocument styleSheet doc
     $doc documentElement root
 
-    $root setAttributeNS {} xmlns $xmlns(M)
+    $root setAttribute xmlns $xmlns(M)
     $root setAttributeNS {} xmlns:mc $xmlns(mc)
     $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
 
@@ -4094,7 +4094,7 @@ oo::class create ooxml::xl_write {
     dom createDocument workbook doc
     $doc documentElement root
 
-    $root setAttributeNS {} xmlns $xmlns(M)
+    $root setAttribute xmlns $xmlns(M)
     $root setAttributeNS {} xmlns:r $xmlns(r)
 
     $root appendFromScript {
@@ -4199,7 +4199,7 @@ oo::class create ooxml::xl_write {
       dom createDocument worksheet doc
       $doc documentElement root
 
-      $root setAttributeNS {} xmlns $xmlns(M)
+      $root setAttribute xmlns $xmlns(M)
       $root setAttributeNS {} xmlns:r $xmlns(r)
       $root setAttributeNS {} xmlns:mc $xmlns(mc)
       $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)

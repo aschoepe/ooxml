@@ -221,13 +221,13 @@ namespace eval ::ooxml::docx {
             {orientation orient} ST_PageOrientation
             {width w} ST_TwipsMeasure}}
         -margins {w:pgMar {
-            bottom ST_TwipsMeasure
-            footer ST_TwipsMeasure
-            gutter ST_TwipsMeasure
-            header ST_TwipsMeasure
-            left ST_TwipsMeasure
-            right ST_TwipsMeasure
-            top ST_TwipsMeasure}}
+            bottom {ST_TwipsMeasure ! 1134}
+            footer {ST_TwipsMeasure ! 0}
+            gutter {ST_TwipsMeasure ! 0}
+            header {ST_TwipsMeasure ! 0}
+            left {ST_TwipsMeasure ! 1134}
+            right {ST_TwipsMeasure ! 1134}
+            top {ST_TwipsMeasure ! 1134}}}
         -paperSource {w:paperSrc {
             first ST_DecimalNumber
             other ST_DecimalNumber
@@ -1034,7 +1034,7 @@ oo::class create ooxml::docx::docx {
                            option is invalid, expected is a key value pairs\
                            list with keys out of [AllowedValues $keys]"
         }
-        foreach {attdata type} $attdefs {
+        foreach {attdata typedata} $attdefs {
             if {[llength $attdata] == 2} {
                 lassign $attdata key attname
             } else {
@@ -1045,14 +1045,25 @@ oo::class create ooxml::docx::docx {
                 }
                 set attname $attdata
             }
+            lassign $typedata type flags default
             if {![info exists atts($key)]} {
-                continue
+                if {$flags eq "!"} {
+                    if {[llength $typedata] == 2} {
+                        error "the argument \"$optionValue\" given to the\
+                                \"$option\" option is invalid: the mandatory\
+                                key \"$key\" in the argument\
+                                is invalid"
+                    } else {
+                        set atts($key) $default
+                    }
+                } else {
+                    continue
+                }
             }
             set ooxmlvalue [my CallType $type $atts($key) \
                                 "the argument \"$optionValue\" given to the\
                                 \"$option\" option is invalid: the value\
-                                given to the key \"$key\" in the argument\
-                                is invalid"]
+                                given to the key \"$key\" invalid"]
             if {[string index $attname 0] eq "-"} {
                 lappend attlist [string range $attname 1 end] $ooxmlvalue
             } else {

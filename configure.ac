@@ -73,6 +73,12 @@ TEA_ADD_TCL_SOURCES([ooxml.tcl])
 TEA_PROG_TCLSH
 
 #--------------------------------------------------------------------
+# Local autoconf addition not worth an own file
+#--------------------------------------------------------------------
+
+AC_CHECK_PROG(HAVE_PANDOC,pandoc,yes,no)
+
+#--------------------------------------------------------------------
 # Finally, substitute all of the various values into the Makefile.
 # You may alternatively have a special pkgIndex.tcl.in or other files
 # which require substituting th AC variables in.  Include these here.

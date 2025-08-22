@@ -1,5 +1,5 @@
-C Enhanced\sthe\sbuiild\sdescription\sfor\swml\scontent\sto\smark\skeys\sin\skey\svalue\soption\svalues\sas\srequired,\swith\sor\swithout\sdefault.\sUsed\sfor\spgMar\swhich\shas\sonly\srequired\sattribures.
-D 2025-08-21T20:56:35.932
+C Merged\sfrom\strunk.
+D 2025-08-22T00:24:09.298
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -44,7 +44,7 @@ F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl d92b40a0c1104478b93c28ab3f675516339958b5366202155754559fcc8e7517
 F ooxml-docx.tcl a8be3a6bf672ae649c4c60941614ade97ff6a1d817b659cb580b02786e4fe574
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
-F ooxml.tcl 5c0d5af8c150eabc6389e99b1bdcca36cea33d75c6a9ba1ba12dd3b71dd26fb4
+F ooxml.tcl 9d72ec6ff6ebef05923fb07b901c78520509564bb6a60ee773d83ef0a1534581
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -101,8 +101,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 5cc20bc5c92f087dbd00297a6ff26626031b437e3e6b5b9055b61569dec423ce
-R 438b6b8466483a8a65f29654e5f6e2b0
+P d8e0f9d2584893c29f1696a214ede6a7374400b8968ea763b89427cfd112e55e abd8521a2c7ae959ad63c8627684b9d1681946d300160f08cc3b72ffec0ff6c6
+R f0cfae8eedbe256d18420bccf0a83c1c
 U rolf
-Z cf38642975fb39c7b447d43ed3400549
+Z a44b443892487046bf2add9619b6c5f5
 # Remove this line to create a well-formed Fossil manifest.

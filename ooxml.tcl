@@ -3596,10 +3596,11 @@ oo::class create ooxml::xl_write {
     dom createDocument cp:coreProperties doc
     $doc documentElement root
 
-    $root setAttribute xmlns:cp $xmlns(cp)
-    $root setAttribute xmlns:dc $xmlns(dc)
-    $root setAttribute xmlns:dcterms $xmlns(dcterms)
-    $root setAttribute xmlns:dcmitype $xmlns(dcmitype)
+    $root setAttributeNS {} xmlns:cp $xmlns(cp)
+    $root setAttributeNS {} xmlns:dc $xmlns(dc)
+    $root setAttributeNS {} xmlns:dcterms $xmlns(dcterms)
+    $root setAttributeNS {} xmlns:dcmitype $xmlns(dcmitype)
+    $root setAttributeNS {} xmlns:xsi $xmlns(xsi)
     $root setAttribute xmlns:xsi $xmlns(xsi)
 
     $root appendFromScript {
@@ -3710,8 +3711,8 @@ oo::class create ooxml::xl_write {
     $doc documentElement root
 
     $root setAttribute xmlns $xmlns(M)
-    $root setAttribute xmlns:mc $xmlns(mc)
-    $root setAttribute xmlns:x14ac $xmlns(x14ac)
+    $root setAttributeNS {} xmlns:mc $xmlns(mc)
+    $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
 
     $root setAttribute mc:Ignorable x14ac
 
@@ -4197,7 +4198,7 @@ oo::class create ooxml::xl_write {
     $doc documentElement root
 
     $root setAttribute xmlns $xmlns(M)
-    $root setAttribute xmlns:r $xmlns(r)
+    $root setAttributeNS {} xmlns:r $xmlns(r)
 
     $root appendFromScript {
       Tag_fileVersion appName xl lastEdited 5 lowestEdited 5 rupBuild 5000 {}
@@ -4302,9 +4303,9 @@ oo::class create ooxml::xl_write {
       $doc documentElement root
 
       $root setAttribute xmlns $xmlns(M)
-      $root setAttribute xmlns:r $xmlns(r)
-      $root setAttribute xmlns:mc $xmlns(mc)
-      $root setAttribute xmlns:x14ac $xmlns(x14ac)
+      $root setAttributeNS {} xmlns:r $xmlns(r)
+      $root setAttributeNS {} xmlns:mc $xmlns(mc)
+      $root setAttributeNS {} xmlns:x14ac $xmlns(x14ac)
 
       $root setAttribute mc:Ignorable x14ac
 

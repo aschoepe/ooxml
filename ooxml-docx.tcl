@@ -1130,6 +1130,17 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method ControlChar {c {n 1}} {
+        set p [my LastParagraph]
+        for {set i 0} {$i<$n} {incr i} {
+            $p appendFromScript {
+                Tag_w:r {
+                    Tag_w:$c
+                }
+            }
+        }
+    }
+
     method Create switchActionList {
         upvar opts opts
         upvar optsknown optsknown
@@ -1737,6 +1748,10 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method br {{n 1}} {
+        my ControlChar br $n
+    }
+
     method comment {args} {
         my variable body
         my variable context
@@ -1860,6 +1875,7 @@ oo::class create ooxml::docx::docx {
             SEQ
             TIME
             TITLE
+            TOC
             USERNAME
         }
         if {$nfield ni $values} {
@@ -2577,6 +2593,10 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
         return $result
+    }
+
+    method tab {{n 1}} {
+        my ControlChar tab $n
     }
 
     method table {args} {

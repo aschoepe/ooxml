@@ -11,6 +11,8 @@ STANDARD ISO/IEC 29500-1 Fourth edition 2016-11-01 Part 1:
 Fundamentals and Markup Language Reference". The file name is
 something crude as C071691e.pdf.
 
+A web version of the same content can be found at <https://ooxml.info/>.
+
 Very helpful (indispensable perhaps) is also wml.xsd
 
 For introductional material to WordprocessingML see

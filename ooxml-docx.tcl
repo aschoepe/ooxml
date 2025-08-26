@@ -1703,7 +1703,8 @@ oo::class create ooxml::docx::docx {
         set pos 0
         set end [string length $text]
         foreach part [split $text "\n\r\t\f"] {
-            if {[string length $part]} {
+            set len [string length $part]
+            if {$len} {
                 set atts ""
                 if {[string index $part 0] eq " " || [string index $part end] eq " "} {
                     lappend atts xml:space preserve
@@ -1712,13 +1713,12 @@ oo::class create ooxml::docx::docx {
                     Text [dom clearString -replace $part]
                 }
             }
-            if {$pos < $end} {
-                switch [string index $text $pos] {
-                    "\n" Tag_w:br
-                    "\r" Tag_w:cr
-                    "\t" Tag_w:tab
-                    "\f" {Tag_w:br w:type "page"}
-                }
+            incr pos $len
+            switch [string index $text $pos] {
+                "\n" Tag_w:br
+                "\r" Tag_w:cr
+                "\t" Tag_w:tab
+                "\f" {Tag_w:br w:type "page"}
             }
             incr pos
         }

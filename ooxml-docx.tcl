@@ -59,6 +59,7 @@ namespace eval ::ooxml::docx {
     array set xmlns {
         a http://schemas.openxmlformats.org/drawingml/2006/main
         ct http://schemas.openxmlformats.org/package/2006/content-types
+        m  http://schemas.openxmlformats.org/officeDocument/2006/math
         mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
         pic http://schemas.openxmlformats.org/drawingml/2006/picture
@@ -673,6 +674,17 @@ namespace eval ::ooxml::docx {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
     }
 
+    # OMML (Office Math) support
+    foreach tag {
+        m:aln m:brk m:chr m:deg m:den m:e m:f m:fName m:fPr m:func
+        m:grow m:jc m:lim m:limLoc m:limLow m:limUpp m:lit m:nary
+        m:naryPr m:nor m:num m:oMath m:oMathPara m:oMathParaPr m:r
+        m:rPr m:rPr m:rad m:radPr m:sSub m:sSubSup m:sSup m:scr m:sty
+        m:sub m:subHide m:sup m:supHide m:t m:type
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(m) elementNode Tag_$tag
+    }
+
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
 }
@@ -703,10 +715,10 @@ oo::class create ooxml::docx::docx {
         set document [dom createDocumentNS $xmlns(w) w:document]
         set docs(word/document.xml) $document
         $document documentElement root
-        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
         set context document
@@ -727,10 +739,10 @@ oo::class create ooxml::docx::docx {
         # with that.
         set setupdoc [dom createDocumentNS $xmlns(w) w:umbrella]
         set setuproot [$setupdoc documentElement]
-        foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o m r v w w10 wp wps wpg mc wp14 w14} {
             $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        $setuproot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+        $setuproot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
         set pagesetup ""
         set sectionsetup ""
         set tablecontext ""
@@ -1267,10 +1279,10 @@ oo::class create ooxml::docx::docx {
             set document [dom createDocumentNS $xmlns(w) w:$types]
             set docs(word/$types.xml) $document
             $document documentElement notesroot
-            foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+            foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
             }
-            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
         } else {
             set notesroot [$docs(word/$types.xml) documentElement]
         }
@@ -1334,10 +1346,10 @@ oo::class create ooxml::docx::docx {
         set document [dom createDocumentNS $xmlns(w) w:$elnName]
         set docs(word/$what$nr.xml) $document
         $document documentElement root
-        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS {} xmlns:$ns $xmlns($ns)
         }
-        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14"
+        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
         set savedbody $body
         set savedcontext $context
         set body $root
@@ -2879,6 +2891,389 @@ oo::class create ooxml::docx::docx {
         puts -nonewline $zf $endrec
         close $zf
         return
+    }
+    # --- OMML (Office Math) builder methods -----------------------------------
+    # Simple text in math run: creates <m:r><m:t>TEXT</m:t></m:r>
+    method Mt {text} {
+        my variable body
+        set atts ""
+        if {$text ne "" && ([string index $text 0] eq " " || [string index $text end] eq " ")} {
+            lappend atts xml:space preserve
+        }
+        Tag_m:t $atts {
+            Text [dom clearString -replace $text]
+        }
+    }
+
+    # mrun TEXT ?-sty p|b|i|bi? ?-scr roman|script|fraktur|double-struck|sans-serif|monospace?
+    #            ?-nor on|off? ?-lit on|off? ?-aln on|off? ?-brk on|off? ?-brkAt 0..255?
+    method mrun {text args} {
+        my variable body
+        if {[catch {
+            OptVal $args
+            # Convenience: let callers say “-plain 1” or “-upright 1”
+            set plain  [my EatOption -plain   ST_OnOff]
+            set upright [my EatOption -upright ST_OnOff]
+
+            set sty    [my EatOption -sty     ST_MathStyle]
+            set scr    [my EatOption -scr     ST_MScript]
+            set nor    [my EatOption -nor     ST_OnOff]
+            set lit    [my EatOption -lit     ST_OnOff]
+            set aln    [my EatOption -aln     ST_OnOff]
+            set brk    [my EatOption -brk     ST_OnOff]
+            set brkAt  [my EatOption -brkAt   ST_Integer255]
+            my CheckRemainingOpts
+
+            # Conveniences: -plain/-upright imply m:sty="p" (if -sty not explicitly set)
+            if {$sty eq "" && ($plain eq "on" || $upright eq "on")} {
+                set sty p
+            }
+
+            Tag_m:r {
+                # Only emit rPr if anything is actually set
+                if {$lit ne "" || $nor eq "on" || $sty ne "" || $scr ne "" || $aln ne "" || $brk ne ""} {
+                    Tag_m:rPr {
+                        if {$lit ne ""} { Tag_m:lit m:val $lit }
+                        # m:nor is mutually exclusive with m:scr/m:sty (per schema choice)
+                        if {$nor eq "on"} {
+                            Tag_m:nor m:val on
+                        } else {
+                            if {$scr ne ""} { Tag_m:scr m:val $scr }
+                            if {$sty ne ""} { Tag_m:sty m:val $sty }
+                        }
+
+                        if {$brk eq "on"} {
+                            if {$brkAt ne ""} {
+                                Tag_m:brk m:alnAt $brkAt
+                            } else {
+                                Tag_m:brk
+                            }
+                        }
+                        if {$aln ne ""} { Tag_m:aln m:val $aln }
+                    }
+                }
+                my Mt $text
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    # Fraction: <m:f> with optional <m:fPr><m:type m:val="..."/></m:fPr>
+    # Usage: doc mfrac { ...numerator... } { ...denominator... } ?-type bar|lin|noBar|skw?
+    method mfrac {numScript denScript args} {
+        my variable body
+        if {[catch {
+            OptVal $args
+            set ftype [my EatOption -type ST_FType]
+            my CheckRemainingOpts
+            $body appendFromScript {
+                Tag_m:f {
+                    if {$ftype ne ""} {
+                        Tag_m:fPr { Tag_m:type m:val $ftype }
+                    }
+                    Tag_m:num {
+                        set savedbody $body
+                        set body [dom fromScriptContext]
+                        uplevel [list eval $numScript]
+                        set body $savedbody
+                    }
+                    Tag_m:den {
+                        set savedbody $body
+                        set body [dom fromScriptContext]
+                        uplevel [list eval $denScript]
+                        set body $savedbody
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    # Superscript: <m:sSup><m:e>base</m:e><m:sup>sup</m:sup></m:sSup>
+    method msup {baseScript supScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:sSup {
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $baseScript]
+                    set body $savedbody
+                }
+                Tag_m:sup {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $supScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # Subscript: <m:sSub><m:e>base</m:e><m:sub>sub</m:sub></m:sSub>
+    method msub {baseScript subScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:sSub {
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $baseScript]
+                    set body $savedbody
+                }
+                Tag_m:sub {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $subScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # Sub+Sup: <m:sSubSup><m:e>base</m:e><m:sub>…</m:sub><m:sup>…</m:sup></m:sSubSup>
+    method msubsup {baseScript subScript supScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:sSubSup {
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $baseScript]
+                    set body $savedbody
+                }
+                Tag_m:sub {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $subScript]
+                    set body $savedbody
+                }
+                Tag_m:sup {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $supScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # Square root: <m:rad><m:e>…</m:e></m:rad>  (no degree)
+    method msqrt {radicandScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:rad {
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $radicandScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # nth-root: <m:rad><m:deg>n</m:deg><m:e>…</m:e></m:rad>
+    method mroot {degreeScript radicandScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:rad {
+                Tag_m:deg {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $degreeScript]
+                    set body $savedbody
+                }
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $radicandScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # Function application: <m:func><m:fName>name</m:fName><m:e>arg</m:e></m:func>
+    method mfunc {nameScript argScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:func {
+                Tag_m:fName {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $nameScript]
+                    set body $savedbody
+                }
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $argScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # n-ary operator (sum/product/integral/⋂ etc.)
+    # Usage:
+    #   doc mnary { base } -char "∑" -limLoc undOvr -sub { i=1 } -sup { n } -grow 1 -subHide 0 -supHide 0
+    method mnary {baseScript args} {
+        my variable body
+        if {[catch {
+            OptVal $args
+            set ch     [my EatOption -char     NoCheck]
+            set limLoc [my EatOption -limLoc   ST_LimLoc]
+            set grow   [my EatOption -grow     ST_OnOff]
+            set subH   [my EatOption -subHide  ST_OnOff]
+            set supH   [my EatOption -supHide  ST_OnOff]
+            set subSc  [my EatOption -sub      NoCheck]
+            set supSc  [my EatOption -sup      NoCheck]
+            my CheckRemainingOpts
+            $body appendFromScript {
+                Tag_m:nary {
+                    if {$ch ne "" || $limLoc ne "" || $grow ne "" || $subH ne "" || $supH ne ""} {
+                        Tag_m:naryPr {
+                            if {$ch ne ""}     { Tag_m:chr     m:val $ch }
+                            if {$limLoc ne ""} { Tag_m:limLoc  m:val $limLoc }
+                            if {$grow ne ""}   { Tag_m:grow    m:val $grow }
+                            if {$subH ne ""}   { Tag_m:subHide m:val $subH }
+                            if {$supH ne ""}   { Tag_m:supHide m:val $supH }
+                        }
+                    }
+                    if {$subSc ne ""} {
+                        Tag_m:sub {
+                            set savedbody $body
+                            set body [dom fromScriptContext]
+                            uplevel [list eval $subSc]
+                            set body $savedbody
+                        }
+                    }
+                    if {$supSc ne ""} {
+                        Tag_m:sup {
+                            set savedbody $body
+                            set body [dom fromScriptContext]
+                            uplevel [list eval $supSc]
+                            set body $savedbody
+                        }
+                    }
+                    Tag_m:e {
+                        set savedbody $body
+                        set body [dom fromScriptContext]
+                        uplevel [list eval $baseScript]
+                        set body $savedbody
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    # Lower limit wrapper: <m:limLow><m:e>base</m:e><m:lim>low</m:lim></m:limLow>
+    method mlimlow {baseScript lowScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:limLow {
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $baseScript]
+                    set body $savedbody
+                }
+                Tag_m:lim {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $lowScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # Upper limit wrapper: <m:limUpp><m:e>base</m:e><m:lim>up</m:lim></m:limUpp>
+    method mlimupp {baseScript upScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:limUpp {
+                Tag_m:e {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $baseScript]
+                    set body $savedbody
+                }
+                Tag_m:lim {
+                    set savedbody $body
+                    set body [dom fromScriptContext]
+                    uplevel [list eval $upScript]
+                    set body $savedbody
+                }
+            }
+        }
+    }
+
+    # Inline or display math zone.
+    #   doc math { ...OMML... }            ;# inline (m:oMath) in current paragraph
+    #   doc math -display 1 { ...OMML... } ;# display (m:oMathPara/m:oMath) on its own paragraph
+    # Options:
+    #   -display ST_OnOff   (default off)
+    #   -jc      ST_MJc     (left|center|right|centerGroup) - only used for display
+    method math {args} {
+        my variable body
+        if {[catch {
+            set script [lindex $args end]
+            OptVal [lrange $args 0 end-1] "math" "script"
+
+            set display [my EatOption -display ST_OnOff]   ;# "1" or "0"
+            set jc      [my EatOption -jc ST_MJc]          ;# left|center|right|centerGroup
+            my CheckRemainingOpts
+
+            if {$display eq "1"} {
+                $body appendFromScript {
+                    Tag_w:p {
+                        Tag_m:oMathPara {
+                            if {$jc ne ""} {
+                                Tag_m:oMathParaPr { Tag_m:jc m:val $jc }
+                            }
+                            Tag_m:oMath {
+                                set savedbody $body
+                                set body [dom fromScriptContext]
+                                uplevel [list eval $script]
+                                set body $savedbody
+                            }
+                        }
+                    }
+                }
+            } else {
+                # Inline math inside current paragraph; create one if needed
+                set p ""
+                if {![catch {set p [my LastParagraph 1]}]} {
+                    $p appendFromScript {
+                        Tag_m:oMath {
+                            set savedbody $body
+                            set body [dom fromScriptContext]
+                            uplevel [list eval $script]
+                            set body $savedbody
+                        }
+                    }
+                } else {
+                    $body appendFromScript {
+                        Tag_w:p {
+                            Tag_m:oMath {
+                                set savedbody $body
+                                set body [dom fromScriptContext]
+                                uplevel [list eval $script]
+                                set body $savedbody
+                            }
+                        }
+                    }
+                }
+            }
+        } errMsg]} {
+            return -code error $errMsg
+        }
     }
 }
 

@@ -38,7 +38,7 @@ package require ooxml::docx::lib
 namespace eval ::ooxml::docx {
 
     namespace export docx
-    
+
     # These are acually used as namespace variables
     variable xmlns
     variable properties
@@ -85,7 +85,7 @@ namespace eval ::ooxml::docx {
         -levelText {w:lvlText NoCheck}
         -align {w:lvlJc ST_Jc}
     }
-    
+
     set properties(cell1) {
         -cellWidth {w:tcW {
             type ST_TblWidth
@@ -120,8 +120,8 @@ namespace eval ::ooxml::docx {
         -cellMarginRight {w:right {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
-    }            
-    
+    }
+
     set properties(paragraph1) {
         -pstyle {w:pStyle PStyle}
         -keepNext {w:keepNext CT_OnOff}
@@ -148,7 +148,7 @@ namespace eval ::ooxml::docx {
         }
         -suppressLineNumbers {w:suppressLineNumbers CT_OnOff}
     }
-        
+
     set properties(paragraph2) {
         -bidi {w:bidi CT_OnOff}
         -spacing {w:spacing {
@@ -166,7 +166,7 @@ namespace eval ::ooxml::docx {
             startChars ST_DecimalNumber}}
         -align {w:jc ST_Jc}
     }
-    
+
     set properties(row) {
         -wBefore {w:wBefore {
             type ST_TblWidth
@@ -184,7 +184,7 @@ namespace eval ::ooxml::docx {
             {value w} ST_MeasurementOrPercent}}
         -align {w:jc ST_JcTable}
     }
-    
+
     # Unspecified order
     set properties(run) {
         -bold {{w:b w:bCs} ST_OnOff}
@@ -319,7 +319,7 @@ namespace eval ::ooxml::docx {
         -alwaysMergeEmptyNamespace {w:alwaysMergeEmptyNamespace CT_OnOff}
         -updateFields {w:updateFields CT_OnOff}
     }
-    
+
     set properties(table1) {
         -style {w:tblStyle TStyle}
         -width {w:tblW {
@@ -344,7 +344,7 @@ namespace eval ::ooxml::docx {
         }}
         -caption {w:tblCaption NoCheck}
     }
-    
+
     set properties(xfrm) {
         -dimension {a:ext {
             {width -cx} ST_Emu
@@ -412,7 +412,7 @@ namespace eval ::ooxml::docx {
             <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
             </cp:coreProperties>
         }
-        word/fontTable.xml {        
+        word/fontTable.xml {
             <w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
                 <w:font w:name="Times New Roman">
                     <w:charset w:val="00" w:characterSet="windows-1252"/>
@@ -623,7 +623,7 @@ namespace eval ::ooxml::docx {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) elementNode Tag_$tag
     }
-    
+
     foreach tag {
         w:footnotePr w:endnotePr w:numPr w:pBdr w:pPr w:rPr w:tabs
         w:tblBorders w:tblCellMar w:tcBorders w:tcMar w:tcPr
@@ -631,13 +631,13 @@ namespace eval ::ooxml::docx {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(w) -notempty elementNode Tag_$tag
     }
-    
+
     foreach tag {
         Relationships Relationship
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(rel) elementNode Tag_$tag
     }
-    
+
     foreach tag {
         wp:align wp:anchor wp:cNvGraphicFramePr wp:docPr
         wp:effectExtent wp:extent wp:inline wp:positionH wp:positionV
@@ -646,7 +646,7 @@ namespace eval ::ooxml::docx {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wp) elementNode Tag_$tag
     }
-    
+
     foreach tag {
         a:avLst a:blip a:ext a:fillRect a:graphic a:graphicData
         a:graphicFrameLocks a:off a:picLocks a:prstGeom a:stretch
@@ -654,7 +654,7 @@ namespace eval ::ooxml::docx {
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(a) elementNode Tag_$tag
     }
-    
+
     foreach tag {
         pic:pic pic:blipFill pic:nvPicPr pic:cNvPr pic:cNvPicPr pic:spPr
     } {
@@ -662,17 +662,17 @@ namespace eval ::ooxml::docx {
     }
 
     foreach tag {
-        wps:bodyPr wps:cNvSpPr wps:spPr wps:txbx wps:wsp        
+        wps:bodyPr wps:cNvSpPr wps:spPr wps:txbx wps:wsp
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(wps) elementNode Tag_$tag
     }
-    
+
     foreach tag {
         Default Override
     } {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
     }
-    
+
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
 }
@@ -734,7 +734,7 @@ oo::class create ooxml::docx::docx {
         set pagesetup ""
         set sectionsetup ""
         set tablecontext ""
-        
+
         my configure {*}$args
     }
 
@@ -840,7 +840,7 @@ oo::class create ooxml::docx::docx {
             Tag_Override PartName $file ContentType $type
         }
     }
-    
+
     method Add2Relationships {type target} {
         my variable docs
         my variable context
@@ -881,11 +881,11 @@ oo::class create ooxml::docx::docx {
             lappend attlist TargetMode External
         }
         $relsRoot appendFromScript {
-            Tag_Relationship {*}$attlist 
+            Tag_Relationship {*}$attlist
         }
         if {$type eq "hyperlink"} {
             return rId$nr
-        }        
+        }
         my Add2Content_Types "/word/$target"
         return rId$nr
     }
@@ -922,7 +922,7 @@ oo::class create ooxml::docx::docx {
             -layoutInCell CT_Boolean
             -allowOverlap CT_Boolean
             -relativeHeight CT_UnsignedInt
-        } -anchorData] 
+        } -anchorData]
         Tag_wp:anchor [array get anchorAtts] {
             Tag_wp:simplePos x 0 y 0
             Tag_wp:positionH [my Option -positionH relativeFrom ST_RelFromH "column"] {
@@ -982,7 +982,7 @@ oo::class create ooxml::docx::docx {
                     Tag_wp:wrapSquare {*}$attlist
                 }
                 "topBottom" {
-                    Tag_wp:wrapTopAndBottom 
+                    Tag_wp:wrapTopAndBottom
                 }
                 default {
                     error "unknown -wrapMode option value \"$wrapMode\", expect\
@@ -997,7 +997,7 @@ oo::class create ooxml::docx::docx {
         }
         return $anchor
     }
-    
+
     method CallType {type value errtext} {
         # A few value checks need access to the docx object internal
         # data and therefor are implemented as object methods. The
@@ -1093,7 +1093,7 @@ oo::class create ooxml::docx::docx {
         }
         return $attlist
     }
-    
+
     method CheckRemainingOpts {} {
         upvar opts opts
         upvar optsknown optsknown
@@ -1144,7 +1144,7 @@ oo::class create ooxml::docx::docx {
     method Create switchActionList {
         upvar opts opts
         upvar optsknown optsknown
-        
+
         foreach {opt optdata} $switchActionList {
             if {[string index $opt 0] eq "+"} {
                 Tag_[string range $opt 1 end] {
@@ -1202,7 +1202,7 @@ oo::class create ooxml::docx::docx {
                 3 {
                     my [lindex $optdata 2] $value
                     unset opts($opt)
-                    
+
                 }
                 default {
                     error "invalid properties value"
@@ -1236,7 +1236,7 @@ oo::class create ooxml::docx::docx {
         }
         return [list [$comments lastChild] $id(comments)]
     }
-    
+
     method EatOption {option {type ""} {deleteOption 1}} {
         upvar opts opts
         upvar optsknown optsknown
@@ -1298,7 +1298,7 @@ oo::class create ooxml::docx::docx {
         set body $savedbody
         return $id($types)
     }
-    
+
     method GetDocDefault {styles} {
         # styles has the content model sequence:
         # docDefaults? latentStyles? styles*
@@ -1393,7 +1393,7 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
-    
+
     method Image_inline {rId file} {
         my variable media
         variable ::ooxml::docx::properties
@@ -1415,10 +1415,10 @@ oo::class create ooxml::docx::docx {
             my Image_graphic $rId $file
         }
     }
-    
+
     method LastParagraph {{create 0}} {
         my variable body
-        
+
         set p [$body lastChild]
         while {$p ne ""} {
             if {[$p nodeType] ne "ELEMENT_NODE"} {
@@ -1448,7 +1448,7 @@ oo::class create ooxml::docx::docx {
     method OneOff {opta optb} {
         upvar opts opts
         upvar optsknown optsknown
-        
+
         lassign $opta optiona typea
         lassign $optb optionb typeb
         set a [my EatOption $optiona $typea]
@@ -1458,7 +1458,7 @@ oo::class create ooxml::docx::docx {
         }
         return [list $a $b]
     }
-    
+
     method Option {option attname type {default ""}} {
         upvar opts opts
         upvar optsknown optsknown
@@ -1484,11 +1484,11 @@ oo::class create ooxml::docx::docx {
         if {$ind > -1} {
             set errMsg [string range $errorinfo 0 $ind-1]
             if {[regexp {(\d+)} [string range $errorinfo $ind end] --> linenr]} {
-                append errMsg "($what script body line $linenr)" 
+                append errMsg "($what script body line $linenr)"
             }
         }
     }
-    
+
     method PPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
@@ -1505,13 +1505,13 @@ oo::class create ooxml::docx::docx {
             my Create $properties(paragraph2)
         }
     }
-    
+
     method PeekOption {option {type ""}} {
         upvar opts opts
         upvar optsknown optsknown
         return [my EatOption $option $type 0]
     }
-        
+
     method PStyle {value} {
         return [my StyleCheck paragraph $value]
     }
@@ -1533,7 +1533,7 @@ oo::class create ooxml::docx::docx {
             my Create $properties(run)
         }
     }
-    
+
     method RStyle {value} {
         return [my StyleCheck character $value]
     }
@@ -1578,7 +1578,7 @@ oo::class create ooxml::docx::docx {
 
     method StyleCheck {type value} {
         my variable docs
-        
+
         set styles [$docs(word/styles.xml) documentElement]
         set style [$styles selectNodes {
             w:style[@w:type=$type][w:name[@w:val=$value]]
@@ -1588,7 +1588,7 @@ oo::class create ooxml::docx::docx {
         }
         return [[lindex $style 0] selectNodes string(@w:styleId)]
     }
-    
+
     method Tabs {tabsdata} {
         foreach tabstop $tabsdata {
             if {[llength $tabstop] == 1} {
@@ -1661,7 +1661,7 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
-    
+
     method TcPr {} {
         variable ::ooxml::docx::properties
         upvar opts opts
@@ -1692,11 +1692,11 @@ oo::class create ooxml::docx::docx {
             my Create $properties(row)
         }
     }
-        
+
     method TStyle {value} {
         return [my StyleCheck table $value]
     }
-    
+
     method Wt {text} {
         # Just not exactly that easy.
         # Handle at least \n \r \t and \f special
@@ -1731,7 +1731,7 @@ oo::class create ooxml::docx::docx {
         }
         $doc delete
     }
-    
+
     method append {text args} {
         if {[catch {
             OptVal $args "text"
@@ -1755,7 +1755,7 @@ oo::class create ooxml::docx::docx {
     method comment {args} {
         my variable body
         my variable context
-        
+
         if {[catch {
             OptVal [lrange $args 0 end-1]
             lassign [my CreateComment] comment id
@@ -1786,7 +1786,7 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
-    
+
     method configure {args} {
         my variable docs
 
@@ -1929,7 +1929,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
     }
-    
+
     method header {script {returnvar ""}} {
         if {$returnvar ne ""} {
             upvar $returnvar result
@@ -1940,7 +1940,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
     }
-    
+
     method image {file type args} {
         my variable media
 
@@ -2029,7 +2029,7 @@ oo::class create ooxml::docx::docx {
 
         package require Tcl 9.0-
         package require fileutil::traverse
-        
+
         set base [file join [zipfs root] InitWord]
         zipfs mount $docxfile $base
         ::fileutil::traverse filesInDocx $base
@@ -2056,7 +2056,7 @@ oo::class create ooxml::docx::docx {
         }
         ::ooxml::ZipClose
     }
-    
+
     method jumpto {text name args} {
         my variable bookmarks
 
@@ -2079,7 +2079,7 @@ oo::class create ooxml::docx::docx {
             set bookmarks($name) 0
         }
     }
-    
+
     method mark {name} {
         if {[catch {
             my markstart $name
@@ -2092,7 +2092,7 @@ oo::class create ooxml::docx::docx {
     method markend {name} {
         my variable id
         my variable bookmarks
-        
+
         if {![info exists bookmarks($name)] || $bookmarks($name) == 0} {
             return -code error "A mark span with the name \"$name\" is\
                                 not started."
@@ -2107,11 +2107,11 @@ oo::class create ooxml::docx::docx {
         }
         set bookmarks($name) "-$bookmarks($name)"
     }
-    
+
     method markstart {name} {
         my variable id
         my variable bookmarks
-        
+
         if {[info exists bookmarks($name)] && $bookmarks($name) > 0} {
             return -code error "mark \"$name\" is not unique"
         }
@@ -2121,7 +2121,7 @@ oo::class create ooxml::docx::docx {
         }
         set bookmarks($name) $id(bookmarks)
     }
-    
+
     method numbering {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties
@@ -2229,7 +2229,7 @@ oo::class create ooxml::docx::docx {
             }
         }
     }
-    
+
     # WordprocessingML has no concept of a page. Rather it groups
     # paragraphs (the main building block) into "sections". The page
     # setup of a section is located within the w:p subtree of the last
@@ -2256,7 +2256,7 @@ oo::class create ooxml::docx::docx {
     method paragraph {text args} {
         my variable body
         variable ::ooxml::docx::properties
-        
+
         if {[catch {
             OptVal $args "text"
             $body appendFromScript {
@@ -2273,7 +2273,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
     }
-    
+
     method readpart {what file} {
         my variable docs
 
@@ -2292,7 +2292,7 @@ oo::class create ooxml::docx::docx {
     method sectionend {} {
         my variable body
         my variable sectionsetup
-        
+
         if {$sectionsetup eq ""} {
             return -code error "no section started"
         }
@@ -2317,7 +2317,7 @@ oo::class create ooxml::docx::docx {
         my variable sectionsetup
         my variable setuproot
 
-        
+
         if {[catch {
             # This way in any case a (maybe empty) w:sectPr tag (via
             # SectionCommon) will be created which helps to keep things
@@ -2385,7 +2385,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
     }
-        
+
     method simplecomment {text args} {
         if {[catch {
             OptVal $args "text"
@@ -2588,7 +2588,7 @@ oo::class create ooxml::docx::docx {
                 default {
                     error "invalid subcommand \"$cmd\""
                 }
-            } 
+            }
         } errMsg]} {
             return -code error $errMsg
         }
@@ -2651,7 +2651,7 @@ oo::class create ooxml::docx::docx {
             set tablecontext "row"
         }
     }
-    
+
     method tablerow {args} {
         my variable body
         my variable tablecontext
@@ -2662,7 +2662,7 @@ oo::class create ooxml::docx::docx {
         }
         set tablecontext "row"
         set script [lindex $args end]
-        OptVal [lrange $args 0 end-1] "tablerow" "script" 
+        OptVal [lrange $args 0 end-1] "tablerow" "script"
         try {
             Tag_w:tr {
                 my TrPr
@@ -2757,7 +2757,7 @@ oo::class create ooxml::docx::docx {
                                 -forceAA CT_Boolean
                                 -compatLnSpc CT_Boolean
                             } -bodyAtts]
-                            Tag_wps:bodyPr {*}[array get bodyPrAtts] 
+                            Tag_wps:bodyPr {*}[array get bodyPrAtts]
                         }
                     }
                 }
@@ -2767,7 +2767,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
     }
-    
+
     method url {text url args} {
         set rId [my Add2Relationships hyperlink $url]
         set p [my LastParagraph 1]
@@ -2786,7 +2786,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
     }
-    
+
     method writepart {what file} {
         my variable docs
 
@@ -2798,7 +2798,7 @@ oo::class create ooxml::docx::docx {
         $docs($what) asXML -channel $fd
         close $fd
     }
-            
+
     method write {file} {
         my variable body
         my variable docs
@@ -2841,7 +2841,7 @@ oo::class create ooxml::docx::docx {
                 Tag_w:sectPr
             }
         }
-        
+
         # Initialize zip file
         set file [string trim $file]
         if {$file eq {}} {
@@ -2871,7 +2871,7 @@ oo::class create ooxml::docx::docx {
         if {$appendedPageSetup ne ""} {
             $appendedPageSetup delete
         }
-        
+
         # Finalize zip.
         set cdoffset [tell $zf]
         set endrec [binary format a4ssssiis PK\05\06 0 0 $count $count [string length $cd] $cdoffset 0]

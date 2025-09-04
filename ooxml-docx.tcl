@@ -174,7 +174,7 @@ namespace eval ::ooxml::docx {
         -wAfter {w:wAfter {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
-        -cantSpit {w:cantSplit ST_OnOff}
+        -cantSplit {w:cantSplit ST_OnOff}
         -rowHeight {w:trHeight {
             {value val} ST_TwipsMeasure
             hRule ST_HeightRule}}
@@ -215,8 +215,8 @@ namespace eval ::ooxml::docx {
             -en_numFmt {w:numFmt ST_NumberFormat}
             -en_numStart {w:numStart ST_DecimalNumber}
             -en_numRestart {w:numRestart ST_RestartNumber}
-        }        
-        -sizeAndOrientaion {w:pgSz {
+        }
+        -sizeAndOrientation {w:pgSz {
             {height h} ST_TwipsMeasure
             {orientation orient} ST_PageOrientation
             {width w} ST_TwipsMeasure}}

@@ -1,5 +1,5 @@
-C Fixed\sthe\s(ridiculously\sbotched)\shandling\sof\s\\n,\s\\r,\s\\t\sand\s\\f\sin\stext\sappended\sto\sthe\sdocument.
-D 2025-08-26T19:17:39.928
+C Spell\sfixes\sin\soption\snames.\sThanks\sto\sMiguel\sBañón.
+D 2025-09-04T20:47:18.511
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -42,7 +42,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl d92b40a0c1104478b93c28ab3f675516339958b5366202155754559fcc8e7517
-F ooxml-docx.tcl afe0653b55e0a7e3dc5ea5140ec44395229832404f843b7953e39267cdb325b6
+F ooxml-docx.tcl 3fc1e5ab0d3a594731873a7202306de44076e19083953ed6f279c917e51a0a3d
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 9d72ec6ff6ebef05923fb07b901c78520509564bb6a60ee773d83ef0a1534581
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -101,8 +101,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 0ffe5ce88947c8162faa2d6837bb94e07e9264ca3e091c97c656720da4e2db9b
-R 37a48fbf955f5e88942869db09946a5d
+P c7e5ba3eed1ec15a6e8d12a3fdc49b63999e767a5509785f824bf3e480cabc0c
+R 5f31602f9a25f53938185c28cfc80d93
 U rolf
-Z e16a371403f9158b85eb827aafa16713
+Z 387576c78c0506920afedc82f598e4e1
 # Remove this line to create a well-formed Fossil manifest.

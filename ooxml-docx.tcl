@@ -168,6 +168,14 @@ namespace eval ::ooxml::docx {
         -align {w:jc ST_Jc}
     }
 
+    set properties(nary) {
+        -char {m:chr NoCheck}
+        -limLoc {m:limLoc ST_LimLoc}
+        -grow {m:grow ST_OnOff}
+        -subHide {m:subHide ST_OnOff}
+        -supHide {m:supHide ST_OnOff}
+    }
+
     set properties(row) {
         -wBefore {w:wBefore {
             type ST_TblWidth
@@ -702,6 +710,7 @@ oo::class create ooxml::docx::docx {
         my variable tablecontext
         my variable bookmarks
         my variable id
+        my variable valPrefix
 
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::staticDocx
@@ -723,6 +732,7 @@ oo::class create ooxml::docx::docx {
         set body [$root firstChild]
         set context document
         set media ""
+        set valPrefix w
 
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
@@ -1154,6 +1164,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method Create switchActionList {
+        variable valPrefix
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1179,7 +1190,7 @@ oo::class create ooxml::docx::docx {
                                             "the value \"$value\" given to the \"$opt\"\
                                               option is invalid"]
                         foreach tag $tags {
-                            Tag_$tag w:val $ooxmlvalue
+                            Tag_$tag ${valPrefix}:val $ooxmlvalue
                         }
                         unset opts($opt)
                         continue
@@ -3122,27 +3133,18 @@ oo::class create ooxml::docx::docx {
     #   doc mnary { base } -char "∑" -limLoc undOvr -sub { i=1 } -sup { n } -grow 1 -subHide 0 -supHide 0
     method mnary {baseScript args} {
         my variable body
+        my variable valPrefix
+        variable ::ooxml::docx::properties
+
+        set savedValPrefix $valPrefix
+        set valPrefix m
         if {[catch {
             OptVal $args
-            set ch     [my EatOption -char     NoCheck]
-            set limLoc [my EatOption -limLoc   ST_LimLoc]
-            set grow   [my EatOption -grow     ST_OnOff]
-            set subH   [my EatOption -subHide  ST_OnOff]
-            set supH   [my EatOption -supHide  ST_OnOff]
             set subSc  [my EatOption -sub      NoCheck]
             set supSc  [my EatOption -sup      NoCheck]
-            my CheckRemainingOpts
             $body appendFromScript {
                 Tag_m:nary {
-                    if {$ch ne "" || $limLoc ne "" || $grow ne "" || $subH ne "" || $supH ne ""} {
-                        Tag_m:naryPr {
-                            if {$ch ne ""}     { Tag_m:chr     m:val $ch }
-                            if {$limLoc ne ""} { Tag_m:limLoc  m:val $limLoc }
-                            if {$grow ne ""}   { Tag_m:grow    m:val $grow }
-                            if {$subH ne ""}   { Tag_m:subHide m:val $subH }
-                            if {$supH ne ""}   { Tag_m:supHide m:val $supH }
-                        }
-                    }
+                    my Create $properties(nary)
                     if {$subSc ne ""} {
                         Tag_m:sub {
                             set savedbody $body
@@ -3167,9 +3169,12 @@ oo::class create ooxml::docx::docx {
                     }
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
+            set valPrefix $savedValPrefix
             return -code error $errMsg
         }
+        set valPrefix $savedValPrefix
     }
 
     # Lower limit wrapper: <m:limLow><m:e>base</m:e><m:lim>low</m:lim></m:limLow>

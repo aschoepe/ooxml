@@ -168,7 +168,7 @@ namespace eval ::ooxml::docx {
         -align {w:jc ST_Jc}
     }
 
-    set properties(nary) {
+    set properties(naryPr) {
         -char {m:chr NoCheck}
         -limLoc {m:limLoc ST_LimLoc}
         -grow {m:grow ST_OnOff}
@@ -2903,12 +2903,13 @@ oo::class create ooxml::docx::docx {
         close $zf
         return
     }
+    
     # --- OMML (Office Math) builder methods -----------------------------------
     # Simple text in math run: creates <m:r><m:t>TEXT</m:t></m:r>
     method Mt {text} {
         my variable body
         set atts ""
-        if {$text ne "" && ([string index $text 0] eq " " || [string index $text end] eq " ")} {
+        if {[string index $text 0] eq " " || [string index $text end] eq " "} {
             lappend atts xml:space preserve
         }
         Tag_m:t $atts {
@@ -3144,17 +3145,19 @@ oo::class create ooxml::docx::docx {
             set supSc  [my EatOption -sup      NoCheck]
             $body appendFromScript {
                 Tag_m:nary {
-                    my Create $properties(nary)
-                    if {$subSc ne ""} {
-                        Tag_m:sub {
+                    Tag_m:naryPr {
+                        my Create $properties(naryPr)
+                    }
+                    Tag_m:sub {
+                        if {$subSc ne ""} {
                             set savedbody $body
                             set body [dom fromScriptContext]
                             uplevel [list eval $subSc]
                             set body $savedbody
                         }
                     }
-                    if {$supSc ne ""} {
-                        Tag_m:sup {
+                    Tag_m:sup {
+                        if {$supSc ne ""} {
                             set savedbody $body
                             set body [dom fromScriptContext]
                             uplevel [list eval $supSc]

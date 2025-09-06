@@ -1278,6 +1278,21 @@ oo::class create ooxml::docx::docx {
         return ""
     }
 
+    method EvalChildScript {tag script} {
+        my variable body
+        set savedbody $body
+        Tag_$tag {
+            set body [dom fromScriptContext]
+            if {$script ne ""
+                && [catch {uplevel 2 [list eval $script]} errMsg]} {
+                # TODO prettify errorMsg
+                set body $savedbody
+                return -code error $errMsg
+            }
+        }
+        set body $savedbody
+    }
+
     method FootnoteEndnote {type refstyle script} {
         my variable docs
         my variable id
@@ -2978,26 +2993,16 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             OptVal $args
             set ftype [my EatOption -type ST_FType]
-            my CheckRemainingOpts
             $body appendFromScript {
                 Tag_m:f {
                     if {$ftype ne ""} {
                         Tag_m:fPr { Tag_m:type m:val $ftype }
                     }
-                    Tag_m:num {
-                        set savedbody $body
-                        set body [dom fromScriptContext]
-                        uplevel [list eval $numScript]
-                        set body $savedbody
-                    }
-                    Tag_m:den {
-                        set savedbody $body
-                        set body [dom fromScriptContext]
-                        uplevel [list eval $denScript]
-                        set body $savedbody
-                    }
+                    my EvalChildScript m:num $numScript
+                    my EvalChildScript m:den $denScript
                 }
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }
@@ -3008,18 +3013,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:sSup {
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $baseScript]
-                    set body $savedbody
-                }
-                Tag_m:sup {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $supScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:sup $supScript
             }
         }
     }
@@ -3029,18 +3024,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:sSub {
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $baseScript]
-                    set body $savedbody
-                }
-                Tag_m:sub {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $subScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:sub $subScript
             }
         }
     }
@@ -3050,24 +3035,9 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:sSubSup {
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $baseScript]
-                    set body $savedbody
-                }
-                Tag_m:sub {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $subScript]
-                    set body $savedbody
-                }
-                Tag_m:sup {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $supScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:sub $subScript
+                my EvalChildScript m:sup $supScript
             }
         }
     }
@@ -3077,12 +3047,7 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:rad {
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $radicandScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:e $radicandScript
             }
         }
     }
@@ -3092,18 +3057,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:rad {
-                Tag_m:deg {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $degreeScript]
-                    set body $savedbody
-                }
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $radicandScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:deg $degreeScript
+                my EvalChildScript m:e $radicandScript
             }
         }
     }
@@ -3113,18 +3068,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:func {
-                Tag_m:fName {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $nameScript]
-                    set body $savedbody
-                }
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $argScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:fName $nameScript
+                my EvalChildScript m:e $argScript
             }
         }
     }
@@ -3148,28 +3093,9 @@ oo::class create ooxml::docx::docx {
                     Tag_m:naryPr {
                         my Create $properties(naryPr)
                     }
-                    Tag_m:sub {
-                        if {$subSc ne ""} {
-                            set savedbody $body
-                            set body [dom fromScriptContext]
-                            uplevel [list eval $subSc]
-                            set body $savedbody
-                        }
-                    }
-                    Tag_m:sup {
-                        if {$supSc ne ""} {
-                            set savedbody $body
-                            set body [dom fromScriptContext]
-                            uplevel [list eval $supSc]
-                            set body $savedbody
-                        }
-                    }
-                    Tag_m:e {
-                        set savedbody $body
-                        set body [dom fromScriptContext]
-                        uplevel [list eval $baseScript]
-                        set body $savedbody
-                    }
+                    my EvalChildScript m:sub $subSc
+                    my EvalChildScript m:sup $supSc
+                    my EvalChildScript m:e $baseScript
                 }
             }
             my CheckRemainingOpts
@@ -3185,18 +3111,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:limLow {
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $baseScript]
-                    set body $savedbody
-                }
-                Tag_m:lim {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $lowScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:lim $lowScript
             }
         }
     }
@@ -3206,18 +3122,8 @@ oo::class create ooxml::docx::docx {
         my variable body
         $body appendFromScript {
             Tag_m:limUpp {
-                Tag_m:e {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $baseScript]
-                    set body $savedbody
-                }
-                Tag_m:lim {
-                    set savedbody $body
-                    set body [dom fromScriptContext]
-                    uplevel [list eval $upScript]
-                    set body $savedbody
-                }
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:lim $upScript
             }
         }
     }
@@ -3245,38 +3151,14 @@ oo::class create ooxml::docx::docx {
                             if {$jc ne ""} {
                                 Tag_m:oMathParaPr { Tag_m:jc m:val $jc }
                             }
-                            Tag_m:oMath {
-                                set savedbody $body
-                                set body [dom fromScriptContext]
-                                uplevel [list eval $script]
-                                set body $savedbody
-                            }
+                            my EvalChildScript m:oMath $script
                         }
                     }
                 }
             } else {
                 # Inline math inside current paragraph; create one if needed
-                set p ""
-                if {![catch {set p [my LastParagraph 1]}]} {
-                    $p appendFromScript {
-                        Tag_m:oMath {
-                            set savedbody $body
-                            set body [dom fromScriptContext]
-                            uplevel [list eval $script]
-                            set body $savedbody
-                        }
-                    }
-                } else {
-                    $body appendFromScript {
-                        Tag_w:p {
-                            Tag_m:oMath {
-                                set savedbody $body
-                                set body [dom fromScriptContext]
-                                uplevel [list eval $script]
-                                set body $savedbody
-                            }
-                        }
-                    }
+                [my LastParagraph 1] appendFromScript {
+                    my EvalChildScript m:oMath $script
                 }
             }
         } errMsg]} {

@@ -1050,6 +1050,8 @@ oo::class create ooxml::docx::docx {
     }
 
     method CheckedAttlist {optionValue attdefs option} {
+        variable valPrefix
+
         set attlist ""
         if {[catch {array set atts $optionValue}]} {
             set keys ""
@@ -1093,7 +1095,7 @@ oo::class create ooxml::docx::docx {
             if {[string index $attname 0] eq "-"} {
                 lappend attlist [string range $attname 1 end] $ooxmlvalue
             } else {
-                lappend attlist w:$attname $ooxmlvalue
+                lappend attlist ${valPrefix}:$attname $ooxmlvalue
             }
             unset atts($key)
         }
@@ -1209,7 +1211,7 @@ oo::class create ooxml::docx::docx {
                         if {[string index $attname 0] eq "-"} {
                             set attname [string range $attname 1 end]
                         } else {
-                            set attname w:$attname
+                            set attname ${valPrefix}:$attname
                         }
                         foreach tag $tags {
                             Tag_$tag $attname $ooxmlvalue
@@ -3083,11 +3085,8 @@ oo::class create ooxml::docx::docx {
     #   doc mnary { base } -char "∑" -limLoc undOvr -sub { i=1 } -sup { n } -grow 1 -subHide 0 -supHide 0
     method mnary {baseScript args} {
         my variable body
-        my variable valPrefix
         variable ::ooxml::docx::properties
 
-        set savedValPrefix $valPrefix
-        set valPrefix m
         if {[catch {
             OptVal $args
             set subSc  [my EatOption -sub      NoCheck]
@@ -3140,6 +3139,10 @@ oo::class create ooxml::docx::docx {
     #   -jc      ST_MJc     (left|center|right|centerGroup) - only used for display
     method math {args} {
         my variable body
+        my variable valPrefix
+
+        set savedValPrefix $valPrefix
+        set valPrefix m
         if {[catch {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "math" "script"
@@ -3166,8 +3169,10 @@ oo::class create ooxml::docx::docx {
                 }
             }
         } errMsg]} {
+            set valPrefix $savedValPrefix
             return -code error $errMsg
         }
+        set valPrefix $savedValPrefix
     }
 }
 

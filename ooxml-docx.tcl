@@ -123,6 +123,10 @@ namespace eval ::ooxml::docx {
             {value w} ST_MeasurementOrPercent}}
     }
 
+    set properties(fPr) {
+        -type {m:type ST_FType}
+    }
+    
     set properties(paragraph1) {
         -pstyle {w:pStyle PStyle}
         -keepNext {w:keepNext CT_OnOff}
@@ -389,7 +393,7 @@ namespace eval ::ooxml::docx {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
                 <Default Extension="xml" ContentType="application/xml"/>
                 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxlformats-package.relationships+xml"/>
                 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
                 <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
                 <Override PartName="/word/_rels/document.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
@@ -2990,13 +2994,13 @@ oo::class create ooxml::docx::docx {
     # Usage: doc mfrac { ...numerator... } { ...denominator... } ?-type bar|lin|noBar|skw?
     method mfrac {numScript denScript args} {
         my variable body
+        variable ::ooxml::docx::properties
         if {[catch {
             OptVal $args
-            set ftype [my EatOption -type ST_FType]
             $body appendFromScript {
                 Tag_m:f {
-                    if {$ftype ne ""} {
-                        Tag_m:fPr { Tag_m:type m:val $ftype }
+                    Tag_m:fPr {
+                        my Create properties(fPr)
                     }
                     my EvalChildScript m:num $numScript
                     my EvalChildScript m:den $denScript

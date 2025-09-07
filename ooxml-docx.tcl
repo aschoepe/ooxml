@@ -127,7 +127,7 @@ namespace eval ::ooxml::docx {
         -type {m:type ST_FType}
     }
 
-    set properties(mrun) {
+    set properties(mrun1) {
         -lit {m:lit ST_OnOff}
         | {
             {
@@ -139,7 +139,11 @@ namespace eval ::ooxml::docx {
             }
         }
     }
-        
+
+    set properties(mrun2) {
+        -aln {m:aln ST_OnOff}
+    }
+    
     set properties(naryPr) {
         -char {m:chr NoCheck}
         -limLoc {m:limLoc ST_LimLoc}
@@ -1211,6 +1215,7 @@ oo::class create ooxml::docx::docx {
                 set seen 0
                 set groupOptions [list]
                 foreach desc $optdata {
+                    array unset startOptsknown
                     array set startOptsknown [array get optsknown]
                     my Create $desc
                     set thisopts [list]
@@ -1219,7 +1224,7 @@ oo::class create ooxml::docx::docx {
                             lappend thisopts $thisopt
                         }
                     }
-                    lappend groupOptions $thisopts
+                    lappend groupOptions [lsort $thisopts]
                     set thisLast [[dom fromScriptContext] lastChild]
                     if {$lastChild ne $thisLast} {
                         incr seen
@@ -1343,9 +1348,9 @@ oo::class create ooxml::docx::docx {
             set body [dom fromScriptContext]
             if {$script ne ""
                 && [catch {uplevel 2 [list eval $script]} errMsg]} {
-                # TODO prettify errorMsg
                 set body $savedbody
-                return -code error $errMsg
+                # TODO prettify errorMsg
+                error $errMsg
             }
         }
         set body $savedbody
@@ -2998,22 +3003,12 @@ oo::class create ooxml::docx::docx {
         
         if {[catch {
             OptVal $args
-            # Convenience: let callers say “-plain 1” or “-upright 1”
-            set plain  [my EatOption -plain   ST_OnOff]
-            set upright [my EatOption -upright ST_OnOff]
-
-            set aln    [my EatOption -aln     ST_OnOff]
             set brk    [my EatOption -brk     ST_OnOff]
             set brkAt  [my EatOption -brkAt   ST_Integer255]
 
-            # Conveniences: -plain/-upright imply m:sty="p" (if -sty not explicitly set)
-            if {$sty eq "" && ($plain eq "on" || $upright eq "on")} {
-                set sty p
-            }
-
             Tag_m:r {
                 Tag_m:rPr {
-                    my Create properties(mrun)
+                    my Create $properties(mrun1)
                     if {$brk eq "on"} {
                         if {$brkAt ne ""} {
                             Tag_m:brk m:alnAt $brkAt
@@ -3021,7 +3016,7 @@ oo::class create ooxml::docx::docx {
                             Tag_m:brk
                         }
                     }
-                    if {$aln ne ""} { Tag_m:aln m:val $aln }
+                    my Create $properties(mrun2)
                 }
                 my Mt $text
             }
@@ -3041,7 +3036,7 @@ oo::class create ooxml::docx::docx {
             $body appendFromScript {
                 Tag_m:f {
                     Tag_m:fPr {
-                        my Create properties(fPr)
+                        my Create $properties(fPr)
                     }
                     my EvalChildScript m:num $numScript
                     my EvalChildScript m:den $denScript
@@ -3142,10 +3137,8 @@ oo::class create ooxml::docx::docx {
             }
             my CheckRemainingOpts
         } errMsg]} {
-            set valPrefix $savedValPrefix
             return -code error $errMsg
         }
-        set valPrefix $savedValPrefix
     }
 
     # Lower limit wrapper: <m:limLow><m:e>base</m:e><m:lim>low</m:lim></m:limLow>

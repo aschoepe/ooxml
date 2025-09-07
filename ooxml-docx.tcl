@@ -126,7 +126,28 @@ namespace eval ::ooxml::docx {
     set properties(fPr) {
         -type {m:type ST_FType}
     }
-    
+
+    set properties(mrun) {
+        -lit {m:lit ST_OnOff}
+        | {
+            {
+                -scr {m:scr ST_MathStyle}
+                -sty {m:sty ST_MathStyle}
+            }
+            {
+                -nor {m:nor ST_OnOff}
+            }
+        }
+    }
+        
+    set properties(naryPr) {
+        -char {m:chr NoCheck}
+        -limLoc {m:limLoc ST_LimLoc}
+        -grow {m:grow ST_OnOff}
+        -subHide {m:subHide ST_OnOff}
+        -supHide {m:supHide ST_OnOff}
+    }
+
     set properties(paragraph1) {
         -pstyle {w:pStyle PStyle}
         -keepNext {w:keepNext CT_OnOff}
@@ -170,14 +191,6 @@ namespace eval ::ooxml::docx {
             start ST_SignedTwipsMeasure
             startChars ST_DecimalNumber}}
         -align {w:jc ST_Jc}
-    }
-
-    set properties(naryPr) {
-        -char {m:chr NoCheck}
-        -limLoc {m:limLoc ST_LimLoc}
-        -grow {m:grow ST_OnOff}
-        -subHide {m:subHide ST_OnOff}
-        -supHide {m:supHide ST_OnOff}
     }
 
     set properties(row) {
@@ -1175,12 +1188,51 @@ oo::class create ooxml::docx::docx {
         upvar optsknown optsknown
 
         foreach {opt optdata} $switchActionList {
+            # If the option description starts with a + then this
+            # describes not an option which would create a child with
+            # one or several attributes. It describes a child (with
+            # the opt value stripped by the leading + as name) with
+            # child nodes and the optdata are the ordinary description
+            # of the options to create that childs with values in
+            # attributes.
             if {[string index $opt 0] eq "+"} {
                 Tag_[string range $opt 1 end] {
                     my Create $optdata
                 }
                 continue
             }
+            # If the opt is just | then optdata is a list of mutually
+            # exclusive usual option descriptions.
+            if {$opt eq "|"} {
+                # We check the last child of the context to see if the
+                # option group has created something (and so at least
+                # one option of this group was given).
+                set lastChild [[dom fromScriptContext] lastChild]
+                set seen 0
+                set groupOptions [list]
+                foreach desc $optdata {
+                    array set startOptsknown [array get optsknown]
+                    my Create $desc
+                    set thisopts [list]
+                    foreach thisopt [array names optsknown] {
+                        if {![info exists startOptsknown($thisopt)]} {
+                            lappend thisopts $thisopt
+                        }
+                    }
+                    lappend groupOptions $thisopts
+                    set thisLast [[dom fromScriptContext] lastChild]
+                    if {$lastChild ne $thisLast} {
+                        incr seen
+                        set lastChild $thisLast
+                    }
+                }
+                if {$seen > 1} {
+                    error "The options [join $groupOptions " and "] are\
+                           mutually exclusive."
+                }
+                continue
+            }
+            # The "normal" cases
             set optsknown($opt) ""
             if {![info exists opts($opt)]} {
                 continue
@@ -1193,8 +1245,8 @@ oo::class create ooxml::docx::docx {
                         # An element with just w:val as attribute and
                         # the attdefs gives the value type.
                         set ooxmlvalue [my CallType $attdefs $value \
-                                            "the value \"$value\" given to the \"$opt\"\
-                                              option is invalid"]
+                                            "the value \"$value\" given to\
+                                             the \"$opt\" option is invalid"]
                         foreach tag $tags {
                             Tag_$tag ${valPrefix}:val $ooxmlvalue
                         }
@@ -2942,20 +2994,17 @@ oo::class create ooxml::docx::docx {
     #            ?-nor on|off? ?-lit on|off? ?-aln on|off? ?-brk on|off? ?-brkAt 0..255?
     method mrun {text args} {
         my variable body
+        variable ::ooxml::docx::properties
+        
         if {[catch {
             OptVal $args
             # Convenience: let callers say “-plain 1” or “-upright 1”
             set plain  [my EatOption -plain   ST_OnOff]
             set upright [my EatOption -upright ST_OnOff]
 
-            set sty    [my EatOption -sty     ST_MathStyle]
-            set scr    [my EatOption -scr     ST_MScript]
-            set nor    [my EatOption -nor     ST_OnOff]
-            set lit    [my EatOption -lit     ST_OnOff]
             set aln    [my EatOption -aln     ST_OnOff]
             set brk    [my EatOption -brk     ST_OnOff]
             set brkAt  [my EatOption -brkAt   ST_Integer255]
-            my CheckRemainingOpts
 
             # Conveniences: -plain/-upright imply m:sty="p" (if -sty not explicitly set)
             if {$sty eq "" && ($plain eq "on" || $upright eq "on")} {
@@ -2963,30 +3012,20 @@ oo::class create ooxml::docx::docx {
             }
 
             Tag_m:r {
-                # Only emit rPr if anything is actually set
-                if {$lit ne "" || $nor eq "on" || $sty ne "" || $scr ne "" || $aln ne "" || $brk ne ""} {
-                    Tag_m:rPr {
-                        if {$lit ne ""} { Tag_m:lit m:val $lit }
-                        # m:nor is mutually exclusive with m:scr/m:sty (per schema choice)
-                        if {$nor eq "on"} {
-                            Tag_m:nor m:val on
+                Tag_m:rPr {
+                    my Create properties(mrun)
+                    if {$brk eq "on"} {
+                        if {$brkAt ne ""} {
+                            Tag_m:brk m:alnAt $brkAt
                         } else {
-                            if {$scr ne ""} { Tag_m:scr m:val $scr }
-                            if {$sty ne ""} { Tag_m:sty m:val $sty }
+                            Tag_m:brk
                         }
-
-                        if {$brk eq "on"} {
-                            if {$brkAt ne ""} {
-                                Tag_m:brk m:alnAt $brkAt
-                            } else {
-                                Tag_m:brk
-                            }
-                        }
-                        if {$aln ne ""} { Tag_m:aln m:val $aln }
                     }
+                    if {$aln ne ""} { Tag_m:aln m:val $aln }
                 }
                 my Mt $text
             }
+            my CheckRemainingOpts
         } errMsg]} {
             return -code error $errMsg
         }

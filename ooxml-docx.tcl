@@ -485,7 +485,7 @@ namespace eval ::ooxml::docx {
             </w:settings>
         }
         word/styles.xml {
-            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="w14"/>
+            <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"/>
         }
     } {
         set staticDocx($name) $xml
@@ -725,6 +725,7 @@ oo::class create ooxml::docx::docx {
         my variable body
         my variable context
         my variable media
+        my variable ignorable
         my variable setuproot
         my variable pagesetup
         my variable sectionsetup
@@ -742,13 +743,14 @@ oo::class create ooxml::docx::docx {
         foreach auxFile [array names staticDocx] {
             set docs($auxFile) [dom parse $staticDocx($auxFile)]
         }
+        # Sensible default according to field
+        set ignorable "w14 wp14 wpg wps"
         set document [dom createDocumentNS $xmlns(w) w:document]
         set docs(word/document.xml) $document
         $document documentElement root
         foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
         set context document
@@ -773,12 +775,12 @@ oo::class create ooxml::docx::docx {
         foreach ns {o m r v w w10 wp wps wpg mc wp14 w14} {
             $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        $setuproot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
         set pagesetup ""
         set sectionsetup ""
         set tablecontext ""
 
         my configure {*}$args
+        my Ignorable
     }
 
     destructor {
@@ -1360,6 +1362,7 @@ oo::class create ooxml::docx::docx {
         my variable docs
         my variable id
         my variable body
+        my variable ignorable
         variable ::ooxml::docx::xmlns
 
         set types "${type}s"
@@ -1371,7 +1374,7 @@ oo::class create ooxml::docx::docx {
             foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
             }
-            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
+            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
         } else {
             set notesroot [$docs(word/$types.xml) documentElement]
         }
@@ -1416,6 +1419,7 @@ oo::class create ooxml::docx::docx {
         my variable docs
         my variable body
         my variable context
+        my variable ignorable
         variable ::ooxml::docx::xmlns
 
         set have [lsort -dictionary [array names docs word/$what*]]
@@ -1438,7 +1442,7 @@ oo::class create ooxml::docx::docx {
         foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS {} xmlns:$ns $xmlns($ns)
         }
-        $root setAttributeNS $xmlns(mc) mc:Ignorable "w14 wp14 wpg wps"
+        $root setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
         set savedbody $body
         set savedcontext $context
         set body $root
@@ -1454,6 +1458,17 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
+    method Ignorable {} {
+        my variable docs
+        my variable ignorable
+        variable ::ooxml::docx::xmlns
+
+        foreach doc [array names docs word/*.xml] {
+            [$docs($doc) documentElement] setAttributeNS \
+                $xmlns(mc) mc:Ignorable $ignorable
+        }
+    }
+    
     method Image_anchor {rId file} {
         my variable media
         variable ::ooxml::docx::properties
@@ -1826,7 +1841,9 @@ oo::class create ooxml::docx::docx {
     }
 
     method addXML {node xmlstr} {
-        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" mc:Ignorable="w14 wp14">$xmlstr</w:document>}]]
+        my variable ignorable
+        
+        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" mc:Ignorable="$ignorable">$xmlstr</w:document>}]]
         foreach child [[$doc documentElement] childNodes] {
             $node appendChild $child
         }
@@ -1890,9 +1907,16 @@ oo::class create ooxml::docx::docx {
 
     method configure {args} {
         my variable docs
+        my variable ignorable
 
         if {[catch {
             OptVal $args
+            # We need to look if -ignorable was given to be able to
+            # handle the empty string as value."
+            if {[info exists opts(-ignorable)]} {
+                set ignorable [EatOption -ignorable]
+                my Ignorable
+            }
             set coreroot [$docs(docProps/core.xml) documentElement]
             $coreroot appendFromScript {
                 foreach elem {

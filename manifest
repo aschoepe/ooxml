@@ -1,5 +1,5 @@
-C Added\sa\sway\sto\ssay\sthat\sgroups\sof\soptions\sare\smutually\sexclusive\sfor\sthe\sCreate\smachinery.\sUsed\sfor\smrun.\sSimplified\smrun\sfuther:\sthe\s-plane\sand\s-upright\soptions\swere\sonly\sused\sto\ssay\s-sty\sp;\sremoved\sthem.\sThe\selement\sm:rPr\smay\sbe\sempty\saccording\sto\sthe\sxsd.\sFixed\sleftover\sfrom\smoving\sattribute\sprefix\ssetting\sto\smethod\smath.
-D 2025-09-07T22:01:33.785
+C Merged\sfrom\sdocx.
+D 2025-09-08T23:16:36.831
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -43,7 +43,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 99110a735c8eb4bc83c0c6c0315b841b05587c19b017bd416c8117bfde6f787a
-F ooxml-docx.tcl c85eaa41b0f8adebdcccbf113dcc874d775b21121b2ad825f9dbd4b8ccf38fe5
+F ooxml-docx.tcl 6ae424b9e9fcbde6b691b2d4e0a4fcb456cfa2b1772eb6c657bc4a2dc0111bad
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl 9d72ec6ff6ebef05923fb07b901c78520509564bb6a60ee773d83ef0a1534581
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -102,9 +102,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P f2c2ea3fc737108e4671066d02bf26a77188ecc52109ee08c1532b48e1afca29 8d032d68fad6b801308e7a222a72269be7fe1e08de73962d09124f59c19bbe7b
-R c99a9824b8d04972a272e7c15101bd91
-T +closed 8d032d68fad6b801308e7a222a72269be7fe1e08de73962d09124f59c19bbe7b
+P d0a7762643853c9de4c0a89f720ac6f45f18543811756b476fd52d426061e53e dce10631fa58b21cca3a24f1c1544c159721d3cebc99d5bcd49161a8ebcfa39d
+R e0bf4e2b4f9c8ad46347db771c0f4b02
 U rolf
-Z 8a27019ea281fd2af83c897ded85e00d
+Z 2a2886c32509c3ace2122cc2decc1600
 # Remove this line to create a well-formed Fossil manifest.

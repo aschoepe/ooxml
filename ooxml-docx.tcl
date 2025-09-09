@@ -1363,7 +1363,12 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::xmlns
 
         foreach doc [array names docs word/*.xml] {
-            [$docs($doc) documentElement] setAttributeNS \
+            set thisroot [$docs($doc) documentElement]
+            if {[catch {$thisroot selectNodes mc:*}]} {
+                # XML namespace prefix mc not defined
+                continue
+            }
+            $thisroot setAttributeNS \
                 $xmlns(mc) mc:Ignorable $ignorable
         }
     }

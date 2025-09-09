@@ -1464,7 +1464,12 @@ oo::class create ooxml::docx::docx {
         variable ::ooxml::docx::xmlns
 
         foreach doc [array names docs word/*.xml] {
-            [$docs($doc) documentElement] setAttributeNS \
+            set thisroot [$docs($doc) documentElement]
+            if {[catch {$thisroot selectNodes mc:*}]} {
+                # XML namespace prefix mc not defined
+                continue
+            }
+            $thisroot setAttributeNS \
                 $xmlns(mc) mc:Ignorable $ignorable
         }
     }
@@ -1875,7 +1880,7 @@ oo::class create ooxml::docx::docx {
         my variable context
 
         if {[catch {
-            OptVal [lrange $args 0 end-1]
+            OptVal [lrange $args 0 end-1] "" "<comment scriopt>"
             lassign [my CreateComment] comment id
             my CheckRemainingOpts
             set script [lindex $args end]
@@ -3006,8 +3011,7 @@ oo::class create ooxml::docx::docx {
         return
     }
     
-    # --- OMML (Office Math) builder methods -----------------------------------
-    # Simple text in math run: creates <m:r><m:t>TEXT</m:t></m:r>
+    # OMML related methods, the initially code contributed by Miguel Bañón
     method Mt {text} {
         my variable body
         set atts ""
@@ -3019,14 +3023,13 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    # mrun TEXT ?-sty p|b|i|bi? ?-scr roman|script|fraktur|double-struck|sans-serif|monospace?
-    #            ?-nor on|off? ?-lit on|off? ?-aln on|off? ?-brk on|off? ?-brkAt 0..255?
-    method mrun {text args} {
+    method mrun {args} {
         my variable body
         variable ::ooxml::docx::properties
         
         if {[catch {
-            OptVal $args
+            OptVal [lrange $args 0 end-1] "" "<mrun script"
+            set text [lindex $args end]
             set brk    [my EatOption -brk     ST_OnOff]
             set brkAt  [my EatOption -brkAt   ST_Integer255]
 
@@ -3052,11 +3055,13 @@ oo::class create ooxml::docx::docx {
 
     # Fraction: <m:f> with optional <m:fPr><m:type m:val="..."/></m:fPr>
     # Usage: doc mfrac { ...numerator... } { ...denominator... } ?-type bar|lin|noBar|skw?
-    method mfrac {numScript denScript args} {
+    method mfrac {args} {
         my variable body
         variable ::ooxml::docx::properties
         if {[catch {
-            OptVal $args
+            OptVal [lrange $args 0 end-2] "" "numScript denScript"
+            set numScript [lindex $args end-1]
+            set denScript [lindex $args end]
             $body appendFromScript {
                 Tag_m:f {
                     Tag_m:fPr {
@@ -3141,12 +3146,13 @@ oo::class create ooxml::docx::docx {
     # n-ary operator (sum/product/integral/⋂ etc.)
     # Usage:
     #   doc mnary { base } -char "∑" -limLoc undOvr -sub { i=1 } -sup { n } -grow 1 -subHide 0 -supHide 0
-    method mnary {baseScript args} {
+    method mnary {args} {
         my variable body
         variable ::ooxml::docx::properties
 
         if {[catch {
-            OptVal $args
+            OptVal [lrange $args 0 end-1] "" "baseScript"
+            set baseScript [lindex $args end]
             set subSc  [my EatOption -sub      NoCheck]
             set supSc  [my EatOption -sup      NoCheck]
             $body appendFromScript {

@@ -1,5 +1,5 @@
-C Changed\sthe\scalling\sconvention\sof\sthe\smathml\smethod\sto\swhat\sthe\swml\score\shas:\sfirst\s-option\svalues\sthen\sscript\sto\sevaluate.
-D 2025-09-09T00:14:52.487
+C Merged\sfrom\sdocx.
+D 2025-09-09T00:17:22.064
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -102,8 +102,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 2907c33a003eb9086f6139d47842a4e19d041a03a94404a020b28e232091fdb2
+P a4d47c6d45cbb8e8fd8b53506c7deff70d8819c9d228b87c8885d5b248d06b00 19d7eeed9f537e8c5cb134bf16d4bb83fd6296cdb420aad1516885ed4bc13695
 R 67efc941294077a984992f3c6c250961
 U rolf
-Z 71b5986f67e4fe50bf8a0d1e576a2895
+Z 7116e51e040dcff5a3edb465fa0e6152
 # Remove this line to create a well-formed Fossil manifest.

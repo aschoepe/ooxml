@@ -1967,4 +1967,81 @@ proc ::ooxml::docx::lib::W3CDTF {value} {
     return $value
 }
 
+# OMML (Office Math) builder methods, contributed by Miguel Bañón
+proc ::ooxml::docx::lib::ST_MJc {value} {
+    set values {
+        left
+        center
+        right
+        centerGroup
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown math justification \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_FType {value} {
+    set values {
+        bar
+        lin
+        noBar
+        skw
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown fraction type \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_LimLoc {value} {
+    set values {
+        undOvr
+        subSup
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown limit location \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_MathStyle {value} {
+    set values {
+        p
+        b
+        i
+        bi
+    }
+    if {$value eq ""} {return ""}
+    if {$value in $values} {return $value}
+    error "unknown math style \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_MScript {value} {
+    set values {
+        ""
+        roman
+        script
+        fraktur
+        double-struck
+        sans-serif
+        monospace
+    }
+    if {$value in $values} {return $value}
+    error "unknown math script \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Integer255 {value} {
+    if {$value eq ""} {return ""}
+    if {[string is integer -strict $value] && $value >= 0 && $value <= 255} {
+        return $value
+    }
+    error "expected integer 0..255 for alnAt, got \"$value\""
+}
+
 package provide ooxml::docx::lib 0.6

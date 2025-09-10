@@ -59,6 +59,7 @@ namespace eval ::ooxml::docx {
     array set xmlns {
         a http://schemas.openxmlformats.org/drawingml/2006/main
         ct http://schemas.openxmlformats.org/package/2006/content-types
+        m  http://schemas.openxmlformats.org/officeDocument/2006/math
         mc http://schemas.openxmlformats.org/markup-compatibility/2006
         o urn:schemas-microsoft-com:office:office
         pic http://schemas.openxmlformats.org/drawingml/2006/picture
@@ -120,6 +121,35 @@ namespace eval ::ooxml::docx {
         -cellMarginRight {w:right {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
+    }
+
+    set properties(fPr) {
+        -type {m:type ST_FType}
+    }
+
+    set properties(mrun1) {
+        -lit {m:lit ST_OnOff}
+        | {
+            {
+                -scr {m:scr ST_MathStyle}
+                -sty {m:sty ST_MathStyle}
+            }
+            {
+                -nor {m:nor ST_OnOff}
+            }
+        }
+    }
+
+    set properties(mrun2) {
+        -aln {m:aln ST_OnOff}
+    }
+    
+    set properties(naryPr) {
+        -char {m:chr NoCheck}
+        -limLoc {m:limLoc ST_LimLoc}
+        -grow {m:grow ST_OnOff}
+        -subHide {m:subHide ST_OnOff}
+        -supHide {m:supHide ST_OnOff}
     }
 
     set properties(paragraph1) {
@@ -380,7 +410,7 @@ namespace eval ::ooxml::docx {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
                 <Default Extension="xml" ContentType="application/xml"/>
                 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxlformats-package.relationships+xml"/>
                 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
                 <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
                 <Override PartName="/word/_rels/document.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
@@ -673,6 +703,17 @@ namespace eval ::ooxml::docx {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
     }
 
+    # OMML (Office Math) support
+    foreach tag {
+        m:aln m:brk m:chr m:deg m:den m:e m:f m:fName m:fPr m:func
+        m:grow m:jc m:lim m:limLoc m:limLow m:limUpp m:lit m:nary
+        m:naryPr m:nor m:num m:oMath m:oMathPara m:oMathParaPr m:r
+        m:rPr m:rPr m:rad m:radPr m:sSub m:sSubSup m:sSup m:scr m:sty
+        m:sub m:subHide m:sup m:supHide m:t m:type
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(m) elementNode Tag_$tag
+    }
+
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
 }
@@ -691,6 +732,7 @@ oo::class create ooxml::docx::docx {
         my variable tablecontext
         my variable bookmarks
         my variable id
+        my variable valPrefix
 
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::staticDocx
@@ -706,13 +748,14 @@ oo::class create ooxml::docx::docx {
         set document [dom createDocumentNS $xmlns(w) w:document]
         set docs(word/document.xml) $document
         $document documentElement root
-        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
         $root appendFromScript Tag_w:body
         set body [$root firstChild]
         set context document
         set media ""
+        set valPrefix w
 
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
@@ -729,7 +772,7 @@ oo::class create ooxml::docx::docx {
         # with that.
         set setupdoc [dom createDocumentNS $xmlns(w) w:umbrella]
         set setuproot [$setupdoc documentElement]
-        foreach ns {o r v w w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o m r v w w10 wp wps wpg mc wp14 w14} {
             $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
         set pagesetup ""
@@ -1026,6 +1069,8 @@ oo::class create ooxml::docx::docx {
     }
 
     method CheckedAttlist {optionValue attdefs option} {
+        variable valPrefix
+
         set attlist ""
         if {[catch {array set atts $optionValue}]} {
             set keys ""
@@ -1069,7 +1114,7 @@ oo::class create ooxml::docx::docx {
             if {[string index $attname 0] eq "-"} {
                 lappend attlist [string range $attname 1 end] $ooxmlvalue
             } else {
-                lappend attlist w:$attname $ooxmlvalue
+                lappend attlist ${valPrefix}:$attname $ooxmlvalue
             }
             unset atts($key)
         }
@@ -1144,16 +1189,57 @@ oo::class create ooxml::docx::docx {
     }
 
     method Create switchActionList {
+        variable valPrefix
         upvar opts opts
         upvar optsknown optsknown
 
         foreach {opt optdata} $switchActionList {
+            # If the option description starts with a + then this
+            # describes not an option which would create a child with
+            # one or several attributes. It describes a child (with
+            # the opt value stripped by the leading + as name) with
+            # child nodes and the optdata are the ordinary description
+            # of the options to create that childs with values in
+            # attributes.
             if {[string index $opt 0] eq "+"} {
                 Tag_[string range $opt 1 end] {
                     my Create $optdata
                 }
                 continue
             }
+            # If the opt is just | then optdata is a list of mutually
+            # exclusive usual option descriptions.
+            if {$opt eq "|"} {
+                # We check the last child of the context to see if the
+                # option group has created something (and so at least
+                # one option of this group was given).
+                set lastChild [[dom fromScriptContext] lastChild]
+                set seen 0
+                set groupOptions [list]
+                foreach desc $optdata {
+                    array unset startOptsknown
+                    array set startOptsknown [array get optsknown]
+                    my Create $desc
+                    set thisopts [list]
+                    foreach thisopt [array names optsknown] {
+                        if {![info exists startOptsknown($thisopt)]} {
+                            lappend thisopts $thisopt
+                        }
+                    }
+                    lappend groupOptions [lsort $thisopts]
+                    set thisLast [[dom fromScriptContext] lastChild]
+                    if {$lastChild ne $thisLast} {
+                        incr seen
+                        set lastChild $thisLast
+                    }
+                }
+                if {$seen > 1} {
+                    error "The options [join $groupOptions " and "] are\
+                           mutually exclusive."
+                }
+                continue
+            }
+            # The "normal" cases
             set optsknown($opt) ""
             if {![info exists opts($opt)]} {
                 continue
@@ -1166,10 +1252,10 @@ oo::class create ooxml::docx::docx {
                         # An element with just w:val as attribute and
                         # the attdefs gives the value type.
                         set ooxmlvalue [my CallType $attdefs $value \
-                                            "the value \"$value\" given to the \"$opt\"\
-                                              option is invalid"]
+                                            "the value \"$value\" given to\
+                                             the \"$opt\" option is invalid"]
                         foreach tag $tags {
-                            Tag_$tag w:val $ooxmlvalue
+                            Tag_$tag ${valPrefix}:val $ooxmlvalue
                         }
                         unset opts($opt)
                         continue
@@ -1184,7 +1270,7 @@ oo::class create ooxml::docx::docx {
                         if {[string index $attname 0] eq "-"} {
                             set attname [string range $attname 1 end]
                         } else {
-                            set attname w:$attname
+                            set attname ${valPrefix}:$attname
                         }
                         foreach tag $tags {
                             Tag_$tag $attname $ooxmlvalue
@@ -1257,6 +1343,21 @@ oo::class create ooxml::docx::docx {
         return ""
     }
 
+    method EvalChildScript {tag script} {
+        my variable body
+        set savedbody $body
+        Tag_$tag {
+            set body [dom fromScriptContext]
+            if {$script ne ""
+                && [catch {uplevel 2 [list eval $script]} errMsg]} {
+                set body $savedbody
+                # TODO prettify errorMsg
+                error $errMsg
+            }
+        }
+        set body $savedbody
+    }
+
     method FootnoteEndnote {type refstyle script} {
         my variable docs
         my variable id
@@ -1270,7 +1371,7 @@ oo::class create ooxml::docx::docx {
             set document [dom createDocumentNS $xmlns(w) w:$types]
             set docs(word/$types.xml) $document
             $document documentElement notesroot
-            foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+            foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
             }
             $notesroot setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
@@ -1338,7 +1439,7 @@ oo::class create ooxml::docx::docx {
         set document [dom createDocumentNS $xmlns(w) w:$elnName]
         set docs(word/$what$nr.xml) $document
         $document documentElement root
-        foreach ns {o r v w10 wp wps wpg mc wp14 w14 } {
+        foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS {} xmlns:$ns $xmlns($ns)
         }
         $root setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
@@ -1779,7 +1880,7 @@ oo::class create ooxml::docx::docx {
         my variable context
 
         if {[catch {
-            OptVal [lrange $args 0 end-1]
+            OptVal [lrange $args 0 end-1] "" "<comment scriopt>"
             lassign [my CreateComment] comment id
             my CheckRemainingOpts
             set script [lindex $args end]
@@ -2908,6 +3009,232 @@ oo::class create ooxml::docx::docx {
         puts -nonewline $zf $endrec
         close $zf
         return
+    }
+    
+    # OMML related methods, the initially code contributed by Miguel Bañón
+    method Mt {text} {
+        my variable body
+        set atts ""
+        if {[string index $text 0] eq " " || [string index $text end] eq " "} {
+            lappend atts xml:space preserve
+        }
+        Tag_m:t $atts {
+            Text [dom clearString -replace $text]
+        }
+    }
+
+    method mrun {args} {
+        my variable body
+        variable ::ooxml::docx::properties
+        
+        if {[catch {
+            OptVal [lrange $args 0 end-1] "" "<mrun script"
+            set text [lindex $args end]
+            set brk    [my EatOption -brk     ST_OnOff]
+            set brkAt  [my EatOption -brkAt   ST_Integer255]
+
+            Tag_m:r {
+                Tag_m:rPr {
+                    my Create $properties(mrun1)
+                    if {$brk eq "on"} {
+                        if {$brkAt ne ""} {
+                            Tag_m:brk m:alnAt $brkAt
+                        } else {
+                            Tag_m:brk
+                        }
+                    }
+                    my Create $properties(mrun2)
+                }
+                my Mt $text
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    # Fraction: <m:f> with optional <m:fPr><m:type m:val="..."/></m:fPr>
+    # Usage: doc mfrac { ...numerator... } { ...denominator... } ?-type bar|lin|noBar|skw?
+    method mfrac {args} {
+        my variable body
+        variable ::ooxml::docx::properties
+        if {[catch {
+            OptVal [lrange $args 0 end-2] "" "numScript denScript"
+            set numScript [lindex $args end-1]
+            set denScript [lindex $args end]
+            $body appendFromScript {
+                Tag_m:f {
+                    Tag_m:fPr {
+                        my Create $properties(fPr)
+                    }
+                    my EvalChildScript m:num $numScript
+                    my EvalChildScript m:den $denScript
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    # Superscript: <m:sSup><m:e>base</m:e><m:sup>sup</m:sup></m:sSup>
+    method msup {baseScript supScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:sSup {
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:sup $supScript
+            }
+        }
+    }
+
+    # Subscript: <m:sSub><m:e>base</m:e><m:sub>sub</m:sub></m:sSub>
+    method msub {baseScript subScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:sSub {
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:sub $subScript
+            }
+        }
+    }
+
+    # Sub+Sup: <m:sSubSup><m:e>base</m:e><m:sub>…</m:sub><m:sup>…</m:sup></m:sSubSup>
+    method msubsup {baseScript subScript supScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:sSubSup {
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:sub $subScript
+                my EvalChildScript m:sup $supScript
+            }
+        }
+    }
+
+    # Square root: <m:rad><m:e>…</m:e></m:rad>  (no degree)
+    method msqrt {radicandScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:rad {
+                my EvalChildScript m:e $radicandScript
+            }
+        }
+    }
+
+    # nth-root: <m:rad><m:deg>n</m:deg><m:e>…</m:e></m:rad>
+    method mroot {degreeScript radicandScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:rad {
+                my EvalChildScript m:deg $degreeScript
+                my EvalChildScript m:e $radicandScript
+            }
+        }
+    }
+
+    # Function application: <m:func><m:fName>name</m:fName><m:e>arg</m:e></m:func>
+    method mfunc {nameScript argScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:func {
+                my EvalChildScript m:fName $nameScript
+                my EvalChildScript m:e $argScript
+            }
+        }
+    }
+
+    # n-ary operator (sum/product/integral/⋂ etc.)
+    # Usage:
+    #   doc mnary { base } -char "∑" -limLoc undOvr -sub { i=1 } -sup { n } -grow 1 -subHide 0 -supHide 0
+    method mnary {args} {
+        my variable body
+        variable ::ooxml::docx::properties
+
+        if {[catch {
+            OptVal [lrange $args 0 end-1] "" "baseScript"
+            set baseScript [lindex $args end]
+            set subSc  [my EatOption -sub      NoCheck]
+            set supSc  [my EatOption -sup      NoCheck]
+            $body appendFromScript {
+                Tag_m:nary {
+                    Tag_m:naryPr {
+                        my Create $properties(naryPr)
+                    }
+                    my EvalChildScript m:sub $subSc
+                    my EvalChildScript m:sup $supSc
+                    my EvalChildScript m:e $baseScript
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+    }
+
+    # Lower limit wrapper: <m:limLow><m:e>base</m:e><m:lim>low</m:lim></m:limLow>
+    method mlimlow {baseScript lowScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:limLow {
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:lim $lowScript
+            }
+        }
+    }
+
+    # Upper limit wrapper: <m:limUpp><m:e>base</m:e><m:lim>up</m:lim></m:limUpp>
+    method mlimupp {baseScript upScript} {
+        my variable body
+        $body appendFromScript {
+            Tag_m:limUpp {
+                my EvalChildScript m:e $baseScript
+                my EvalChildScript m:lim $upScript
+            }
+        }
+    }
+
+    # Inline or display math zone.
+    #   doc math { ...OMML... }            ;# inline (m:oMath) in current paragraph
+    #   doc math -display 1 { ...OMML... } ;# display (m:oMathPara/m:oMath) on its own paragraph
+    # Options:
+    #   -display ST_OnOff   (default off)
+    #   -jc      ST_MJc     (left|center|right|centerGroup) - only used for display
+    method math {args} {
+        my variable body
+        my variable valPrefix
+
+        set savedValPrefix $valPrefix
+        set valPrefix m
+        if {[catch {
+            set script [lindex $args end]
+            OptVal [lrange $args 0 end-1] "math" "script"
+
+            set display [my EatOption -display ST_OnOff]   ;# "1" or "0"
+            set jc      [my EatOption -jc ST_MJc]          ;# left|center|right|centerGroup
+            my CheckRemainingOpts
+
+            if {$display eq "1"} {
+                $body appendFromScript {
+                    Tag_w:p {
+                        Tag_m:oMathPara {
+                            if {$jc ne ""} {
+                                Tag_m:oMathParaPr { Tag_m:jc m:val $jc }
+                            }
+                            my EvalChildScript m:oMath $script
+                        }
+                    }
+                }
+            } else {
+                # Inline math inside current paragraph; create one if needed
+                [my LastParagraph 1] appendFromScript {
+                    my EvalChildScript m:oMath $script
+                }
+            }
+        } errMsg]} {
+            set valPrefix $savedValPrefix
+            return -code error $errMsg
+        }
+        set valPrefix $savedValPrefix
     }
 }
 

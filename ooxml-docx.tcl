@@ -410,7 +410,7 @@ namespace eval ::ooxml::docx {
             <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
                 <Default Extension="xml" ContentType="application/xml"/>
                 <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxlformats-package.relationships+xml"/>
+                <Override PartName="/_rels/.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
                 <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
                 <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
                 <Override PartName="/word/_rels/document.xml.rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
@@ -803,7 +803,7 @@ oo::class create ooxml::docx::docx {
         }
         set ctRoot [$docs(\[Content_Types\].xml) documentElement]
         if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-            count(ct:Override[@Partname=$file])
+            count(ct:Override[@PartName=$file])
         }] > 0} {
             return
         }
@@ -875,7 +875,7 @@ oo::class create ooxml::docx::docx {
                 set type "application/vnd.openxmlformats-officedocument.theme+xml"
             }
             "/word/webSettings.xml" {
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.webSettings+xml"
+                set type "application/vnd.openxmlformats-officedocument.wordprocessingml.webSettings+xml"
             }
             default {
                 error "cannot find the ContentType for '$file'"
@@ -1476,7 +1476,6 @@ oo::class create ooxml::docx::docx {
     
     method Image_anchor {rId file} {
         my variable media
-        variable ::ooxml::docx::properties
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1488,7 +1487,6 @@ oo::class create ooxml::docx::docx {
 
     method Image_graphic {rId file} {
         my variable media
-        variable ::ooxml::docx::properties
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1517,7 +1515,6 @@ oo::class create ooxml::docx::docx {
 
     method Image_inline {rId file} {
         my variable media
-        variable ::ooxml::docx::properties
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1880,7 +1877,7 @@ oo::class create ooxml::docx::docx {
         my variable context
 
         if {[catch {
-            OptVal [lrange $args 0 end-1] "" "<comment scriopt>"
+            OptVal [lrange $args 0 end-1] "" "<comment script>"
             lassign [my CreateComment] comment id
             my CheckRemainingOpts
             set script [lindex $args end]
@@ -2385,7 +2382,6 @@ oo::class create ooxml::docx::docx {
 
     method paragraph {text args} {
         my variable body
-        variable ::ooxml::docx::properties
 
         if {[catch {
             OptVal $args "text"
@@ -2544,7 +2540,6 @@ oo::class create ooxml::docx::docx {
 
     method simpletable {tabledata args} {
         my variable body
-        variable ::ooxml::docx::properties
 
         if {[catch {
             OptVal $args "tabledata"
@@ -2590,7 +2585,6 @@ oo::class create ooxml::docx::docx {
 
     method style {cmd args} {
         my variable docs
-        variable ::ooxml::docx::properties
 
         set result ""
         if {[catch {
@@ -2598,9 +2592,11 @@ oo::class create ooxml::docx::docx {
             switch $cmd {
                 "paragraphdefault" {
                     set docDefaults [my GetDocDefault $styles]
-                    set pdefault [$docDefaults selectNodes w:pPrDefault]
+                    set pdefault [$docDefaults selectNodes {
+                        w:pPrDefault | w:rPrDefault
+                    }]
                     foreach this $pdefault {
-                        $pdefault delete
+                        $this delete
                     }
                     # docDefaults has two childs in the order:
                     # rPrDefault pPrDefault
@@ -2619,7 +2615,7 @@ oo::class create ooxml::docx::docx {
                     set docDefaults [my GetDocDefault $styles]
                     set rdefault [$docDefaults selectNodes w:rPrDefault]
                     foreach this $rdefault {
-                        $rdefault delete
+                        $this delete
                     }
                     # docDefaults has two childs in the order:
                     # rPrDefault pPrDefault
@@ -3013,7 +3009,6 @@ oo::class create ooxml::docx::docx {
     
     # OMML related methods, the initially code contributed by Miguel Bañón
     method Mt {text} {
-        my variable body
         set atts ""
         if {[string index $text 0] eq " " || [string index $text end] eq " "} {
             lappend atts xml:space preserve

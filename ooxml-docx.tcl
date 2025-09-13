@@ -128,28 +128,28 @@ namespace eval ::ooxml::docx {
     }
 
     set properties(mrun1) {
-        -lit {m:lit ST_OnOff}
+        -lit {m:lit CT_OnOff}
         | {
             {
                 -scr {m:scr ST_MathStyle}
                 -sty {m:sty ST_MathStyle}
             }
             {
-                -nor {m:nor ST_OnOff}
+                -nor {m:nor CT_OnOff}
             }
         }
     }
 
     set properties(mrun2) {
-        -aln {m:aln ST_OnOff}
+        -aln {m:aln CT_OnOff}
     }
     
     set properties(naryPr) {
         -char {m:chr NoCheck}
         -limLoc {m:limLoc ST_LimLoc}
-        -grow {m:grow ST_OnOff}
-        -subHide {m:subHide ST_OnOff}
-        -supHide {m:supHide ST_OnOff}
+        -grow {m:grow CT_OnOff}
+        -subHide {m:subHide CT_OnOff}
+        -supHide {m:supHide CT_OnOff}
     }
 
     set properties(paragraph1) {
@@ -170,7 +170,7 @@ namespace eval ::ooxml::docx {
             vSpace ST_TwipsMeasure
             hSpace ST_TwipsMeasure
             hrule ST_HeightRule
-            anchorLock ST_OnOff}}
+            anchorLock CT_OnOff}}
         -widowControl {w:widowControl CT_OnOff}
         +w:numPr {
             -level {w:ilvl ST_DecimalNumber}
@@ -204,11 +204,11 @@ namespace eval ::ooxml::docx {
         -wAfter {w:wAfter {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
-        -cantSplit {w:cantSplit ST_OnOff}
+        -cantSplit {w:cantSplit CT_OnOff}
         -rowHeight {w:trHeight {
             {value val} ST_TwipsMeasure
             hRule ST_HeightRule}}
-        -headerrow {w:tblHeader ST_OnOff}
+        -headerrow {w:tblHeader CT_OnOff}
         -cellSpacing {w:tblCellSpacing {
             type ST_TblWidth
             {value w} ST_MeasurementOrPercent}}
@@ -217,18 +217,18 @@ namespace eval ::ooxml::docx {
 
     # Unspecified order
     set properties(run) {
-        -bold {{w:b w:bCs} ST_OnOff}
+        -bold {{w:b w:bCs} CT_OnOff}
         -color {w:color ST_HexColor}
         -cstyle {w:rStyle RStyle}
-        -dstrike {w:dstrike ST_OnOff}
-        -emboss {w:emboss ST_OnOff}
+        -dstrike {w:dstrike CT_OnOff}
+        -emboss {w:emboss CT_OnOff}
         -font {w:rFonts NoCheck RFonts}
         -fontsize {{w:sz w:szCs} ST_HpsMeasure}
         -highlight {w:highlight ST_HighlightColor}
-        -italic {{w:i w:iCs} ST_OnOff}
-        -noProof {w:noProof ST_OnOff}
+        -italic {{w:i w:iCs} CT_OnOff}
+        -noProof {w:noProof CT_OnOff}
         -rtl {w:rtl CT_OnOff}
-        -strike {w:strike ST_OnOff}
+        -strike {w:strike CT_OnOff}
         -underline {w:u ST_Underline}
         -verticalAlign {w:vertAlign ST_VerticalAlignRun}
     }
@@ -365,12 +365,12 @@ namespace eval ::ooxml::docx {
 
     set properties(table3) {
         -look {w:tblLook {
-            firstRow ST_OnOff
-            lastRow ST_OnOff
-            firstColumn ST_OnOff
-            lastColumn ST_OnOff
-            noHBand ST_OnOff
-            noVBand ST_OnOff
+            firstRow CT_OnOff
+            lastRow CT_OnOff
+            firstColumn CT_OnOff
+            lastColumn CT_OnOff
+            noHBand CT_OnOff
+            noVBand CT_OnOff
         }}
         -caption {w:tblCaption NoCheck}
     }
@@ -3025,7 +3025,7 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             OptVal [lrange $args 0 end-1] "" "<mrun script"
             set text [lindex $args end]
-            set brk    [my EatOption -brk     ST_OnOff]
+            set brk    [my EatOption -brk     CT_OnOff]
             set brkAt  [my EatOption -brkAt   ST_Integer255]
 
             Tag_m:r {
@@ -3192,7 +3192,7 @@ oo::class create ooxml::docx::docx {
     #   doc math { ...OMML... }            ;# inline (m:oMath) in current paragraph
     #   doc math -display 1 { ...OMML... } ;# display (m:oMathPara/m:oMath) on its own paragraph
     # Options:
-    #   -display ST_OnOff   (default off)
+    #   -display CT_OnOff   (default off)
     #   -jc      ST_MJc     (left|center|right|centerGroup) - only used for display
     method math {args} {
         my variable body
@@ -3204,7 +3204,7 @@ oo::class create ooxml::docx::docx {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "math" "script"
 
-            set display [my EatOption -display ST_OnOff]   ;# "1" or "0"
+            set display [my EatOption -display CT_OnOff]   ;# "1" or "0"
             set jc      [my EatOption -jc ST_MJc]          ;# left|center|right|centerGroup
             my CheckRemainingOpts
 

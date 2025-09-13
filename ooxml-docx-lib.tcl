@@ -1072,9 +1072,9 @@ proc ::ooxml::docx::lib::CT_OnOff {value} {
         error "expected a Tcl boolean value"
     }
     if {$value} {
-        return "on"
+        return "1"
     } else {
-        return "off"
+        return "0"
     }
 }
 
@@ -1552,17 +1552,6 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
     }
     error "unknown numbering format \"$value\", expected one of\
             [AllowedValues $values]"
-}
-
-proc ::ooxml::docx::lib::ST_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
-    }
-    if {$value} {
-        return "1"
-    } else {
-        return "0"
-    }
 }
 
 proc ::ooxml::docx::lib::ST_PageOrientation {value} {

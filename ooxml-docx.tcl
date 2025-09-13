@@ -223,7 +223,7 @@ namespace eval ::ooxml::docx {
         -dstrike {w:dstrike ST_OnOff}
         -emboss {w:emboss ST_OnOff}
         -font {w:rFonts NoCheck RFonts}
-        -fontsize {{w:sz w:szCs} ST_TwipsMeasure}
+        -fontsize {{w:sz w:szCs} ST_HpsMeasure}
         -highlight {w:highlight ST_HighlightColor}
         -italic {{w:i w:iCs} ST_OnOff}
         -noProof {w:noProof ST_OnOff}

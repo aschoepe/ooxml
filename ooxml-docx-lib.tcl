@@ -1455,16 +1455,18 @@ proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {
     if {[string is integer -strict $value]} {
         return $value
     }
-    if {[regexp -- {-?[0-9]+(\.[0-9]+)?%} $value]} {
-        return $value
+    # Percent form (e.g., "50%" or "12.5%") -> integer in 1/50 percent units
+    #    100% -> 5000, 50% -> 2500, 12.5% -> 625
+    if {[regexp -- {^(-?[0-9]+(\.[0-9]+)?)%$} $value -> num]} {
+        return [expr {int(round(double($num) * 50.0))}]
     }
-    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure or perent value - value must\
-              be an integer or a numeric value directly followed either a\
-              percent sign (%) or one of the units mm, cm, in, pt, pc or pi"
+    # Physical measurement -> twips (Word canonical numeric form)
+    if {[regexp -- {^-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)$} $value]} {
+        return [::ooxml::docx::lib::ST_TwipsMeasure $value]
     }
-    return $value
-
+    error "\"$value\" is not a valid measure or percent value — expected an\
+          integer, a percentage (e.g. 50%), or a unit-suffixed measure\
+          (mm|cm|in|pt|pc|pi)."
 }
 
 proc ::ooxml::docx::lib::ST_Merge {value} {
@@ -1640,15 +1642,50 @@ proc ::ooxml::docx::lib::ST_RestartNumber {value} {
            one of: [AllowedValues $values]"
 }
 
+# Convert a number+unit to twips (1pt=20 twips).
+proc ::ooxml::docx::lib::_MeasureToTwips {value signed} {
+    set value [string trim $value]
+    if {$signed} {
+        if {[string is integer -strict $value]} {return $value}
+        if {![regexp {^(-?[0-9]+(?:\.[0-9]+)?)(mm|cm|in|pt|pc|pi)$} $value \
+                  > num unit]} {
+            error "\"$value\" is not a valid measure (int twips or\
+                  number+unit: mm|cm|in|pt|pc|pi)"
+        }
+    } else {
+        if {[string is integer -strict $value] && $value >= 0} {return $value}
+        if {![regexp {^([0-9]+(?:\.[0-9]+)?)(mm|cm|in|pt|pc|pi)$} $value \
+                  > num unit]} {
+            error "\"$value\" is not a valid measure (non-negative int\
+                  twips or number+unit: mm|cm|in|pt|pc|pi)"
+        }
+    }
+    switch $unit {
+        mm { set tw [expr {round($num * 1440.0 / 25.4)}] }
+        cm { set tw [expr {round($num * 1440.0 / 2.54)}] }
+        in { set tw [expr {round($num * 1440.0)} }
+        pt { set tw [expr {round($num * 20.0)}] }
+        pc - pi { set tw [expr {round($num * 240.0)}] }
+    }
+    return $tw
+}
+
+proc ::ooxml::docx::lib::ST_TwipsMeasure {value} {
+    return [::ooxml::docx::lib::_MeasureToTwips $value 0]
+}
+
 proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {
-    if {[string is integer -strict $value]} {
+    return [::ooxml::docx::lib::_MeasureToTwips $value 1]
+}
+
+# Half-points (hps). Accept integer hps directly (e.g., 36) *or* a
+# number+unit (e.g., 18pt, 1in, 3cm).
+proc ::ooxml::docx::lib::ST_HpsMeasure {value} {
+    if {[string is integer -strict $value] && $value >= 0} {
         return $value
     }
-    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-    }
-    return $value
+    set tw [::ooxml::docx::lib::ST_TwipsMeasure $value]  ;# ensures '18pt' -> 360
+    return [expr {int(round($tw / 10.0))}]               ;# 360 twips -> 36 hps
 }
 
 proc ::ooxml::docx::lib::ST_TabJc {value} {
@@ -1807,22 +1844,6 @@ proc ::ooxml::docx::lib::ST_TextWrappingType {value} {
     }
     error "unknown text wrapping type \"$value\", expected one of\
            [AllowedValues $values]"
-}
-
-# ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
-# The difference is only the interpretation of the integer (only)
-# values. For ST_HpsMeasure the number specifies half points
-# (1/144 of an inch), for ST_TwipsMeasure the number specifies
-# twentieths of a point (equivalent to 1/1440th of an inch).
-proc ::ooxml::docx::lib::ST_TwipsMeasure {value} {
-    if {[string is integer -strict $value] && $value >= 0} {
-        return $value
-    }
-    if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-    }
-    return $value
 }
 
 proc ::ooxml::docx::lib::ST_Underline {value} {

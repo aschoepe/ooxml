@@ -46,7 +46,7 @@ puts [$docx numbering abstractNumIds]
 # Use it
 $docx paragraph "First" -numberingStyle 3
 $docx paragraph "Second" -numberingStyle 3 -level 0
-$docx paragraph "Sub Second frist" -numberingStyle 3 -level 1
+$docx paragraph "Sub Second first" -numberingStyle 3 -level 1
 #$docx paragraph "Sub Second second" -numberingStyle 3 -level 1 -pstyle mystyle
 $docx paragraph "Sub Second second" -numberingStyle 3 -level 1 
 $docx paragraph "Third" -numberingStyle 3 -level 0 

@@ -99,7 +99,7 @@ $docx paragraph "Tabs test $loreipsum" -tabs {3cm 6cm 9cm 12cm}
 $docx url "link to core.tcl-lang.org" https://core.tcl-lang.org -underline single
 $docx comment -author "Document Creator" \
       -date [clock format [clock seconds] -format %Y-%m-%dT%H:%M:%SZ] \
-      -initals "dc" {
+      -initials "dc" {
     $docx paragraph "You have "
     $docx append "every" -bold 1
     $docx append " local formating at hand to format the comment text."

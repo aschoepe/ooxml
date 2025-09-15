@@ -1320,7 +1320,7 @@ oo::class create ooxml::docx::docx {
             Tag_w:comment w:id [incr id(comments)] \
                 w:date [my EatOption -date ST_DateTime] \
                 w:author $author \
-                w:initials [my EatOption -initals NoCheck]
+                w:initials [my EatOption -initials NoCheck]
         }
         return [list [$comments lastChild] $id(comments)]
     }

@@ -909,13 +909,13 @@ oo::class create ooxml::docx::docx {
             return $result
         }
 
-        # At least for documents we build up from scratch this should
-        # work reliable enough
-        set lastchild [$relsRoot lastChild]
-        if {$lastchild eq ""} {
-            set nr 0
-        } else {
-            set nr [string range [$lastchild @Id] 3 end]
+        # Find the maximum numeric part of any existing rId in this relationships part
+        set nr 0
+        foreach rel [$relsRoot childNodes] {
+            set id [$rel @Id ""]
+            if {[regexp {^rId([0-9]+)$} $id -> n]} {
+                if {$n > $nr} { set nr $n }
+            }
         }
         incr nr
         set attlist [list \
@@ -936,7 +936,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method Anchor {name} {
-        my variable id
         variable ::ooxml::docx::properties
         upvar opts opts
         upvar optsknown optsknown
@@ -1034,7 +1033,7 @@ oo::class create ooxml::docx::docx {
                          one of [AllowedValues {none square topBottom}]"
                 }
             }
-            Tag_wp:docPr id [incr id(drawingElements)] name $name
+            Tag_wp:docPr id [my NextId drawingElements] name $name
             Tag_wp:cNvGraphicFramePr {
                 Tag_a:graphicFrameLocks noChangeAspect 1
             }
@@ -1301,7 +1300,6 @@ oo::class create ooxml::docx::docx {
 
     method CreateComment {} {
         my variable docs
-        my variable id
 
         upvar opts opts
         upvar optsknown optsknown
@@ -1317,7 +1315,7 @@ oo::class create ooxml::docx::docx {
             if {$author eq ""} {
                 set author "Unknown"
             }
-            Tag_w:comment w:id [incr id(comments)] \
+            Tag_w:comment w:id [my NextId comments] \
                 w:date [my EatOption -date ST_DateTime] \
                 w:author $author \
                 w:initials [my EatOption -initials NoCheck]
@@ -1360,7 +1358,6 @@ oo::class create ooxml::docx::docx {
 
     method FootnoteEndnote {type refstyle script} {
         my variable docs
-        my variable id
         my variable body
         my variable ignorable
         variable ::ooxml::docx::xmlns
@@ -1379,7 +1376,7 @@ oo::class create ooxml::docx::docx {
             set notesroot [$docs(word/$types.xml) documentElement]
         }
         $notesroot appendFromScript {
-            Tag_w:$type w:id [incr id($types)]
+            Tag_w:$type w:id [my NextId $types]
         }
         set savedbody $body
         set body [$notesroot lastChild]
@@ -1563,6 +1560,13 @@ oo::class create ooxml::docx::docx {
         return $p
     }
 
+    method NextId {domain} {
+        my variable id
+
+        # Return the next unique id
+        return [incr id($domain)]
+    }
+        
     method OneOff {opta optb} {
         upvar opts opts
         upvar optsknown optsknown
@@ -1938,6 +1942,10 @@ oo::class create ooxml::docx::docx {
                     dc:title
                     cp:version
                 } {
+                    # Hm. According to opc-coreProperties.xsd
+                    # cp:keywords should have value elements as
+                    # childs, but I don't see this in in what
+                    # libreoffice generates.
                     lassign [split $elem :] prefix option
                     set value [my EatOption -$option]
                     if {$value ne ""} {
@@ -2217,7 +2225,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method markend {name} {
-        my variable id
         my variable bookmarks
 
         if {![info exists bookmarks($name)] || $bookmarks($name) == 0} {
@@ -2236,17 +2243,17 @@ oo::class create ooxml::docx::docx {
     }
 
     method markstart {name} {
-        my variable id
         my variable bookmarks
 
         if {[info exists bookmarks($name)] && $bookmarks($name) > 0} {
             return -code error "mark \"$name\" is not unique"
         }
         set p [my LastParagraph 1]
+        set thisid [my NextId bookmarks]
         $p appendFromScript {
-            Tag_w:bookmarkStart w:id [incr id(bookmarks)] w:name $name
+            Tag_w:bookmarkStart w:id $thisid w:name $name
         }
-        set bookmarks($name) $id(bookmarks)
+        set bookmarks($name) $thisid
     }
 
     method numbering {cmd args} {
@@ -2801,7 +2808,6 @@ oo::class create ooxml::docx::docx {
 
     method textbox {args} {
         my variable body
-        my variable id
 
         set p [my LastParagraph 1]
         set script [lindex $args end]
@@ -2809,7 +2815,7 @@ oo::class create ooxml::docx::docx {
             OptVal [lrange $args 0 end-1]
             set name [my EatOption -name]
             if {$name eq ""} {
-                set name "Textbox [incr id(textboxes)]"
+                set name "Textbox [my NextId textboxes]"
             }
             $p appendFromScript {
                 Tag_w:r {

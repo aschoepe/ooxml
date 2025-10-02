@@ -740,23 +740,16 @@ oo::class create ooxml::docx::docx {
         namespace import ::ooxml::docx::lib::*
         namespace import ::ooxml::docx::Tag_*  ::ooxml::docx::Text
 
-        foreach auxFile [array names staticDocx] {
-            set docs($auxFile) [dom parse $staticDocx($auxFile)]
-        }
+        # Setup defaults/initial values
+        #
         # Sensible default according to field
         set ignorable "w14 wp14 wpg wps"
-        set document [dom createDocumentNS $xmlns(w) w:document]
-        set docs(word/document.xml) $document
-        $document documentElement root
-        foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
-            $root setAttributeNS "" xmlns:$ns $xmlns($ns)
-        }
-        $root appendFromScript Tag_w:body
-        set body [$root firstChild]
         set context document
         set media ""
         set valPrefix w
-
+        set pagesetup ""
+        set sectionsetup ""
+        set tablecontext ""
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
         # the last paragraph it seems handy to not realy insert that
@@ -775,12 +768,28 @@ oo::class create ooxml::docx::docx {
         foreach ns {o m r v w w10 wp wps wpg mc wp14 w14} {
             $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        set pagesetup ""
-        set sectionsetup ""
-        set tablecontext ""
 
+        if {[llength $args] % 2} {
+            # User gave a docx file name to start from
+            set startdocx [linde $args end]
+            set args [lrange $args 0 end-1]
+            my InitFromDocx $startdocx
+        } else {
+            # Create a docx from scratch
+            foreach auxFile [array names staticDocx] {
+                set docs($auxFile) [dom parse $staticDocx($auxFile)]
+            }
+            set document [dom createDocumentNS $xmlns(w) w:document]
+            set docs(word/document.xml) $document
+            $document documentElement root
+            foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
+                $root setAttributeNS "" xmlns:$ns $xmlns($ns)
+            }
+            $root appendFromScript Tag_w:body
+            set body [$root firstChild]
+            my Ignorable
+        }
         my configure {*}$args
-        my Ignorable
     }
 
     destructor {
@@ -1033,7 +1042,7 @@ oo::class create ooxml::docx::docx {
                          one of [AllowedValues {none square topBottom}]"
                 }
             }
-            Tag_wp:docPr id [my NextId drawingElements] name $name
+            Tag_wp:docPr id [my NextId docPr] name $name
             Tag_wp:cNvGraphicFramePr {
                 Tag_a:graphicFrameLocks noChangeAspect 1
             }
@@ -1528,6 +1537,35 @@ oo::class create ooxml::docx::docx {
             Tag_wp:extent {*}$attlist
             Tag_wp:docPr id [llength $media] name [file tail $file]
             my Image_graphic $rId $file
+        }
+    }
+
+    method InitFromDocx {docxfile} {
+        my variable docs
+        my variable body
+
+        if {[catch {::ooxml::ZipOpen $docxfile} errMsg]} {
+            return -code error "Cannot open '$docxfile': $errMsg"
+        }
+        foreach part [::ooxml::docx::ZipMembers] {
+            if {[catch [set docs($part) [::ooxml::ZipReadParse $part]]]} {
+                # Non XML file; add to binparts
+            }
+        }
+        ::ooxml::ZipClose
+
+        # Check that (by the spec) required parts of the docx which
+        # are by the ooxml-doc internal implementation expected as
+        # existing are present. 
+        foreach musthave {
+            [Content_Types].xml
+            word/document.xml
+            word/_rels/document.xml.rels
+        } {
+            if {![info exists docs($musthave)]} {
+                return -code error "Invalid ooxml docx file '$docxfile':\
+                                    missing required part '$part'"
+            }
         }
     }
 
@@ -2786,7 +2824,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method tablerow {args} {
-        my variable body
         my variable tablecontext
 
         if {$tablecontext ne "table"} {

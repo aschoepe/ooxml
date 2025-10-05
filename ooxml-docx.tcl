@@ -729,6 +729,7 @@ oo::class create ooxml::docx::docx {
         my variable setuproot
         my variable pagesetup
         my variable sectionsetup
+        my variable impPagesetup
         my variable tablecontext
         my variable bookmarks
         my variable id
@@ -749,6 +750,7 @@ oo::class create ooxml::docx::docx {
         set valPrefix w
         set pagesetup ""
         set sectionsetup ""
+        set impPagesetup ""
         set tablecontext ""
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
@@ -771,7 +773,7 @@ oo::class create ooxml::docx::docx {
 
         if {[llength $args] % 2} {
             # User gave a docx file name to start from
-            set startdocx [linde $args end]
+            set startdocx [lindex $args end]
             set args [lrange $args 0 end-1]
             my InitFromDocx $startdocx
         } else {
@@ -1319,17 +1321,18 @@ oo::class create ooxml::docx::docx {
             }]
         }
         set comments [$docs(word/comments.xml) documentElement]
+        set commentID [my NextId comments]
         $comments appendFromScript {
             set author [my EatOption -author]
             if {$author eq ""} {
                 set author "Unknown"
             }
-            Tag_w:comment w:id [my NextId comments] \
+            Tag_w:comment w:id $commentID \
                 w:date [my EatOption -date ST_DateTime] \
                 w:author $author \
                 w:initials [my EatOption -initials NoCheck]
         }
-        return [list [$comments lastChild] $id(comments)]
+        return [list [$comments lastChild] $commentID]
     }
 
     method EatOption {option {type ""} {deleteOption 1}} {
@@ -1384,8 +1387,9 @@ oo::class create ooxml::docx::docx {
         } else {
             set notesroot [$docs(word/$types.xml) documentElement]
         }
+        set thisid [my NextId $types]
         $notesroot appendFromScript {
-            Tag_w:$type w:id [my NextId $types]
+            Tag_w:$type w:id $thisid
         }
         set savedbody $body
         set body [$notesroot lastChild]
@@ -1406,7 +1410,7 @@ oo::class create ooxml::docx::docx {
             }
         } [$firstp selectNodes {w:r[1]}]
         set body $savedbody
-        return $id($types)
+        return $thisid
     }
 
     method GetDocDefault {styles} {
@@ -1543,20 +1547,22 @@ oo::class create ooxml::docx::docx {
     method InitFromDocx {docxfile} {
         my variable docs
         my variable body
+        my variable binparts
+        my variable impPagesetup
 
         if {[catch {::ooxml::ZipOpen $docxfile} errMsg]} {
             return -code error "Cannot open '$docxfile': $errMsg"
         }
-        foreach part [::ooxml::docx::ZipMembers] {
-            if {[catch [set docs($part) [::ooxml::ZipReadParse $part]]]} {
+        foreach part [::ooxml::ZipMembers] {
+            if {[catch {set docs($part) [::ooxml::ZipReadParse $part]}]} {
                 # Non XML file; add to binparts
+                set binparts($part) [::ooxml::ZipReadBinaryFile $part]
             }
         }
         ::ooxml::ZipClose
 
-        # Check that (by the spec) required parts of the docx which
-        # are by the ooxml-doc internal implementation expected as
-        # existing are present. 
+        # Check that (by the spec) required parts of the docx are
+        # actually exist (the implementation expects them as present).
         foreach musthave {
             [Content_Types].xml
             word/document.xml
@@ -1564,8 +1570,28 @@ oo::class create ooxml::docx::docx {
         } {
             if {![info exists docs($musthave)]} {
                 return -code error "Invalid ooxml docx file '$docxfile':\
-                                    missing required part '$part'"
+                                    missing required part '$musthave'"
             }
+        }
+        # Ensure that a word/styles.xml is there
+        if {![info exists docs(word/styles.xml)]} {
+            variable ::ooxml::docx::staticDocx
+            set docs(word/styles.xml) [dom parse staticDocx(word/styles.xml)]
+        }
+        # Ensure that we can use our prefixes for XPath queries 
+        set prefixnslist [array get ::ooxml::docx::xmlns]
+        foreach xmlpart [array names docs] {
+            $docs($xmlpart) selectNodesNamespaces $prefixnslist
+        }
+        set body [$docs(word/document.xml) selectNodes {w:document/w:body[last()]}]
+        if {$body eq ""} {
+            return -code error "Invalid ooxml docx file '$docxfile':\
+                no body element in word/document.xml"
+        }
+        set lastElm [$body selectNodes {w:*[last()]}]
+        if {[$lastElm localName] eq "sectPr"} {
+            set impPagesetup $lastElm
+            $body removeChild $lastElm
         }
     }
 
@@ -2956,24 +2982,14 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method writepart {what file} {
-        my variable docs
-
-        if {![info exists docs($what)]} {
-            error "unknown part $what"
-        }
-        set fd [open $file w+]
-        fconfigure $fd -encoding utf-8
-        $docs($what) asXML -channel $fd
-        close $fd
-    }
-
     method write {file} {
         my variable body
         my variable docs
+        my variable binparts
         my variable media
         my variable pagesetup
         my variable sectionsetup
+        my variable impPagesetup
         variable ::ooxml::docx::xmlns
 
         # Finalize section and do pagesetup
@@ -3004,10 +3020,14 @@ oo::class create ooxml::docx::docx {
             }
             set appendedPageSetup [$body lastChild]
         } else {
-            # This keeps things sane in case there was no pagesetup
-            # but sections inbetween.
-            $body appendFromScript {
-                Tag_w:sectPr
+            if {$impPagesetup ne ""} {
+                $body appendChild $impPagesetup
+            } else {
+                # This keeps things sane in case there was no pagesetup
+                # but sections inbetween.
+                $body appendFromScript {
+                    Tag_w:sectPr
+                }
             }
         }
 
@@ -3026,6 +3046,10 @@ oo::class create ooxml::docx::docx {
 
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
+        }
+        foreach part [array names binparts] {
+            append cd [::ooxml::add_str_to_archive $zf $part $binparts($part) "" 1]
+            incr count
         }
         set nr 1
         foreach this $media {
@@ -3050,6 +3074,18 @@ oo::class create ooxml::docx::docx {
         return
     }
     
+    method writepart {what file} {
+        my variable docs
+
+        if {![info exists docs($what)]} {
+            error "unknown part $what"
+        }
+        set fd [open $file w+]
+        fconfigure $fd -encoding utf-8
+        $docs($what) asXML -channel $fd
+        close $fd
+    }
+
     # OMML related methods, the initially code contributed by Miguel Bañón
     method Mt {text} {
         set atts ""

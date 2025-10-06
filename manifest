@@ -1,5 +1,5 @@
-C wip
-D 2025-10-05T23:35:19.995
+C Make\sprogress.
+D 2025-10-06T20:50:46.857
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -43,7 +43,7 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl a835d5e9818d89edd1c4ad306db922029a05a532d5360c7833b835ea58e30f16
-F ooxml-docx.tcl 790f2da92cee9ea7ad889887c34869c94839912dc4635c28dcac1c7399e0f92d
+F ooxml-docx.tcl 66db5c8f737ed464cd2bd22add5614e56c7fe3ea912eb93e077fdbcb97db9e52
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl d3e1b573e4517eef93cb3db15ff8030471d6aded55cc4270f6df238b139ddaf8
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -103,8 +103,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P a9608f73c7d5000dac9a66b4c442a92d533cde467289f7274b4ffaba9f899f3b
-R a9bcca8ce82bfbe3bdbc7cdf3dd1cd6b
+P 42a36c3e70108ef1a78d91d97dc56cb961dd4cdb4ea615ebad699aa1ef414cf2
+R 972cc93424a95ed0bbceeedd34888359
 U rolf
-Z f95278c8ff863d706bc7eff05653da94
+Z 5d807667432815e5ffb8794dda7c7620
 # Remove this line to create a well-formed Fossil manifest.

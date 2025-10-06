@@ -44,10 +44,10 @@ namespace eval ::ooxml::docx {
     variable properties
     variable staticDocx
     # These variables are only used in the namespace setup and
-    # definded here only to avoid changes of possibly global variables
+    # defined here only to avoid changes of possibly global variables
     # with the same name for Tcl < 9.0
-    # (See   https://core.tcl-lang.org/tips/doc/trunk/tip/278.md
-    # "Fix Variable Name Resolution Quirks"
+    # (See https://core.tcl-lang.org/tips/doc/trunk/tip/278.md
+    # "Fix Variable Name Resolution Quirks")
     variable BorderOpts
     variable borderOptions
     variable property
@@ -1496,7 +1496,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method Image_graphic {rId file} {
-        my variable media
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1504,7 +1503,7 @@ oo::class create ooxml::docx::docx {
             Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                 Tag_pic:pic {
                     Tag_pic:nvPicPr {
-                        Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                        Tag_pic:cNvPr id [my NextId pic] name [file rootname [file tail $file]]
                         Tag_pic:cNvPicPr {
                             Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
                         }
@@ -1524,7 +1523,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method Image_inline {rId file} {
-        my variable media
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1539,7 +1537,7 @@ oo::class create ooxml::docx::docx {
                       \"height\" to be given"
             }
             Tag_wp:extent {*}$attlist
-            Tag_wp:docPr id [llength $media] name [file tail $file]
+            Tag_wp:docPr id [my NextId docPr] name [file tail $file]
             my Image_graphic $rId $file
         }
     }
@@ -1549,6 +1547,7 @@ oo::class create ooxml::docx::docx {
         my variable body
         my variable binparts
         my variable impPagesetup
+        my variable ids
 
         if {[catch {::ooxml::ZipOpen $docxfile} errMsg]} {
             return -code error "Cannot open '$docxfile': $errMsg"
@@ -1583,6 +1582,8 @@ oo::class create ooxml::docx::docx {
         foreach xmlpart [array names docs] {
             $docs($xmlpart) selectNodesNamespaces $prefixnslist
         }
+        # Move a present sectPr elemet away (to restore it at write
+        # time, if the user has not specified another page setup).
         set body [$docs(word/document.xml) selectNodes {w:document/w:body[last()]}]
         if {$body eq ""} {
             return -code error "Invalid ooxml docx file '$docxfile':\
@@ -1592,6 +1593,43 @@ oo::class create ooxml::docx::docx {
         if {[$lastElm localName] eq "sectPr"} {
             set impPagesetup $lastElm
             $body removeChild $lastElm
+        }
+        # Seed index counters
+        foreach part [array names docs "word/*.xml"] {
+            foreach {key tag att} {
+                docPr wp:docPr id
+                pic pic:cNvPr id
+                bookmarks w:bookmarkStart w:id
+            } {
+                set ids($key) 0
+                foreach attribute [$docs($part) selectNodes //$tag/@$att] {
+                    lassign $attribute name id
+                    if {[string is integer -strict $id] && $id > $ids($key)} {
+                        set ids($key) $id
+                    }
+                }
+            }
+            set ids(textboxes) 0
+            foreach attribute [$docs($part) selectNodes //wp:docPr/@name] {
+                lassign $attribute name value
+                if {[regexp {^Textbox\s+(\d+)$} $value -> n] && $n > $ids(textboxes)} {
+                    set ids(textboxes) $n
+                }
+            }
+        }
+        foreach {key part tag} {
+            comments word/comments.xml w:comment
+            footnotes word/footnotes.xml w:footnote
+            endnotes word/endnotes.xml w:endnote
+        } {
+            if {![info exists docs($part)]} continue
+            set ids($key) 0
+            foreach attribute [$docs($part) selectNodes //$tag/@id] {
+                lassign $attribute name id
+                if {[string is integer -strict $id] && $id > $ids($key)} {
+                    set ids($key) $id
+                }
+            }
         }
     }
 
@@ -1911,9 +1949,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method addXML {node xmlstr} {
-        my variable ignorable
-        
-        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" mc:Ignorable="$ignorable">$xmlstr</w:document>}]]
+        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">$xmlstr</w:document>}]]
         foreach child [[$doc documentElement] childNodes] {
             $node appendChild $child
         }

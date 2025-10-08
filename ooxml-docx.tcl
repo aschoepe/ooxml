@@ -44,10 +44,10 @@ namespace eval ::ooxml::docx {
     variable properties
     variable staticDocx
     # These variables are only used in the namespace setup and
-    # definded here only to avoid changes of possibly global variables
+    # defined here only to avoid changes of possibly global variables
     # with the same name for Tcl < 9.0
-    # (See   https://core.tcl-lang.org/tips/doc/trunk/tip/278.md
-    # "Fix Variable Name Resolution Quirks"
+    # (See https://core.tcl-lang.org/tips/doc/trunk/tip/278.md
+    # "Fix Variable Name Resolution Quirks")
     variable BorderOpts
     variable borderOptions
     variable property
@@ -724,11 +724,12 @@ oo::class create ooxml::docx::docx {
         my variable docs
         my variable body
         my variable context
-        my variable media
+        my variable binparts
         my variable ignorable
         my variable setuproot
         my variable pagesetup
         my variable sectionsetup
+        my variable impPagesetup
         my variable tablecontext
         my variable bookmarks
         my variable id
@@ -740,23 +741,16 @@ oo::class create ooxml::docx::docx {
         namespace import ::ooxml::docx::lib::*
         namespace import ::ooxml::docx::Tag_*  ::ooxml::docx::Text
 
-        foreach auxFile [array names staticDocx] {
-            set docs($auxFile) [dom parse $staticDocx($auxFile)]
-        }
+        # Setup defaults/initial values
+        #
         # Sensible default according to field
         set ignorable "w14 wp14 wpg wps"
-        set document [dom createDocumentNS $xmlns(w) w:document]
-        set docs(word/document.xml) $document
-        $document documentElement root
-        foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
-            $root setAttributeNS "" xmlns:$ns $xmlns($ns)
-        }
-        $root appendFromScript Tag_w:body
-        set body [$root firstChild]
         set context document
-        set media ""
         set valPrefix w
-
+        set pagesetup ""
+        set sectionsetup ""
+        set impPagesetup ""
+        set tablecontext ""
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
         # the last paragraph it seems handy to not realy insert that
@@ -775,12 +769,32 @@ oo::class create ooxml::docx::docx {
         foreach ns {o m r v w w10 wp wps wpg mc wp14 w14} {
             $setuproot setAttributeNS "" xmlns:$ns $xmlns($ns)
         }
-        set pagesetup ""
-        set sectionsetup ""
-        set tablecontext ""
 
+        if {[llength $args] % 2} {
+            # User gave a docx file name to start from
+            set startdocx [lindex $args end]
+            set args [lrange $args 0 end-1]
+            my InitFromDocx $startdocx
+        } else {
+            # Create a docx from scratch
+            # Ensure that we can use our prefixes for XPath queries 
+            set prefixnslist [array get ::ooxml::docx::xmlns]
+            foreach auxFile [array names staticDocx] {
+                set docs($auxFile) [dom parse $staticDocx($auxFile)]
+                $docs($auxFile) selectNodesNamespaces $prefixnslist
+            }
+            set document [dom createDocumentNS $xmlns(w) w:document]
+            set docs(word/document.xml) $document
+            $docs(word/document.xml) selectNodesNamespaces $prefixnslist
+            $document documentElement root
+            foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
+                $root setAttributeNS "" xmlns:$ns $xmlns($ns)
+            }
+            $root appendFromScript Tag_w:body
+            set body [$root firstChild]
+            my Ignorable
+        }
         my configure {*}$args
-        my Ignorable
     }
 
     destructor {
@@ -802,14 +816,12 @@ oo::class create ooxml::docx::docx {
                    with a slash (/)"
         }
         set ctRoot [$docs(\[Content_Types\].xml) documentElement]
-        if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-            count(ct:Override[@PartName=$file])
-        }] > 0} {
+        if {[$ctRoot selectNodes {count(ct:Override[@PartName=$file])}] > 0} {
             return
         }
         if {[string range $file 0 11] eq "/word/media/"} {
-            set suffix [string range [file extension $file] 1 end]
-            if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+            set suffix [string tolower [string range [file extension $file] 1 end]]
+            if {[$ctRoot selectNodes {
                 count(ct:Default[@Extension=$suffix])
             }] > 0} {
                 return
@@ -850,13 +862,10 @@ oo::class create ooxml::docx::docx {
                 set type "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"
             }
             "/word/media/*" {
-                set suffix [string range [file extension $file] 1 end]
                 set contentType [MimeType $suffix]
                 $ctRoot insertBeforeFromScript {
                     Tag_Default Extension $suffix ContentType $contentType
-                } [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-                    ct:Override[1]
-                }]
+                } [$ctRoot selectNodes {ct:Override[1]}]
                 return
             }
             "/word/numbering.xml" {
@@ -909,13 +918,13 @@ oo::class create ooxml::docx::docx {
             return $result
         }
 
-        # At least for documents we build up from scratch this should
-        # work reliable enough
-        set lastchild [$relsRoot lastChild]
-        if {$lastchild eq ""} {
-            set nr 0
-        } else {
-            set nr [string range [$lastchild @Id] 3 end]
+        # Find the maximum numeric part of any existing rId in this relationships part
+        set nr 0
+        foreach rel [$relsRoot childNodes] {
+            set id [$rel @Id ""]
+            if {[regexp {^rId([0-9]+)$} $id -> n]} {
+                if {$n > $nr} { set nr $n }
+            }
         }
         incr nr
         set attlist [list \
@@ -936,7 +945,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method Anchor {name} {
-        my variable id
         variable ::ooxml::docx::properties
         upvar opts opts
         upvar optsknown optsknown
@@ -1034,7 +1042,7 @@ oo::class create ooxml::docx::docx {
                          one of [AllowedValues {none square topBottom}]"
                 }
             }
-            Tag_wp:docPr id [incr id(drawingElements)] name $name
+            Tag_wp:docPr id [my NextId docPr] name $name
             Tag_wp:cNvGraphicFramePr {
                 Tag_a:graphicFrameLocks noChangeAspect 1
             }
@@ -1301,7 +1309,6 @@ oo::class create ooxml::docx::docx {
 
     method CreateComment {} {
         my variable docs
-        my variable id
 
         upvar opts opts
         upvar optsknown optsknown
@@ -1312,17 +1319,18 @@ oo::class create ooxml::docx::docx {
             }]
         }
         set comments [$docs(word/comments.xml) documentElement]
+        set commentID [my NextId comments]
         $comments appendFromScript {
             set author [my EatOption -author]
             if {$author eq ""} {
                 set author "Unknown"
             }
-            Tag_w:comment w:id [incr id(comments)] \
+            Tag_w:comment w:id $commentID \
                 w:date [my EatOption -date ST_DateTime] \
                 w:author $author \
                 w:initials [my EatOption -initials NoCheck]
         }
-        return [list [$comments lastChild] $id(comments)]
+        return [list [$comments lastChild] $commentID]
     }
 
     method EatOption {option {type ""} {deleteOption 1}} {
@@ -1360,7 +1368,6 @@ oo::class create ooxml::docx::docx {
 
     method FootnoteEndnote {type refstyle script} {
         my variable docs
-        my variable id
         my variable body
         my variable ignorable
         variable ::ooxml::docx::xmlns
@@ -1374,12 +1381,13 @@ oo::class create ooxml::docx::docx {
             foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
             }
-            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
+            my Ignorable word/$types.xml
         } else {
             set notesroot [$docs(word/$types.xml) documentElement]
         }
+        set thisid [my NextId $types]
         $notesroot appendFromScript {
-            Tag_w:$type w:id [incr id($types)]
+            Tag_w:$type w:id $thisid
         }
         set savedbody $body
         set body [$notesroot lastChild]
@@ -1400,7 +1408,7 @@ oo::class create ooxml::docx::docx {
             }
         } [$firstp selectNodes {w:r[1]}]
         set body $savedbody
-        return $id($types)
+        return $thisid
     }
 
     method GetDocDefault {styles} {
@@ -1442,7 +1450,7 @@ oo::class create ooxml::docx::docx {
         foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS {} xmlns:$ns $xmlns($ns)
         }
-        $root setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
+        my Ignorable word/$what$nr.xml
         set savedbody $body
         set savedcontext $context
         set body $root
@@ -1458,24 +1466,33 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
-    method Ignorable {} {
+    method Ignorable {{file ""}} {
         my variable docs
         my variable ignorable
         variable ::ooxml::docx::xmlns
 
-        foreach doc [array names docs word/*.xml] {
-            set thisroot [$docs($doc) documentElement]
+        if {$file eq ""} {
+            set files [array names docs word/*.xml]
+        } else {
+            set files [list $file]
+        }
+        foreach doc $files  {
+            set thisdoc $docs($doc)
+            set storedprefixns [$thisdoc selectNodesNamespaces]
+            $thisdoc selectNodesNamespaces ""
+            set thisroot [$thisdoc documentElement]
             if {[catch {$thisroot selectNodes mc:*}]} {
                 # XML namespace prefix mc not defined
+                $thisdoc selectNodesNamespaces $storedprefixns
                 continue
             }
+            $thisdoc selectNodesNamespaces $storedprefixns
             $thisroot setAttributeNS \
                 $xmlns(mc) mc:Ignorable $ignorable
         }
     }
     
     method Image_anchor {rId file} {
-        my variable media
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1486,7 +1503,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method Image_graphic {rId file} {
-        my variable media
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1494,7 +1510,7 @@ oo::class create ooxml::docx::docx {
             Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                 Tag_pic:pic {
                     Tag_pic:nvPicPr {
-                        Tag_pic:cNvPr id [llength $media] name [file rootname [file tail $file]]
+                        Tag_pic:cNvPr id [my NextId pic] name [file rootname [file tail $file]]
                         Tag_pic:cNvPicPr {
                             Tag_a:picLocks  noChangeAspect 1 noChangeArrowheads 1
                         }
@@ -1514,7 +1530,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method Image_inline {rId file} {
-        my variable media
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1529,8 +1544,105 @@ oo::class create ooxml::docx::docx {
                       \"height\" to be given"
             }
             Tag_wp:extent {*}$attlist
-            Tag_wp:docPr id [llength $media] name [file tail $file]
+            Tag_wp:docPr id [my NextId docPr] name [file tail $file]
             my Image_graphic $rId $file
+        }
+    }
+
+    method InitFromDocx {docxfile} {
+        my variable docs
+        my variable body
+        my variable binparts
+        my variable impPagesetup
+        my variable id
+
+        if {[catch {::ooxml::ZipOpen $docxfile} errMsg]} {
+            return -code error "Cannot open '$docxfile': $errMsg"
+        }
+        set id(image) 0
+        foreach part [::ooxml::ZipMembers] {
+            if {[catch {set docs($part) [::ooxml::ZipReadParse $part]}]} {
+                # Non XML file; add to binparts
+                set binparts($part) [::ooxml::ZipReadBinaryFile $part]
+            }
+            if {[regexp {^word/media/image(\d+)$} $part -> n]} {
+                if {$id(image) < $n} {
+                    set id(image) $n
+                }
+            }
+        }
+        ::ooxml::ZipClose
+
+        # Check that (by the spec) required parts of the docx are
+        # actually exist (the implementation expects them as present).
+        foreach musthave {
+            [Content_Types].xml
+            word/document.xml
+            word/_rels/document.xml.rels
+        } {
+            if {![info exists docs($musthave)]} {
+                return -code error "Invalid ooxml docx file '$docxfile':\
+                                    missing required part '$musthave'"
+            }
+        }
+        # Ensure that a word/styles.xml is there
+        if {![info exists docs(word/styles.xml)]} {
+            variable ::ooxml::docx::staticDocx
+            set docs(word/styles.xml) [dom parse staticDocx(word/styles.xml)]
+        }
+        # Ensure that we can use our prefixes for XPath queries 
+        set prefixnslist [array get ::ooxml::docx::xmlns]
+        foreach xmlpart [array names docs] {
+            $docs($xmlpart) selectNodesNamespaces $prefixnslist
+        }
+        # Move a present sectPr elemet away (to restore it at write
+        # time, if the user has not specified another page setup).
+        set body [$docs(word/document.xml) selectNodes {w:document/w:body[last()]}]
+        if {$body eq ""} {
+            return -code error "Invalid ooxml docx file '$docxfile':\
+                no body element in word/document.xml"
+        }
+        set lastElm [$body selectNodes {w:*[last()]}]
+        if {[$lastElm localName] eq "sectPr"} {
+            set impPagesetup $lastElm
+            $body removeChild $lastElm
+        }
+        # Seed index counters
+        foreach key {docPr pic bookmarks textboxes comments footnotes endnotes} {
+            set id($key) 0
+        }
+        foreach part [array names docs "word/*.xml"] {
+            foreach {key tag att} {
+                docPr wp:docPr id
+                pic pic:cNvPr id
+                bookmarks w:bookmarkStart w:id
+            } {
+                foreach attribute [$docs($part) selectNodes //$tag/@$att] {
+                    lassign $attribute name v
+                    if {[string is integer -strict $v] && $v > $id($key)} {
+                        set id($key) $v
+                    }
+                }
+            }
+            foreach attribute [$docs($part) selectNodes //wp:docPr/@name] {
+                lassign $attribute name value
+                if {[regexp {^Textbox\s+(\d+)$} $value -> n] && $n > $id(textboxes)} {
+                    set id(textboxes) $n
+                }
+            }
+        }
+        foreach {key part tag} {
+            comments word/comments.xml w:comment
+            footnotes word/footnotes.xml w:footnote
+            endnotes word/endnotes.xml w:endnote
+        } {
+            if {![info exists docs($part)]} continue
+            foreach attribute [$docs($part) selectNodes //$tag/@id] {
+                lassign $attribute name v
+                if {[string is integer -strict $v] && $v > $id($key)} {
+                    set id($key) $v
+                }
+            }
         }
     }
 
@@ -1563,6 +1675,13 @@ oo::class create ooxml::docx::docx {
         return $p
     }
 
+    method NextId {domain} {
+        my variable id
+
+        # Return the next unique id
+        return [incr id($domain)]
+    }
+        
     method OneOff {opta optb} {
         upvar opts opts
         upvar optsknown optsknown
@@ -1843,9 +1962,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method addXML {node xmlstr} {
-        my variable ignorable
-        
-        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" mc:Ignorable="$ignorable">$xmlstr</w:document>}]]
+        set doc [dom parse [subst -nocommands -nobackslashes {<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">$xmlstr</w:document>}]]
         foreach child [[$doc documentElement] childNodes] {
             $node appendChild $child
         }
@@ -1938,6 +2055,10 @@ oo::class create ooxml::docx::docx {
                     dc:title
                     cp:version
                 } {
+                    # Hm. According to opc-coreProperties.xsd
+                    # cp:keywords should have value elements as
+                    # childs, but I don't see this in in what
+                    # libreoffice generates.
                     lassign [split $elem :] prefix option
                     set value [my EatOption -$option]
                     if {$value ne ""} {
@@ -2069,7 +2190,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method image {file type args} {
-        my variable media
+        my variable binparts
 
         if {[catch {
             if {![file isfile $file] || ![file readable $file]} {
@@ -2079,16 +2200,11 @@ oo::class create ooxml::docx::docx {
                 error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
             }
             OptVal $args "file type"
-            set file [file normalize $file]
-            set ind [lsearch -exact $media $file]
-            if {$ind < 0} {
-                lappend media $file
-                set ind [llength $media]
-            } else {
-                # Tcl indexes count from 0, the image numbering from 1
-                incr ind
-            }
-            set imagename image${ind}[file extension $file]
+            set imagename image[my NextId picture]
+            append imagename [string tolower [file extension $file]]
+            set fd [open $file rb]
+            set binparts(word/media/$imagename) [read $fd]
+            close $fd
             set rId [my Add2Relationships image media/$imagename]
             set p [my LastParagraph 1]
             $p appendFromScript {
@@ -2151,39 +2267,6 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
-    method initWord {docxfile} {
-        my variable docs
-
-        package require Tcl 9.0-
-        package require fileutil::traverse
-
-        set base [file join [zipfs root] InitWord]
-        zipfs mount $docxfile $base
-        ::fileutil::traverse filesInDocx $base
-        set prefixlen [string length "$base/word/"]
-        set pathstart [string length "$base/"]
-        set files [list]
-        filesInDocx foreach file {
-            if {[file isdirectory $file]} {
-                continue
-            }
-            lappend files [string range $file $pathstart end]
-        }
-        zipfs unmount $base
-        ::ooxml::ZipOpen $docxfile
-        foreach file $files {
-            if {$file eq "word/document.xml"} {
-                continue
-            }
-            if {[info exists docs($file)]} {
-                $docs($file) delete
-            }
-            # TODO: Should handle media data in template
-            catch {set docs($file) [::ooxml::ZipReadParse $file]}
-        }
-        ::ooxml::ZipClose
-    }
-
     method jumpto {text name args} {
         my variable bookmarks
 
@@ -2217,7 +2300,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method markend {name} {
-        my variable id
         my variable bookmarks
 
         if {![info exists bookmarks($name)] || $bookmarks($name) == 0} {
@@ -2236,17 +2318,17 @@ oo::class create ooxml::docx::docx {
     }
 
     method markstart {name} {
-        my variable id
         my variable bookmarks
 
         if {[info exists bookmarks($name)] && $bookmarks($name) > 0} {
             return -code error "mark \"$name\" is not unique"
         }
         set p [my LastParagraph 1]
+        set thisid [my NextId bookmarks]
         $p appendFromScript {
-            Tag_w:bookmarkStart w:id [incr id(bookmarks)] w:name $name
+            Tag_w:bookmarkStart w:id $thisid w:name $name
         }
-        set bookmarks($name) $id(bookmarks)
+        set bookmarks($name) $thisid
     }
 
     method numbering {cmd args} {
@@ -2779,7 +2861,6 @@ oo::class create ooxml::docx::docx {
     }
 
     method tablerow {args} {
-        my variable body
         my variable tablecontext
 
         if {$tablecontext ne "table"} {
@@ -2801,7 +2882,6 @@ oo::class create ooxml::docx::docx {
 
     method textbox {args} {
         my variable body
-        my variable id
 
         set p [my LastParagraph 1]
         set script [lindex $args end]
@@ -2809,7 +2889,7 @@ oo::class create ooxml::docx::docx {
             OptVal [lrange $args 0 end-1]
             set name [my EatOption -name]
             if {$name eq ""} {
-                set name "Textbox [incr id(textboxes)]"
+                set name "Textbox [my NextId textboxes]"
             }
             $p appendFromScript {
                 Tag_w:r {
@@ -2913,24 +2993,13 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method writepart {what file} {
-        my variable docs
-
-        if {![info exists docs($what)]} {
-            error "unknown part $what"
-        }
-        set fd [open $file w+]
-        fconfigure $fd -encoding utf-8
-        $docs($what) asXML -channel $fd
-        close $fd
-    }
-
     method write {file} {
         my variable body
         my variable docs
-        my variable media
+        my variable binparts
         my variable pagesetup
         my variable sectionsetup
+        my variable impPagesetup
         variable ::ooxml::docx::xmlns
 
         # Finalize section and do pagesetup
@@ -2961,10 +3030,14 @@ oo::class create ooxml::docx::docx {
             }
             set appendedPageSetup [$body lastChild]
         } else {
-            # This keeps things sane in case there was no pagesetup
-            # but sections inbetween.
-            $body appendFromScript {
-                Tag_w:sectPr
+            if {$impPagesetup ne ""} {
+                $body appendChild $impPagesetup
+            } else {
+                # This keeps things sane in case there was no pagesetup
+                # but sections inbetween.
+                $body appendFromScript {
+                    Tag_w:sectPr
+                }
             }
         }
 
@@ -2976,20 +3049,16 @@ oo::class create ooxml::docx::docx {
         if {[file extension $file] ne {.docx}} {
             append file .docx
         }
-        if {[catch {open $file w} zf]} {
+        if {[catch {open $file wb} zf]} {
             error "cannot open file $file for writing"
         }
-        fconfigure $zf -translation binary -eofchar {}
 
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
         }
-        set nr 1
-        foreach this $media {
-            set medianame word/media/image${nr}[file extension $this]
-            append cd [::ooxml::add_file_with_path_to_archive $zf $medianame $this]
+        foreach part [array names binparts] {
+            append cd [::ooxml::add_str_to_archive $zf $part $binparts($part) "" 1]
             incr count
-            incr nr
         }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than
@@ -3007,6 +3076,18 @@ oo::class create ooxml::docx::docx {
         return
     }
     
+    method writepart {what file} {
+        my variable docs
+
+        if {![info exists docs($what)]} {
+            error "unknown part $what"
+        }
+        set fd [open $file w+]
+        fconfigure $fd -encoding utf-8
+        $docs($what) asXML -channel $fd
+        close $fd
+    }
+
     # OMML related methods, the initially code contributed by Miguel Bañón
     method Mt {text} {
         set atts ""

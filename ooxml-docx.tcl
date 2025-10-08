@@ -724,7 +724,7 @@ oo::class create ooxml::docx::docx {
         my variable docs
         my variable body
         my variable context
-        my variable media
+        my variable binparts
         my variable ignorable
         my variable setuproot
         my variable pagesetup
@@ -746,7 +746,6 @@ oo::class create ooxml::docx::docx {
         # Sensible default according to field
         set ignorable "w14 wp14 wpg wps"
         set context document
-        set media ""
         set valPrefix w
         set pagesetup ""
         set sectionsetup ""
@@ -778,11 +777,15 @@ oo::class create ooxml::docx::docx {
             my InitFromDocx $startdocx
         } else {
             # Create a docx from scratch
+            # Ensure that we can use our prefixes for XPath queries 
+            set prefixnslist [array get ::ooxml::docx::xmlns]
             foreach auxFile [array names staticDocx] {
                 set docs($auxFile) [dom parse $staticDocx($auxFile)]
+                $docs($auxFile) selectNodesNamespaces $prefixnslist
             }
             set document [dom createDocumentNS $xmlns(w) w:document]
             set docs(word/document.xml) $document
+            $docs(word/document.xml) selectNodesNamespaces $prefixnslist
             $document documentElement root
             foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $root setAttributeNS "" xmlns:$ns $xmlns($ns)
@@ -813,14 +816,12 @@ oo::class create ooxml::docx::docx {
                    with a slash (/)"
         }
         set ctRoot [$docs(\[Content_Types\].xml) documentElement]
-        if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-            count(ct:Override[@PartName=$file])
-        }] > 0} {
+        if {[$ctRoot selectNodes {count(ct:Override[@PartName=$file])}] > 0} {
             return
         }
         if {[string range $file 0 11] eq "/word/media/"} {
-            set suffix [string range [file extension $file] 1 end]
-            if {[$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
+            set suffix [string tolower [string range [file extension $file] 1 end]]
+            if {[$ctRoot selectNodes {
                 count(ct:Default[@Extension=$suffix])
             }] > 0} {
                 return
@@ -861,13 +862,10 @@ oo::class create ooxml::docx::docx {
                 set type "application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"
             }
             "/word/media/*" {
-                set suffix [string range [file extension $file] 1 end]
                 set contentType [MimeType $suffix]
                 $ctRoot insertBeforeFromScript {
                     Tag_Default Extension $suffix ContentType $contentType
-                } [$ctRoot selectNodes -namespaces [list ct $xmlns(ct)] {
-                    ct:Override[1]
-                }]
+                } [$ctRoot selectNodes {ct:Override[1]}]
                 return
             }
             "/word/numbering.xml" {
@@ -1383,7 +1381,7 @@ oo::class create ooxml::docx::docx {
             foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
             }
-            $notesroot setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
+            my Ignorable word/$types.xml
         } else {
             set notesroot [$docs(word/$types.xml) documentElement]
         }
@@ -1452,7 +1450,7 @@ oo::class create ooxml::docx::docx {
         foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS {} xmlns:$ns $xmlns($ns)
         }
-        $root setAttributeNS $xmlns(mc) mc:Ignorable $ignorable
+        my Ignorable word/$what$nr.xml
         set savedbody $body
         set savedcontext $context
         set body $root
@@ -1468,24 +1466,33 @@ oo::class create ooxml::docx::docx {
         return $rId
     }
 
-    method Ignorable {} {
+    method Ignorable {{file ""}} {
         my variable docs
         my variable ignorable
         variable ::ooxml::docx::xmlns
 
-        foreach doc [array names docs word/*.xml] {
-            set thisroot [$docs($doc) documentElement]
+        if {$file eq ""} {
+            set files [array names docs word/*.xml]
+        } else {
+            set files [list $file]
+        }
+        foreach doc $files  {
+            set thisdoc $docs($doc)
+            set storedprefixns [$thisdoc selectNodesNamespaces]
+            $thisdoc selectNodesNamespaces ""
+            set thisroot [$thisdoc documentElement]
             if {[catch {$thisroot selectNodes mc:*}]} {
                 # XML namespace prefix mc not defined
+                $thisdoc selectNodesNamespaces $storedprefixns
                 continue
             }
+            $thisdoc selectNodesNamespaces $storedprefixns
             $thisroot setAttributeNS \
                 $xmlns(mc) mc:Ignorable $ignorable
         }
     }
     
     method Image_anchor {rId file} {
-        my variable media
         upvar opts opts
         upvar optsknown optsknown
 
@@ -1547,15 +1554,21 @@ oo::class create ooxml::docx::docx {
         my variable body
         my variable binparts
         my variable impPagesetup
-        my variable ids
+        my variable id
 
         if {[catch {::ooxml::ZipOpen $docxfile} errMsg]} {
             return -code error "Cannot open '$docxfile': $errMsg"
         }
+        set id(image) 0
         foreach part [::ooxml::ZipMembers] {
             if {[catch {set docs($part) [::ooxml::ZipReadParse $part]}]} {
                 # Non XML file; add to binparts
                 set binparts($part) [::ooxml::ZipReadBinaryFile $part]
+            }
+            if {[regexp {^word/media/image(\d+)$} $part -> n]} {
+                if {$id(image) < $n} {
+                    set id(image) $n
+                }
             }
         }
         ::ooxml::ZipClose
@@ -1595,25 +1608,26 @@ oo::class create ooxml::docx::docx {
             $body removeChild $lastElm
         }
         # Seed index counters
+        foreach key {docPr pic bookmarks textboxes comments footnotes endnotes} {
+            set id($key) 0
+        }
         foreach part [array names docs "word/*.xml"] {
             foreach {key tag att} {
                 docPr wp:docPr id
                 pic pic:cNvPr id
                 bookmarks w:bookmarkStart w:id
             } {
-                set ids($key) 0
                 foreach attribute [$docs($part) selectNodes //$tag/@$att] {
-                    lassign $attribute name id
-                    if {[string is integer -strict $id] && $id > $ids($key)} {
-                        set ids($key) $id
+                    lassign $attribute name v
+                    if {[string is integer -strict $v] && $v > $id($key)} {
+                        set id($key) $v
                     }
                 }
             }
-            set ids(textboxes) 0
             foreach attribute [$docs($part) selectNodes //wp:docPr/@name] {
                 lassign $attribute name value
-                if {[regexp {^Textbox\s+(\d+)$} $value -> n] && $n > $ids(textboxes)} {
-                    set ids(textboxes) $n
+                if {[regexp {^Textbox\s+(\d+)$} $value -> n] && $n > $id(textboxes)} {
+                    set id(textboxes) $n
                 }
             }
         }
@@ -1623,11 +1637,10 @@ oo::class create ooxml::docx::docx {
             endnotes word/endnotes.xml w:endnote
         } {
             if {![info exists docs($part)]} continue
-            set ids($key) 0
             foreach attribute [$docs($part) selectNodes //$tag/@id] {
-                lassign $attribute name id
-                if {[string is integer -strict $id] && $id > $ids($key)} {
-                    set ids($key) $id
+                lassign $attribute name v
+                if {[string is integer -strict $v] && $v > $id($key)} {
+                    set id($key) $v
                 }
             }
         }
@@ -2177,7 +2190,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method image {file type args} {
-        my variable media
+        my variable binparts
 
         if {[catch {
             if {![file isfile $file] || ![file readable $file]} {
@@ -2187,16 +2200,11 @@ oo::class create ooxml::docx::docx {
                 error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
             }
             OptVal $args "file type"
-            set file [file normalize $file]
-            set ind [lsearch -exact $media $file]
-            if {$ind < 0} {
-                lappend media $file
-                set ind [llength $media]
-            } else {
-                # Tcl indexes count from 0, the image numbering from 1
-                incr ind
-            }
-            set imagename image${ind}[file extension $file]
+            set imagename image[my NextId picture]
+            append imagename [string tolower [file extension $file]]
+            set fd [open $file rb]
+            set binparts(word/media/$imagename) [read $fd]
+            close $fd
             set rId [my Add2Relationships image media/$imagename]
             set p [my LastParagraph 1]
             $p appendFromScript {
@@ -2257,39 +2265,6 @@ oo::class create ooxml::docx::docx {
             ::ooxml::ZipClose
         }
         return $rId
-    }
-
-    method initWord {docxfile} {
-        my variable docs
-
-        package require Tcl 9.0-
-        package require fileutil::traverse
-
-        set base [file join [zipfs root] InitWord]
-        zipfs mount $docxfile $base
-        ::fileutil::traverse filesInDocx $base
-        set prefixlen [string length "$base/word/"]
-        set pathstart [string length "$base/"]
-        set files [list]
-        filesInDocx foreach file {
-            if {[file isdirectory $file]} {
-                continue
-            }
-            lappend files [string range $file $pathstart end]
-        }
-        zipfs unmount $base
-        ::ooxml::ZipOpen $docxfile
-        foreach file $files {
-            if {$file eq "word/document.xml"} {
-                continue
-            }
-            if {[info exists docs($file)]} {
-                $docs($file) delete
-            }
-            # TODO: Should handle media data in template
-            catch {set docs($file) [::ooxml::ZipReadParse $file]}
-        }
-        ::ooxml::ZipClose
     }
 
     method jumpto {text name args} {
@@ -3022,7 +2997,6 @@ oo::class create ooxml::docx::docx {
         my variable body
         my variable docs
         my variable binparts
-        my variable media
         my variable pagesetup
         my variable sectionsetup
         my variable impPagesetup
@@ -3075,10 +3049,9 @@ oo::class create ooxml::docx::docx {
         if {[file extension $file] ne {.docx}} {
             append file .docx
         }
-        if {[catch {open $file w} zf]} {
+        if {[catch {open $file wb} zf]} {
             error "cannot open file $file for writing"
         }
-        fconfigure $zf -translation binary -eofchar {}
 
         foreach part [array names docs] {
             ::ooxml::Dom2zip $zf $docs($part) $part cd count
@@ -3086,13 +3059,6 @@ oo::class create ooxml::docx::docx {
         foreach part [array names binparts] {
             append cd [::ooxml::add_str_to_archive $zf $part $binparts($part) "" 1]
             incr count
-        }
-        set nr 1
-        foreach this $media {
-            set medianame word/media/image${nr}[file extension $this]
-            append cd [::ooxml::add_file_with_path_to_archive $zf $medianame $this]
-            incr count
-            incr nr
         }
         # Cleanup the appendedPageSetup node in case that after the
         # document was written more content will be added and than

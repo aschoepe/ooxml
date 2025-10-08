@@ -640,7 +640,6 @@ proc ::ooxml::add_file_with_path_to_archive {zipchan path filepath {comment ""}}
         # handling PNG or JPEG or nested ZIP files.
         if {$size < 0x00200000} {
             set fin [::open $fullpath rb]
-            fconfigure $fin -translation binary
             set data [::read $fin]
             set crc [::zlib crc32 $data]
             set cdata [::zlib deflate $data]
@@ -654,7 +653,6 @@ proc ::ooxml::add_file_with_path_to_archive {zipchan path filepath {comment ""}}
         } else {
             set method 8
             set fin [::open $fullpath rb]
-            fconfigure $fin -translation binary
             set zlib [::zlib stream deflate]
             while {![eof $fin]} {
                 set data [read $fin 4096]
@@ -1062,8 +1060,7 @@ proc ::ooxml::ZipReadBinaryFile {path} {
       return [::zipfile::decode::getfile $::ooxml::zipdesc $path]
     }
     default {
-      set fd [open ${::ooxml::zipfs}xlsx/$path r]
-      fconfigure $fd -translation binary -eofchar {}
+      set fd [open ${::ooxml::zipfs}xlsx/$path rb]
       set data [read $fd]
       close $fd
       return $data

@@ -445,7 +445,7 @@ namespace eval ::ooxml::docx {
         word/fontTable.xml {
             <w:fonts xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
                 <w:font w:name="Times New Roman">
-                    <w:charset w:val="00" w:characterSet="windows-1252"/>
+                    <w:charset w:val="00"/>
                     <w:family w:val="roman"/>
                     <w:pitch w:val="variable"/>
                 </w:font>
@@ -455,19 +455,19 @@ namespace eval ::ooxml::docx {
                     <w:pitch w:val="variable"/>
                 </w:font>
                 <w:font w:name="Arial">
-                    <w:charset w:val="00" w:characterSet="windows-1252"/>
+                    <w:charset w:val="00"/>
                     <w:family w:val="swiss"/>
                     <w:pitch w:val="variable"/>
                 </w:font>
                 <w:font w:name="Liberation Serif">
                     <w:altName w:val="Times New Roman"/>
-                    <w:charset w:val="01" w:characterSet="utf-8"/>
+                    <w:charset w:val="01"/>
                     <w:family w:val="roman"/>
                     <w:pitch w:val="variable"/>
                 </w:font>
                 <w:font w:name="Liberation Sans">
                     <w:altName w:val="Arial"/>
-                    <w:charset w:val="01" w:characterSet="utf-8"/>
+                    <w:charset w:val="01"/>
                     <w:family w:val="swiss"/>
                     <w:pitch w:val="variable"/>
                 </w:font>
@@ -1487,8 +1487,22 @@ oo::class create ooxml::docx::docx {
                 continue
             }
             $thisdoc selectNodesNamespaces $storedprefixns
+            array unset prefixlookup
+            array set prefixlookup [join [$thisroot selectNodes namespace::*]]
+            set knownprefixes ""
+            foreach prefix $ignorable {
+                if {[info exists prefixlookup(xmlns:$prefix)]} {
+                    lappend knownprefixes $prefix
+                }
+            }
+            if {![llength $knownprefixes]} {
+                if {[$thisroot hasAttributeNS $xmlns(mc) Ignorable]} {
+                    $thisroot removeAttributeNS $xmlns(mc) Ignorable
+                }
+                continue
+            }
             $thisroot setAttributeNS \
-                $xmlns(mc) mc:Ignorable $ignorable
+                $xmlns(mc) mc:Ignorable $knownprefixes
         }
     }
     

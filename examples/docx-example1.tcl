@@ -72,7 +72,7 @@ $docx append "The whole sentence is a mark."
 $docx markend mymark1
 
 # Style heritage:
-$docx style paragraph Base -font "Arial" -color 101010 -fontsize 12pt
+$docx style paragraph Base -color 101010 -fontsize 12pt -font "Arial" 
 $docx style paragraph H1 -basedon Base -fontsize 18pt
 $docx style paragraph H2 -basedon Base -fontsize 16pt
 

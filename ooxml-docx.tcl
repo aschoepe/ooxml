@@ -2511,6 +2511,29 @@ oo::class create ooxml::docx::docx {
         set docs($what) $doc
     }
 
+    method replace {from to {where ""}} {
+        my variable docs
+
+        if {$where eq ""} {
+            set parts [array names docs]
+        } else {
+            set parts ""
+            foreach this $where {
+                if {[info exists docs($this)]} {
+                    lappend parts $this
+                } else {
+                    lappend parts {*}[array names docs $parts]
+                }
+            }
+        }
+        foreach part $parts {
+            set doc $docs($part)
+            foreach text [$doc selectNodes {//w:t/text()[contains(.,$from)]}] {
+                $text nodeValue [string map [list $from $to] [$text nodeValue]]
+            }
+        }
+    }
+    
     method sectionend {} {
         my variable body
         my variable sectionsetup

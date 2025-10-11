@@ -209,6 +209,16 @@ from a header oder footer method call.
 
 **readpart** *part* *filename*
 
+**replace** *from* *to* *?part_list?*
+
+Replaces every *from* substring in any text with *to*, Only uniformly
+styled text is replaced (if *from* spans over more than one text part
+it will not be recogniced). Without the optional *part list* argument
+all parts of the document (the main documentbody, footnotes, comments
+pp.) will be processed. If the argument is given then only the named
+parts will be processed. The elements of the part list may be a Tcl
+glob expression. Part names given by the *part list* argument which
+are currently not exists in the object will be silently ignored.
 
 **sectionend**
 

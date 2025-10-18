@@ -274,6 +274,25 @@ namespace eval ::ooxml::docx {
     }
 
     set properties(settings) {
+        -writeProtection {w:writeProtection {
+            recommended CT_OnOff
+            algorithmName NoCheck
+            hashValue XSD_base64Binary
+            saltValue XSD_base64Binary
+            spinCount ST_DecimalNumber
+            cryptProviderType ST_CryptProv
+            cryptAlgorithmClass ST_AlgClass
+            cryptAlgorithmType ST_AlgType
+            cryptAlgorithmSid ST_DecimalNumber
+            cryptSpinCount ST_DecimalNumber
+            cryptProvider NoCheck
+            algIdExt XSD_hexBinary
+            algIdExtSource NoCheck
+            cryptProviderTypeExt XSD_hexBinary
+            cryptProviderTypeExtSource NoCheck
+            hash XSD_base64Binary
+            salt XSD_base64Binary
+        }}
         -view {w:view ST_View}
         -zoom {w:zoom {
             {type val} ST_Zoom
@@ -320,6 +339,9 @@ namespace eval ::ooxml::docx {
         -hyphenationZone {w:hyphenationZone ST_TwipsMeasure}
         -doNotHyphenateCaps {w:doNotHyphenateCaps CT_OnOff}
         -showEnvelope {w:showEnvelope CT_OnOff}
+        -summaryLength {w:summaryLength ST_DecimalNumberOrPercent}
+        -clickAndTypeStyle {w:clickAndTypeStyle NoCheck}
+        -defaultTableStyle {w:defaultTableStyle NoCheck}
         -evenAndOddHeaders {w:evenAndOddHeaders CT_OnOff}
         -bookFoldRevPrinting {w:bookFoldRevPrinting CT_OnOff}
         -bookFoldPrinting {w:bookFoldPrinting CT_OnOff}

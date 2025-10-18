@@ -38,7 +38,7 @@ namespace eval ::ooxml::docx {
 
 namespace eval ::ooxml::docx::lib {
 
-    namespace export OptVal MimeType NoCheck CT_* ST_* W3CDTF AllowedValues
+    namespace export OptVal MimeType NoCheck CT_* ST_* W3CDTF AllowedValues XSD_*
 
     variable mimeTypes
     # This uses the list found at
@@ -1126,6 +1126,30 @@ proc ::ooxml::docx::lib::ST_AlignH {value} {
             [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_AlgClass {value} {
+    set values {
+        hash
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown AlgClass value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_AlgType {value} {
+    set values {
+        typeAny
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown AlgType value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 proc ::ooxml::docx::lib::ST_AlignV {value} {
     set values {
         top
@@ -1252,6 +1276,19 @@ proc ::ooxml::docx::lib::ST_CharacterSpacing {value} {
         return $value
     }
     error "unknown character spacing type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_CryptProv {value} {
+    set values {
+        rsaAES
+        rsaFull
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown CryptProv value \"$value\", expected one of\
             [AllowedValues $values]"
 }
 
@@ -2051,7 +2088,29 @@ proc ::ooxml::docx::lib::ST_Integer255 {value} {
     if {[string is integer -strict $value] && $value >= 0 && $value <= 255} {
         return $value
     }
-    error "expected integer 0..255 for alnAt, got \"$value\""
+    error "expected integer 0..255, got \"$value\""
+}
+
+proc ::ooxml::docx::lib::XSD_base64Binary {value} {
+    if {[package vsatisfies [package present tdom] 0.9.7-]} {
+        if {[::tdom::type::base64 $value]} {
+            return $value
+        }
+        error "expected base64 encoded data, got \"$value\""
+    } else {
+        return $value
+    }
+}
+
+proc ::ooxml::docx::lib::XSD_hexBinary {value} {
+    if {[package vsatisfies [package present tdom] 0.9.7-]} {
+        if {[::tdom::type::hexBinary $value]} {
+            return $value
+        }
+        error "expected base64 encoded data, got \"$value\""
+    } else {
+        return $value
+    }
 }
 
 package provide ooxml::docx::lib 0.6

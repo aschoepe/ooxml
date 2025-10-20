@@ -65,6 +65,7 @@ namespace eval ::ooxml::docx {
         pic http://schemas.openxmlformats.org/drawingml/2006/picture
         r http://schemas.openxmlformats.org/officeDocument/2006/relationships
         rel http://schemas.openxmlformats.org/package/2006/relationships
+        sl http://schemas.openxmlformats.org/schemaLibrary/2006/main
         v urn:schemas-microsoft-com:vml
         w http://schemas.openxmlformats.org/wordprocessingml/2006/main
         w10 urn:schemas-microsoft-com:office:word
@@ -316,12 +317,17 @@ namespace eval ::ooxml::docx {
         -gutterAtTop {w:gutterAtTop CT_OnOff}
         -hideSpellingErrors {w:hideSpellingErrors CT_OnOff}
         -hideGrammaticalErrors {w:hideGrammaticalErrors CT_OnOff}
+        / w:activeWritingStyle
         -proofState {w:proofState {
             spelling ST_Proof
             grammar ST_Proof
         }}
         -formsDesign {w:formsDesign CT_OnOff}
         -linkStyles {w:linkStyles CT_OnOff}
+        / w:stylePaneFormatFilter
+        / w:stylePaneSortMethod
+        -documentType {w:documentType NoCheck}
+        / w:revisionView
         -trackRevisions {w:trackRevisions CT_OnOff}
         -doNotTrackMoves {w:doNotTrackMoves CT_OnOff}
         -doNotTrackFormatting {w:doNotTrackFormatting CT_OnOff}
@@ -358,6 +364,8 @@ namespace eval ::ooxml::docx {
         -characterSpacingControl {w:characterSpacingControl ST_CharacterSpacing}
         -printTwoOnOne {w:printTwoOnOne CT_OnOff}
         -strictFirstAndLastChars {w:strictFirstAndLastChars CT_OnOff}
+        / w:noLineBreaksAfter
+        / w:noLineBreaksBefore
         -savePreviewPicture {w:savePreviewPicture CT_OnOff}
         -doNotValidateAgainstSchema {w:doNotValidateAgainstSchema CT_OnOff}
         -saveInvalidXml {w:saveInvalidXml CT_OnOff}
@@ -370,6 +378,27 @@ namespace eval ::ooxml::docx {
         -showXMLTags {w:showXMLTags CT_OnOff}
         -alwaysMergeEmptyNamespace {w:alwaysMergeEmptyNamespace CT_OnOff}
         -updateFields {w:updateFields CT_OnOff}
+        / hdrShapeDefaults
+        / footnotePr
+        / endnotePr
+        / compat
+        / docVars
+        / rsids
+        / m:mathPr
+        -attachedSchema {w:attachedSchema NoCheck}
+        / themeFontLang
+        / clrSchemeMapping
+        -doNotIncludeSubdocsInStats {w:doNotIncludeSubdocsInStats CT_OnOff}
+        -doNotAutoCompressPictures {w:doNotAutoCompressPictures CT_OnOff}
+        / forceUpgrade
+        / captions
+        / readModeInkLockDown
+        / smartTagType
+        / sl:schemaLibrary
+        / shapeDefaults
+        -doNotEmbedSmartTags {w:doNotEmbedSmartTags CT_OnOff}
+        -decimalSymbol {w:decimalSymbol NoCheck}
+        -listSeparator {w:listSeparator NoCheck}
     }
 
     set properties(table1) {
@@ -738,6 +767,12 @@ namespace eval ::ooxml::docx {
 
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
+}
+
+namespace eval ::ooxml::docx::createdata {
+    # This namespace is used to cache data needed and used to create
+    # elements at the right place in sequence content model
+
 }
 
 oo::class create ooxml::docx::docx {
@@ -1224,6 +1259,12 @@ oo::class create ooxml::docx::docx {
         upvar optsknown optsknown
 
         foreach {opt optdata} $switchActionList {
+            # If the opt is just / then this is a placeholder for an
+            # element which currently cannot be created by an option.
+            # The optdata gives the element name.
+            if {$opt eq "/"} {
+                continue
+            }                
             # If the option description starts with a + then this
             # describes not an option which would create a child with
             # one or several attributes. It describes a child (with
@@ -1748,6 +1789,12 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
 
+    method PeekOption {option {type ""}} {
+        upvar opts opts
+        upvar optsknown optsknown
+        return [my EatOption $option $type 0]
+    }
+
     method ProcessErrorinfo {what} {
         upvar errMsg errMsg
         upvar errVals errVals
@@ -1777,12 +1824,6 @@ oo::class create ooxml::docx::docx {
             }
             my Create $properties(paragraph2)
         }
-    }
-
-    method PeekOption {option {type ""}} {
-        upvar opts opts
-        upvar optsknown optsknown
-        return [my EatOption $option $type 0]
     }
 
     method PStyle {value} {

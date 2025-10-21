@@ -3673,7 +3673,7 @@ printf "%s\n" "$as_me: --exec-prefix defaulting to ${prefix}" >&6;}
     vars="ooxml.tcl \
                      ooxml-docx.tcl \
                      ooxml-docx-lib.tcl \
-                     oomxl-docx-math.tcl"
+                     ooxml-docx-math.tcl"
     for i in $vars; do
 	# check for existence, be strict because it is installed
 	if test ! -f "${srcdir}/$i" ; then

@@ -51,7 +51,7 @@ TEA_PREFIX
 TEA_ADD_TCL_SOURCES([ooxml.tcl \
                      ooxml-docx.tcl \
                      ooxml-docx-lib.tcl \
-                     oomxl-docx-math.tcl])
+                     ooxml-docx-math.tcl])
 
 #--------------------------------------------------------------------
 # You can add more files to clean if your extension creates any extra

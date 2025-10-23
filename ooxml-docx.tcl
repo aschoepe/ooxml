@@ -810,13 +810,13 @@ oo::class create ooxml::docx::docx {
         set tablecontext ""
         # Since the "general page setup" (WordprocessingML does not
         # really have a concept for that) is a child of w:body after
-        # the last paragraph it seems handy to not realy insert that
+        # the last paragraph it seems handy to not reallyq insert that
         # into the tree at the moment the user calls pagesetup but
         # just before serializing - as the user consecutive add
         # content we can just append to the w:body without looking at
         # every place if there is already a page setup child and we
         # have to insert new content before that element. The current
-        # pagesetup/sectionsetup user definition is storend in
+        # pagesetup/sectionsetup user definition is stored in
         # according variables to be applied later. To give the user
         # error feedback at the place he provides commands an
         # auxiliary document is used and the definition is "tested"

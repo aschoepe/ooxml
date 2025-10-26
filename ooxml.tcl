@@ -1110,7 +1110,7 @@ proc ::ooxml::ZipReadParse {file} {
   }
   # Parse the file data
   # This throws an error if parsing fails
-  return [dom parse $filedata]
+  return [dom parse -keepEmpties $filedata]
 }
 
 #

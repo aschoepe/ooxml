@@ -100,10 +100,10 @@ Set certain document properties. The recogniced options are:
 
 -version
 
-**field** *fieldname*
+**field** *field-type* ?*switches*? *?-option value ...?*
 
 Appends the given field type to the last paragraph. Recognized
-fieldnames are
+field types are
 
             AUTHOR
             CREATEDATE
@@ -116,6 +116,12 @@ fieldnames are
             TIME
             TITLE
             USERNAME
+
+If the optional argument *switches* is given its value will be
+appended as the field switches to the field-type name. The following
+optional *-option value* pairs allows formating of the (whole)
+inserted field value. See [CHARACTER OPTIONS](#character) for the valid
+  options and the type of their value.
 
 **footer** *creatingScript* ?returnvar?
 **header** *creatingScript* ?returnvar?

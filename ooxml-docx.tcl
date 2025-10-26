@@ -2175,54 +2175,65 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method field {field {switches ""}} {
+    method field {field {switches ""} args} {
         my variable docs
-
-        # TODO: field formating / switches
-        set nfield [string toupper $field]
-        # libreoffice doesn't seem to support
-        # AUTHOR
-        # FILESIZE
-        # SAVEDATE
-        # SECTION
-        # although the spec say it should.
-        # TODO: check what word does
-        set values {
-            AUTHOR
-            CREATEDATE
-            DATE
-            FILESIZE
-            NUMPAGES
-            PAGE
-            REF
-            SAVEDATE
-            SECTION
-            SEQ
-            TIME
-            TITLE
-            TOC
-            USERNAME
-        }
-        if {$nfield ni $values} {
-            return -code error "Unknown field type '$field', expected one\
-                                out of [AllowedValues $values]"
-        }
-        set p [my LastParagraph 1]
-        $p appendFromScript {
-            Tag_w:r {
-                Tag_w:fldChar w:fldCharType "begin"
+        if {[catch {
+            set nfield [string toupper $field]
+            set values {
+                AUTHOR
+                CREATEDATE
+                DATE
+                FILESIZE
+                NUMPAGES
+                PAGE
+                REF
+                SAVEDATE
+                SECTION
+                SEQ
+                TIME
+                TITLE
+                TOC
+                USERNAME
             }
-            Tag_w:r {
-                Tag_w:instrText {
-                    Text "$nfield $switches"
+            if {$nfield ni $values} {
+                return -code error "Unknown field type '$field', expected one\
+                                         out of [AllowedValues $values]"
+            }
+            set dirtyAttrib ""
+            if {$nfield in {REF SEQ TOC}} {
+                set dirtyAttrib {w:dirty "true"}
+            }
+            if {$switches ne ""} {
+                set nfield "$nfield $switches"
+            }
+            OptVal $args "field switches"
+            set p [my LastParagraph 1]
+            $p appendFromScript {
+                Tag_w:r {
+                    my RPr
+                    Tag_w:fldChar w:fldCharType "begin" {*}$dirtyAttrib
+                }
+                Tag_w:r {
+                    OptVal $args
+                    my RPr
+                    Tag_w:instrText xml:space preserve {
+                        Text "$nfield"
+                    }
+                }
+                Tag_w:r {
+                    OptVal $args
+                    my RPr
+                    Tag_w:fldChar w:fldCharType "separate"
+                }
+                Tag_w:r {
+                    OptVal $args
+                    my RPr
+                    Tag_w:fldChar w:fldCharType "end"
                 }
             }
-            Tag_w:r {
-                Tag_w:fldChar w:fldCharType "separate"
-            }
-            Tag_w:r {
-                Tag_w:fldChar w:fldCharType "end"
-            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
         }
     }
 

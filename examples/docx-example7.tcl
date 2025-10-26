@@ -37,7 +37,7 @@ $docx pagebreak
 $docx paragraph "$loreipsum"
 $docx field page
 $docx append " "
-$docx field date "" -bold 1 -color 0B24F8
+$docx field date "DATE \\@ \"yyyy-MM-dd\"" -bold 1 -color 0B24F8
 
 $docx configure -creator bar -title "ooxml-docx Example File"
 

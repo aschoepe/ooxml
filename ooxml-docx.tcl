@@ -2199,6 +2199,10 @@ oo::class create ooxml::docx::docx {
                 return -code error "Unknown field type '$field', expected one\
                                          out of [AllowedValues $values]"
             }
+            set dirtyAttrib ""
+            if {$nfield in {REF SEQ TOC}} {
+                set dirtyAttrib {w:dirty "true"}
+            }
             if {$switches ne ""} {
                 set nfield "$nfield $switches"
             }
@@ -2207,7 +2211,7 @@ oo::class create ooxml::docx::docx {
             $p appendFromScript {
                 Tag_w:r {
                     my RPr
-                    Tag_w:fldChar w:fldCharType "begin" w:dirty "true"
+                    Tag_w:fldChar w:fldCharType "begin" {*}$dirtyAttrib
                 }
                 Tag_w:r {
                     OptVal $args

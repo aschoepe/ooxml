@@ -1,0 +1,61 @@
+#
+# Covers the type function lib
+#
+# (c) 2025 Rolf Ade
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+  loadTestedCommands
+}
+
+source [file join [file dir [info script]] ../ooxml-docx-lib.tcl]
+namespace import ::ooxml::docx::lib::*
+
+test docxlib-1.1 {ST_TwipsMeasure} {
+    set result ""
+    foreach {value} {
+        3
+        1pt
+        2.3pt
+        0pt
+        2.33pt
+        2.32pt
+        " 3"
+        " 2.34pt "
+    } {
+        lappend result [ST_TwipsMeasure $value]
+    }
+    set result
+} {3 20 46 0 47 46 3 47}
+
+test docxlib-1.2 {ST_TwipsMeasure} {
+    set result ""
+    foreach {value} {
+        3,1
+        .2
+        -3
+        -.3pt
+        0PT
+        "1 pt"
+         2Cm
+    } {
+        if {![catch {ST_TwipsMeasure $value}]} {
+            lappend result "\"$value\" dit not raise error but should"
+        }
+    }
+    set result
+} {}
+
+test docxlib-1.3 {ST_SignedTwipsMeasure} {
+    ST_SignedTwipsMeasure -2.3pt
+} -46
+
+# cleanup
+::tcltest::cleanupTests
+return
+n

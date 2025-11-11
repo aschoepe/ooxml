@@ -37,7 +37,7 @@ $docx style paragraph Heading1 -fontsize 28 -spacing {before 480 after 240}
 
 # Set the margins
 #$docx pagesetup 
-$docx pagesetup -sizeAndOrientaion {width 15840 height 12240} \
+$docx pagesetup -sizeAndOrientation {width 15840 height 12240} \
     -margins {left 1cm right 1cm top 1cm bottom 1cm} \
     -topBorder {type dashed borderwidth 10} \
     -defaultHeader $defaultHeader \
@@ -51,7 +51,7 @@ $docx paragraph "A very simple monoton paragraph: $loreipsum"
 $docx paragraph "The next paragraph: $loreipsum"
 
 # Start a new section with different page setup
-$docx sectionstart -sizeAndOrientaion {width 12240 height 15840} \
+$docx sectionstart -sizeAndOrientation {width 12240 height 15840} \
     -margins {left 3cm right 3cm top 4cm bottom 4cm} \
     -leftBorder {type thick borderwidth 20 color 00ff00 space 20} \
     -pageNumbering {fmt upperRoman start 222}

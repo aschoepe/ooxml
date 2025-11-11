@@ -6,15 +6,17 @@
 # SYNOPSIS
 
     package require ooxml
-    ::ooxml::docx new
+    ::ooxml::docx new *?-option value ...?* ?docx-file?
     
 # DESCRIPTION
 
-The command *::ooxml::docx* creates an object which is able to create ECMA-376 Office Open XML
-WordprocessingML document returns that object. The object has
-methods to add and style content. The more vulgo named ".docx" files
-created by the object can be read by word processing programs as
-libreOffice or Word.
+The command *::ooxml::docx* creates a docx object. Without the
+optional file argument it represents an almost minimal empty document.
+If the last argument is an ECMA-376 Office Open XML WordprocessingML
+document (vulgo a .docx file) the inital document is a copy of this
+.docx. The object has methods to append and style content as text,
+tables, pictures or textboxes. The .docx file created by the object
+can be read by word processing programs as libreOffice or Word.
 
 A simple "Hello, World" example is:
 
@@ -36,8 +38,8 @@ wins.
 The value of an option is - depending on the option - either a
 single value or a key value list. In the second case the key value
 pairs may be in any order. If a key is given more than one time then
-the last one wins. An unknown key is reported as error. In almost any
-case the value given to the option or key will be type checked.
+the last one wins. An unknown key is reported as error. In almost all
+cases the value given to the option or key will be type checked.
 
 Content to the document is added top down.
 
@@ -49,7 +51,7 @@ methods:
 : Appends *text* to the last paragraph of the content of the document.
   The option/value pairs control the appearance of the *text* within
   the paragraph. See [CHARACTER OPTIONS](#character) for the valid
-  options and the type of their argument.
+  options and the type of their value.
 
 **comment** *?-option value ...?* *creatingScript*
 
@@ -98,10 +100,10 @@ Set certain document properties. The recogniced options are:
 
 -version
 
-**field** *fieldname*
+**field** *field-type* ?*switches*? *?-option value ...?*
 
 Appends the given field type to the last paragraph. Recognized
-fieldnames are
+field types are
 
             AUTHOR
             CREATEDATE
@@ -114,6 +116,12 @@ fieldnames are
             TIME
             TITLE
             USERNAME
+
+If the optional argument *switches* is given its value will be
+appended as the field switches to the field-type name. The following
+optional *-option value* pairs allows formating of the (whole)
+inserted field value. See [CHARACTER OPTIONS](#character) for the valid
+  options and the type of their value.
 
 **footer** *creatingScript* ?returnvar?
 **header** *creatingScript* ?returnvar?
@@ -207,6 +215,16 @@ from a header oder footer method call.
 
 **readpart** *part* *filename*
 
+**replace** *from* *to* *?part_list?*
+
+Replaces every *from* substring in any text with *to*, Only uniformly
+styled text is replaced (if *from* spans over more than one text part
+it will not be recogniced). Without the optional *part list* argument
+all parts of the document (the main documentbody, footnotes, comments
+pp.) will be processed. If the argument is given then only the named
+parts will be processed. The elements of the part list may be a Tcl
+glob expression. Part names given by the *part list* argument which
+are currently not exists in the object will be silently ignored.
 
 **sectionend**
 

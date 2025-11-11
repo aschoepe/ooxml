@@ -38,7 +38,7 @@ namespace eval ::ooxml::docx {
 
 namespace eval ::ooxml::docx::lib {
 
-    namespace export OptVal MimeType NoCheck CT_* ST_* W3CDTF AllowedValues
+    namespace export OptVal MimeType NoCheck CT_* ST_* W3CDTF AllowedValues XSD_*
 
     variable mimeTypes
     # This uses the list found at
@@ -1072,9 +1072,9 @@ proc ::ooxml::docx::lib::CT_OnOff {value} {
         error "expected a Tcl boolean value"
     }
     if {$value} {
-        return "on"
+        return "1"
     } else {
-        return "off"
+        return "0"
     }
 }
 
@@ -1123,6 +1123,30 @@ proc ::ooxml::docx::lib::ST_AlignH {value} {
         return $value
     }
     error "unknown alignH value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_AlgClass {value} {
+    set values {
+        hash
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown AlgClass value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_AlgType {value} {
+    set values {
+        typeAny
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown AlgType value \"$value\", expected one of\
             [AllowedValues $values]"
 }
 
@@ -1252,6 +1276,19 @@ proc ::ooxml::docx::lib::ST_CharacterSpacing {value} {
         return $value
     }
     error "unknown character spacing type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_CryptProv {value} {
+    set values {
+        rsaAES
+        rsaFull
+        custom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown CryptProv value \"$value\", expected one of\
             [AllowedValues $values]"
 }
 
@@ -1455,16 +1492,18 @@ proc ::ooxml::docx::lib::ST_MeasurementOrPercent {value} {
     if {[string is integer -strict $value]} {
         return $value
     }
-    if {[regexp -- {-?[0-9]+(\.[0-9]+)?%} $value]} {
-        return $value
+    # Percent form (e.g., "50%" or "12.5%") -> integer in 1/50 percent units
+    #    100% -> 5000, 50% -> 2500, 12.5% -> 625
+    if {[regexp -- {^(-?[0-9]+(\.[0-9]+)?)%$} $value -> num]} {
+        return [expr {int(round(double($num) * 50.0))}]
     }
-    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure or perent value - value must\
-              be an integer or a numeric value directly followed either a\
-              percent sign (%) or one of the units mm, cm, in, pt, pc or pi"
+    # Physical measurement -> twips (Word canonical numeric form)
+    if {[regexp -- {^-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)$} $value]} {
+        return [::ooxml::docx::lib::ST_TwipsMeasure $value]
     }
-    return $value
-
+    error "\"$value\" is not a valid measure or percent value — expected an\
+          integer, a percentage (e.g. 50%), or a unit-suffixed measure\
+          (mm|cm|in|pt|pc|pi)."
 }
 
 proc ::ooxml::docx::lib::ST_Merge {value} {
@@ -1552,17 +1591,6 @@ proc ::ooxml::docx::lib::ST_NumberFormat {value} {
             [AllowedValues $values]"
 }
 
-proc ::ooxml::docx::lib::ST_OnOff {value} {
-    if {![string is boolean -strict $value]} {
-        error "expected a Tcl boolean value"
-    }
-    if {$value} {
-        return "1"
-    } else {
-        return "0"
-    }
-}
-
 proc ::ooxml::docx::lib::ST_PageOrientation {value} {
     if {$value ni {landscape portrait}} {
         error "unknown symbol \"$value\", expected \"landscape\"\
@@ -1640,15 +1668,50 @@ proc ::ooxml::docx::lib::ST_RestartNumber {value} {
            one of: [AllowedValues $values]"
 }
 
+# Convert a number+unit to twips (1pt=20 twips).
+proc ::ooxml::docx::lib::_MeasureToTwips {value signed} {
+    set value [string trim $value]
+    if {$signed} {
+        if {[string is integer -strict $value]} {return $value}
+        if {![regexp {^(-?[0-9]+(?:\.[0-9]+)?)(mm|cm|in|pt|pc|pi)$} $value \
+                  > num unit]} {
+            error "\"$value\" is not a valid measure (int twips or\
+                  number+unit: mm|cm|in|pt|pc|pi)"
+        }
+    } else {
+        if {[string is integer -strict $value] && $value >= 0} {return $value}
+        if {![regexp {^([0-9]+(?:\.[0-9]+)?)(mm|cm|in|pt|pc|pi)$} $value \
+                  > num unit]} {
+            error "\"$value\" is not a valid measure (non-negative int\
+                  twips or number+unit: mm|cm|in|pt|pc|pi)"
+        }
+    }
+    switch $unit {
+        mm { set tw [expr {round($num * 1440.0 / 25.4)}] }
+        cm { set tw [expr {round($num * 1440.0 / 2.54)}] }
+        in { set tw [expr {round($num * 1440.0)} }
+        pt { set tw [expr {round($num * 20.0)}] }
+        pc - pi { set tw [expr {round($num * 240.0)}] }
+    }
+    return $tw
+}
+
+proc ::ooxml::docx::lib::ST_TwipsMeasure {value} {
+    return [::ooxml::docx::lib::_MeasureToTwips $value 0]
+}
+
 proc ::ooxml::docx::lib::ST_SignedTwipsMeasure {value} {
-    if {[string is integer -strict $value]} {
+    return [::ooxml::docx::lib::_MeasureToTwips $value 1]
+}
+
+# Half-points (hps). Accept integer hps directly (e.g., 36) *or* a
+# number+unit (e.g., 18pt, 1in, 3cm).
+proc ::ooxml::docx::lib::ST_HpsMeasure {value} {
+    if {[string is integer -strict $value] && $value >= 0} {
         return $value
     }
-    if {![regexp -- {-?[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-    }
-    return $value
+    set tw [::ooxml::docx::lib::ST_TwipsMeasure $value]  ;# ensures '18pt' -> 360
+    return [expr {int(round($tw / 10.0))}]               ;# 360 twips -> 36 hps
 }
 
 proc ::ooxml::docx::lib::ST_TabJc {value} {
@@ -1809,22 +1872,6 @@ proc ::ooxml::docx::lib::ST_TextWrappingType {value} {
            [AllowedValues $values]"
 }
 
-# ST_HpsMeasure accepts exactly the same value as ST_TwipsMeasure.
-# The difference is only the interpretation of the integer (only)
-# values. For ST_HpsMeasure the number specifies half points
-# (1/144 of an inch), for ST_TwipsMeasure the number specifies
-# twentieths of a point (equivalent to 1/1440th of an inch).
-proc ::ooxml::docx::lib::ST_TwipsMeasure {value} {
-    if {[string is integer -strict $value] && $value >= 0} {
-        return $value
-    }
-    if {![regexp {[0-9]+(\.[0-9]+)?(mm|cm|in|pt|pc|pi)} $value]} {
-        error "\"$value\" is not a valid measure value - value must match\
-               the regular expression \[0-9\]+(\.\[0-9\]+)?(mm|cm|in|pt|pc|pi)"
-    }
-    return $value
-}
-
 proc ::ooxml::docx::lib::ST_Underline {value} {
     set values {
         single
@@ -1965,6 +2012,105 @@ proc ::ooxml::docx::lib::W3CDTF {value} {
                 accepted by \[clock scan\]"
     }
     return $value
+}
+
+# OMML (Office Math) builder methods, contributed by Miguel Bañón
+proc ::ooxml::docx::lib::ST_MJc {value} {
+    set values {
+        left
+        center
+        right
+        centerGroup
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown math justification \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_FType {value} {
+    set values {
+        bar
+        lin
+        noBar
+        skw
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown fraction type \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_LimLoc {value} {
+    set values {
+        undOvr
+        subSup
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown limit location \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_MathStyle {value} {
+    set values {
+        p
+        b
+        i
+        bi
+    }
+    if {$value eq ""} {return ""}
+    if {$value in $values} {return $value}
+    error "unknown math style \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_MScript {value} {
+    set values {
+        ""
+        roman
+        script
+        fraktur
+        double-struck
+        sans-serif
+        monospace
+    }
+    if {$value in $values} {return $value}
+    error "unknown math script \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Integer255 {value} {
+    if {$value eq ""} {return ""}
+    if {[string is integer -strict $value] && $value >= 0 && $value <= 255} {
+        return $value
+    }
+    error "expected integer 0..255, got \"$value\""
+}
+
+proc ::ooxml::docx::lib::XSD_base64Binary {value} {
+    if {[package vsatisfies [package present tdom] 0.9.7-]} {
+        if {[::tdom::type::base64 $value]} {
+            return $value
+        }
+        error "expected base64 encoded data, got \"$value\""
+    } else {
+        return $value
+    }
+}
+
+proc ::ooxml::docx::lib::XSD_hexBinary {value} {
+    if {[package vsatisfies [package present tdom] 0.9.7-]} {
+        if {[::tdom::type::hexBinary $value]} {
+            return $value
+        }
+        error "expected base64 encoded data, got \"$value\""
+    } else {
+        return $value
+    }
 }
 
 package provide ooxml::docx::lib 0.6

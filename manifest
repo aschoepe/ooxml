@@ -1,5 +1,5 @@
-C Parse\sthe\sxml\sfiles\sinside\sthe\sdocx\szip\swith\s-keepEmpties\sto\sprevent\sthat\sspace\sonly\stext\sgets\slost.
-D 2025-10-26T14:45:07.482
+C Lesser\sboiler\splate\scode\sfor\soption/error\shandling.
+D 2025-11-15T03:33:38.589
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -45,7 +45,7 @@ F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 30484bd3cdac34ff6309d0c190c5247aad5e9c9a50d1a117744e26832469e246
 F ooxml-docx-math.tcl 1a977a002067ee397aa2b51466eaec4255e6e1ca30d21d46b18f9a03c7eb5972
-F ooxml-docx.tcl 41676fbdcfa09ee7a0ebf88e98bde02d07e1e08d2f0325adedb5493991261249
+F ooxml-docx.tcl d53688b5ea52c71c6a177c2445e39d06a494199d28a7ebf47a7c0fbf40a35c1d
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl ec667ed207ddcce24a0d744475836e164e512da8fe725aaf92a16c420994002c
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -105,8 +105,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 953f40ced42ca1c847da9ad33c84cf16db84083e41c2b5f0e946cce90f7d71c5
-R 518b640c7b33e178534d80454f4355f0
+P c8e47d7821efc5ef7aa3e65632710eb769291975be42ffb8c6d04b120c94b051
+R fce2ea2e0c360f533c397e1baf978a64
 U rolf
-Z ccf77c4bc7f23a7687c26c5f3573011b
+Z 80a8b32a1280ca43f1d32ce3d0212705
 # Remove this line to create a well-formed Fossil manifest.

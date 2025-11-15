@@ -1002,10 +1002,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method Anchor {name} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         # Defaults
         array set anchorAtts {
             behindDoc 0
@@ -1207,9 +1204,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method CheckRemainingOpts {} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         set nrRemainigOpts [llength [array names opts]]
         if {$nrRemainigOpts == 0} return
         if {$nrRemainigOpts == 1} {
@@ -1255,9 +1250,7 @@ oo::class create ooxml::docx::docx {
 
     method Create switchActionList {
         variable valPrefix
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         foreach {opt optdata} $switchActionList {
             # If the opt is just / then this is a placeholder for an
             # element which currently cannot be created by an option.
@@ -1373,8 +1366,7 @@ oo::class create ooxml::docx::docx {
     method CreateComment {} {
         my variable docs
 
-        upvar opts opts
-        upvar optsknown optsknown
+        my Prepare
         if {![info exists docs(word/comments.xml)]} {
             my Add2Relationships comments comments.xml
             set docs(word/comments.xml) [dom parse {
@@ -1397,9 +1389,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method EatOption {option {type ""} {deleteOption 1}} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         set optsknown($option) ""
         if {[info exists opts($option)]} {
             set value $opts($option)
@@ -1570,9 +1560,7 @@ oo::class create ooxml::docx::docx {
     }
     
     method Image_anchor {rId file} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         set anchor [my Anchor [file tail $file]]
         $anchor appendFromScript {
             my Image_graphic $rId $file
@@ -1580,9 +1568,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method Image_graphic {rId file} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         Tag_a:graphic {
             Tag_a:graphicData uri "http://schemas.openxmlformats.org/drawingml/2006/picture" {
                 Tag_pic:pic {
@@ -1607,9 +1593,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method Image_inline {rId file} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         Tag_wp:inline {
             set thisOptionValue [my PeekOption -dimension]
             set attlist [my CheckedAttlist $thisOptionValue {
@@ -1760,9 +1744,7 @@ oo::class create ooxml::docx::docx {
     }
         
     method OneOff {opta optb} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         lassign $opta optiona typea
         lassign $optb optionb typeb
         set a [my EatOption $optiona $typea]
@@ -1774,9 +1756,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method Option {option attname type {default ""}} {
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare
         set optsknown($option) ""
         if {[info exists opts($option)]} {
             set ooxmlvalue [my CallType $type $opts($option) \
@@ -1790,11 +1770,19 @@ oo::class create ooxml::docx::docx {
     }
 
     method PeekOption {option {type ""}} {
-        upvar opts opts
-        upvar optsknown optsknown
+        my Prepare
         return [my EatOption $option $type 0]
     }
 
+
+    method Prepare {{properties 0}} {
+        set script "upvar opts opts; upvar optsknown optsknown;"
+        if {$properties} {
+            append script "variable ::ooxml::docx::properties"
+        }
+        uplevel [list eval $script]
+    }
+    
     method ProcessErrorinfo {what} {
         upvar errMsg errMsg
         upvar errVals errVals
@@ -1810,10 +1798,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method PPr {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_w:pPr {
             my Create $properties(paragraph1)
             Tag_w:pBdr {
@@ -1839,10 +1824,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method RPr {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_w:rPr {
             my Create $properties(run)
         }
@@ -1853,10 +1835,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method SectionCommon {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_w:sectPr {
             foreach what {Header Footer} {
                 foreach type {even default first} {
@@ -1877,10 +1856,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method SpPr_Content {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_a:xfrm {
             Tag_a:off x 0 y 0
             my Create $properties(xfrm)
@@ -1922,10 +1898,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method TblPr {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_w:tblPr {
             my Create $properties(table1)
             Tag_w:tblBorders {
@@ -1977,10 +1950,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method TcPr {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_w:tcPr {
             my Create $properties(cell1)
             Tag_w:tcBorders {
@@ -1998,10 +1968,7 @@ oo::class create ooxml::docx::docx {
     }
 
     method TrPr {} {
-        variable ::ooxml::docx::properties
-        upvar opts opts
-        upvar optsknown optsknown
-
+        my Prepare 1
         Tag_w:trPr {
             my Create $properties(row)
         }

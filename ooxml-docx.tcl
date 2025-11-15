@@ -1370,7 +1370,7 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method CreateComment {} {
+    method CreateComment {{commentID ""}} {
         my variable docs
 
         upvar opts opts
@@ -1382,7 +1382,9 @@ oo::class create ooxml::docx::docx {
             }]
         }
         set comments [$docs(word/comments.xml) documentElement]
-        set commentID [my NextId comments]
+        if {$commentID eq ""} {
+            set commentID [my NextId comments]
+        }
         $comments appendFromScript {
             set author [my EatOption -author]
             if {$author eq ""} {
@@ -2101,13 +2103,17 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method commenend {id} {
+    method commentend {id args} {
         my variable body
         my variable context
+        my variable commentranges
         
         if {[catch {
+            if {![info exists commentranges($id)]} {
+                error "no open comment range with the id '$id'"
+            }
             OptVal [lrange $args 0 end-1]
-            lassign [my CreateComment] comment id
+            lassign [my CreateComment $id] comment id
             my CheckRemainingOpts
             set script [lindex $args end]
             set savedbody $body
@@ -2119,7 +2125,7 @@ oo::class create ooxml::docx::docx {
             } errMsg errVals]} {
                 set body $savedbody
                 set context $savedcontext
-                my ProcessErrorinfo "comment"
+                my ProcessErrorinfo "commentend"
                 error $errMsg
             }
         } errMsg]} {
@@ -2130,31 +2136,30 @@ oo::class create ooxml::docx::docx {
         # Add the comment mark to the document
         set p [my LastParagraph 1]
         $p appendFromScript {
+            Tag_w:commentRangeEnd w:id $id
             Tag_w:r {
                 Tag_w:commentReference w:id $id
             }
         }
+        unset commentranges($id)
     }
 
 
-    method commentstart {args} {
+    method commentstart {{returnvar ""}} {
         my variable body
         my variable context
+        my variable commentranges
         
-        if {[catch {
-            OptVal $args
-            lassign [my CreateComment] comment id
-            my CheckRemainingOpts
-        } errMsg]} {
-            return -code error $errMsg
+        if {$returnvar ne ""} {
+            upvar $returnvar id
         }
+        set id [my NextId comments]
         # Add the comment range start mark to the document
         set p [my LastParagraph 1]
         $p appendFromScript {
-            Tag_w:r {
-                Tag_w:commentRangeStart w:id $id
-            }
+            Tag_w:commentRangeStart w:id $id
         }
+        set commentranges($id) ""
         return $id
     }
 
@@ -2786,6 +2791,39 @@ oo::class create ooxml::docx::docx {
                 Tag_w:commentReference w:id $id
             }
         }
+    }
+
+    method simplecommentend {id text args} {
+        variable commentranges
+        
+        if {[catch {
+            if {![info exists commentranges($id)]} {
+                error "no open comment range with the id '$id'"
+            }
+            OptVal $args "text"
+            lassign [my CreateComment $id] comment
+            $comment appendFromScript {
+                Tag_w:p {
+                    my PPr
+                    Tag_w:r {
+                        my RPr
+                        my Wt $text
+                    }
+                }
+            }
+            my CheckRemainingOpts
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        # Add the comment mark to the document
+        set p [my LastParagraph 1]
+        $p appendFromScript {
+            Tag_w:commentRangeEnd w:id $id
+            Tag_w:r {
+                Tag_w:commentReference w:id $id
+            }
+        }
+        unset commentranges($id)
     }
 
     method simpletable {tabledata args} {

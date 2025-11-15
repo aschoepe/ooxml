@@ -1,5 +1,5 @@
-C Added\sa\scommentstart/(commentend|simplecommentend)\spair\smethods\sto\sallow\sto\scomment\sa\srange\sof\stext.
-D 2025-11-15T03:15:18.500
+C Merged\sfrom\sdocx.
+D 2025-11-15T12:22:12.689
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -46,7 +46,7 @@ F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 30484bd3cdac34ff6309d0c190c5247aad5e9c9a50d1a117744e26832469e246
 F ooxml-docx-math.tcl 1a977a002067ee397aa2b51466eaec4255e6e1ca30d21d46b18f9a03c7eb5972
-F ooxml-docx.tcl 58fd9926cc28c8b540c02f3584950f5c80da57331218e3e744c81406b6ad81ae
+F ooxml-docx.tcl 3e52a17b6a38331d654a0a2c1d43969f2c2968d792a9386ed0300ec2d2dee4b7
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl ec667ed207ddcce24a0d744475836e164e512da8fe725aaf92a16c420994002c
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -106,8 +106,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P b56a114c9fb31c87ab8a04c0bf6b71a41774ab6b7982c40cb6944ea24c159f99
-R ef805528b59f29e647169a4028d4a0c2
+P f037d3f9ebe1f6cc558abb2028ed6977065ca297d2ff1a75ec069dbb450096dd e2aba55fc83bf2b4fb08b1a0ad3f0a8da263addfcd5dfbe030f5714cb0454432
+R d784b381f1a93dd42e9948435d3d3f71
 U rolf
-Z 0e759579bd433fc17abf6279f43f0d0a
+Z 619a785aa2b3852b059f9696eedf2ed7
 # Remove this line to create a well-formed Fossil manifest.

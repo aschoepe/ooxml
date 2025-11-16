@@ -2070,7 +2070,7 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method commentend {id args} {
+    method commentrangeend {id args} {
         my variable body
         my variable context
         my variable commentranges
@@ -2112,7 +2112,7 @@ oo::class create ooxml::docx::docx {
     }
 
 
-    method commentstart {{returnvar ""}} {
+    method commentrangestart {{returnvar ""}} {
         my variable body
         my variable context
         my variable commentranges
@@ -2760,7 +2760,7 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method simplecommentend {id text args} {
+    method simplecommentrangeend {id text args} {
         variable commentranges
         
         if {[catch {

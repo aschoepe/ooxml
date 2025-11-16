@@ -66,6 +66,10 @@ The allowed options are
 The content of the comment is determined by the evaluated script given
 as last argument. 
 
+**commentrangeend** *id* *?-option value ...?* *creatingScript*
+
+**commentrangestart** ?returnvar?
+
 **configure** *?-option value ...?*
 
 Set certain document properties. The recogniced options are:
@@ -237,7 +241,9 @@ allowed options are the same as for the method pagesetup, see there.
 
 **settings** *?-option value ...?*
 
-**simplecomment** *?-option value ...?*
+**simplecomment** *comment* *?-option value ...?*
+
+**simplecommentrangeend** *id* *comment* *?-option value ...?*
 
 **simpletable** *args*
 

@@ -55,6 +55,11 @@ methods:
 
 **comment** *?-option value ...?* *creatingScript*
 
+This method creates a comment to the current point in the doucment
+with comment content created by the *creatingScript*. Although the
+standard allows much more rich content most word processor support
+only basic text formating for comments.
+
 The allowed options are
 
 -author string
@@ -63,8 +68,20 @@ The allowed options are
 
 -initals string
 
-The content of the comment is determined by the evaluated script given
-as last argument. 
+**commentrangeend** *id* *?-option value ...?* *creatingScript*
+
+This method marks the end of a range of content in the document and
+creates a comment to this content range with comment content created
+by the *creatingScript*. The *id* argument must be the id returned by
+the corresponding *commentrangestart* call. For the allowed options
+see the method *comment*.
+
+**commentrangestart** ?returnvar?
+
+This method marks the start of a range of content in the document
+for which a comment should be added. The method returns the id of the
+range and stores the id additionally in the variable with the name
+*resultvar*, if the optional argument is given.
 
 **configure** *?-option value ...?*
 
@@ -237,7 +254,25 @@ allowed options are the same as for the method pagesetup, see there.
 
 **settings** *?-option value ...?*
 
-**simplecomment** *?-option value ...?*
+**simplecomment** *comment* *?-option value ...?*
+
+This method creates a comment to the current point in the document.
+The text content of the comment will be what is given by the argument
+*comment*. For the allowed options see the method *comment*.
+Additionally to this options all [PARAGRAPH OPTIONS](#paragraph) and
+[CHARACTER OPTIONS](#character) are allowed. If given they are
+applied to format the comment text.
+
+**simplecommentrangeend** *id* *comment* *?-option value ...?*
+
+This method marks the end of a range of content in the document and
+creates a comment to this content range with comment content given by
+the *comment* argument. The *id* argument must be the id returned by
+the corresponding *commentrangestart* call. For the allowed options
+see the method *comment*. Additionally to this options all
+[PARAGRAPH OPTIONS](#paragraph) and [CHARACTER OPTIONS](#character) are
+allowed. If given they are applied to format the comment text.
+
 
 **simpletable** *args*
 
@@ -300,6 +335,7 @@ Creates a table by defining every row and cell individually by the
 
 # CHARACTER OPTIONS
 
+
 **-bold** *onOffValue*
 
 **-color** *auto|RRGGBB hex value*
@@ -353,6 +389,7 @@ The allowd *kind* values are:
 
 
 # PARAGRAPH OPTIONS
+
 
 **-align** *kind*
 

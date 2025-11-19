@@ -1628,7 +1628,7 @@ oo::class create ooxml::docx::docx {
                 # Non XML file; add to binparts
                 set binparts($part) [::ooxml::ZipReadBinaryFile $part]
             }
-            if {[regexp {^word/media/image(\d+)$} $part -> n]} {
+            if {[regexp {^word/media/image(\d+)} $part -> n]} {
                 if {$id(image) < $n} {
                     set id(image) $n
                 }
@@ -2317,7 +2317,7 @@ oo::class create ooxml::docx::docx {
                 error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
             }
             OptVal $args "file type"
-            set imagename image[my NextId picture]
+            set imagename image[my NextId image]
             append imagename [string tolower [file extension $file]]
             set fd [open $file rb]
             set binparts(word/media/$imagename) [read $fd]

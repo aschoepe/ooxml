@@ -1378,10 +1378,7 @@ oo::class create ooxml::docx::docx {
             set commentID [my NextId comments]
         }
         $comments appendFromScript {
-            set author [my EatOption -author]
-            if {$author eq ""} {
-                set author "Unknown"
-            }
+            set author [my EatOption -author "Unknown"]
             Tag_w:comment w:id $commentID \
                 w:date [my EatOption -date ST_DateTime] \
                 w:author $author \
@@ -1390,7 +1387,7 @@ oo::class create ooxml::docx::docx {
         return [list [$comments lastChild] $commentID]
     }
 
-    method EatOption {option {type ""} {deleteOption 1}} {
+    method EatOption {option {type ""} {default ""} {deleteOption 1}} {
         my Prepare
         set optsknown($option) ""
         if {[info exists opts($option)]} {
@@ -1403,7 +1400,7 @@ oo::class create ooxml::docx::docx {
             }
             return $value
         }
-        return ""
+        return $default
     }
 
     method EvalChildScript {tag script} {
@@ -1771,9 +1768,9 @@ oo::class create ooxml::docx::docx {
         return [list $attname $ooxmlvalue]
     }
 
-    method PeekOption {option {type ""}} {
+    method PeekOption {option {type ""} {default ""}} {
         my Prepare
-        return [my EatOption $option $type 0]
+        return [my EatOption $option $type $default 0]
     }
 
 
@@ -2714,21 +2711,50 @@ oo::class create ooxml::docx::docx {
         my variable docs
         variable ::ooxml::docx::properties
 
-        if {[info exists docs(word/settings.xml)]} {
-            $docs(word/settings.xml) delete
-        } else {
-            my Add2Relationships settings settings.xml
-        }
-        set docs(word/settings.xml) [dom parse {
-                <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
-        }]
-        set settings [$docs(word/settings.xml) documentElement]
+        puts "settings called"
         if {[catch {
             OptVal $args
+            set reset [my EatOption -reset CT_OnOff 0]
+            if {![info exists docs(word/settings.xml)]} {
+                my Add2Relationships settings settings.xml
+                set docs(word/settings.xml) [dom parse {
+                    <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+                        xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
+                        xmlns:sl="http://schemas.openxmlformats.org/schemaLibrary/2006/main"/>
+                }]
+            } else {
+                if {$reset} {
+                    $docs(word/settings.xml) delete
+                    set docs(word/settings.xml) [dom parse {
+                        <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+                            xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
+                            xmlns:sl="http://schemas.openxmlformats.org/schemaLibrary/2006/main"/>
+                    }]
+                }
+                
+            }
+            set settings [$docs(word/settings.xml) documentElement]
+            set lastchild [$settings lastChild]
             $settings appendFromScript {
                 my Create $properties(settings)
             }
             my CheckRemainingOpts
+            puts [array get tags]
+            if {$lastchild ne ""} {
+                foreach {opt optdata} $properties(settings) {
+                    set tags([lindex $optdata 0]) [incr i]
+                }
+                set newchild [$lastchild nextChild]
+                set curchild [$settings firstChild]
+                while {$newchild ne ""} {
+                    set nextnewchild [$newchild nextChild]
+                    set curindex $tags([
+                    
+                    
+                    set newchild $nextnewchild
+                }
+                puts [array get tags]
+            }                    
         } errMsg]} {
             return -code error $errMsg
         }

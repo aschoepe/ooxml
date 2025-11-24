@@ -378,24 +378,24 @@ namespace eval ::ooxml::docx {
         -showXMLTags {w:showXMLTags CT_OnOff}
         -alwaysMergeEmptyNamespace {w:alwaysMergeEmptyNamespace CT_OnOff}
         -updateFields {w:updateFields CT_OnOff}
-        / hdrShapeDefaults
-        / footnotePr
-        / endnotePr
-        / compat
-        / docVars
-        / rsids
+        / w:hdrShapeDefaults
+        / w:footnotePr
+        / w:endnotePr
+        / w:compat
+        / w:docVars
+        / w:rsids
         / m:mathPr
         -attachedSchema {w:attachedSchema NoCheck}
-        / themeFontLang
-        / clrSchemeMapping
+        / w:themeFontLang
+        / w:clrSchemeMapping
         -doNotIncludeSubdocsInStats {w:doNotIncludeSubdocsInStats CT_OnOff}
         -doNotAutoCompressPictures {w:doNotAutoCompressPictures CT_OnOff}
-        / forceUpgrade
-        / captions
-        / readModeInkLockDown
-        / smartTagType
+        / w:forceUpgrade
+        / w:captions
+        / w:readModeInkLockDown
+        / w:smartTagType
         / sl:schemaLibrary
-        / shapeDefaults
+        / w:shapeDefaults
         -doNotEmbedSmartTags {w:doNotEmbedSmartTags CT_OnOff}
         -decimalSymbol {w:decimalSymbol NoCheck}
         -listSeparator {w:listSeparator NoCheck}
@@ -1378,7 +1378,7 @@ oo::class create ooxml::docx::docx {
             set commentID [my NextId comments]
         }
         $comments appendFromScript {
-            set author [my EatOption -author "Unknown"]
+            set author [my EatOption -author NoCheck "Unknown"]
             Tag_w:comment w:id $commentID \
                 w:date [my EatOption -date ST_DateTime] \
                 w:author $author \
@@ -1841,6 +1841,9 @@ oo::class create ooxml::docx::docx {
                     set value [my EatOption -$type$what]
                     if {$value eq ""} {
                         continue
+                    }
+                    if {$type eq "even"} {
+                        my settings -evenAndOddHeaders on
                     }
                     my CheckrId [string tolower $what] $value
                     Tag_w:[string tolower $what]Reference w:type $type r:id $value
@@ -2710,53 +2713,85 @@ oo::class create ooxml::docx::docx {
     method settings {args} {
         my variable docs
         variable ::ooxml::docx::properties
+        variable ::ooxml::docx::xmlns
 
-        puts "settings called"
         if {[catch {
             OptVal $args
+            set create 0
             set reset [my EatOption -reset CT_OnOff 0]
             if {![info exists docs(word/settings.xml)]} {
                 my Add2Relationships settings settings.xml
+                set create 1
+            } else {
+                if {$reset} {
+                    $docs(word/settings.xml) delete
+                    set create 1
+                }
+            }
+            if {$create} {
                 set docs(word/settings.xml) [dom parse {
                     <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
                         xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
                         xmlns:sl="http://schemas.openxmlformats.org/schemaLibrary/2006/main"/>
                 }]
-            } else {
-                if {$reset} {
-                    $docs(word/settings.xml) delete
-                    set docs(word/settings.xml) [dom parse {
-                        <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-                            xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
-                            xmlns:sl="http://schemas.openxmlformats.org/schemaLibrary/2006/main"/>
-                    }]
-                }
-                
             }
             set settings [$docs(word/settings.xml) documentElement]
-            set lastchild [$settings lastChild]
+            $settings lastChild lastchild
             $settings appendFromScript {
                 my Create $properties(settings)
             }
             my CheckRemainingOpts
-            puts [array get tags]
-            if {$lastchild ne ""} {
-                foreach {opt optdata} $properties(settings) {
-                    set tags([lindex $optdata 0]) [incr i]
-                }
-                set newchild [$lastchild nextChild]
-                set curchild [$settings firstChild]
-                while {$newchild ne ""} {
-                    set nextnewchild [$newchild nextChild]
-                    set curindex $tags([
-                    
-                    
-                    set newchild $nextnewchild
-                }
-                puts [array get tags]
-            }                    
         } errMsg]} {
             return -code error $errMsg
+        }
+        # We only have to rearrange the settings child if there has
+        # been childs and if there are new childs.
+        # nc = new child         
+        if {$lastchild ne "" && [$lastchild nextSibling nc] ne ""} {
+            foreach {opt optdata} $properties(settings) {
+                set tag [lindex $optdata 0]
+                lassign [split [lindex $optdata 0] :] prefix localname
+                set tags($xmlns($prefix):$localname) [incr 1]
+            }
+            # cc = current child
+            $settings firstChild cc
+            # Find the first known child
+            while {$cc ne $nc} {
+                set fqcc [$cc namespaceURI]:[$cc localName]
+                if {[info exists tags($fqcc)]} {
+                    set ccind $tags($fqcc)
+                    break
+                }
+                $cc nextSibling cc
+            }
+            if {$cc eq $nc} return
+            while {$nc ne ""} {
+                $nc nextSibling nextnc
+                set ncind $tags([$nc namespaceURI]:[$nc localName])
+                while {$ccind < $ncind && $cc ne $nc} {
+                    $cc nextSibling cc
+                    set fqcc [$cc namespaceURI]:[$cc localName]
+                    if {[info exists tags($fqcc)]} {
+                        set cclastind $ccind
+                        set ccind $tags($fqcc)
+                        if {$ccind < $cclastind} {
+                            return -code error "invalid word/settings.xml:\
+                                                childs are not in order"
+                        }
+                    }
+                }
+                if {$cc eq $nc} return
+                if {$ccind == $ncind} {
+                    # TODO this doesn't handle the cases of multiple
+                    # child elements nicely (activeWritingStyle,
+                    # attachedSchema and smartTagType)
+                    $settings replaceChild $nc $cc
+                    $nc nextSibling cc
+                } else {
+                    $settings insertBefore $nc $cc
+                }
+                set nc $nextnc
+            }
         }
     }
 

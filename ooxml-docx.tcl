@@ -40,9 +40,10 @@ namespace eval ::ooxml::docx {
     namespace export docx
 
     # These are acually used as namespace variables
-    variable xmlns
+    variable prefixnslist
     variable properties
     variable staticDocx
+    variable xmlns
     # These variables are only used in the namespace setup and
     # defined here only to avoid changes of possibly global variables
     # with the same name for Tcl < 9.0
@@ -75,7 +76,7 @@ namespace eval ::ooxml::docx {
         wpg http://schemas.microsoft.com/office/word/2010/wordprocessingGroup
         wps http://schemas.microsoft.com/office/word/2010/wordprocessingShape
     }
-
+    set prefixnslist [array get xmlns]
     # Most WordprocessingML elements have a sequence content model. So
     # the basic rule is to keep the order of the options below as is
     # (and to care that new options are inserted at the right place).
@@ -794,6 +795,7 @@ oo::class create ooxml::docx::docx {
 
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::staticDocx
+        variable ::ooxml::docx::prefixnslist
 
         namespace import ::ooxml::docx::lib::*
         namespace import ::ooxml::docx::Tag_*  ::ooxml::docx::Text
@@ -835,7 +837,6 @@ oo::class create ooxml::docx::docx {
         } else {
             # Create a docx from scratch
             # Ensure that we can use our prefixes for XPath queries 
-            set prefixnslist [array get ::ooxml::docx::xmlns]
             foreach auxFile [array names staticDocx] {
                 set docs($auxFile) [dom parse $staticDocx($auxFile)]
                 $docs($auxFile) selectNodesNamespaces $prefixnslist
@@ -1423,12 +1424,14 @@ oo::class create ooxml::docx::docx {
         my variable body
         my variable ignorable
         variable ::ooxml::docx::xmlns
+        variable ::ooxml::docx::prefixnslist
 
         set types "${type}s"
         if {![info exists docs(word/$types.xml)]} {
             my Add2Relationships $types $types.xml
             set document [dom createDocumentNS $xmlns(w) w:$types]
             set docs(word/$types.xml) $document
+            $docs(word/$types.xml) selectNodesNamespaces $prefixnslist
             $document documentElement notesroot
             foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
@@ -1481,6 +1484,7 @@ oo::class create ooxml::docx::docx {
         my variable context
         my variable ignorable
         variable ::ooxml::docx::xmlns
+        variable ::ooxml::docx::prefixnslist
 
         set have [lsort -dictionary [array names docs word/$what*]]
         if {![llength $have]} {
@@ -1498,6 +1502,7 @@ oo::class create ooxml::docx::docx {
         }
         set document [dom createDocumentNS $xmlns(w) w:$elnName]
         set docs(word/$what$nr.xml) $document
+        $docs(word/$what$nr.xml) selectNodesNamespaces $prefixnslist
         $document documentElement root
         foreach ns {o m r v w10 wp wps wpg mc wp14 w14} {
             $root setAttributeNS {} xmlns:$ns $xmlns($ns)
@@ -1615,7 +1620,8 @@ oo::class create ooxml::docx::docx {
         my variable binparts
         my variable impPagesetup
         my variable id
-
+        variable ::ooxml::docx::prefixnslist
+        
         if {[catch {::ooxml::ZipOpen $docxfile} errMsg]} {
             return -code error "Cannot open '$docxfile': $errMsg"
         }
@@ -1651,7 +1657,6 @@ oo::class create ooxml::docx::docx {
             set docs(word/styles.xml) [dom parse staticDocx(word/styles.xml)]
         }
         # Ensure that we can use our prefixes for XPath queries 
-        set prefixnslist [array get ::ooxml::docx::xmlns]
         foreach xmlpart [array names docs] {
             $docs($xmlpart) selectNodesNamespaces $prefixnslist
         }
@@ -2451,6 +2456,7 @@ oo::class create ooxml::docx::docx {
     method numbering {cmd args} {
         my variable docs
         variable ::ooxml::docx::properties
+        variable ::ooxml::docx::prefixnslist
 
         if {![info exists docs(word/numbering.xml)]} {
             if {$cmd in {"abstractNumIds" "delete"}} {
@@ -2463,6 +2469,7 @@ oo::class create ooxml::docx::docx {
             set docs(word/numbering.xml) [dom parse {
                 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"/>
             }]
+            $docs(word/numbering.xml) selectNodesNamespaces $prefixnslist
         }
         set numbering [$docs(word/numbering.xml) documentElement]
         switch $cmd {
@@ -2611,6 +2618,7 @@ oo::class create ooxml::docx::docx {
         if {[info exists docs($what)]} {
             $docs($what) delete
         }
+        $doc selectNodesNamespaces $::ooxml::docx::prefixnslist
         set docs($what) $doc
     }
 
@@ -2710,6 +2718,31 @@ oo::class create ooxml::docx::docx {
         set sectionsetup $args
     }
 
+    method selectNodes {xpath {part ""} args} {
+        my variable docs
+
+        if {$part eq ""} {
+            set doc $docs(word/document.xml)
+        } else {
+            if {[info exists docs($part)]} {
+                set doc $docs($part)
+            } elseif {[info exists docs(word/$part)]} {
+                set doc $docs(word/$part)
+            } elseif {[info exists docs(word/$part.xml)]} {
+                set doc $docs(word/$part.xml)
+            } else {
+                return -code error "unkown docx part '$part'"
+            }
+        }
+        $doc documentElement root
+        if {[catch {
+            set result [$root selectNodes {*}$args $xpath]
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        return $result
+    }
+    
     method settings {args} {
         my variable docs
         variable ::ooxml::docx::properties
@@ -2734,6 +2767,7 @@ oo::class create ooxml::docx::docx {
                         xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
                         xmlns:sl="http://schemas.openxmlformats.org/schemaLibrary/2006/main"/>
                 }]
+                $docs(word/settings.xml) selectNodesNamespaces $::ooxml::docx::prefixnslist
             }
             set settings [$docs(word/settings.xml) documentElement]
             $settings lastChild lastchild
@@ -2786,10 +2820,11 @@ oo::class create ooxml::docx::docx {
                     # child elements nicely (activeWritingStyle,
                     # attachedSchema and smartTagType)
                     $settings replaceChild $nc $cc
-                    $nc nextSibling cc
                 } else {
                     $settings insertBefore $nc $cc
                 }
+                set cc $nc
+                set ccind $ncind
                 set nc $nextnc
             }
         }
@@ -3321,9 +3356,18 @@ oo::class create ooxml::docx::docx {
         $docs($what) asXML -channel $fd
         close $fd
     }
+
+    method xpath {xpath {part ""} args} {
+        if {[catch {
+            set result [my selectNodes $xpath $part {*}$args]
+        } errMsg]} {
+            return -code error $errMsg
+        }
+        return $result
+    }
 }
 
-# Incldue the OOML related methods.
+# Include the OOML related methods.
 source [file join [file dir [info script]] ooxml-docx-math.tcl]
 
 package provide ooxml::docx 0.6

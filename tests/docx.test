@@ -44,6 +44,50 @@ test docx-1.4 {mutually exclusive options} {
 
 $docx destroy
 
-# cleanup
+test docx-2.1 {settings} {
+    set docx [docx new]
+    $docx settings -reset 1
+    set result [$docx xpath count(*) settings]
+    $docx destroy
+    set result
+} 0
+
+test docx-2.2 {settings} {
+    set docx [docx new]
+    $docx settings -reset 1
+    $docx settings -defaultTabStop 400 -zoom {type bestFit percent 100} -autoHyphenation off
+    set result ""
+    foreach node [$docx xpath * settings] {
+        lappend result [$node localName]
+    }
+    $docx destroy
+    set result
+} {zoom defaultTabStop autoHyphenation}
+
+test docx-2.3 {settings} {
+    set docx [docx new]
+    $docx settings -reset 1
+    $docx settings -defaultTabStop 400 -zoom {type bestFit percent 100} -autoHyphenation off
+    $docx settings -evenAndOddHeaders on -view outline -embedSystemFonts on \
+        -doNotEmbedSmartTags on -zoom {type textFit percent 200}
+    set result [$docx xpath {* local-name()} settings -list]
+    $docx destroy
+    set result
+} {view zoom embedSystemFonts defaultTabStop autoHyphenation evenAndOddHeaders doNotEmbedSmartTags}
+
+test docx-2.4 {settings} {
+    set docx [docx new]
+    $docx settings -reset 1
+    $docx settings -defaultTabStop 400 -zoom {type bestFit percent 100} -autoHyphenation off
+    $docx settings -evenAndOddHeaders on -view outline -embedSystemFonts on \
+        -doNotEmbedSmartTags on -zoom {type textFit percent 200}
+    set result [$docx xpath string(w:zoom/@w:val) settings]
+    lappend result [$docx xpath string(w:zoom/@w:percent) settings]
+    $docx destroy
+    set result
+} {textFit 200}
+
+
+    # cleanup
 ::tcltest::cleanupTests
 return

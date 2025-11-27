@@ -254,6 +254,42 @@ allowed options are the same as for the method pagesetup, see there.
 
 **settings** *?-option value ...?*
 
+**selectNodes** *xpath* ?*part*? *?selectNodes options?*
+
+Returns the result of the *xpath* expression. If no other argument is
+given the context node will be the document element node of the
+word/document.xml part of the docx. If the *part* argument is given the
+context node of the expression will be the document element of the
+docx part identified by this argument. If *part* is a relative path
+inside the docx zip (example: _rels/.rels) then this is used. All
+parts of the docx inside the word directory may specified without the
+directory part and the .xml suffix. The optional *selectNodes options*
+are routed throw.
+
+All documents accessible by this have the following prefix namespace
+mappings predefined:
+
+Prefix   Namespace
+------   ---------
+ a       http://schemas.openxmlformats.org/drawingml/2006/main|
+ ct      http://schemas.openxmlformats.org/package/2006/content-types|
+ m       http://schemas.openxmlformats.org/officeDocument/2006/math|
+ mc      http://schemas.openxmlformats.org/markup-compatibility/2006|
+ o       urn:schemas-microsoft-com:office:office|
+ pic     http://schemas.openxmlformats.org/drawingml/2006/picture|
+ r       http://schemas.openxmlformats.org/officeDocument/2006/relationships|
+ rel     http://schemas.openxmlformats.org/package/2006/relationships|
+ sl      http://schemas.openxmlformats.org/schemaLibrary/2006/main|
+ v       urn:schemas-microsoft-com:vml|
+ w       http://schemas.openxmlformats.org/wordprocessingml/2006/main|
+ w10     urn:schemas-microsoft-com:office:word|
+ w14     http://schemas.microsoft.com/office/word/2010/wordml|
+ wp      http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing|
+ wp14    http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing|
+ wpg     http://schemas.microsoft.com/office/word/2010/wordprocessingGroup|
+ wps     http://schemas.microsoft.com/office/word/2010/wordprocessingShape|
+
+
 **simplecomment** *comment* *?-option value ...?*
 
 This method creates a comment to the current point in the document.
@@ -318,9 +354,9 @@ Creates a table by defining every row and cell individually by the
 -cellMarginEnd
 -cellMarginRight
 
-**tablecell** *?-option value ...?*
+**tablecell** *?-option value ...?* *creatingScript*
 
-**tablerow** *?-option value ...?*
+**tablerow** *?-option value ...?* *creatingScript*
 
 **textbox** *?-option value ...?*
 
@@ -332,6 +368,11 @@ Creates a table by defining every row and cell individually by the
   the argument is ommited then document.docx will be used.
 
 **writepart** *part* *filename*
+
+**xpath** *xpath* ?*part*? *?selectNodes options?*
+
+An alias for the method *selectNodes*. See there for the meaning of
+the arguments.
 
 # CHARACTER OPTIONS
 

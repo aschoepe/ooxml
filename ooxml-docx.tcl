@@ -3372,6 +3372,15 @@ oo::class create ooxml::docx::docx {
         close $fd
     }
 
+    method xmlparts {{pattern ""}} {
+        my variable docs
+
+        if {$pattern eq ""} {
+            set pattern *
+        }
+        return [lsort [array names docs $pattern]]
+    }
+        
     method xpath {xpath {part ""} args} {
         if {[catch {
             set result [my selectNodes $xpath $part {*}$args]

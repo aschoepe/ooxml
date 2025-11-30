@@ -369,10 +369,17 @@ Creates a table by defining every row and cell individually by the
 
 **writepart** *part* *filename*
 
-**xpath** *xpath* ?*part*? *?selectNodes options?*
+**xpath** *xpath* *?part?* *?selectNodes options?*
 
 An alias for the method *selectNodes*. See there for the meaning of
 the arguments.
+
+**xmlparts** *?pattern?*
+
+Returns the paths of the xml parts of the docx object. If the optional
+argument *pattern* is given only the xml parts of the docx docx object
+which match the *pattern* using glob style matching are returned.
+
 
 # CHARACTER OPTIONS
 

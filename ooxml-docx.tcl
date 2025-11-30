@@ -3113,20 +3113,27 @@ oo::class create ooxml::docx::docx {
         set script [lindex $args end]
         OptVal [lrange $args 0 end-1] "tablecell" "script"
         set tablecontext ""
-        try {
+        if {[catch {
             Tag_w:tc {
                 my TcPr
+                my CheckRemainingOpts
                 set savedbody $body
                 set body [dom fromScriptContext]
-                try {
+                if {[catch {
                     uplevel [list eval $script]
-                } finally {
+                } errMsg errVals]} {
                     set body $savedbody
+                    set tablecontext "row"
+                    my ProcessErrorinfo "tablecell"
+                    error $errMsg
                 }
+                set body $savedbody
             }
-        } finally {
+        } errMsg]} {
             set tablecontext "row"
+            return -code error $errMsg
         }
+        set tablecontext "row"
     }
 
     method tablerow {args} {
@@ -3139,14 +3146,22 @@ oo::class create ooxml::docx::docx {
         set tablecontext "row"
         set script [lindex $args end]
         OptVal [lrange $args 0 end-1] "tablerow" "script"
-        try {
+        if {[catch {
             Tag_w:tr {
                 my TrPr
-                uplevel [list eval $script]
+                my CheckRemainingOpts
+                if {[catch {
+                    uplevel [list eval $script]
+                } errMsg errVals]} {
+                    my ProcessErrorinfo "tablerow"
+                    error $errMsg
+                }
             }
-        } finally {
+        } errMsg]} {
             set tablecontext "table"
+            return -code error $errMsg
         }
+        set tablecontext "table"
     }
 
     method textbox {args} {

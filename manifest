@@ -1,5 +1,5 @@
-C Fixed\smethod\ssettings.\sAdded\smethods\sselectNodes/xpath\s(they\sare\saliases).\sAdded\sa\sfew\stests\sand\sa\sbit\sdocumentation.
-D 2025-11-27T02:24:36.941
+C Improved\serror\sreporting\sfor\snested\stable\screation.
+D 2025-11-30T22:30:27.954
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -46,7 +46,7 @@ F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 30484bd3cdac34ff6309d0c190c5247aad5e9c9a50d1a117744e26832469e246
 F ooxml-docx-math.tcl 1a977a002067ee397aa2b51466eaec4255e6e1ca30d21d46b18f9a03c7eb5972
-F ooxml-docx.tcl 248a2061053b35f16102f7fa17efd5b5a3e0c639cb4f09f0ca68dfc73e627c9d
+F ooxml-docx.tcl fa582d7e47981556dd9bcb8bc3374a4b81021a60352c5a7e2e8bd7b99ce031b8
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl ec667ed207ddcce24a0d744475836e164e512da8fe725aaf92a16c420994002c
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -106,8 +106,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P a487dd0cb69f24a38375455e69f40da211a3c663c114406e987b4e33ea67c3f5
-R 0535c8d7e9c1d1db92867005e8f407d6
+P 133a36355da267c60dfbbfffeceedc7a8cfef8f02d428025514496397de6ca16
+R 546cedd167ed666f05fddf347a40f0d8
 U rolf
-Z 32f8bf906ab39a34816080e739648466
+Z 1615d4fdba1d309806f98f2eb297250b
 # Remove this line to create a well-formed Fossil manifest.

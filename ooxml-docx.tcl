@@ -1365,20 +1365,6 @@ oo::class create ooxml::docx::docx {
         return $default
     }
 
-    method EvalChildScript {tag script} {
-        my variable body
-        set savedbody $body
-        Tag_$tag {
-            set body [dom fromScriptContext]
-            if {$script ne ""
-                && [catch {uplevel 2 [list eval $script]} errMsg]} {
-                set body $savedbody
-                error $errMsg
-            }
-        }
-        set body $savedbody
-    }
-
     method FootnoteEndnote {type refstyle script} {
         my variable docs
         my variable body

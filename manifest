@@ -1,5 +1,5 @@
-C More\sclearly\sseparated\sthe\sOMML\sstuff\sin\sits\sown\sfile.
-D 2025-12-01T00:21:05.638
+C Removed\sthe\sEvalChildScript\smethod\sin\sooxml-doc.tcl;\sit\sis\sin\sooxml-doc-math.tcl.
+D 2025-12-01T10:11:24.820
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -46,7 +46,7 @@ F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 30484bd3cdac34ff6309d0c190c5247aad5e9c9a50d1a117744e26832469e246
 F ooxml-docx-math.tcl 3568857d7b896cabeafc7ff9d5faba4f0c239f27d9da13fe5b67e7a619139b06
-F ooxml-docx.tcl 74fd05f4ee24eec8be9e816959d4414c9eef88c462a0d8b0a978c2cdc1f32a46
+F ooxml-docx.tcl 61ac55176d55d4d2328fb62fd8f2b0f0e811a3ced0376759706008a389ddfb4f
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl ec667ed207ddcce24a0d744475836e164e512da8fe725aaf92a16c420994002c
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -106,8 +106,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 58a935a223ddea035bfefa7f40834e382f4b62a1a302fea625805e06ca3b4911
-R c32dba461040db4cb38f35453ae2018b
+P 024c66950ed7b26c9cfc2216444fae8bc44ddc473ba5d730931be3eaab9fdc7e
+R 0fe5c7b08ca6cecdaeab6229a0161db3
 U rolf
-Z 407d61d4cdb44693f922a65f70628396
+Z 33edf154b096c223b2588ace891c0886
 # Remove this line to create a well-formed Fossil manifest.

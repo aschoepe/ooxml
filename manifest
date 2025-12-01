@@ -1,5 +1,5 @@
-C Added\sthe\smethod\sxmlparts.
-D 2025-11-30T23:13:28.638
+C More\sclearly\sseparated\sthe\sOMML\sstuff\sin\sits\sown\sfile.
+D 2025-12-01T00:21:05.638
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -21,7 +21,7 @@ F examples/docx-example1.tcl a13ddf05a5bdb2eb965b3ab4733a255666370d58e213f9be607
 F examples/docx-example10.tcl 60ced009077502b0fa83ee5e88d1307947896cb8a80217ace485ef82e0430b4a x
 F examples/docx-example11.tcl 5974a12b6ad2a7ca83284d4697fd0440d56f1d1bc9f73292044cfee96bdf5b6d x
 F examples/docx-example2.tcl 071c028ed99ce87e243620c65aa618165e52be6fae05b7e31bb46b53ba2218a6 x
-F examples/docx-example3.tcl 13b2596128cd6fea49ca173de96570ddb3ba9ab39e74539d808c1227a23b37dd x
+F examples/docx-example3.tcl 23d43a297fbaa3a618b4955b41cec34ded5d35a412bbc73c2fb75e128a067cd4 x
 F examples/docx-example4-in.docx 3ae216f142325eca22df5a5a624451e39e20005b06d3fcdaca8419b977e599e5
 F examples/docx-example4.tcl 4f8aae61a164b88638e2de8e39df8c0dc397d16420e3f6659d8c9d7b325278a2 x
 F examples/docx-example5.tcl 110aed0757a978b9c4fd459d653dac4b65acf1ff63b3319fbb210d0dec093c79 x
@@ -45,8 +45,8 @@ F examples/xlsx-writeRowsIndex.tcl 99a77e54b1269b233039731cbcc98717eff9dcd5a26b3
 F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 30484bd3cdac34ff6309d0c190c5247aad5e9c9a50d1a117744e26832469e246
-F ooxml-docx-math.tcl 1a977a002067ee397aa2b51466eaec4255e6e1ca30d21d46b18f9a03c7eb5972
-F ooxml-docx.tcl 93f17185daf04e8a9858088fbd0c517eeeee3f0ec00faa6e961f1c606aca8c6e
+F ooxml-docx-math.tcl 3568857d7b896cabeafc7ff9d5faba4f0c239f27d9da13fe5b67e7a619139b06
+F ooxml-docx.tcl 74fd05f4ee24eec8be9e816959d4414c9eef88c462a0d8b0a978c2cdc1f32a46
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl ec667ed207ddcce24a0d744475836e164e512da8fe725aaf92a16c420994002c
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -106,8 +106,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 9b7ec50b43bec78cf541f14bc948ac7476ada4f057249dcdb94835e5ffac4efd
-R 9d51409d62a8119126ec883442ade5d0
+P 58a935a223ddea035bfefa7f40834e382f4b62a1a302fea625805e06ca3b4911
+R c32dba461040db4cb38f35453ae2018b
 U rolf
-Z f9f6410f314dbf11607f7a354224ea4d
+Z 407d61d4cdb44693f922a65f70628396
 # Remove this line to create a well-formed Fossil manifest.

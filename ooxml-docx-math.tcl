@@ -30,8 +30,66 @@
 #  SUCH DAMAGE.
 #
 
+namespace eval ::ooxml::docx {
+    
+    set properties(fPr) {
+        -type {m:type ST_FType}
+    }
+
+    set properties(mrun1) {
+        -lit {m:lit CT_OnOff}
+        | {
+            {
+                -scr {m:scr ST_MathStyle}
+                -sty {m:sty ST_MathStyle}
+            }
+            {
+                -nor {m:nor CT_OnOff}
+            }
+        }
+    }
+
+    set properties(mrun2) {
+        -aln {m:aln CT_OnOff}
+    }
+    
+    set properties(naryPr) {
+        -char {m:chr NoCheck}
+        -limLoc {m:limLoc ST_LimLoc}
+        -grow {m:grow CT_OnOff}
+        -subHide {m:subHide CT_OnOff}
+        -supHide {m:supHide CT_OnOff}
+    }
+
+    foreach tag {
+        m:aln m:brk m:chr m:deg m:den m:e m:f m:fName m:fPr m:func
+        m:grow m:jc m:lim m:limLoc m:limLow m:limUpp m:lit m:nary
+        m:naryPr m:nor m:num m:oMath m:oMathPara m:oMathParaPr m:r
+        m:rPr m:rPr m:rad m:radPr m:sSub m:sSubSup m:sSup m:scr m:sty
+        m:sub m:subHide m:sup m:supHide m:t m:type
+    } {
+        dom createNodeCmd -tagName $tag -namespace $xmlns(m) elementNode Tag_$tag
+    }
+
+}
+
 # OMML related methods, the initially code contributed by Miguel Bañón
 oo::define ooxml::docx::docx {
+
+    method EvalChildScript {tag script} {
+        my variable body
+        set savedbody $body
+        Tag_$tag {
+            set body [dom fromScriptContext]
+            if {$script ne ""
+                && [catch {uplevel 2 [list eval $script]} errMsg]} {
+                set body $savedbody
+                error $errMsg
+            }
+        }
+        set body $savedbody
+    }
+    
     method Mt {text} {
         set atts ""
         if {[string index $text 0] eq " " || [string index $text end] eq " "} {

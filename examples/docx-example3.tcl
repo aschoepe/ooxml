@@ -67,22 +67,22 @@ $docx pagebreak
 $docx paragraph "A first start of a complex table"
 $docx table -width {type dxa value 9638} -columnwidths {4819 4819} {
     $docx tablerow {
-        $docx tablecell -width {type dxa value 4819} {
+        $docx tablecell -cellWidth {type dxa value 4819} {
             $docx paragraph "A normal paragraph with all paragraph styling" -fontsize 18pt
             $docx paragraph $loreipsum -spacing {before 240} -underline double
         }
-        $docx tablecell -width {type dxa value 4819} {
+        $docx tablecell -cellWidth {type dxa value 4819} {
             $docx paragraph "Fill grid"
         }
     }
     $docx tablerow {
-        $docx tablecell -width {type dxa value 4819} {
+        $docx tablecell -cellWidth {type dxa value 4819} {
             $docx simpletable $simpledata -width {type measure value 1000} \
                 -columnwidths {2354 2355} \
                 -layout fixed
             $docx paragraph ""
         }
-        $docx tablecell -width {type dxa value 4819} {
+        $docx tablecell -cellWidth {type dxa value 4819} {
             $docx paragraph "Another cell" -underline single
             $docx image book.jpg anchor -anchorData {layoutInCell 1} -dimension {width 3cm height 3cm} -bwMode black
         }

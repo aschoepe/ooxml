@@ -125,35 +125,6 @@ namespace eval ::ooxml::docx {
             {value w} ST_MeasurementOrPercent}}
     }
 
-    set properties(fPr) {
-        -type {m:type ST_FType}
-    }
-
-    set properties(mrun1) {
-        -lit {m:lit CT_OnOff}
-        | {
-            {
-                -scr {m:scr ST_MathStyle}
-                -sty {m:sty ST_MathStyle}
-            }
-            {
-                -nor {m:nor CT_OnOff}
-            }
-        }
-    }
-
-    set properties(mrun2) {
-        -aln {m:aln CT_OnOff}
-    }
-    
-    set properties(naryPr) {
-        -char {m:chr NoCheck}
-        -limLoc {m:limLoc ST_LimLoc}
-        -grow {m:grow CT_OnOff}
-        -subHide {m:subHide CT_OnOff}
-        -supHide {m:supHide CT_OnOff}
-    }
-
     set properties(paragraph1) {
         -pstyle {w:pStyle PStyle}
         -keepNext {w:keepNext CT_OnOff}
@@ -755,16 +726,6 @@ namespace eval ::ooxml::docx {
         dom createNodeCmd -tagName $tag -namespace $xmlns(ct) elementNode Tag_$tag
     }
 
-    # OMML (Office Math) support
-    foreach tag {
-        m:aln m:brk m:chr m:deg m:den m:e m:f m:fName m:fPr m:func
-        m:grow m:jc m:lim m:limLoc m:limLow m:limUpp m:lit m:nary
-        m:naryPr m:nor m:num m:oMath m:oMathPara m:oMathParaPr m:r
-        m:rPr m:rPr m:rad m:radPr m:sSub m:sSubSup m:sSup m:scr m:sty
-        m:sub m:subHide m:sup m:supHide m:t m:type
-    } {
-        dom createNodeCmd -tagName $tag -namespace $xmlns(m) elementNode Tag_$tag
-    }
 
     dom createNodeCmd textNode Text
     namespace export Tag_* Text
@@ -1412,7 +1373,6 @@ oo::class create ooxml::docx::docx {
             if {$script ne ""
                 && [catch {uplevel 2 [list eval $script]} errMsg]} {
                 set body $savedbody
-                # TODO prettify errorMsg
                 error $errMsg
             }
         }

@@ -277,7 +277,7 @@ $docx style table myTable2  \
     firstCol {
         -color ffff00
         -bold off
-        -background ff0000
+        -shading {type pct5 color ff0000}
     }
     lastCol {
         -color 00ffff

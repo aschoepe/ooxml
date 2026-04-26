@@ -1,5 +1,5 @@
-C Integrating\sinput\sby\sMiguel.
-D 2026-04-25T01:35:17.100
+C Fixed\smy\sadaption\sof\sMiguels\scode.
+D 2026-04-26T01:17:12.767
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -46,7 +46,7 @@ F helper.tcl 8c40832a9aed4ab56d777dca4aa242d36efd338a6d285650d2c6cb702e95fbf0 x
 F license.terms b6f4565b9a907e09f40eeee91b6fd3cddf8923a2c43926323c2858fa274d11b6
 F ooxml-docx-lib.tcl 5eaa770f1c94f6d6b1a0592951fc2528cca5f82cccb7a52f2bfaa1b7a2f788e8
 F ooxml-docx-math.tcl 3568857d7b896cabeafc7ff9d5faba4f0c239f27d9da13fe5b67e7a619139b06
-F ooxml-docx.tcl e6a6605998e273358cc1702fe0eb349530e757e9647fc583c202705c336bbf35
+F ooxml-docx.tcl 69d2c881c35d28a9fe868fa7111ef2027dc2747555d5073e52157ddb2628a271
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
 F ooxml.tcl ec667ed207ddcce24a0d744475836e164e512da8fe725aaf92a16c420994002c
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
@@ -106,11 +106,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P f4ee4d276d9f368b0b329231efb64b5fd19a32ea49c8d88daafc481a0259c6a2
-R aaaf83c8d4ea9908deb34d1d7b0e0051
-T *branch * wip
-T *sym-wip *
-T -sym-docx *
+P 65bf07a0afde22f7e21b1791d9a29d1323dcb0a8487abb9ab78a9c176371e0e6
+R ba22185726b5cd7ee8d2a0f366619fc8
 U rolf
-Z abf6fe08c69070991d08b4b446aabe18
+Z 5d6109b2d51b4302cacc98c95ef971c5
 # Remove this line to create a well-formed Fossil manifest.

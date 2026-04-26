@@ -1396,6 +1396,7 @@ oo::class create ooxml::docx::docx {
         my variable docs
         my variable body
         my variable ignorable
+        my variable id
         variable ::ooxml::docx::xmlns
         variable ::ooxml::docx::prefixnslist
 
@@ -2789,7 +2790,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
         # We only have to rearrange the settings children if there has
-        # been childs and if there are new childs.
+        # been children and new children were appended.
         # nc = new child
         if {$lastchild ne "" && [$lastchild nextSibling nc] ne ""} {
             foreach {opt optdata} $properties(settings) {

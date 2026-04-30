@@ -1,0 +1,65 @@
+# settings.test --
+#
+#   Tests for settings method, reorder algorithm, and
+#   multiply-occurring elements.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+test settings-1.1 {basic setting} -body {
+    withDoc doc {
+        $doc settings -defaultTabStop 720
+        xpath $doc {string(//w:defaultTabStop/@w:val)} word/settings.xml
+    }
+} -result 720
+
+test settings-1.2 {multiple settings} -body {
+    withDoc doc {
+        $doc settings -autoHyphenation off -hideSpellingErrors on
+        set hyp [xpath $doc {string(//w:autoHyphenation/@w:val)} word/settings.xml]
+        set spell [xpath $doc {string(//w:hideSpellingErrors/@w:val)} word/settings.xml]
+        list $hyp $spell
+    }
+} -result {0 1}
+
+test settings-1.3 {settings replaces existing value} -body {
+    withDoc doc {
+        # Default settings.xml has autoHyphenation=true
+        $doc settings -autoHyphenation off
+        xpath $doc {string(//w:autoHyphenation/@w:val)} word/settings.xml
+    }
+} -result 0
+
+test settings-1.4 {incremental settings calls} -body {
+    withDoc doc {
+        $doc settings -defaultTabStop 360
+        $doc settings -hideSpellingErrors on
+        set tab [xpath $doc {string(//w:defaultTabStop/@w:val)} word/settings.xml]
+        set spell [xpath $doc {string(//w:hideSpellingErrors/@w:val)} word/settings.xml]
+        list $tab $spell
+    }
+} -result {360 1}
+
+test settings-2.1 {repeating element attachedSchema} -body {
+    withDoc doc {
+        $doc settings -attachedSchema "urn:schema:one"
+        $doc settings -attachedSchema "urn:schema:two"
+        countNodes $doc {//w:attachedSchema} word/settings.xml
+    }
+} -result 2
+
+test settings-2.2 {evenAndOddHeaders} -body {
+    withDoc doc {
+        $doc settings -evenAndOddHeaders on
+        xpath $doc {string(//w:evenAndOddHeaders/@w:val)} word/settings.xml
+    }
+} -result 1
+
+test settings-3.1 {reset settings} -body {
+    withDoc doc {
+        $doc settings -reset on -defaultTabStop 500
+        xpath $doc {string(//w:defaultTabStop/@w:val)} word/settings.xml
+    }
+} -result 500
+
+cleanupTests

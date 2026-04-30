@@ -1079,7 +1079,7 @@ proc ::ooxml::docx::lib::CT_OnOff {value} {
 }
 
 proc ::ooxml::docx::lib::CT_UnsignedInt {value} {
-    if {![regexp {[0-9]+} $value]} {
+    if {![regexp {^[0-9]+$} $value]} {
         error "expected an unsigned integer"
     }
     return $value
@@ -1166,19 +1166,6 @@ proc ::ooxml::docx::lib::ST_AlignV {value} {
 }
 
 proc ::ooxml::docx::lib::ST_Anchor {value} {
-    set values {
-        text
-        margin
-        page
-    }
-    if {$value in $values} {
-        return $value
-    }
-    error "unknown vAnchor or hAnchor type \"$value\", expected one of\
-            [AllowedValues $values]"
-}
-
-proc ::ooxml::docx::lib::ST_Angle {value} {
     set values {
         text
         margin
@@ -1329,6 +1316,20 @@ proc ::ooxml::docx::lib::ST_DocProtect {value} {
         return $value
     }
     error "unknown document protection edit value \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_DocGrid {value} {
+    set values {
+        default
+        lines
+        linesAndChars
+        snapToChars
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown document grid type \"$value\", expected one of\
             [AllowedValues $values]"
 }
 
@@ -1485,6 +1486,19 @@ proc ::ooxml::docx::lib::ST_JcTable {value} {
         return $value
     }
     error "unknown table align value \"$value\", expected one of:\
+               [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_LineSpacingRule {value} {
+    set values {
+        auto
+        exact
+        atLeast
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown line spacing rule \"$value\", expected one of:\
                [AllowedValues $values]"
 }
 
@@ -1668,6 +1682,69 @@ proc ::ooxml::docx::lib::ST_RestartNumber {value} {
            one of: [AllowedValues $values]"
 }
 
+proc ::ooxml::docx::lib::ST_SectionMark {value} {
+    set values {
+        continuous
+        evenPage
+        nextColumn
+        nextPage
+        oddPage
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown section type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Shd {value} {
+    set values {
+        nil
+        clear
+        solid
+        horzStripe
+        vertStripe
+        reverseDiagStripe
+        diagStripe
+        horzCross
+        diagCross
+        thinHorzStripe
+        thinVertStripe
+        thinReverseDiagStripe
+        thinDiagStripe
+        thinHorzCross
+        thinDiagCross
+        pct5
+        pct10
+        pct12
+        pct15
+        pct20
+        pct25
+        pct30
+        pct35
+        pct37
+        pct40
+        pct45
+        pct50
+        pct55
+        pct60
+        pct62
+        pct65
+        pct70
+        pct75
+        pct80
+        pct85
+        pct87
+        pct90
+        pct95
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown shading pattern \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
 # Convert a number+unit to twips (1pt=20 twips).
 proc ::ooxml::docx::lib::_MeasureToTwips {value signed} {
     set value [string trim $value]
@@ -1689,7 +1766,7 @@ proc ::ooxml::docx::lib::_MeasureToTwips {value signed} {
     switch $unit {
         mm { set tw [expr {round($num * 1440.0 / 25.4)}] }
         cm { set tw [expr {round($num * 1440.0 / 2.54)}] }
-        in { set tw [expr {round($num * 1440.0)} }
+        in { set tw [expr {round($num * 1440.0)}] }
         pt { set tw [expr {round($num * 20.0)}] }
         pc - pi { set tw [expr {round($num * 240.0)}] }
     }
@@ -1894,7 +1971,7 @@ proc ::ooxml::docx::lib::ST_Underline {value} {
         none
     }
     if {$value ni $values} {
-        error "unkown underline value \"$value\", expected one of\
+        error "unknown underline value \"$value\", expected one of\
                   [AllowedValues $values]"
     }
     return $value
@@ -1913,6 +1990,20 @@ proc ::ooxml::docx::lib::ST_Wrap {value} {
         return $value
     }
     error "unknown wrap type \"$value\", expected one of\
+            [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_VerticalJc {value} {
+    set values {
+        top
+        center
+        bottom
+        both
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown vertical alignment value \"$value\", expected one of\
             [AllowedValues $values]"
 }
 
@@ -2062,7 +2153,6 @@ proc ::ooxml::docx::lib::ST_MathStyle {value} {
         i
         bi
     }
-    if {$value eq ""} {return ""}
     if {$value in $values} {return $value}
     error "unknown math style \"$value\", expected one of\
            [AllowedValues $values]"
@@ -2070,7 +2160,6 @@ proc ::ooxml::docx::lib::ST_MathStyle {value} {
 
 proc ::ooxml::docx::lib::ST_MScript {value} {
     set values {
-        ""
         roman
         script
         fraktur
@@ -2083,12 +2172,62 @@ proc ::ooxml::docx::lib::ST_MScript {value} {
            [AllowedValues $values]"
 }
 
-proc ::ooxml::docx::lib::ST_Integer255 {value} {
-    if {$value eq ""} {return ""}
-    if {[string is integer -strict $value] && $value >= 0 && $value <= 255} {
+proc ::ooxml::docx::lib::ST_TopBot {value} {
+    set values {
+        top
+        bot
+    }
+    if {$value in $values} {
         return $value
     }
-    error "expected integer 0..255, got \"$value\""
+    error "unknown top/bottom value \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Shp {value} {
+    set values {
+        centered
+        match
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown delimiter shape \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_BaseJc {value} {
+    set values {
+        top
+        center
+        bottom
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown matrix base justification \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_McJc {value} {
+    set values {
+        left
+        center
+        right
+    }
+    if {$value in $values} {
+        return $value
+    }
+    error "unknown matrix column justification \"$value\", expected one of\
+           [AllowedValues $values]"
+}
+
+proc ::ooxml::docx::lib::ST_Integer255 {value} {
+    if {$value eq ""} {return ""}
+    if {[string is integer -strict $value] && $value >= 1 && $value <= 255} {
+        return $value
+    }
+    error "expected integer 1..255, got \"$value\""
 }
 
 proc ::ooxml::docx::lib::XSD_base64Binary {value} {
@@ -2107,7 +2246,7 @@ proc ::ooxml::docx::lib::XSD_hexBinary {value} {
         if {[::tdom::type::hexBinary $value]} {
             return $value
         }
-        error "expected base64 encoded data, got \"$value\""
+        error "expected hex binary data, got \"$value\""
     } else {
         return $value
     }

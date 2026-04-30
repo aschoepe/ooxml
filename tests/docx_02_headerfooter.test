@@ -1,0 +1,78 @@
+# headerfooter.test --
+#
+#   Tests for header and footer creation, relationship scoping,
+#   and transactional rollback.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+test hf-1.1 {header creates part} -body {
+    withDoc doc {
+        set rId [$doc header { $doc paragraph "Header text" }]
+        expr {$rId ne "" && [haspart $doc word/header1.xml]}
+    }
+} -result 1
+
+test hf-1.2 {header content} -body {
+    withDoc doc {
+        $doc header { $doc paragraph "My Header" }
+        xpath $doc {string(//w:t)} word/header1.xml
+    }
+} -result {My Header}
+
+test hf-1.3 {footer creates part} -body {
+    withDoc doc {
+        set rId [$doc footer { $doc paragraph "Footer text" }]
+        expr {$rId ne "" && [haspart $doc word/footer1.xml]}
+    }
+} -result 1
+
+test hf-1.4 {multiple headers get unique numbers} -body {
+    withDoc doc {
+        $doc header { $doc paragraph "H1" }
+        $doc header { $doc paragraph "H2" }
+        set h1 [haspart $doc word/header1.xml]
+        set h2 [haspart $doc word/header2.xml]
+        list $h1 $h2
+    }
+} -result {1 1}
+
+test hf-1.5 {header relationship in document.xml.rels} -body {
+    withDoc doc {
+        set rId [$doc header { $doc paragraph "H" }]
+        set rels [$doc xmlparts word/_rels/document.xml.rels]
+        expr {$rels ne ""}
+    }
+} -result 1
+
+test hf-2.1 {header rollback on script error} -body {
+    withDoc doc {
+        catch {
+            $doc header { error "deliberate failure" }
+        }
+        # No orphaned header part should remain
+        expr {![haspart $doc word/header1.xml]}
+    }
+} -result 1
+
+test hf-2.2 {footer rollback on script error} -body {
+    withDoc doc {
+        catch {
+            $doc footer { error "deliberate failure" }
+        }
+        expr {![haspart $doc word/footer1.xml]}
+    }
+} -result 1
+
+test hf-3.1 {pagesetup with header and footer} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "Header" }]
+        set fId [$doc footer { $doc paragraph "Footer" }]
+        $doc pagesetup -defaultHeader $hId -defaultFooter $fId
+        $doc paragraph "Body"
+        set f [writedoc $doc]
+        file exists $f
+    }
+} -result 1
+
+cleanupTests

@@ -1,0 +1,157 @@
+# style.test --
+#
+#   Tests for style creation, resolution, deletion, inheritance,
+#   duplicate checks, and styleId derivation.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ──────────────────────────────────────────────────────────────────
+#  Style creation and styleId derivation
+# ──────────────────────────────────────────────────────────────────
+
+test style-1.1 {create paragraph style} -body {
+    withDoc doc {
+        $doc style paragraph "My Heading" -bold on -fontsize 32
+        set ids [$doc style ids paragraph]
+        expr {"MyHeading" in $ids}
+    }
+} -result 1
+
+test style-1.2 {styleId strips non-alnum} -body {
+    withDoc doc {
+        $doc style paragraph "Heading (Level 1)" -bold on
+        set ids [$doc style ids paragraph]
+        expr {"HeadingLevel1" in $ids}
+    }
+} -result 1
+
+test style-1.3 {explicit -styleid} -body {
+    withDoc doc {
+        $doc style paragraph "My Style" -styleid CustomId01
+        set ids [$doc style ids paragraph]
+        expr {"CustomId01" in $ids}
+    }
+} -result 1
+
+test style-1.4 {character style} -body {
+    withDoc doc {
+        $doc style character "Emphasis" -italic on
+        set ids [$doc style ids character]
+        expr {"Emphasis" in $ids}
+    }
+} -result 1
+
+test style-1.5 {table style} -body {
+    withDoc doc {
+        $doc style table "Plain Table"
+        set ids [$doc style ids table]
+        expr {"PlainTable" in $ids}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Style resolution (StyleCheck)
+# ──────────────────────────────────────────────────────────────────
+
+test style-2.1 {resolve by display name} -body {
+    withDoc doc {
+        $doc style paragraph "My Heading" -bold on
+        $doc paragraph "Styled" -pstyle "My Heading"
+        xpath $doc {string(//w:p/w:pPr/w:pStyle/@w:val)}
+    }
+} -result MyHeading
+
+test style-2.2 {resolve by styleId} -body {
+    withDoc doc {
+        $doc style paragraph "My Heading" -bold on
+        $doc paragraph "Styled" -pstyle MyHeading
+        xpath $doc {string(//w:p/w:pPr/w:pStyle/@w:val)}
+    }
+} -result MyHeading
+
+test style-2.3 {unknown style raises error} -body {
+    withDoc doc {
+        $doc paragraph "Test" -pstyle "NoSuchStyle"
+    }
+} -returnCodes error -match glob -result {*unknown paragraph style*}
+
+# ──────────────────────────────────────────────────────────────────
+#  Duplicate checks
+# ──────────────────────────────────────────────────────────────────
+
+test style-3.1 {duplicate display name rejected} -body {
+    withDoc doc {
+        $doc style paragraph "Heading" -bold on
+        $doc style paragraph "Heading" -italic on
+    }
+} -returnCodes error -match glob -result {*already exists*}
+
+test style-3.2 {duplicate styleId rejected} -body {
+    withDoc doc {
+        $doc style paragraph "My Heading" -bold on
+        # "My-Heading" strips to same "MyHeading"
+        $doc style paragraph "My-Heading" -italic on
+    }
+} -returnCodes error -match glob -result {*styleId*already*}
+
+test style-3.3 {explicit styleid collision rejected} -body {
+    withDoc doc {
+        $doc style paragraph "First" -styleid Shared
+        $doc style paragraph "Second" -styleid Shared
+    }
+} -returnCodes error -match glob -result {*styleId*already*}
+
+# ──────────────────────────────────────────────────────────────────
+#  Style inheritance (-basedon)
+# ──────────────────────────────────────────────────────────────────
+
+test style-4.1 {basedon resolves to styleId} -body {
+    withDoc doc {
+        $doc style paragraph "Parent" -bold on
+        $doc style paragraph "Child" -basedon "Parent" -italic on
+        xpath $doc {
+            string(//w:style[@w:styleId='Child']/w:basedOn/@w:val)
+        } word/styles.xml
+    }
+} -result Parent
+
+test style-4.2 {basedon resolves display name to styleId} -body {
+    withDoc doc {
+        $doc style paragraph "Base Style" -bold on
+        $doc style paragraph "Derived" -basedon "Base Style"
+        xpath $doc {
+            string(//w:style[@w:styleId='Derived']/w:basedOn/@w:val)
+        } word/styles.xml
+    }
+} -result BaseStyle
+
+test style-4.3 {basedon with invalid parent raises error} -body {
+    withDoc doc {
+        $doc style paragraph "Orphan" -basedon "NonExistent"
+    }
+} -returnCodes error -match glob -result {*unknown paragraph style*}
+
+# ──────────────────────────────────────────────────────────────────
+#  Style deletion
+# ──────────────────────────────────────────────────────────────────
+
+test style-5.1 {delete by name} -body {
+    withDoc doc {
+        $doc style paragraph "ToDelete" -bold on
+        $doc style delete paragraph "ToDelete"
+        set ids [$doc style ids paragraph]
+        expr {"ToDelete" in $ids}
+    }
+} -result 0
+
+test style-5.2 {style names subcommand} -body {
+    withDoc doc {
+        $doc style paragraph "Alpha" -bold on
+        $doc style paragraph "Beta" -italic on
+        set names [$doc style names paragraph]
+        expr {"Alpha" in $names && "Beta" in $names}
+    }
+} -result 1
+
+cleanupTests

@@ -207,9 +207,9 @@ test math-4.12 {matrix} -body {
                 }
             }
         }
-        set rows [countNodes $doc {//m:mr}]
-        set cells [countNodes $doc {//m:mr/m:e}]
-        list $rows $cells
+        set mrows [countNodes $doc {//m:mr}]
+        set mcells [countNodes $doc {//m:mr/m:e}]
+        list $mrows $mcells
     }
 } -result {2 4}
 

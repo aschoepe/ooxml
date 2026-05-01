@@ -150,7 +150,7 @@ test reg-R5-footnote-separators {footnote part has separator entries} -body {
     }
 } -result {1 1}
 
-test reg-R5-comment-rollback-on-bad-option {comment rollback on unknown option} -body {
+test reg-R5-comment-rollback-on-bad-option {comment rollback on unknown option} -constraints mutation -body {
     withDoc doc {
         $doc paragraph "Text"
         catch {
@@ -164,7 +164,7 @@ test reg-R5-comment-rollback-on-bad-option {comment rollback on unknown option} 
     }
 } -result 0
 
-test reg-R5-hf-rollback {header rollback on script error} -body {
+test reg-R5-hf-rollback {header rollback on script error} -constraints mutation -body {
     withDoc doc {
         catch {
             $doc header { error "fail" }

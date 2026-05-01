@@ -27,9 +27,9 @@ test pkg-1.1 {minimal doc has required parts} -body {
             docProps/app.xml
         }
         set missing [list]
-        foreach r $required {
-            if {$r ni $parts} {
-                lappend missing $r
+        foreach rp $required {
+            if {$rp ni $parts} {
+                lappend missing $rp
             }
         }
         set missing

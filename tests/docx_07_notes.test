@@ -113,7 +113,7 @@ test notes-3.2 {unknown option rejected in endnote} -body {
 #  Rollback on script error
 # ──────────────────────────────────────────────────────────────────
 
-test notes-4.1 {footnote rollback on script error} -body {
+test notes-4.1 {footnote rollback on script error} -constraints mutation -body {
     withDoc doc {
         $doc paragraph "Text"
         catch {

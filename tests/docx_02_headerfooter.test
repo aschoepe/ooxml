@@ -55,7 +55,7 @@ test hf-2.1 {header rollback on script error} -constraints mutation -body {
     }
 } -result 1
 
-test hf-2.2 {footer rollback on script error} constraints mutation -body {
+test hf-2.2 {footer rollback on script error} -constraints mutation -body {
     withDoc doc {
         catch {
             $doc footer { error "deliberate failure" }

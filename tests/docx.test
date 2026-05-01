@@ -15,7 +15,6 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 }
 
 package require ooxml
-source [file join [file dir [info script]] ../ooxml-docx.tcl]
 namespace import ::ooxml::docx::docx
 
 

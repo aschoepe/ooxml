@@ -18,5 +18,23 @@ configure {*}$argv -testdir [file dir [info script]]
 if {[singleProcess]} {
     interp debug {} -frame 1
 }
+set thisdir [file dirname [file normalize [info script]]]
+
+# Run all test files in a single interpreter so that the shared
+# package load and helper definitions are available to every test.
+configure {*}$argv \
+    -testdir $thisdir \
+    -singleproc 1
+
+# Load the package under test
+set libdir [file dirname $thisdir]
+source [file join $libdir ooxml.tcl]
+source [file join $libdir ooxml-docx.tcl]
+
+# Shared test helpers
+source [file join $thisdir docx_helpers.tcl]
+
+testConstraint mutation false
+
 runAllTests
 proc exit args {}

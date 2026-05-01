@@ -1,0 +1,510 @@
+# feature-exercise.test --
+#
+#   Runs the comprehensive feature-exercise script inside the test
+#   harness.  All .docx output goes to docxtest_tmp so the ecma-99.1
+#   sweep validates every generated file against the ECMA-376 schema.
+#
+#   The test is intentionally a single large body rather than many
+#   small tests, because its purpose is to produce a complex real-world
+#   document and verify that the library does not error out.  Per-feature
+#   unit tests live in the other .test files.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ── Lorem ipsum texts ────────────────────────────────────────────
+
+namespace eval ::featuretest {
+    variable lorem
+    array set lorem {
+        short   "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        medium  "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+        long    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris."
+        list1   "Pellentesque habitant morbi tristique senectus."
+        list2   "Netus et malesuada fames ac turpis egestas."
+        list3   "Vestibulum tortor quam, feugiat vitae, ultricies eget."
+        fn1     "Fusce dapibus, tellus ac cursus commodo."
+        fn2     "Tortor mauris condimentum nibh, ut fermentum massa."
+        en1     "Maecenas sed diam eget risus varius blandit sit amet non."
+        cmt1    "Aenean lacinia bibendum nulla sed consectetur."
+        cmt2    "Praesent commodo cursus magna, vel scelerisque nisl."
+        math    "The quadratic formula is given by"
+        matrix  "Consider the rotation matrix"
+    }
+}
+
+# ══════════════════════════════════════════════════════════════════
+#  Main feature-exercise test
+# ══════════════════════════════════════════════════════════════════
+
+test feature-1.0 {comprehensive feature exercise produces valid docx} -body {
+    array set lorem [array get ::featuretest::lorem]
+
+    set outfile [tmpfile .docx]
+    set imgfile [writeTinyPng]
+    set doc [newdoc]
+
+    # ── 1. Document properties ───────────────────────────────────
+    $doc configure \
+        -title "OOXML Feature Exercise" \
+        -creator "ooxml test suite" \
+        -subject "Comprehensive feature test" \
+        -description "Exercises every supported feature." \
+        -keywords "ooxml test" \
+        -category "Testing" \
+        -language "en-US"
+
+    # ── 2. Settings ──────────────────────────────────────────────
+    $doc settings \
+        -defaultTabStop 720 \
+        -autoHyphenation on \
+        -hideSpellingErrors on \
+        -hideGrammaticalErrors on
+
+    # ── 3. Styles ────────────────────────────────────────────────
+    $doc style paragraph "Title" \
+        -bold on -fontsize 56 -align center -color 1F3864
+    $doc style paragraph "Heading 1" \
+        -bold on -fontsize 36 -color 2E75B6 \
+        -spacing {before 360 after 120}
+    $doc style paragraph "Heading 2" \
+        -bold on -italic on -fontsize 28 -color 2E75B6 \
+        -spacing {before 240 after 80}
+    $doc style paragraph "Body Text" \
+        -fontsize 22 \
+        -spacing {after 120 line 276 lineRule auto}
+    $doc style paragraph "Indented" \
+        -basedon "Body Text" \
+        -indentation {start 720 end 720}
+    $doc style character "Emphasis" -italic on -color C00000
+    $doc style character "Strong" -bold on
+    $doc style character "Code" -font "Courier New" -fontsize 20 -color 333333
+    $doc style table "GridTable" -bold on
+
+    # ── 4. Numbering ─────────────────────────────────────────────
+    $doc numbering abstractNum 1 {
+        {-numberFormat decimal    -levelText "%1." -align start -start 1}
+        {-numberFormat lowerLetter -levelText "%2)" -align start}
+    }
+    $doc numbering abstractNum 2 {
+        {-numberFormat bullet -levelText "\u2022" -align start}
+        {-numberFormat bullet -levelText "\u2013" -align start}
+    }
+
+    # ── 5. Header and Footer ─────────────────────────────────────
+    set hId [$doc header {
+        $doc paragraph "OOXML Feature Exercise" \
+            -align center -fontsize 16 -color 888888
+    }]
+    set fId [$doc footer {
+        $doc paragraph "Page " -align center -fontsize 16 -color 888888
+        $doc field PAGE
+        $doc append " of "
+        $doc field NUMPAGES
+    }]
+    $doc pagesetup \
+        -defaultHeader $hId \
+        -defaultFooter $fId \
+        -margins {top 1440 bottom 1440 left 1440 right 1440 header 720 footer 720} \
+        -sizeAndOrientation {width 12240 height 15840}
+
+    # ── 6. Character formatting ──────────────────────────────────
+    $doc paragraph "OOXML Feature Exercise" -pstyle "Title"
+    $doc paragraph ""
+    $doc paragraph "1. Character Formatting" -pstyle "Heading 1"
+
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -bold on
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -italic on
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -underline single
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -underline double
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -underline dotted
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -strike on
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -dstrike on
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -emboss on
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -color FF0000
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -color 0000FF -highlight yellow
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -fontsize 48
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -fontsize 16 -noProof on
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -verticalAlign superscript
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -verticalAlign subscript
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" -font "Georgia"
+    $doc paragraph "$lorem(short)" -pstyle "Body Text" \
+        -bold on -italic on -underline single -color C00000 -fontsize 28
+
+    # Append and character styles
+    $doc paragraph "This uses " -pstyle "Body Text"
+    $doc append "emphasis" -cstyle "Emphasis"
+    $doc append " and "
+    $doc append "strong" -cstyle "Strong"
+    $doc append " and "
+    $doc append "code" -cstyle "Code"
+    $doc append " character styles."
+
+    # ── 7. Paragraph formatting ──────────────────────────────────
+    $doc paragraph "2. Paragraph Formatting" -pstyle "Heading 1"
+
+    $doc paragraph "$lorem(medium)" -align start -spacing {before 120 after 120}
+    $doc paragraph "$lorem(short)" -align center
+    $doc paragraph "$lorem(short)" -align end
+    $doc paragraph "$lorem(medium)" -align both
+    $doc paragraph "$lorem(medium)" -pstyle "Indented"
+    $doc paragraph "$lorem(medium)" \
+        -spacing {before 240 after 240 line 360 lineRule exact}
+    $doc paragraph "$lorem(short)" -shading {type solid color FFFF00}
+    $doc paragraph "$lorem(short)" -shading {type clear fill DDEEFF}
+    $doc paragraph "$lorem(short)" -shading {type pct10 color 000000 fill FFFFFF}
+    $doc paragraph "$lorem(short)" -keepNext on -keepLines on
+    $doc paragraph "$lorem(short)" -widowControl on
+    $doc paragraph "$lorem(short)" -suppressLineNumbers on
+    $doc paragraph "$lorem(short)" -indentation {start 1440 firstLine 720}
+    $doc paragraph "$lorem(short)" -indentation {hanging 360 start 720}
+
+    # ── 8. Breaks and tabs ───────────────────────────────────────
+    $doc paragraph "3. Breaks and Tabs" -pstyle "Heading 1"
+    $doc paragraph "Line one."
+    $doc br
+    $doc append "Line two."
+    $doc br 2
+    $doc append "Line four."
+    $doc paragraph "Col A"
+    $doc tab
+    $doc append "Col B"
+    $doc tab 2
+    $doc append "Col C"
+
+    # ── 9. Fields ────────────────────────────────────────────────
+    $doc paragraph "4. Fields" -pstyle "Heading 1"
+    foreach ftype {PAGE NUMPAGES DATE TIME AUTHOR TITLE} {
+        $doc paragraph "$ftype: "
+        $doc field $ftype
+    }
+
+    # ── 10. Bookmarks and links ──────────────────────────────────
+    $doc paragraph "5. Bookmarks and Links" -pstyle "Heading 1"
+    $doc paragraph "Point bookmark."
+    $doc mark bookmark1
+    $doc markstart "RangeBookmark"
+    $doc paragraph "$lorem(short)"
+    $doc markend "RangeBookmark"
+    $doc paragraph ""
+    $doc jumpto "Jump to bookmark" bookmark1 -color 0000FF -underline single
+    $doc paragraph ""
+    $doc url "Example.com" "https://example.com" -color 0563C1 -underline single
+
+    # ── 11. Lists ────────────────────────────────────────────────
+    $doc paragraph "6. Lists" -pstyle "Heading 1"
+    $doc paragraph "$lorem(list1)" -numberingStyle 1 -level 0
+    $doc paragraph "$lorem(list2)" -numberingStyle 1 -level 0
+    $doc paragraph "Sub-item." -numberingStyle 1 -level 1
+    $doc paragraph "$lorem(list3)" -numberingStyle 1 -level 0
+    $doc paragraph ""
+    $doc paragraph "$lorem(list1)" -numberingStyle 2 -level 0
+    $doc paragraph "$lorem(list2)" -numberingStyle 2 -level 0
+    $doc paragraph "Nested dash." -numberingStyle 2 -level 1
+    $doc paragraph "$lorem(list3)" -numberingStyle 2 -level 0
+
+    # ── 12. Tables ───────────────────────────────────────────────
+    $doc pagebreak
+    $doc paragraph "7. Tables" -pstyle "Heading 1"
+
+    $doc table \
+        -columnwidths {3120 3120 3120} \
+        -width {type dxa value 9360} \
+        -align center \
+        -look {firstRow on lastRow off firstColumn on lastColumn off noHBand off noVBand on} \
+        -topBorder {type single borderwidth 8 color 2E75B6} \
+        -bottomBorder {type single borderwidth 8 color 2E75B6} \
+        -insideHBorder {type single borderwidth 4 color CCCCCC} \
+        -insideVBorder {type single borderwidth 4 color CCCCCC} \
+        {
+        $doc tablerow -headerrow on {
+            $doc tablecell -shading {type solid color 2E75B6} {
+                $doc paragraph "Header A" -bold on -color FFFFFF -align center
+            }
+            $doc tablecell -shading {type solid color 2E75B6} {
+                $doc paragraph "Header B" -bold on -color FFFFFF -align center
+            }
+            $doc tablecell -shading {type solid color 2E75B6} {
+                $doc paragraph "Header C" -bold on -color FFFFFF -align center
+            }
+        }
+        $doc tablerow {
+            $doc tablecell -shading {type clear fill F2F2F2} {
+                $doc paragraph "Row 1, A"
+            }
+            $doc tablecell -vAlign center {
+                $doc paragraph "Row 1, B" -align center
+            }
+            $doc tablecell { $doc paragraph "Row 1, C" }
+        }
+        $doc tablerow {
+            $doc tablecell { $doc paragraph "Row 2, A" }
+            $doc tablecell -textDirection btLr {
+                $doc paragraph "Vertical" -align center
+            }
+            $doc tablecell -vAlign bottom {
+                $doc paragraph "Bottom-aligned" -align end
+            }
+        }
+        $doc tablerow {
+            $doc tablecell -span 2 -shading {type solid color DDEEFF} {
+                $doc paragraph "Spanning two columns" -bold on
+            }
+            $doc tablecell { $doc paragraph "Single cell" }
+        }
+    }
+
+    $doc paragraph ""
+    $doc simpletable {
+        {"Name" "Role" "Location"}
+        {"Marcus" "Developer" "Roma"}
+        {"Claudia" "Designer" "Mediolanum"}
+        {"Gaius" "Architect" "Carthago"}
+    }
+
+    # ── 13. Footnotes, endnotes ──────────────────────────────────
+    $doc paragraph "8. Footnotes and Endnotes" -pstyle "Heading 1"
+    $doc paragraph "$lorem(medium)"
+    $doc footnote { $doc paragraph "$lorem(fn1)" }
+    $doc paragraph "$lorem(short)"
+    $doc footnote { $doc paragraph "$lorem(fn2)" }
+    $doc paragraph "$lorem(short)"
+    $doc endnote { $doc paragraph "$lorem(en1)" }
+
+    # ── 14. Comments ─────────────────────────────────────────────
+    $doc paragraph "9. Comments" -pstyle "Heading 1"
+    $doc paragraph "$lorem(short)"
+    $doc comment -author "Reviewer A" -initials "RA" {
+        $doc paragraph "$lorem(cmt1)"
+    }
+    $doc paragraph "$lorem(medium)"
+    $doc simplecomment "$lorem(cmt2)" -author "Reviewer B"
+    set rangeId [$doc commentrangestart]
+    $doc paragraph "$lorem(short)"
+    $doc commentrangeend $rangeId -author "Reviewer C" {
+        $doc paragraph "Range comment."
+    }
+    set rid2 [$doc commentrangestart]
+    $doc paragraph "$lorem(short)"
+    $doc simplecommentrangeend $rid2 "Simple range comment." -author "Reviewer D"
+
+    # ── 15. Images ───────────────────────────────────────────────
+    $doc paragraph "10. Images" -pstyle "Heading 1"
+    $doc paragraph "Inline image:"
+    $doc image $imgfile inline -dimension {width 914400 height 914400}
+    $doc paragraph "Anchor image:"
+    $doc image $imgfile anchor \
+        -dimension {width 457200 height 457200} \
+        -positionH column -posOffsetH 4572000 \
+        -positionV paragraph -posOffsetV 0 \
+        -wrapMode square -wrapData {wrapText bothSides}
+    $doc paragraph "$lorem(medium)"
+
+    # ── 16. Textbox ──────────────────────────────────────────────
+    $doc paragraph "11. Textbox" -pstyle "Heading 1"
+    $doc textbox \
+        -name "Sample Textbox" \
+        -dimension {width 3657600 height 1371600} \
+        -bodyAtts {wrap square} {
+        $doc paragraph "Inside the textbox" -bold on -color 2E75B6
+        $doc paragraph "$lorem(short)" -fontsize 18
+    }
+    $doc paragraph "$lorem(medium)"
+
+    # ── 17. Math ─────────────────────────────────────────────────
+    $doc pagebreak
+    $doc paragraph "12. Mathematics" -pstyle "Heading 1"
+
+    # Inline fraction
+    $doc paragraph "Inline: " -pstyle "Body Text"
+    $doc math {
+        $doc mfrac { $doc mrun "a + b" } { $doc mrun "c" }
+    }
+    $doc append " ratio."
+
+    # Display: quadratic formula
+    $doc math -display 1 -jc center {
+        $doc mrun "x = "
+        $doc mfrac {
+            $doc mrun "\u2212b \u00B1 "
+            $doc msqrt {
+                $doc msup { $doc mrun "b" } { $doc mrun "2" }
+                $doc mrun " \u2212 4ac"
+            }
+        } { $doc mrun "2a" }
+    }
+
+    # Sub / sup / subsup
+    $doc math -display 1 -jc center {
+        $doc msub { $doc mrun "x" } { $doc mrun "i" }
+        $doc mrun " + "
+        $doc msup { $doc mrun "y" } { $doc mrun "2" }
+        $doc mrun " + "
+        $doc msubsup { $doc mrun "z" } { $doc mrun "i" } { $doc mrun "n" }
+    }
+
+    # Roots
+    $doc math -display 1 -jc center {
+        $doc msqrt { $doc mrun "a\u00B2 + b\u00B2" }
+        $doc mrun " and "
+        $doc mroot { $doc mrun "3" } { $doc mrun "x + 1" }
+    }
+
+    # N-ary
+    $doc math -display 1 -jc center {
+        $doc mnary -char "\u2211" -limLoc undOvr -grow 1 \
+            -sub { $doc mrun "i=1" } -sup { $doc mrun "n" } {
+            $doc msub { $doc mrun "a" } { $doc mrun "i" }
+        }
+        $doc mrun " = "
+        $doc mnary -char "\u222B" -limLoc subSup \
+            -sub { $doc mrun "0" } -sup { $doc mrun "\u221E" } {
+            $doc mrun "f(x) dx"
+        }
+    }
+
+    # Function
+    $doc math -display 1 -jc center {
+        $doc mfunc { $doc mrun "sin" } {
+            $doc mdelim { $doc mrun "\u03B8" }
+        }
+        $doc mrun " + "
+        $doc mfunc { $doc mrun "cos" } {
+            $doc mdelim { $doc mrun "\u03B8" }
+        }
+    }
+
+    # Limits
+    $doc math -display 1 -jc center {
+        $doc mlimlow { $doc mrun "lim" } { $doc mrun "n\u2192\u221E" }
+        $doc mdelim {
+            $doc mrun "1 + "
+            $doc mfrac { $doc mrun "1" } { $doc mrun "n" }
+        }
+        $doc msup {} { $doc mrun "n" }
+    }
+    $doc math -display 1 -jc center {
+        $doc mlimupp { $doc mrun "x + y + z" } { $doc mrun "k terms" }
+    }
+
+    # Accent
+    $doc math -display 1 -jc center {
+        $doc maccent { $doc mrun "x" }
+        $doc mrun " , "
+        $doc maccent -char "\u0303" { $doc mrun "y" }
+        $doc mrun " , "
+        $doc maccent -char "\u0307" { $doc mrun "z" }
+        $doc mrun " , "
+        $doc maccent -char "\u20D7" { $doc mrun "v" }
+    }
+
+    # Bar
+    $doc math -display 1 -jc center {
+        $doc mbar { $doc mrun "X" }
+        $doc mrun " and "
+        $doc mbar -pos bot { $doc mrun "Y" }
+    }
+
+    # Delimiters
+    $doc math -display 1 -jc center {
+        $doc mdelim { $doc mrun "a + b" }
+        $doc mrun " , "
+        $doc mdelim -begChr "\[" -endChr "\]" {
+            $doc mdelimarg { $doc mrun "x" }
+            $doc mdelimarg { $doc mrun "y" }
+        }
+        $doc mrun " , "
+        $doc mdelim -begChr "|" -endChr "|" { $doc mrun "z" }
+        $doc mrun " , "
+        $doc mdelim -begChr "\{" -endChr "\}" -grow 1 {
+            $doc mfrac { $doc mrun "a" } { $doc mrun "b" }
+        }
+    }
+
+    # Grouping character
+    $doc math -display 1 -jc center {
+        $doc mgroupchr { $doc mrun "a + b + c" }
+        $doc mrun " + "
+        $doc mgroupchr -char "\u23DE" -pos top -vertJc bot {
+            $doc mrun "d + e"
+        }
+    }
+
+    # Matrix
+    $doc math -display 1 -jc center {
+        $doc mrun "R = "
+        $doc mdelim -begChr "\[" -endChr "\]" {
+            $doc mmatrix -mcJc center {
+                {
+                    $doc mmatcell { $doc mrun "cos \u03B8" }
+                    $doc mmatcell { $doc mrun "\u2212sin \u03B8" }
+                }
+                {
+                    $doc mmatcell { $doc mrun "sin \u03B8" }
+                    $doc mmatcell { $doc mrun "cos \u03B8" }
+                }
+            }
+        }
+    }
+
+    # Math run styles + fraction types
+    $doc math -display 1 -jc center {
+        $doc mrun -sty b "F"
+        $doc mrun " = m"
+        $doc mrun -sty bi "a"
+    }
+    $doc math -display 1 -jc center {
+        $doc mfrac { $doc mrun "a" } { $doc mrun "b" }
+        $doc mrun " , "
+        $doc mfrac -type lin { $doc mrun "c" } { $doc mrun "d" }
+        $doc mrun " , "
+        $doc mfrac -type noBar { $doc mrun "n" } { $doc mrun "k" }
+        $doc mrun " , "
+        $doc mfrac -type skw { $doc mrun "1" } { $doc mrun "2" }
+    }
+
+    # ── 18. Sections ─────────────────────────────────────────────
+    $doc pagebreak
+    $doc paragraph "13. Sections" -pstyle "Heading 1"
+    $doc paragraph "$lorem(medium)" -pstyle "Body Text"
+
+    $doc sectionstart -sectionType continuous
+    $doc paragraph "$lorem(long)" -pstyle "Body Text"
+    $doc sectionend
+
+    $doc sectionstart -sectionType continuous
+    $doc paragraph "Back to normal." -pstyle "Body Text"
+    $doc sectionend
+
+    # ── 19. Replace ──────────────────────────────────────────────
+    $doc paragraph "14. Replacement" -pstyle "Heading 1"
+    $doc paragraph "The word PLACEHOLDER will be replaced."
+    $doc replace PLACEHOLDER "SUBSTITUTED"
+
+    # ── 20. Inspection ───────────────────────────────────────────
+    set parts [$doc xmlparts]
+    set paraCount [expr {int([$doc xpath {count(//w:p)}])}]
+    set firstText [$doc selectNodes {string(//w:p[1]//w:t)}]
+
+    # ── Write v1 ─────────────────────────────────────────────────
+    $doc write $outfile
+
+    # ── Post-write: writepart, readpart, import ──────────────────
+    set settingsFile [tmpfile .xml]
+    $doc writepart word/settings.xml $settingsFile
+    $doc readpart word/settings.xml $settingsFile
+
+    set outfile2 [tmpfile .docx]
+    $doc import styles $outfile
+    $doc paragraph "Post-import content." -pstyle "Body Text"
+    $doc write $outfile2
+
+    # Clean up
+    file delete -force $imgfile
+    $doc destroy
+
+    # Return success indicator
+    list ok [llength $parts] $paraCount [expr {$firstText ne ""}]
+} -match glob -result {ok * * 1}
+
+cleanupTests

@@ -1,0 +1,228 @@
+# regression.test --
+#
+#   Regression tests for all bugs identified and fixed during
+#   code review rounds. Each test is tagged with the original
+#   finding number.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 1 — Math module fixes
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R1-baseJc {-baseJc accepts vertical values not horizontal} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mmatrix -baseJc center {
+                { $doc mmatcell { $doc mrun "a" } }
+            }
+        }
+        xpath $doc {string(//m:mPr/m:baseJc/@m:val)}
+    }
+} -result center
+
+test reg-R1-baseJc-rejects-horizontal {-baseJc rejects horizontal values} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mmatrix -baseJc left {
+                { $doc mmatcell { $doc mrun "a" } }
+            }
+        }
+    }
+} -returnCodes error -match glob -result {*unknown*}
+
+test reg-R1-mdelim-empty {empty mdelim still has m:e} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mdelim { }
+        }
+        countNodes $doc {//m:d/m:e}
+    }
+} -result 1
+
+test reg-R1-msqrt-degHide {msqrt has degHide and empty deg} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc msqrt { $doc mrun "x" }
+        }
+        set dh [xpath $doc {string(//m:radPr/m:degHide/@m:val)}]
+        set deg [countNodes $doc {//m:rad/m:deg}]
+        list $dh $deg
+    }
+} -result {1 1}
+
+test reg-R1-mroot-no-empty-radPr {mroot omits radPr when no properties} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mroot { $doc mrun "3" } { $doc mrun "x" }
+        }
+        countNodes $doc {//m:rad/m:radPr}
+    }
+} -result 0
+
+test reg-R1-ST_Integer255 {ST_Integer255 rejects 0} -body {
+    ::ooxml::docx::lib::ST_Integer255 0
+} -returnCodes error -match glob -result {*1..255*}
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 2 — Production review blocker fixes
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R2-configure-EatOption {configure -ignorable uses my EatOption} -body {
+    # This would crash with "invalid command name EatOption" if bare
+    withDoc doc {
+        $doc configure -ignorable "w14"
+        expr {1}
+    }
+} -result 1
+
+test reg-R2-formatting-attr {documentProtection uses formatting not formating} -body {
+    withDoc doc {
+        $doc settings -documentProtection {edit readOnly formatting 1 enforcement 1}
+        set xml [$doc xpath {string(//w:documentProtection/@w:formatting)} word/settings.xml]
+        set xml
+    }
+} -result 1
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 3 — Style consistency fixes
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R3-styleId-derived {styleId derived by stripping non-alnum} -body {
+    withDoc doc {
+        $doc style paragraph "Heading (Level 1)"
+        set ids [$doc style ids paragraph]
+        expr {"HeadingLevel1" in $ids}
+    }
+} -result 1
+
+test reg-R3-styleId-collision {duplicate derived styleId rejected} -body {
+    withDoc doc {
+        $doc style paragraph "My Heading"
+        $doc style paragraph "My-Heading"
+    }
+} -returnCodes error -match glob -result {*styleId*already*}
+
+test reg-R3-basedon-resolves {-basedon resolves through StyleCheck} -body {
+    withDoc doc {
+        $doc style paragraph "Parent Style" -bold on
+        $doc style paragraph "Child Style" -basedon "Parent Style"
+        xpath $doc {
+            string(//w:style[@w:styleId='ChildStyle']/w:basedOn/@w:val)
+        } word/styles.xml
+    }
+} -result ParentStyle
+
+test reg-R3-delete-by-name {style delete uses display name} -body {
+    withDoc doc {
+        $doc style paragraph "To Delete"
+        $doc style delete paragraph "To Delete"
+        set ids [$doc style ids paragraph]
+        expr {"ToDelete" ni $ids}
+    }
+} -result 1
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 4 — Settings reorder
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R4-settings-repeating {attachedSchema allows multiple values} -body {
+    withDoc doc {
+        $doc settings -attachedSchema "urn:one"
+        $doc settings -attachedSchema "urn:two"
+        $doc settings -attachedSchema "urn:three"
+        countNodes $doc {//w:attachedSchema} word/settings.xml
+    }
+} -result 3
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 5 — Production review fixes
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R5-footnote-separators {footnote part has separator entries} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        set sep [countNodes $doc {//w:footnote[@w:type='separator']} word/footnotes.xml]
+        set cont [countNodes $doc {//w:footnote[@w:type='continuationSeparator']} word/footnotes.xml]
+        list $sep $cont
+    }
+} -result {1 1}
+
+test reg-R5-comment-rollback-on-bad-option {comment rollback on unknown option} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        catch {
+            $doc comment -author "A" -badOption x { $doc paragraph "X" }
+        }
+        if {[haspart $doc word/comments.xml]} {
+            countNodes $doc {//w:comment} word/comments.xml
+        } else {
+            expr {0}
+        }
+    }
+} -result 0
+
+test reg-R5-hf-rollback {header rollback on script error} -body {
+    withDoc doc {
+        catch {
+            $doc header { error "fail" }
+        }
+        expr {![haspart $doc word/header1.xml]}
+    }
+} -result 1
+
+test reg-R5-sectPr-cleanup-in-finally {sectPr cleaned up even on write concepts} -body {
+    # Verify cleanup is inside finally by writing, then adding content
+    withDoc doc {
+        $doc paragraph "Before"
+        writedoc $doc
+        $doc paragraph "After"
+        # After write+cleanup, last body child should be the new paragraph
+        set last [xpath $doc {local-name(//w:body/*[last()])}]
+        set last
+    }
+} -result p
+
+test reg-R5-footnote-option-validation {unknown footnote option rejected} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote -badopt xyz { $doc paragraph "Note." }
+    }
+} -returnCodes error -match glob -result {*unknown*badopt*}
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 6 — Paragraph background
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R6-paragraph-background {paragraph -background creates shd} -body {
+    withDoc doc {
+        $doc paragraph "Yellow" -shading {type clear fill FFFF00}
+        set val [xpath $doc {string(//w:pPr/w:shd/@w:val)}]
+        set fill [xpath $doc {string(//w:pPr/w:shd/@w:fill)}]
+        list $val $fill
+    }
+} -result {clear FFFF00}
+
+# ══════════════════════════════════════════════════════════════════
+#  Round 7 — Final audit fixes
+# ══════════════════════════════════════════════════════════════════
+
+test reg-R7-cd-count-init {write initializes cd and count} -body {
+    # This is implicitly tested by any successful write, but verify
+    # explicitly that multiple writes don't accumulate stale cd/count
+    withDoc doc {
+        $doc paragraph "First"
+        writedoc $doc
+        $doc paragraph "Second"
+        set f [writedoc $doc]
+        # If cd/count weren't re-initialized, the second write would
+        # have double entries. Check that zip has expected part count.
+        set parts [ziplist $f]
+        # Should have standard parts, not duplicates
+        expr {[llength $parts] == [llength [lsort -unique $parts]]}
+    }
+} -result 1
+
+cleanupTests

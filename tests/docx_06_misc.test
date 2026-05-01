@@ -1,0 +1,302 @@
+# misc.test --
+#
+#   Tests for remaining public methods: mark, markstart/markend,
+#   url, jumpto, pagebreak, field, numbering, textbox, configure,
+#   selectNodes/xpath, xmlparts, readpart/replace.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ──────────────────────────────────────────────────────────────────
+#  Marks and bookmarks
+# ──────────────────────────────────────────────────────────────────
+
+test misc-1.1 {mark creates bookmarkStart and bookmarkEnd} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc mark mymark
+        set starts [countNodes $doc {//w:bookmarkStart}]
+        set ends [countNodes $doc {//w:bookmarkEnd}]
+        list $starts $ends
+    }
+} -result {1 1}
+
+test misc-1.2 {markstart/markend span} -body {
+    withDoc doc {
+        $doc paragraph "Before"
+        $doc markstart myspan
+        $doc paragraph "Inside span"
+        $doc markend myspan
+        set starts [countNodes $doc {//w:bookmarkStart}]
+        set ends [countNodes $doc {//w:bookmarkEnd}]
+        list $starts $ends
+    }
+} -result {1 1}
+
+test misc-1.3 {markend without markstart raises error} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc markend nosuchmark
+    }
+} -returnCodes error -match glob -result {*not started*}
+
+test misc-1.4 {duplicate markstart raises error} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc markstart dup
+        $doc markstart dup
+    }
+} -returnCodes error -match glob -result {*not unique*}
+
+# ──────────────────────────────────────────────────────────────────
+#  URL (hyperlink)
+# ──────────────────────────────────────────────────────────────────
+
+test misc-2.1 {url creates hyperlink} -body {
+    withDoc doc {
+        $doc paragraph "Click "
+        $doc url "here" "https://example.com"
+        countNodes $doc {//w:hyperlink}
+    }
+} -result 1
+
+test misc-2.2 {url text content} -body {
+    withDoc doc {
+        $doc paragraph "Click "
+        $doc url "link text" "https://example.com"
+        xpath $doc {string(//w:hyperlink//w:t)}
+    }
+} -result {link text}
+
+# ──────────────────────────────────────────────────────────────────
+#  Jumpto (internal hyperlink)
+# ──────────────────────────────────────────────────────────────────
+
+test misc-3.1 {jumpto creates internal hyperlink} -body {
+    withDoc doc {
+        $doc paragraph "Target"
+        $doc mark target
+        $doc paragraph "Click "
+        $doc jumpto "go to target" target
+        countNodes $doc {//w:hyperlink}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Pagebreak
+# ──────────────────────────────────────────────────────────────────
+
+test misc-4.1 {pagebreak creates page break} -body {
+    withDoc doc {
+        $doc paragraph "Page 1"
+        $doc pagebreak
+        $doc paragraph "Page 2"
+        countNodes $doc {//w:br[@w:type='page']}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Field
+# ──────────────────────────────────────────────────────────────────
+
+test misc-5.1 {PAGE field} -body {
+    withDoc doc {
+        $doc paragraph "Page "
+        $doc field PAGE
+        countNodes $doc {//w:fldChar}
+    }
+} -result 3 ;# begin + separate + end
+
+test misc-5.2 {NUMPAGES field} -body {
+    withDoc doc {
+        $doc paragraph "Total: "
+        $doc field NUMPAGES
+        set instr [xpath $doc {string(//w:instrText)}]
+        expr {[string match *NUMPAGES* $instr]}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Configure
+# ──────────────────────────────────────────────────────────────────
+
+test misc-6.1 {configure sets creator} -body {
+    withDoc doc {
+        $doc configure -creator "Test Author"
+        xpath $doc {string(//*[local-name()='creator'])} docProps/core.xml
+    }
+} -result {Test Author}
+
+test misc-6.2 {configure sets title} -body {
+    withDoc doc {
+        $doc configure -title "Test Document"
+        xpath $doc {string(//*[local-name()='title'])} docProps/core.xml
+    }
+} -result {Test Document}
+
+test misc-6.3 {configure sets description} -body {
+    withDoc doc {
+        $doc configure -description "A test"
+        xpath $doc {string(//*[local-name()='description'])} docProps/core.xml
+    }
+} -result {A test}
+
+# ──────────────────────────────────────────────────────────────────
+#  xmlparts and selectNodes
+# ──────────────────────────────────────────────────────────────────
+
+test misc-7.1 {xmlparts lists all parts} -body {
+    withDoc doc {
+        set parts [$doc xmlparts]
+        expr {
+            "word/document.xml" in $parts &&
+            "word/styles.xml" in $parts &&
+            "word/settings.xml" in $parts
+        }
+    }
+} -result 1
+
+test misc-7.2 {xmlparts with pattern} -body {
+    withDoc doc {
+        set parts [$doc xmlparts word/*]
+        # Should include word/ parts but not docProps/
+        expr {
+            "word/document.xml" in $parts &&
+            "docProps/core.xml" ni $parts
+        }
+    }
+} -result 1
+
+test misc-7.3 {selectNodes works} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set result [$doc selectNodes {count(//w:p)}]
+        expr {$result == 1}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Numbering
+# ──────────────────────────────────────────────────────────────────
+
+test misc-8.1 {numbering abstractNum creates part} -body {
+    withDoc doc {
+        $doc numbering abstractNum 0 {
+            {-numberFormat decimal -levelText "%1." -align start}
+        }
+        haspart $doc word/numbering.xml
+    }
+} -result 1
+
+test misc-8.2 {numbering delete abstractNum} -body {
+    withDoc doc {
+        $doc numbering abstractNum 0 {
+            {-numberFormat decimal -levelText "%1." -align start}
+        }
+        $doc numbering delete abstractNum 0
+        countNodes $doc {//w:abstractNum} word/numbering.xml
+    }
+} -result 0
+
+# ──────────────────────────────────────────────────────────────────
+#  Section management
+# ──────────────────────────────────────────────────────────────────
+
+test misc-9.1 {pagesetup stores settings} -body {
+    withDoc doc {
+        $doc pagesetup -sizeAndOrientation {orientation landscape}
+        $doc paragraph "Body"
+        set f [writedoc $doc]
+        set xml [zipread $f word/document.xml]
+        expr {[string match *landscape* $xml]}
+    }
+} -result 1
+
+test misc-9.2 {sectionstart/sectionend} -body {
+    withDoc doc {
+        $doc paragraph "Section 1"
+        $doc sectionstart -sectionType continuous
+        $doc paragraph "Section 2"
+        $doc sectionend
+        $doc paragraph "Section 3"
+        # Should have section break paragraph
+        countNodes $doc {//w:sectPr}
+    }
+} -result 2
+
+test misc-9.3 {sectionend without sectionstart raises error} -body {
+    withDoc doc {
+        $doc sectionend
+    }
+} -returnCodes error -match glob -result {*no section started*}
+
+# ──────────────────────────────────────────────────────────────────
+#  readpart / replace / textbox
+# ──────────────────────────────────────────────────────────────────
+
+test misc-10.1 {readpart replaces settings part from file} -body {
+    withDoc doc {
+        set f [writeTextFile {
+            <w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                <w:defaultTabStop w:val="1440"/>
+            </w:settings>
+        }]
+        $doc readpart word/settings.xml $f
+        xpath $doc {string(//w:defaultTabStop/@w:val)} word/settings.xml
+    }
+} -result 1440
+
+test misc-10.2 {replace updates all matching parts by default} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "Alpha header" }]
+        $doc pagesetup -defaultHeader $hId
+        $doc paragraph "Alpha body"
+        $doc replace Alpha Beta
+        list \
+            [xpath $doc {string(//w:p[1]//w:t)}] \
+            [xpath $doc {string(//w:t)} word/header1.xml]
+    }
+} -result {{Beta body} {Beta header}}
+
+test misc-10.3 {replace can be limited to matching parts} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "Alpha header" }]
+        $doc pagesetup -defaultHeader $hId
+        $doc paragraph "Alpha body"
+        $doc replace Alpha Beta word/header*
+        list \
+            [xpath $doc {string(//w:p[1]//w:t)}] \
+            [xpath $doc {string(//w:t)} word/header1.xml]
+    }
+} -result {{Alpha body} {Beta header}}
+
+test misc-10.4 {textbox creates anchored drawing with content} -body {
+    withDoc doc {
+        $doc textbox \
+            -name "Callout Box" \
+            -dimension {width 914400 height 457200} \
+            -bodyAtts {wrap none numCol 2} {
+                $doc paragraph "Inside box"
+            }
+        list \
+            [countNodes $doc {//wps:txbx}] \
+            [xpath $doc {string(//wp:docPr/@name)}] \
+            [xpath $doc {string(//wps:txbx//w:t)}] \
+            [xpath $doc {string(//wps:bodyPr/@wrap)}]
+    }
+} -result {1 {Callout Box} {Inside box} none}
+
+# ──────────────────────────────────────────────────────────────────
+#  Destroy
+# ──────────────────────────────────────────────────────────────────
+
+test misc-11.1 {destroy cleans up} -body {
+    set doc [docxtest::newdoc]
+    $doc paragraph "Test"
+    $doc destroy
+    # Object should no longer exist
+    catch {$doc paragraph "After destroy"} err
+    expr {$err ne ""}
+} -result 1
+
+cleanupTests

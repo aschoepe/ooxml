@@ -1412,24 +1412,19 @@ oo::class create ooxml::docx::docx {
                 $notesroot setAttributeNS {} xmlns:$ns $xmlns($ns)
             }
             my Ignorable $notePart
-        } else {
-            set notesroot [$docs($notePart) documentElement]
-        }
-
-        foreach {thisid sepType} {
-            0 separator
-            1 continuationSeparator
-        } {
-            if {![$notesroot selectNodes "count(w:$type\[@w:id=$thisid])"]} {
+            foreach {thisid sepType} {
+                0 separator
+                1 continuationSeparator
+            } {
                 $notesroot appendFromScript {
-                    Tag_w:$type w:type separator w:id $thisid {
+                    Tag_w:$type w:type $sepType w:id $thisid {
                         Tag_w:p { Tag_w:r { Tag_w:$sepType } }
                     }
                 }
             }
-        }
-        if {![info exists id($types)] || $id($types) < 1} {
             set id($types) 1
+        } else {
+            set notesroot [$docs($notePart) documentElement]
         }
 
         set thisid [my NextId $types]
@@ -1443,10 +1438,9 @@ oo::class create ooxml::docx::docx {
             my ProcessErrorinfo $type
             return -code error $errMsg
         }
-        set body $savedbody
-        set firstp [$notesroot selectNodes {w:p[1]}]
+        set firstp [$body selectNodes {w:p[1]}]
         if {$firstp eq ""} {
-            $notesroot appendFromScript Tag_w:p
+            $body appendFromScript Tag_w:p
             set firstp [$notesroot lastChild]
         }
         $firstp insertBeforeFromScript {
@@ -1459,6 +1453,7 @@ oo::class create ooxml::docx::docx {
                 Tag_w:${type}Ref
             }
         } [$firstp selectNodes {w:r[1]}]
+        set body $savedbody
         return $thisid
     }
 
@@ -3070,7 +3065,7 @@ oo::class create ooxml::docx::docx {
                 }
                 "deleteByName" -
                 "delete" {
-                    if {[llength $args] == 1]} {
+                    if {[llength $args] == 1} {
                         lassign $args type
                         if {$type ni {paragraphdefault characterdefault}} {
                             error "unknown default style type \"$type\""

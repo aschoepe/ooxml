@@ -1,0 +1,134 @@
+# notes.test --
+#
+#   Tests for footnote and endnote creation, separator entries,
+#   reference marks, and transactional rollback.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ──────────────────────────────────────────────────────────────────
+#  Footnote creation
+# ──────────────────────────────────────────────────────────────────
+
+test notes-1.1 {footnote creates note part} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note text." }
+        haspart $doc word/footnotes.xml
+    }
+} -result 1
+
+test notes-1.2 {footnote has separator entries} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        # 2 special (separator + continuationSeparator) + 1 user = 3
+        countNodes $doc {//w:footnote} word/footnotes.xml
+    }
+} -result 3
+
+test notes-1.3 {footnote separator has correct type} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        set sep [xpath $doc {string(//w:footnote[@w:type='separator']/@w:id)} word/footnotes.xml]
+        set cont [xpath $doc {string(//w:footnote[@w:type='continuationSeparator']/@w:id)} word/footnotes.xml]
+        list $sep $cont
+    }
+} -result {0 1}
+
+test notes-1.4 {footnote reference in document body} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        countNodes $doc {//w:footnoteReference}
+    }
+} -result 1
+
+test notes-1.5 {footnote self-reference mark} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        countNodes $doc {//w:footnoteRef} word/footnotes.xml
+    }
+} -result 1
+
+test notes-1.6 {multiple footnotes get unique IDs} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note 1." }
+        $doc footnote { $doc paragraph "Note 2." }
+        # 2 special + 2 user = 4
+        countNodes $doc {//w:footnote} word/footnotes.xml
+    }
+} -result 4
+
+# ──────────────────────────────────────────────────────────────────
+#  Endnote creation
+# ──────────────────────────────────────────────────────────────────
+
+test notes-2.1 {endnote creates note part} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc endnote { $doc paragraph "End note." }
+        haspart $doc word/endnotes.xml
+    }
+} -result 1
+
+test notes-2.2 {endnote has separator entries} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc endnote { $doc paragraph "End note." }
+        countNodes $doc {//w:endnote} word/endnotes.xml
+    }
+} -result 3
+
+test notes-2.3 {endnote reference in document body} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc endnote { $doc paragraph "End note." }
+        countNodes $doc {//w:endnoteReference}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Footnote/endnote option validation
+# ──────────────────────────────────────────────────────────────────
+
+test notes-3.1 {unknown option rejected in footnote} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote -bogus xyz { $doc paragraph "Note." }
+    }
+} -returnCodes error -match glob -result {*unknown*bogus*}
+
+test notes-3.2 {unknown option rejected in endnote} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc endnote -bogus xyz { $doc paragraph "Note." }
+    }
+} -returnCodes error -match glob -result {*unknown*bogus*}
+
+# ──────────────────────────────────────────────────────────────────
+#  Rollback on script error
+# ──────────────────────────────────────────────────────────────────
+
+test notes-4.1 {footnote rollback on script error} -constraints mutation -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        catch {
+            $doc footnote { error "deliberate failure" }
+        }
+        # After rollback, footnotes part should not exist
+        # (or if it existed before, no user note should remain)
+        if {[haspart $doc word/footnotes.xml]} {
+            # Only separator entries, no user note
+            set count [countNodes $doc {//w:footnote[not(@w:type)]} word/footnotes.xml]
+            expr {$count == 0}
+        } else {
+            expr {1}
+        }
+    }
+} -result 1
+
+cleanupTests

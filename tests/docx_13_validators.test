@@ -1,0 +1,165 @@
+# validators.test --
+#
+#   Tests for validator edge cases, bounds, and error messages.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ──────────────────────────────────────────────────────────────────
+#  Boolean validators
+# ──────────────────────────────────────────────────────────────────
+
+test val-1.1 {CT_OnOff true} -body {
+    ::ooxml::docx::lib::CT_OnOff true
+} -result 1
+
+test val-1.2 {CT_OnOff false} -body {
+    ::ooxml::docx::lib::CT_OnOff false
+} -result 0
+
+test val-1.3 {CT_OnOff yes} -body {
+    ::ooxml::docx::lib::CT_OnOff yes
+} -result 1
+
+test val-1.4 {CT_OnOff invalid} -body {
+    ::ooxml::docx::lib::CT_OnOff "maybe"
+} -returnCodes error -match glob -result {*boolean*}
+
+# ──────────────────────────────────────────────────────────────────
+#  Integer validators
+# ──────────────────────────────────────────────────────────────────
+
+test val-2.1 {ST_Integer255 minimum} -body {
+    ::ooxml::docx::lib::ST_Integer255 1
+} -result 1
+
+test val-2.2 {ST_Integer255 maximum} -body {
+    ::ooxml::docx::lib::ST_Integer255 255
+} -result 255
+
+test val-2.3 {ST_Integer255 zero rejected} -body {
+    ::ooxml::docx::lib::ST_Integer255 0
+} -returnCodes error -match glob -result {*1..255*}
+
+test val-2.4 {ST_Integer255 256 rejected} -body {
+    ::ooxml::docx::lib::ST_Integer255 256
+} -returnCodes error -match glob -result {*1..255*}
+
+test val-2.5 {ST_DecimalNumber} -body {
+    ::ooxml::docx::lib::ST_DecimalNumber 42
+} -result 42
+
+test val-2.6 {ST_DecimalNumber non-integer rejected} -body {
+    ::ooxml::docx::lib::ST_DecimalNumber "abc"
+} -returnCodes error -match glob -result *integer*
+
+test val-2.7 {CT_UnsignedInt} -body {
+    ::ooxml::docx::lib::CT_UnsignedInt 0
+} -result 0
+
+test val-2.8 {CT_UnsignedInt non-numeric rejected} -body {
+    ::ooxml::docx::lib::CT_UnsignedInt abc
+} -returnCodes error -match glob -result *unsigned*
+
+# ──────────────────────────────────────────────────────────────────
+#  Enum validators
+# ──────────────────────────────────────────────────────────────────
+
+test val-3.1 {ST_Jc center} -body {
+    ::ooxml::docx::lib::ST_Jc center
+} -result center
+
+test val-3.2 {ST_Jc invalid} -body {
+    ::ooxml::docx::lib::ST_Jc middle
+} -returnCodes error -match glob -result {*unknown*}
+
+test val-3.3 {ST_MathStyle values} -body {
+    list \
+        [::ooxml::docx::lib::ST_MathStyle p] \
+        [::ooxml::docx::lib::ST_MathStyle b] \
+        [::ooxml::docx::lib::ST_MathStyle i] \
+        [::ooxml::docx::lib::ST_MathStyle bi]
+} -result {p b i bi}
+
+test val-3.4 {ST_MathStyle invalid} -body {
+    ::ooxml::docx::lib::ST_MathStyle bold
+} -returnCodes error -match glob -result {*unknown*}
+
+test val-3.5 {ST_BaseJc values} -body {
+    list \
+        [::ooxml::docx::lib::ST_BaseJc top] \
+        [::ooxml::docx::lib::ST_BaseJc center] \
+        [::ooxml::docx::lib::ST_BaseJc bottom]
+} -result {top center bottom}
+
+test val-3.6 {ST_McJc values} -body {
+    list \
+        [::ooxml::docx::lib::ST_McJc left] \
+        [::ooxml::docx::lib::ST_McJc center] \
+        [::ooxml::docx::lib::ST_McJc right]
+} -result {left center right}
+
+test val-3.7 {ST_SectionMark values} -body {
+    ::ooxml::docx::lib::ST_SectionMark continuous
+} -result continuous
+
+test val-3.8 {ST_LineSpacingRule values} -body {
+    list \
+        [::ooxml::docx::lib::ST_LineSpacingRule auto] \
+        [::ooxml::docx::lib::ST_LineSpacingRule exact] \
+        [::ooxml::docx::lib::ST_LineSpacingRule atLeast]
+} -result {auto exact atLeast}
+
+test val-3.9 {ST_VerticalJc values} -body {
+    list \
+        [::ooxml::docx::lib::ST_VerticalJc top] \
+        [::ooxml::docx::lib::ST_VerticalJc center] \
+        [::ooxml::docx::lib::ST_VerticalJc bottom] \
+        [::ooxml::docx::lib::ST_VerticalJc both]
+} -result {top center bottom both}
+
+# ──────────────────────────────────────────────────────────────────
+#  Measurement validators
+# ──────────────────────────────────────────────────────────────────
+
+test val-4.1 {ST_TwipsMeasure integer passthrough} -body {
+    ::ooxml::docx::lib::ST_TwipsMeasure 1440
+} -result 1440
+
+test val-4.2 {ST_TwipsMeasure 1in = 1440 twips} -body {
+    ::ooxml::docx::lib::ST_TwipsMeasure 1in
+} -result 1440
+
+test val-4.3 {ST_TwipsMeasure 2.54cm = 1440 twips} -body {
+    ::ooxml::docx::lib::ST_TwipsMeasure 2.54cm
+} -result 1440
+
+test val-4.4 {ST_TwipsMeasure 25.4mm = 1440 twips} -body {
+    ::ooxml::docx::lib::ST_TwipsMeasure 25.4mm
+} -result 1440
+
+test val-4.5 {ST_TwipsMeasure 72pt = 1440 twips} -body {
+    ::ooxml::docx::lib::ST_TwipsMeasure 72pt
+} -result 1440
+
+test val-4.6 {ST_HpsMeasure integer passthrough} -body {
+    ::ooxml::docx::lib::ST_HpsMeasure 24
+} -result 24
+
+test val-4.7 {ST_Emu valid} -body {
+    ::ooxml::docx::lib::ST_Emu 914400
+} -result 914400
+
+# ──────────────────────────────────────────────────────────────────
+#  Color validators
+# ──────────────────────────────────────────────────────────────────
+
+test val-5.1 {ST_HexColor valid} -body {
+    ::ooxml::docx::lib::ST_HexColor FF00FF
+} -result FF00FF
+
+test val-5.2 {ST_HexColor auto} -body {
+    ::ooxml::docx::lib::ST_HexColor auto
+} -result auto
+
+cleanupTests

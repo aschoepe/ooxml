@@ -1,0 +1,193 @@
+# packaging.test --
+#
+#   Tests for package structure: content types, relationships,
+#   part presence, and structural validity of generated .docx files.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ──────────────────────────────────────────────────────────────────
+#  Minimal document package
+# ──────────────────────────────────────────────────────────────────
+
+test pkg-1.1 {minimal doc has required parts} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        set required {
+            {[Content_Types].xml}
+            _rels/.rels
+            word/document.xml
+            word/_rels/document.xml.rels
+            word/styles.xml
+            word/settings.xml
+            word/fontTable.xml
+            docProps/core.xml
+            docProps/app.xml
+        }
+        set missing [list]
+        foreach rp $required {
+            if {$rp ni $parts} {
+                lappend missing $rp
+            }
+        }
+        set missing
+    }
+} -result {}
+
+test pkg-1.2 {core-properties uses package relationship type} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set f [writedoc $doc]
+        set xml [zipread $f _rels/.rels]
+        expr {[string match *package/2006/relationships/metadata/core-properties* $xml]}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Document with footnotes
+# ──────────────────────────────────────────────────────────────────
+
+test pkg-2.1 {footnotes part in zip} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        expr {"word/footnotes.xml" in $parts}
+    }
+} -result 1
+
+test pkg-2.2 {footnotes has content type} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        set f [writedoc $doc]
+        set ct [zipread $f {[Content_Types].xml}]
+        expr {[string match *footnotes* $ct]}
+    }
+} -result 1
+
+test pkg-2.3 {footnotes has relationship} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Note." }
+        set f [writedoc $doc]
+        set rels [zipread $f word/_rels/document.xml.rels]
+        expr {[string match *footnotes* $rels]}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Document with header and footer
+# ──────────────────────────────────────────────────────────────────
+
+test pkg-3.1 {header part in zip} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "H" }]
+        $doc pagesetup -defaultHeader $hId
+        $doc paragraph "Body"
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        expr {"word/header1.xml" in $parts}
+    }
+} -result 1
+
+test pkg-3.2 {header has content type} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "H" }]
+        $doc pagesetup -defaultHeader $hId
+        $doc paragraph "Body"
+        set f [writedoc $doc]
+        set ct [zipread $f {[Content_Types].xml}]
+        expr {[string match *header* $ct]}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Document with comments
+# ──────────────────────────────────────────────────────────────────
+
+test pkg-4.1 {comments part in zip} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc comment -author "A" { $doc paragraph "Note." }
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        expr {"word/comments.xml" in $parts}
+    }
+} -result 1
+
+test pkg-4.2 {comments has content type and relationship} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc comment -author "A" { $doc paragraph "Note." }
+        set f [writedoc $doc]
+        set ct [zipread $f {[Content_Types].xml}]
+        set rels [zipread $f word/_rels/document.xml.rels]
+        expr {[string match *comments* $ct] && [string match *comments* $rels]}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Additional package relationships
+# ──────────────────────────────────────────────────────────────────
+
+test pkg-5.1 {endnotes has part content type and relationship} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc endnote { $doc paragraph "End note." }
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        set ct [zipread $f {[Content_Types].xml}]
+        set rels [zipread $f word/_rels/document.xml.rels]
+        expr {"word/endnotes.xml" in $parts && [string match *endnotes* $ct] && [string match *endnotes* $rels]}
+    }
+} -result 1
+
+test pkg-5.2 {numbering has part content type and relationship} -body {
+    withDoc doc {
+        $doc numbering abstractNum 7 {
+            {-numberFormat decimal -levelText "%1." -align start}
+        }
+        $doc paragraph "List item"
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        set ct [zipread $f {[Content_Types].xml}]
+        set rels [zipread $f word/_rels/document.xml.rels]
+        expr {"word/numbering.xml" in $parts && [string match *numbering* $ct] && [string match *numbering* $rels]}
+    }
+} -result 1
+
+test pkg-5.3 {pagesetup writes header and footer references} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "Header" }]
+        set fId [$doc footer { $doc paragraph "Footer" }]
+        $doc pagesetup -defaultHeader $hId -defaultFooter $fId
+        $doc paragraph "Body"
+        set f [writedoc $doc]
+        set xml [zipread $f word/document.xml]
+        set ddoc [xmlparse $xml]
+        $ddoc selectNodesNamespaces {
+            w http://schemas.openxmlformats.org/wordprocessingml/2006/main
+            r http://schemas.openxmlformats.org/officeDocument/2006/relationships
+        }
+        set headerRef [$ddoc selectNodes {string(//w:sectPr/w:headerReference[@w:type='default']/@r:id)}]
+        set footerRef [$ddoc selectNodes {string(//w:sectPr/w:footerReference[@w:type='default']/@r:id)}]
+        $ddoc delete
+        expr {$headerRef eq $hId && $footerRef eq $fId}
+    }
+} -result 1
+
+test pkg-5.4 {external hyperlink relationship uses TargetMode External} -body {
+    withDoc doc {
+        $doc paragraph "See "
+        $doc url "example" "https://example.com"
+        set f [writedoc $doc]
+        set rels [zipread $f word/_rels/document.xml.rels]
+        expr {[string match *TargetMode=\"External\"* $rels] && [string match *https://example.com* $rels]}
+    }
+} -result 1
+
+cleanupTests

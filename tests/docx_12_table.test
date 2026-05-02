@@ -1,0 +1,85 @@
+# table.test --
+#
+#   Tests for table, tablerow, tablecell, simpletable.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+test table-1.1 {basic table structure} -body {
+    withDoc doc {
+        $doc table {
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "A1" }
+                $doc tablecell { $doc paragraph "B1" }
+            }
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "A2" }
+                $doc tablecell { $doc paragraph "B2" }
+            }
+        }
+        set t [countNodes $doc {//w:tbl}]
+        set r [countNodes $doc {//w:tr}]
+        set c [countNodes $doc {//w:tc}]
+        list $t $r $c
+    }
+} -result {1 2 4}
+
+test table-1.2 {table cell content} -body {
+    withDoc doc {
+        $doc table {
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "Hello" }
+            }
+        }
+        xpath $doc {string(//w:tc//w:t)}
+    }
+} -result Hello
+
+test table-1.3 {table with style} -body {
+    withDoc doc {
+        $doc style table "Grid Table" -styleid GridTable
+        $doc table -style "Grid Table" {
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "Cell" }
+            }
+        }
+        xpath $doc {string(//w:tblPr/w:tblStyle/@w:val)}
+    }
+} -result GridTable
+
+test table-1.4 {cell vertical alignment} -body {
+    withDoc doc {
+        $doc table {
+            $doc tablerow {
+                $doc tablecell -vAlign center {
+                    $doc paragraph "Centered"
+                }
+            }
+        }
+        xpath $doc {string(//w:tcPr/w:vAlign/@w:val)}
+    }
+} -result center
+
+test table-1.5 {cell background} -body {
+    withDoc doc {
+        $doc table {
+            $doc tablerow {
+                $doc tablecell -shading {type clear fill FF0000} {
+                    $doc paragraph "Red"
+                }
+            }
+        }
+        xpath $doc {string(//w:tcPr/w:shd/@w:fill)}
+    }
+} -result FF0000
+
+test table-2.1 {simpletable} -body {
+    withDoc doc {
+        $doc simpletable {{A1 B1} {A2 B2}}
+        set r [countNodes $doc {//w:tr}]
+        set c [countNodes $doc {//w:tc}]
+        list $r $c
+    }
+} -result {2 4}
+
+cleanupTests

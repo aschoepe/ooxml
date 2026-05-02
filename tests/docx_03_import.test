@@ -1,0 +1,205 @@
+# import.test --
+#
+#   Tests for import, recursive .rels handling, binary target
+#   import, subgraph cleanup, and transactional rollback.
+#
+#   These tests generate their own fixture documents at runtime
+#   so no external .docx files are needed.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+
+# ──────────────────────────────────────────────────────────────────
+#  Helper: create a source document with specific features
+# ──────────────────────────────────────────────────────────────────
+
+# createSourceWithHeader --
+#   Create a .docx that contains a header with text.
+#   Returns the file path.
+proc createSourceWithHeader {} {
+    set src [docxtest::newdoc]
+    set hId [$src header { $src paragraph "Source Header" }]
+    $src pagesetup -defaultHeader $hId
+    $src paragraph "Source body"
+    set f [docxtest::tmpfile .docx]
+    $src write $f
+    $src destroy
+    return $f
+}
+
+# createSourceWithFootnote --
+#   Create a .docx that contains a footnote.
+#   Returns the file path.
+proc createSourceWithFootnote {} {
+    set src [docxtest::newdoc]
+    $src paragraph "Source text"
+    $src footnote { $src paragraph "Source footnote." }
+    set f [docxtest::tmpfile .docx]
+    $src write $f
+    $src destroy
+    return $f
+}
+
+# createSourceWithStyles --
+#   Create a .docx with custom styles.
+#   Returns the file path.
+proc createSourceWithStyles {} {
+    set src [docxtest::newdoc]
+    $src style paragraph "ImportedHeading" -bold on -fontsize 32
+    $src style character "ImportedEmphasis" -italic on -color FF0000
+    $src paragraph "Styled text" -pstyle "ImportedHeading"
+    set f [docxtest::tmpfile .docx]
+    $src write $f
+    $src destroy
+    return $f
+}
+
+# createSourceWithComment --
+#   Create a .docx with a comment.
+#   Returns the file path.
+proc createSourceWithComment {} {
+    set src [docxtest::newdoc]
+    $src paragraph "Commented text"
+    $src comment -author "Importer" { $src paragraph "Imported comment." }
+    set f [docxtest::tmpfile .docx]
+    $src write $f
+    $src destroy
+    return $f
+}
+
+# ──────────────────────────────────────────────────────────────────
+#  Basic import
+# ──────────────────────────────────────────────────────────────────
+
+test import-1.1 {import styles from another doc} -body {
+    set srcFile [createSourceWithStyles]
+    withDoc doc {
+        $doc import styles $srcFile
+        set names [$doc style names paragraph]
+        expr {"ImportedHeading" in $names}
+    }
+} -result 1
+
+test import-1.2 {import styles replaces existing} -body {
+    set srcFile [createSourceWithStyles]
+    withDoc doc {
+        # Create a local style first
+        $doc style paragraph "LocalStyle" -italic on
+        # Import replaces styles.xml entirely
+        $doc import styles $srcFile
+        set names [$doc style names paragraph]
+        # Local style gone, imported present
+        list [expr {"LocalStyle" in $names}] [expr {"ImportedHeading" in $names}]
+    }
+} -result {0 1}
+
+test import-1.3 {import returns rId for word/ parts} -body {
+    set srcFile [createSourceWithHeader]
+    withDoc doc {
+        set rId [$doc import header1 $srcFile]
+        expr {$rId ne ""}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Import with relationships
+# ──────────────────────────────────────────────────────────────────
+
+test import-2.1 {imported header available as part} -body {
+    set srcFile [createSourceWithHeader]
+    withDoc doc {
+        $doc import header1 $srcFile
+        docxtest::haspart $doc word/header1.xml
+    }
+} -result 1
+
+test import-2.2 {imported header content preserved} -body {
+    set srcFile [createSourceWithHeader]
+    withDoc doc {
+        $doc import header1 $srcFile
+        docxtest::xpath $doc {string(//w:t)} word/header1.xml
+    }
+} -result {Source Header}
+
+test import-2.3 {import header twice replaces cleanly} -body {
+    set srcFile [createSourceWithHeader]
+    withDoc doc {
+        $doc import header1 $srcFile
+        # Import again — should replace, not duplicate
+        $doc import header1 $srcFile
+        docxtest::haspart $doc word/header1.xml
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Import and write integration
+# ──────────────────────────────────────────────────────────────────
+
+test import-3.1 {imported styles survive write} -body {
+    set srcFile [createSourceWithStyles]
+    withDoc doc {
+        $doc import styles $srcFile
+        $doc paragraph "Body"
+        set f [docxtest::writedoc $doc]
+        # Read back and check
+        set xml [docxtest::zipread $f word/styles.xml]
+        expr {[string match *ImportedHeading* $xml]}
+    }
+} -result 1
+
+test import-3.2 {imported header survives write} -body {
+    set srcFile [createSourceWithHeader]
+    withDoc doc {
+        set rId [$doc import header1 $srcFile]
+        $doc pagesetup -defaultHeader $rId
+        $doc paragraph "Body"
+        set f [docxtest::writedoc $doc]
+        set parts [docxtest::ziplist $f]
+        expr {"word/header1.xml" in $parts}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Import error handling / rollback
+# ──────────────────────────────────────────────────────────────────
+
+test import-4.1 {import nonexistent file raises error} -body {
+    withDoc doc {
+        $doc import styles /no/such/file.docx
+    }
+} -returnCodes error -match glob -result *
+
+test import-4.2 {import nonexistent part raises error} -body {
+    set srcFile [createSourceWithStyles]
+    withDoc doc {
+        $doc import header99 $srcFile
+    }
+} -returnCodes error -match glob -result *
+
+test import-4.3 {failed import leaves object usable} -body {
+    withDoc doc {
+        $doc paragraph "Before"
+        catch {
+            $doc import styles /no/such/file.docx
+        }
+        $doc paragraph "After"
+        docxtest::countNodes $doc {//w:p}
+    }
+} -result 2
+
+# ──────────────────────────────────────────────────────────────────
+#  Content type propagation
+# ──────────────────────────────────────────────────────────────────
+
+test import-5.1 {imported header gets content type} -body {
+    set srcFile [createSourceWithHeader]
+    withDoc doc {
+        $doc import header1 $srcFile
+        $doc paragraph "Body"
+        set f [docxtest::writedoc $doc]
+        set ct [docxtest::zipread $f {[Content_Types].xml}]
+        expr {[string match *header* $ct]}
+    }
+} -result 1
+
+cleanupTests

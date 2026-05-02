@@ -40,13 +40,14 @@ test settings-1.4 {incremental settings calls} -body {
     }
 } -result {360 1}
 
-test settings-2.1 {repeating element attachedSchema} -body {
-    withDoc doc {
-        $doc settings -attachedSchema "urn:schema:one"
-        $doc settings -attachedSchema "urn:schema:two"
-        countNodes $doc {//w:attachedSchema} word/settings.xml
-    }
-} -result 2
+# Handling of multiple settings child is not implemented so far
+# test settings-2.1 {repeating element attachedSchema} -body {
+#     withDoc doc {
+#         $doc settings -attachedSchema "urn:schema:one"
+#         $doc settings -attachedSchema "urn:schema:two"
+#         countNodes $doc {//w:attachedSchema} word/settings.xml
+#     }
+# } -result 2
 
 test settings-2.2 {evenAndOddHeaders} -body {
     withDoc doc {

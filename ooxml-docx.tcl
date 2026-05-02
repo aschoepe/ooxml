@@ -383,7 +383,7 @@ namespace eval ::ooxml::docx {
         / w:docVars
         / w:rsids
         / m:mathPr
-        -attachedSchema {w:attachedSchema NoCheck}
+        / w:attachedSchema
         / w:themeFontLang
         / w:clrSchemeMapping
         -doNotIncludeSubdocsInStats {w:doNotIncludeSubdocsInStats CT_OnOff}
@@ -2361,6 +2361,9 @@ oo::class create ooxml::docx::docx {
                 }
             }
             set thisdoc [::ooxml::ZipReadParse $what]
+            if {$thisdoc eq ""} {
+                return -code error "Part $what not found"
+            }
             set target [string range $what 5 end]
             if {[info exists docs($what)]} {
                 $docs($what) delete

@@ -64,7 +64,7 @@ test table-1.5 {cell background} -body {
     withDoc doc {
         $doc table {
             $doc tablerow {
-                $doc tablecell -shading {type clear fill FF0000} {
+                $doc tablecell -background FF0000 {
                     $doc paragraph "Red"
                 }
             }

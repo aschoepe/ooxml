@@ -150,7 +150,7 @@ test feature-1.0 {comprehensive feature exercise produces valid docx} -body {
     $doc paragraph "$lorem(medium)" -pstyle "Indented"
     $doc paragraph "$lorem(medium)" \
         -spacing {before 240 after 240 line 360 lineRule exact}
-    $doc paragraph "$lorem(short)" -shading {type solid color FFFF00}
+    $doc paragraph "$lorem(short)" -background FFFF00
     $doc paragraph "$lorem(short)" -shading {type clear fill DDEEFF}
     $doc paragraph "$lorem(short)" -shading {type pct10 color 000000 fill FFFFFF}
     $doc paragraph "$lorem(short)" -keepNext on -keepLines on
@@ -218,13 +218,13 @@ test feature-1.0 {comprehensive feature exercise produces valid docx} -body {
         -insideVBorder {type single borderwidth 4 color CCCCCC} \
         {
         $doc tablerow -headerrow on {
-            $doc tablecell -shading {type solid color 2E75B6} {
+            $doc tablecell -background 2E75B6 {
                 $doc paragraph "Header A" -bold on -color FFFFFF -align center
             }
-            $doc tablecell -shading {type solid color 2E75B6} {
+            $doc tablecell -background 2E75B6 {
                 $doc paragraph "Header B" -bold on -color FFFFFF -align center
             }
-            $doc tablecell -shading {type solid color 2E75B6} {
+            $doc tablecell -background 2E75B6 {
                 $doc paragraph "Header C" -bold on -color FFFFFF -align center
             }
         }
@@ -247,7 +247,7 @@ test feature-1.0 {comprehensive feature exercise produces valid docx} -body {
             }
         }
         $doc tablerow {
-            $doc tablecell -span 2 -shading {type solid color DDEEFF} {
+            $doc tablecell -span 2 -background DDEEFF {
                 $doc paragraph "Spanning two columns" -bold on
             }
             $doc tablecell { $doc paragraph "Single cell" }

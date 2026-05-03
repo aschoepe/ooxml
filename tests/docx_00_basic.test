@@ -138,7 +138,7 @@ test basic-4.2 {spacing} -body {
 
 test basic-4.3 {paragraph background} -body {
     withDoc doc {
-        $doc paragraph "Yellow" -shading {type clear fill FFFF00}
+        $doc paragraph "Yellow" -background FFFF00
         set val [xpath $doc {string(//w:p/w:pPr/w:shd/@w:val)}]
         set fill [xpath $doc {string(//w:p/w:pPr/w:shd/@w:fill)}]
         list $val $fill

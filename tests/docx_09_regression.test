@@ -199,7 +199,7 @@ test reg-R5-footnote-option-validation {unknown footnote option rejected} -body 
 
 test reg-R6-paragraph-background {paragraph -background creates shd} -body {
     withDoc doc {
-        $doc paragraph "Yellow" -shading {type clear fill FFFF00}
+        $doc paragraph "Yellow" -background fill FFFF00}
         set val [xpath $doc {string(//w:pPr/w:shd/@w:val)}]
         set fill [xpath $doc {string(//w:pPr/w:shd/@w:fill)}]
         list $val $fill

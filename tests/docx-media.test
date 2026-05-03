@@ -4,6 +4,7 @@
 
 package require tcltest 2.5
 namespace import ::tcltest::*
+package require ooxml::docx
 
 test media-1.1 {inline image writes media part and relationship} -body {
     set img [writeTinyPng]

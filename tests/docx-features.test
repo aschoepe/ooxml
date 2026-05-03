@@ -11,6 +11,7 @@
 
 package require tcltest 2.5
 namespace import ::tcltest::*
+package require ooxml::docx
 
 # ── Lorem ipsum texts ────────────────────────────────────────────
 

@@ -5,6 +5,7 @@
 
 package require tcltest 2.5
 namespace import ::tcltest::*
+package require ooxml::docx
 
 # ──────────────────────────────────────────────────────────────────
 #  Math zone guard

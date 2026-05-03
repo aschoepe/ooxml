@@ -6,6 +6,7 @@
 
 package require tcltest 2.5
 namespace import ::tcltest::*
+package require ooxml::docx
 
 # ══════════════════════════════════════════════════════════════════
 #  Round 1 — Math module fixes
@@ -199,7 +200,7 @@ test reg-R5-footnote-option-validation {unknown footnote option rejected} -body 
 
 test reg-R6-paragraph-background {paragraph -background creates shd} -body {
     withDoc doc {
-        $doc paragraph "Yellow" -background fill FFFF00}
+        $doc paragraph "Yellow" -background FFFF00
         set val [xpath $doc {string(//w:pPr/w:shd/@w:val)}]
         set fill [xpath $doc {string(//w:pPr/w:shd/@w:fill)}]
         list $val $fill

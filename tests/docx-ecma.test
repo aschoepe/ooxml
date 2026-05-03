@@ -9,6 +9,7 @@
 
 package require tcltest 2.5
 namespace import ::tcltest::*
+package require ooxml::docx
 
 # Load the validator
 source [file join [file dirname [info script]] ecma376 validate.tcl]

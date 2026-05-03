@@ -1751,6 +1751,18 @@ oo::class create ooxml::docx::docx {
         return [list $a $b]
     }
 
+    method OneOffOptions {args} {
+        my Prepare
+        set count 0
+        foreach option $args {
+            incr count [info exists opts($option)]
+        }
+        if {$count > 1} {
+            return -code error "the options [AllowedValues $args and] are\
+                                mutually exclusive"
+        }
+    }
+    
     method Option {option attname type {default ""}} {
         my Prepare
         set optsknown($option) ""
@@ -1795,12 +1807,17 @@ oo::class create ooxml::docx::docx {
 
     method PPr {} {
         my Prepare 1
+        my OneOffOptions -shading -background
         Tag_w:pPr {
             my Create $properties(paragraph1)
             Tag_w:pBdr {
                 my Create $properties(paragraphBorders)
             }
             my Create $properties(paragraph2)
+            set value [my EatOption -background ST_HexColor]
+            if {$value ne ""} {
+                Tag_w:shd w:val "clear" w:fill $value
+            }
             Tag_w:tabs {
                 my Tabs [my EatOption -tabs]
             }
@@ -1956,13 +1973,18 @@ oo::class create ooxml::docx::docx {
 
     method TcPr {} {
         my Prepare 1
+        my OneOffOptions -shading -background
         Tag_w:tcPr {
             my Create $properties(cell1)
             Tag_w:tcBorders {
                 my Create $properties(cellBorders)
             }
             my Create $properties(cell2)
-            Tag_w:tcMar {
+            set value [my EatOption -background ST_HexColor]
+            if {$value ne ""} {
+                Tag_w:shd w:val "clear" w:fill $value
+            }
+             Tag_w:tcMar {
                 my Create $properties(cellMargins)
             }
             my Create $properties(cell3)

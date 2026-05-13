@@ -60,33 +60,33 @@ methods:
 
 **comment** *?-option value ...?* *creatingScript*
 
-This method creates a comment to the current point in the document
-with comment content created by the *creatingScript*. Although the
-standard allows much more rich content most word processor support
-only basic text formatting for comments.
+: This method creates a comment to the current point in the document
+  with comment content created by the *creatingScript*. Although the
+  standard allows much more rich content most word processor support
+  only basic text formatting for comments.
 
-The allowed options are
+    The allowed options are
 
--author string
+        -author string
 
--date <xsd datetime>
+        -date <xsd datetime>
 
--initials string
+        -initials string
 
 **commentrangeend** *id* *?-option value ...?* *creatingScript*
 
-This method marks the end of a range of content in the document and
-creates a comment to this content range with comment content created
-by the *creatingScript*. The *id* argument must be the id returned by
-the corresponding *commentrangestart* call. For the allowed options
-see the method *comment*.
+: This method marks the end of a range of content in the document and
+  creates a comment to this content range with comment content created
+  by the *creatingScript*. The *id* argument must be the id returned by
+  the corresponding *commentrangestart* call. For the allowed options
+  see the method *comment*.
 
 **commentrangestart** ?returnvar?
 
-This method marks the start of a range of content in the document
-for which a comment should be added. The method returns the id of the
-range and stores the id additionally in the variable with the name
-*resultvar*, if the optional argument is given.
+: This method marks the start of a range of content in the document
+  for which a comment should be added. The method returns the id of the
+  range and stores the id additionally in the variable with the name
+  *resultvar*, if the optional argument is given.
 
 **destroy**
 
@@ -95,39 +95,39 @@ range and stores the id additionally in the variable with the name
 
 **configure** *?-option value ...?*
 
-Set certain document properties. The recognized options are:
+: Set certain document properties. The recognized options are:
 
--category
+    -category
 
--contentStatus
+    -contentStatus
 
--created
+    -created
 
--creator
+    -creator
 
--description
+    -description
 
--identifier
+    -identifier
 
--ignorable *prefixList*: Set the MC Ignorable prefixes (e.g. "w14 wp14").
+    -ignorable *prefixList*: Set the MC Ignorable prefixes (e.g. "w14 wp14").
 
--keywords
+    -keywords
 
--language
+    -language
 
--lastModifiedBy
+    -lastModifiedBy
 
--lastPrinted
+    -lastPrinted
 
--modified
+    -modified
 
--revision
+    -revision
 
--subject
+    -subject
 
--title
+    -title
 
--version
+    -version
 
 **endnote** *?-option value ...?* *creatingScript*
 
@@ -135,12 +135,18 @@ Set certain document properties. The recognized options are:
   reference mark is inserted at the current position in the document.
   The allowed options are:
 
-  -refstyle *styleRef*: Character style applied to the reference mark. The value may be either the internal style ID (*w:styleId*) or the display name (*w:name*).
+    -refstyle *styleRef*: Character style applied to the reference mark.
+    The value may be either the internal style ID (*w:styleId*) or the
+    display name (*w:name*).
+  
+  The other *-option value* pairs allows formatting of the (whole)
+  endnote value. See [CHARACTER OPTIONS](#character) for the valid
+  options and the type of their value.
 
 **field** *field-type* ?*switches*? *?-option value ...?*
 
-Appends the given field type to the last paragraph. Recognized
-field types are
+: Appends the given field type to the last paragraph. Recognized
+  field types are
 
             AUTHOR
             CREATEDATE
@@ -154,11 +160,11 @@ field types are
             TITLE
             USERNAME
 
-If the optional argument *switches* is given its value will be
-appended as the field switches to the field-type name. The following
-optional *-option value* pairs allows formatting of the (whole)
-inserted field value. See [CHARACTER OPTIONS](#character) for the valid
-  options and the type of their value.
+    If the optional argument *switches* is given its value will be
+    appended as the field switches to the field-type name. The following
+    optional *-option value* pairs allows formatting of the (whole)
+    inserted field value. See [CHARACTER OPTIONS](#character) for the valid
+    options and the type of their value.
 
 **footnote** *?-option value ...?* *creatingScript*
 
@@ -166,61 +172,63 @@ inserted field value. See [CHARACTER OPTIONS](#character) for the valid
   reference mark is inserted at the current position in the document.
   The allowed options are:
 
-  -refstyle *styleRef*: Character style applied to the reference mark. The value may be either the internal style ID (*w:styleId*) or the display name (*w:name*).
+    -refstyle *styleRef*: Character style applied to the reference
+    mark. The value may be either the internal style ID (*w:styleId*)
+    or the display name (*w:name*).
 
 **footer** *creatingScript* ?returnvar?
 **header** *creatingScript* ?returnvar?
 
-Creates a new footer or header by evaluating the creating script.
-The id of the created footer or header is returned and, if given,
-stored in the returnvar.
+: Creates a new footer or header by evaluating the creating script.
+  The id of the created footer or header is returned and, if given,
+  stored in the returnvar.
 
 **image** *file* *anchor|inline* *?-option value ...?*
 
-An *inline* image is part of the text, like a character (and therefore
-may change the line height). An *anchor* image is also anchored at an
-exact place within the text (which determines the page at which the
-image is shown) but can be freely placed at the page.
+: An *inline* image is part of the text, like a character (and therefore
+  may change the line height). An *anchor* image is also anchored at an
+  exact place within the text (which determines the page at which the
+  image is shown) but can be freely placed at the page.
 
-Both types of images share the following options:
+:  Both types of images share the following options:
 
--dimension *keyValueList*: Required. Sets the image size. Keys:
-width (EMU), height (EMU).
+        -dimension *keyValueList*: Required. Sets the image size. Keys:
+            width (EMU), height (EMU).
 
--bwMode *(auto|black|blackGray|blackWhite|clr|gray|grayWhite|
-hidden|invGray|ltGray|white)*: Black-and-white mode
-(default "auto").
+        -bwMode *(auto|black|blackGray|blackWhite|clr|gray|grayWhite|
+            hidden|invGray|ltGray|white)*: Black-and-white mode
+            (default "auto").
 
-Anchor images additionally accept:
+:  Anchor images additionally accept:
 
--anchorData *keyValueList*: Anchor attributes. Keys: behindDoc,
-distT, distB, distL, distR, hidden, locked, layoutInCell,
-allowOverlap, relativeHeight.
+        -anchorData *keyValueList*: Anchor attributes. Keys: behindDoc,
+        distT, distB, distL, distR, hidden, locked, layoutInCell,
+        allowOverlap, relativeHeight.
 
--positionH *relativeFrom*: Horizontal position reference
-(column, character, insideMargin, leftMargin, margin, outsideMargin,
-page, rightMargin). Default "column".
+        -positionH *relativeFrom*: Horizontal position reference
+        (column, character, insideMargin, leftMargin, margin, outsideMargin,
+        page, rightMargin). Default "column".
 
--alignH *(left|right|center|inside|outside)*: Horizontal alignment
-(mutually exclusive with -posOffsetH).
+        -alignH *(left|right|center|inside|outside)*: Horizontal alignment
+        (mutually exclusive with -posOffsetH).
 
--posOffsetH *EMU*: Horizontal offset (mutually exclusive with
--alignH).
+        -posOffsetH *EMU*: Horizontal offset (mutually exclusive with
+        -alignH).
 
--positionV *relativeFrom*: Vertical position reference (insideMargin,
-line, margin, outsideMargin, page, paragraph, topMargin,
-bottomMargin). Default "paragraph".
+        -positionV *relativeFrom*: Vertical position reference (insideMargin,
+        line, margin, outsideMargin, page, paragraph, topMargin,
+        bottomMargin). Default "paragraph".
 
--alignV *(inline|top|center|bottom|inside|outside)*: Vertical
-alignment (mutually exclusive with -posOffsetV).
+        -alignV *(inline|top|center|bottom|inside|outside)*: Vertical
+        alignment (mutually exclusive with -posOffsetV).
 
--posOffsetV *EMU*: Vertical offset (mutually exclusive with -alignV).
+        -posOffsetV *EMU*: Vertical offset (mutually exclusive with -alignV).
 
--wrapMode *(none|square|topBottom)*: Text wrapping mode (default
-"none").
+        -wrapMode *(none|square|topBottom)*: Text wrapping mode (default
+        "none").
 
--wrapData *keyValueList*: Wrap attributes (only with -wrapMode
-square). Keys: wrapText, distT, distB, distL, distR.
+        -wrapData *keyValueList*: Wrap attributes (only with -wrapMode
+        square). Keys: wrapText, distT, distB, distL, distR.
 
 
 **import** *part* *docx*
@@ -228,22 +236,22 @@ square). Keys: wrapText, distT, distB, distL, distR.
 : Imports the given *part* from the file *docx* into the docx object,
   replacing what the object had for that part of the docx zip archive.
 
-  The shortcut "styles" may be used for word/styles.xml and
+: The shortcut "styles" may be used for word/styles.xml and
   "numbering" for word/numbering.xml.
 
 **jumpto** *text* *markid* *?-option value ...?*
 
-Appends the text *text* to the last paragraph and if the text is
+: Appends the text *text* to the last paragraph and if the text is
 clicked as link (typically Ctrl-Button-1) the text processor jumps to
 the mark with the id *markid* inside the document. 
 
-  The option/value pairs control locally the appearance of the *text*
+: The option/value pairs control locally the appearance of the *text*
   within the paragraph. See [CHARACTER OPTIONS](#character) for the
   valid options and the type of their argument.
 
 **mark** *markid*
 
-Sets the mark *markid* at the end of the last paragraph.
+: Sets the mark *markid* at the end of the last paragraph.
 
 **markstart** *name*
 
@@ -361,16 +369,16 @@ Sets the mark *markid* at the end of the last paragraph.
 : Creates an accent construct — places a diacritical mark (hat, tilde,
   dot, vector arrow, etc.) above the base expression.
 
-  -char *string*: The accent character. Default is the combining
-  circumflex accent (U+0302). Common values:
-  U+0303 (tilde), U+0307 (dot), U+0308 (double dot),
-  U+20D7 (combining right arrow / vector).
+        -char *string*: The accent character. Default is the combining
+        circumflex accent (U+0302). Common values:
+        U+0303 (tilde), U+0307 (dot), U+0308 (double dot),
+        U+20D7 (combining right arrow / vector).
 
 **mbar** *?-option value ...?* *baseScript*
 
 : Creates an overline or underline bar above or below the base.
 
-  -pos *top|bot*: Position of the bar (default "top" = overline).
+        -pos *top|bot*: Position of the bar (default "top" = overline).
 
 **mdelim** *?-option value ...?* *script*
 
@@ -378,17 +386,17 @@ Sets the mark *markid* at the end of the last paragraph.
   such as parentheses, brackets, braces, absolute-value bars, norms,
   floor/ceiling symbols, etc.
 
-  The *script* body creates the content. For a single argument, math
+: The *script* body creates the content. For a single argument, math
   methods in the script create content directly within an m:e element.
   For multiple arguments separated by the separator character, use
   **mdelimarg** within the script.
 
-  -begChr *string*: Opening delimiter character (default "(")
-  -endChr *string*: Closing delimiter character (default ")")
-  -sepChr *string*: Separator character between arguments (default "|")
-  -grow *onOffValue*: Delimiters grow to match content height
-  -shp *centered|match*: Delimiter shape
-
+        -begChr *string*: Opening delimiter character (default "(")
+        -endChr *string*: Closing delimiter character (default ")")
+        -sepChr *string*: Separator character between arguments (default "|")
+        -grow *onOffValue*: Delimiters grow to match content height
+        -shp *centered|match*: Delimiter shape
+      
 **mdelimarg** *script*
 
 : Creates a delimiter argument (m:e child) inside an enclosing mdelim.
@@ -413,12 +421,12 @@ Sets the mark *markid* at the end of the last paragraph.
   is a script that creates cells via **mmatcell** calls. Wrap in
   **mdelim** for bracket/parenthesis notation.
 
-  -baseJc *top|center|bottom*: Vertical alignment of the matrix
-  relative to the math baseline
-  -mcJc *left|center|right*: Column justification
-  -count *integer*: Number of adjacent columns sharing the
-  justification (1–255)
-
+        -baseJc *top|center|bottom*: Vertical alignment of the matrix
+        relative to the math baseline
+        -mcJc *left|center|right*: Column justification
+        -count *integer*: Number of adjacent columns sharing the
+        justification (1–255)
+        
 **mmatcell** *script*
 
 : Creates a matrix cell (m:e child) inside a matrix row. Each call
@@ -428,7 +436,7 @@ Sets the mark *markid* at the end of the last paragraph.
 
 : Manages numbering definitions (lists, outlines).
 
-  The supported subcommands are:
+: The supported subcommands are:
 
   **abstractNum** *id* *levelDefinitions*: Creates an abstract
   numbering definition with the given integer *id*. The

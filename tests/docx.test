@@ -29,7 +29,7 @@ test docx-1.2 {paragraph argument check} {
 } 0
 
 test docx-1.3 {paragraph argument check} {
-    catch {$docx paragraph "some text" -style}
+    catch {$docx paragraph "some text" -style} errMsg
 } 1
 
 test docx-1.4 {mutually exclusive options} {
@@ -41,6 +41,65 @@ test docx-1.4 {mutually exclusive options} {
     list $result $errMsg
 } {1 {The options -scr -sty and -nor are mutually exclusive.}}
 
+    # mark name 
+    # markend name 
+    # markstart name 
+    # numbering cmd args 
+    # pagebreak  
+    # pagesetup args 
+    # paragraph text args 
+    # readpart what file 
+    # replace from to where "" 
+    # sectionend  
+    # sectionstart args 
+    # selectNodes xpath part "" args 
+    # settings args 
+    # simplecomment text args 
+    # simplecommentrangeend id text args 
+    # simpletable tabledata args 
+    # style cmd args 
+    # tab n 1 
+    # table args 
+    # tablecell args 
+    # tablerow args 
+    # textbox args 
+    # url text url args 
+
+set counter 0
+foreach {method fixedArguments postOptions}  {
+    append text ""
+    comment "" {"<comment script>"}
+    commentrangeend id ""
+    configure "" ""
+    endnote "" script
+    footnote "" script
+    image "file type" ""
+    jumpto "text mark"
+} {
+    incr counter
+    set nrFixedArguments [llength $fixedArguments]
+    set nrPostOptions [llength $postOptions]
+    set bodyScript "$docx $method"
+    for {set i 0} {$i < $nrFixedArguments} {incr i} {
+        append bodyScript " dummy"
+    }
+    append bodyScript " -optionWithoutValue"
+    for {set i 0} {$i < $nrPostOptions} {incr i} {
+        append bodyScript " {}"
+    }
+    set expectedResult "invalid arguments, expected:"
+    if {$nrFixedArguments} {
+        append expectedResult " $fixedArguments"
+    }
+    append expectedResult " ?-option value? ?-option value? .."
+    foreach postOption $postOptions {
+        append expectedResult " $postOption"
+    }
+    test docx-1.5.$counter "Method $method - not paired option value list" \
+        -body $bodyScript \
+        -returnCodes error \
+        -result $expectedResult
+}
 $docx destroy
 
 test docx-2.1 {settings} {

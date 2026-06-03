@@ -2098,10 +2098,10 @@ oo::class create ooxml::docx::docx {
         my variable commentranges
 
         if {[catch {
+            OptVal $args id
             if {![info exists commentranges($id)]} {
                 error "no open comment range with the id '$id'"
             }
-            OptVal [lrange $args 0 end-1]
             lassign [my CreateComment $id] comment id
             my CheckRemainingOpts
             set script [lindex $args end]
@@ -2159,7 +2159,7 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             OptVal $args
             # We need to look if -ignorable was given to be able to
-            # handle the empty string as value."
+            # handle the empty string as value.
             if {[info exists opts(-ignorable)]} {
                 set ignorable [my EatOption -ignorable]
                 my Ignorable
@@ -2211,7 +2211,7 @@ oo::class create ooxml::docx::docx {
     method endnote {args} {
         if {[catch {
             set script [lindex $args end]
-            OptVal [lrange $args 0 end-1] "endnote" "script"
+            OptVal [lrange $args 0 end-1] "" "script"
             set id [my FootnoteEndnote endnote \
                         [my EatOption -refstyle RStyle] $script]
             set p [my LastParagraph 1]
@@ -2304,7 +2304,7 @@ oo::class create ooxml::docx::docx {
     method footnote {args} {
         if {[catch {
             set script [lindex $args end]
-            OptVal [lrange $args 0 end-1] "footnote" "script"
+            OptVal [lrange $args 0 end-1] "" "script"
             set id [my FootnoteEndnote footnote \
                         [my EatOption -refstyle RStyle] $script]
             set p [my LastParagraph 1]
@@ -2336,13 +2336,13 @@ oo::class create ooxml::docx::docx {
         my variable binparts
 
         if {[catch {
+            OptVal $args "file type"
             if {![file isfile $file] || ![file readable $file]} {
                 error "cannot read file \"$file\""
             }
             if {$type ni {inline anchor}} {
                 error "invalid image type \"$type\" (expected \"inline\" or \"anchor\")"
             }
-            OptVal $args "file type"
             set imagename image[my NextId image]
             append imagename [string tolower [file extension $file]]
             set fd [open $file rb]

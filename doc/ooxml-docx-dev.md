@@ -41,7 +41,7 @@ At least it is a voluminous beast - which is kind of inevitable (to
 some degree) for a powerful layout markup language.
 
 Almost all WordprocessingML elements have no text content. Values and
-options are carried out by attributes. That attributes are namespaces
+options are carried out by attributes. That attributes are namespaced
 (for no obvious or good reason).
 
 Some elements can have a meaning just by their precence, without any
@@ -95,7 +95,7 @@ In a lot of cases with the method Create it is possible to create
 WordprocessingML content directly from option values given by the
 user. This method expects a list of opion value pairs as argument.
 
-The value off an option (as -bold, -margins etc.) must be a Tcl list
+The value of an option (as -bold, -margins etc.) must be a Tcl list
 with at least two elements.
 
 The first element of that list is the list of elements to create. 

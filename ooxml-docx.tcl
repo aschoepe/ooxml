@@ -2098,7 +2098,7 @@ oo::class create ooxml::docx::docx {
         my variable commentranges
 
         if {[catch {
-            OptVal $args id
+            OptVal [lrange $args 0 end-1] id script
             if {![info exists commentranges($id)]} {
                 error "no open comment range with the id '$id'"
             }
@@ -2891,10 +2891,10 @@ oo::class create ooxml::docx::docx {
         my variable commentranges
 
         if {[catch {
+            OptVal $args "id text"
             if {![info exists commentranges($id)]} {
                 error "no open comment range with the id '$id'"
             }
-            OptVal $args "text"
             lassign [my CreateComment $id] comment
             $comment appendFromScript {
                 Tag_w:p {
@@ -3016,7 +3016,7 @@ oo::class create ooxml::docx::docx {
                         error "missing the style name argument"
                     }
                     set name [lindex $args 0]
-                    OptVal [lrange $args 1 end] $cmd
+                    OptVal [lrange $args 1 end] "$cmd name"
                     # Check for duplicate by display name
                     set style [$styles selectNodes {
                         w:style[@w:type=$cmd][w:name[@w:val=$name]]
@@ -3152,7 +3152,7 @@ oo::class create ooxml::docx::docx {
         set script [lindex $args end]
         set tablecontext "table"
         if {[catch {
-            OptVal [lrange $args 0 end-1] "table" "script"
+            OptVal [lrange $args 0 end-1] "" "script"
             $body appendFromScript {
                 Tag_w:tbl {
                     my TblPr
@@ -3180,7 +3180,7 @@ oo::class create ooxml::docx::docx {
             error "method tablecell called outside of table row script context"
         }
         set script [lindex $args end]
-        OptVal [lrange $args 0 end-1] "tablecell" "script"
+        OptVal [lrange $args 0 end-1] "" "script"
         set tablecontext ""
         if {[catch {
             Tag_w:tc {
@@ -3214,7 +3214,7 @@ oo::class create ooxml::docx::docx {
         }
         set tablecontext "row"
         set script [lindex $args end]
-        OptVal [lrange $args 0 end-1] "tablerow" "script"
+        OptVal [lrange $args 0 end-1] "" "script"
         if {[catch {
             Tag_w:tr {
                 my TrPr
@@ -3239,7 +3239,7 @@ oo::class create ooxml::docx::docx {
         set p [my LastParagraph 1]
         set script [lindex $args end]
         if {[catch {
-            OptVal [lrange $args 0 end-1]
+            OptVal [lrange $args 0 end-1] "" "script"
             set name [my EatOption -name]
             if {$name eq ""} {
                 set name "Textbox [my NextId textboxes]"

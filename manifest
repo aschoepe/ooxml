@@ -1,5 +1,5 @@
-C Added\sthe\ssame\s-option\svalue\stests\sfor\smath\smethods.
-D 2026-06-04T13:17:25.172
+C More\soption\shandling\sinfrastructure\stests.
+D 2026-06-04T23:23:36.682
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -74,7 +74,7 @@ F tests/docx-style.test 85bbf9dc14f051608d57d7cd481edf5aa469b94917ab42570136a82d
 F tests/docx-tables.test 6b19cf08da444b765b733a5f674a89130d5f9e43d86e9c2ad922253da1ca5c98
 F tests/docx-val.test 31a1cec94b384be18da568d72e65be456e29f8423703862b468d67d8b703a7d1
 F tests/docx-write.test 37ee5b12e64b3b255eb466790ae33d4780f2a70e2a64b85263779b1d5d43beb1
-F tests/docx.test eec462364fb3db96d89be1096923228c724c4d3c4b55812bd6fa645646373df7
+F tests/docx.test b2527c0ab13bdd7ffee83fb937a134982d91b3f2b84bc3defcec01cf1d350023
 F tests/docx_helpers.tcl 4aecbbdafd8249f7ab850411e93b36da949407e1b575184c15a1f75d000261b6
 F tests/ecma376/RULES.txt 79610fa032ab1ffcda5df871d3e3adc674f9c8bc5a38ccb1915814bede07c69f
 F tests/ecma376/schema-data.tcl 6541b42eb71635234c663bb682d62b7609387d3335c52e6d3f55cc8cd7b1c248
@@ -130,8 +130,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P b4260e1e158a8dc92446da1f6fd63154145265da2c828b019bbcb4fa91fadd6d
-R f07eb61cc9b93b19dc4a6e00e457b322
+P 0edfe7832ba9bd714d644b5e799d20d43dd021679e1d4483d469a8935eb16dba
+R 5a9264b91a78e3b9daf7255690e7dd78
 U rolf
-Z aec01a489eaa64d44244ab4ad34dbfe4
+Z 5449b6190123aafabec9e12eacaa69ab
 # Remove this line to create a well-formed Fossil manifest.

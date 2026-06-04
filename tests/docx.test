@@ -114,6 +114,72 @@ foreach {mathmethod fixedArguments postOptions} {
         -returnCodes error \
         -result $expectedResult
 }
+
+
+set counter 0
+set expectedResult "unknown option: -notExistingOption, known option.*"
+foreach {method fixedArguments postOptions} {
+    append text ""
+    comment "" {"<comment script>"}
+    configure "" ""
+    endnote "" script
+    footnote "" script
+    jumpto "text mark" ""
+    pagesetup "" ""
+    paragraph text ""
+    sectionstart "" ""
+    settings "" ""
+    simplecomment text ""
+    simpletable tabledata ""
+    style paragraphdefault ""
+    style characterdefault ""
+    style "character name" ""
+    style "paragraph name" ""
+    style "table name" ""
+    table "" script
+    url "text url" ""
+} {
+    incr counter
+    set bodyScript "$docx $method"
+    foreach fixedArgument $fixedArguments {
+        append bodyScript " $fixedArgument"
+    }
+    append bodyScript " -notExistingOption dummyValue"
+    foreach postOption $postOptions {
+        append bodyScript " {}"
+    }
+    test docx-1.6.$counter "Method $method - unknown option" \
+        -body $bodyScript \
+        -returnCodes error \
+        -match regexp \
+        -result $expectedResult
+}
+
+set mathbodytmpl {$docx math {$bodyScript}}
+foreach {mathmethod fixedArguments postOptions} {
+    maccent "" baseScript
+    mbar "" baseScript
+    mdelim "" script
+    mfrac "" {numScript denScript}
+    mgroupchr "" baseScript
+    mnary "" baseScript
+    mrun "" text
+} {
+    incr counter
+    set bodyScript "$docx $mathmethod"
+    foreach fixedArgument $fixedArguments {
+        append bodyScript " $fixedArgument"
+    }
+    append bodyScript " -notExistingOption dummyValue"
+    foreach postOption $postOptions {
+        append bodyScript " {}"
+    }
+    test docx-1.6.$counter "Method $mathmethod - unknown option" \
+        -body [subst $mathbodytmpl] \
+        -returnCodes error \
+        -match regexp \
+        -result $expectedResult
+}
 $docx destroy
 
 test docx-2.1 {settings} {

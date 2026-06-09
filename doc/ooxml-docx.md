@@ -5,8 +5,8 @@
 
 # SYNOPSIS
 
-    package require ooxml
-    ::ooxml::docx new *?-option value ...?* ?docx-file?
+    package require ooxml::docx
+    ::ooxml::docx::docx new *?-option value ...?* ?docx-file?
     
 # DESCRIPTION
 
@@ -25,7 +25,7 @@ can be read by word processing programs as libreOffice or Word.
 
 A simple "Hello, World" example is:
 
-    set docx [::ooxml::docx new]
+    set docx [ooxml::docx::docx new]
     $docx paragraph "Hello, World!"
     $docx write hello.docx
     $docx destroy
@@ -849,7 +849,8 @@ the mark with the id *markid* inside the document.
 **write** *?filename?*
 
 : Writes the object as WordprocessingML docx file to *filename*. If
-  the argument is omitted then document.docx will be used.
+  the argument is omitted then document.docx will be used. If the
+  filename does not have a suffix, then the suffix .docx will be appended.
 
 **writepart** *part* *filename*
 

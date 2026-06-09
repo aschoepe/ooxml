@@ -1,5 +1,5 @@
-C More\soption\shandling\sinfrastructure\stests.
-D 2026-06-04T23:23:36.682
+C Some\seditorial\sdocumentation\sclean\sup.
+D 2026-06-09T23:16:03.747
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -11,7 +11,7 @@ F configure b2add97b6f5454210ad7dfe98f246682d17cfc1a49826cd896424baff2ab51c8 x
 F configure.ac 05e0c4e8d49fbdd1e45656bd885a4e529244c77c28c697c4820f35c548bbf873
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml-docx-dev.md 456ae2a9c147597f7e0962b0ee15aa285093f111b870064faec31cecb54c5124
-F doc/ooxml-docx.md 7cac26caa098274c89e46fef01ea16851b473a2bb3aacdd4551616011a017f4f
+F doc/ooxml-docx.md c85991b817f7f199a72add8bc4a1391094a87f9a04b353ebb117357d8377459b
 F doc/ooxml.md 8e9af22574db8fdd0de01894d6f0cdb06a975c7e01bad5a024425d7fc0cf1c44
 F doc/tcl-docs.css 1864d346150f579ea5d9efaa9ca83c2078c8ed696c494f37e9f122d5f1d4350f
 F docxtest.tcl d55c5fbee8d7e3d7fcb7193578abf8d554c99f87c2d3eabc2d94b61856636f38
@@ -130,8 +130,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 0edfe7832ba9bd714d644b5e799d20d43dd021679e1d4483d469a8935eb16dba
-R 5a9264b91a78e3b9daf7255690e7dd78
+P 3a41a99cd8281ad494848a6dfeaa3a561daec9ad4ec9423f5f50b59fba7a3f9c
+R 6ff8d7b263b83b75a7071b1b59a4e9a7
 U rolf
-Z 5449b6190123aafabec9e12eacaa69ab
+Z 21559816fd36949f47ac447c183a51fe
 # Remove this line to create a well-formed Fossil manifest.

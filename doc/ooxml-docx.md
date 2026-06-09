@@ -1,4 +1,4 @@
-% ooxml(n) | ooxml user documentation
+% ooxml-docx(n) | ooxml user documentation
 # NAME
 
 ::ooxml::docx - Create ECMA-376 Office Open XML writer documents (the .docx format)
@@ -10,11 +10,16 @@
     
 # DESCRIPTION
 
-The command *::ooxml::docx* creates a docx object. Without the
-optional file argument it represents an almost minimal empty document.
+The command *::ooxml::docx* creates a new docx object.
+
+Without the optional file argument the object represents an almost
+minimal empty document.
+
 If the last argument is an ECMA-376 Office Open XML WordprocessingML
 document (vulgo a .docx file) the inital document is a copy of this
-.docx. The object has methods to append and style content as text,
+.docx.
+
+The object has methods to append and style content as text,
 tables, pictures or textboxes. The .docx file created by the object
 can be read by word processing programs as libreOffice or Word.
 
@@ -50,7 +55,7 @@ methods:
 
 : Appends *text* to the last paragraph of the content of the document.
   The option/value pairs control the appearance of the *text* within
-  the paragraph. See [CHARACTER OPTIONS](#character) for the valid
+  the paragraph. See [CHARACTER OPTIONS](#character-options) for the valid
   options and the type of their value.
 
 **br** *?n?*
@@ -97,37 +102,37 @@ methods:
 
 : Set certain document properties. The recognized options are:
 
-    -category
+        -category
 
-    -contentStatus
+        -contentStatus
 
-    -created
+        -created
 
-    -creator
+        -creator
 
-    -description
+        -description
 
-    -identifier
+        -identifier
 
-    -ignorable *prefixList*: Set the MC Ignorable prefixes (e.g. "w14 wp14").
+        -ignorable prefixList: Set the MC Ignorable prefixes (e.g. "w14 wp14").
 
-    -keywords
+        -keywords
 
-    -language
+        -language
 
-    -lastModifiedBy
+        -lastModifiedBy
 
-    -lastPrinted
+        -lastPrinted
 
-    -modified
+        -modified
 
-    -revision
+        -revision
 
-    -subject
+        -subject
 
-    -title
+        -title
 
-    -version
+        -version
 
 **endnote** *?-option value ...?* *creatingScript*
 
@@ -139,9 +144,9 @@ methods:
     The value may be either the internal style ID (*w:styleId*) or the
     display name (*w:name*).
   
-  The other *-option value* pairs allows formatting of the (whole)
-  endnote value. See [CHARACTER OPTIONS](#character) for the valid
-  options and the type of their value.
+    The other *-option value* pairs allows formatting of the (whole)
+    endnote value. See [CHARACTER OPTIONS](#character-options) for the valid
+    options and the type of their value.
 
 **field** *field-type* ?*switches*? *?-option value ...?*
 
@@ -163,7 +168,7 @@ methods:
     If the optional argument *switches* is given its value will be
     appended as the field switches to the field-type name. The following
     optional *-option value* pairs allows formatting of the (whole)
-    inserted field value. See [CHARACTER OPTIONS](#character) for the valid
+    inserted field value. See [CHARACTER OPTIONS](#character-options) for the valid
     options and the type of their value.
 
 **footnote** *?-option value ...?* *creatingScript*
@@ -172,9 +177,9 @@ methods:
   reference mark is inserted at the current position in the document.
   The allowed options are:
 
-    -refstyle *styleRef*: Character style applied to the reference
-    mark. The value may be either the internal style ID (*w:styleId*)
-    or the display name (*w:name*).
+        -refstyle styleRef: Character style applied to the reference
+        mark. The value may be either the internal style ID (*w:styleId*)
+        or the display name (*w:name*).
 
 **footer** *creatingScript* ?returnvar?
 **header** *creatingScript* ?returnvar?
@@ -246,7 +251,7 @@ clicked as link (typically Ctrl-Button-1) the text processor jumps to
 the mark with the id *markid* inside the document. 
 
 : The option/value pairs control locally the appearance of the *text*
-  within the paragraph. See [CHARACTER OPTIONS](#character) for the
+  within the paragraph. See [CHARACTER OPTIONS](#character-options) for the
   valid options and the type of their argument.
 
 **mark** *markid*
@@ -270,45 +275,45 @@ the mark with the id *markid* inside the document.
   using the math methods described below. By default the math is
   inline within the current paragraph. Options:
 
-  -display *onOffValue*: If on, the math is rendered as a display
-  equation on its own paragraph.
+           -display *onOffValue*: If on, the math is rendered as a display
+           equation on its own paragraph.
 
-  -jc *(left|center|right|centerGroup)*: Justification of a display
-  equation. Ignored when -display is off.
+           -jc *(left|center|right|centerGroup)*: Justification of a display
+           equation. Ignored when -display is off.
 
-  Inside the *creatingScript*, the following math methods are
-  available. All math methods must be called from within the
-  *creatingScript* of a **math** call; calling them outside a math
-  zone raises a Tcl error. Invalid option values also raise a Tcl
-  error.
+    Inside the *creatingScript*, the following math methods are
+    available. All math methods must be called from within the
+    *creatingScript* of a **math** call; calling them outside a math
+    zone raises a Tcl error. Invalid option values also raise a Tcl
+    error.
 
 **mrun** *?-option value ...?* *text*
 
 : Creates a math run (text within a math zone). Options:
 
-  -lit *onOffValue*: Literal (non-italic) text.
+        -lit *onOffValue*: Literal (non-italic) text.
 
-  -sty *(p|b|i|bi)*: Math style (plain, bold, italic, bold-italic).
+        -sty *(p|b|i|bi)*: Math style (plain, bold, italic, bold-italic).
 
-  -scr *(roman|script|fraktur|double-struck|sans-serif|monospace)*:
-  Math font script.
+        -scr *(roman|script|fraktur|double-struck|sans-serif|monospace)*:
+        Math font script.
 
-  -nor *onOffValue*: Normal text (non-math font). Mutually exclusive
-  with -sty/-scr.
+        -nor *onOffValue*: Normal text (non-math font). Mutually exclusive
+        with -sty/-scr.
 
-  -aln *onOffValue*: Alignment point.
+        -aln *onOffValue*: Alignment point.
 
-  -brk *onOffValue*: Line break. -brkAt *integer*: alignment position
-  after break.
+        -brk *onOffValue*: Line break. -brkAt *integer*: alignment position
+        after break.
 
 **mfrac** *?-option value ...?* *numeratorScript* *denominatorScript*
 
 : Creates a fraction. The two scripts create the numerator and
   denominator content. Options:
 
-  -type *(bar|lin|noBar|skw)*: Fraction type. Defaults to bar (stacked
-  with horizontal rule). *lin* gives a linear (inline slash) form,
-  *noBar* stacked without bar, *skw* skewed.
+           -type *(bar|lin|noBar|skw)*: Fraction type. Defaults to bar (stacked
+           with horizontal rule). *lin* gives a linear (inline slash) form,
+           *noBar* stacked without bar, *skw* skewed.
 
 **msub** *baseScript* *subscriptScript*
 
@@ -337,20 +342,20 @@ the mark with the id *markid* inside the document.
 : Creates an n-ary operator (summation, product, integral, etc.).
   Options:
 
-  -char *string*: The operator character (e.g. "∑", "∏", "∫").
+        -char *string*: The operator character (e.g. "∑", "∏", "∫").
 
-  -limLoc *(undOvr|subSup)*: Limit placement — under/over or
-  sub/superscript position.
+        -limLoc *(undOvr|subSup)*: Limit placement — under/over or
+        sub/superscript position.
 
-  -grow *onOffValue*: Whether the operator grows with its content.
+        -grow *onOffValue*: Whether the operator grows with its content.
 
-  -sub *script*: Subscript (lower limit) content script.
+        -sub *script*: Subscript (lower limit) content script.
 
-  -sup *script*: Superscript (upper limit) content script.
+        -sup *script*: Superscript (upper limit) content script.
 
-  -subHide *onOffValue*: Hide the subscript.
+        -subHide *onOffValue*: Hide the subscript.
 
-  -supHide *onOffValue*: Hide the superscript.
+        -supHide *onOffValue*: Hide the superscript.
 
 **mfunc** *nameScript* *argumentScript*
 
@@ -409,11 +414,11 @@ the mark with the id *markid* inside the document.
   or similar character that spans the base expression. Commonly used
   to label parts of an equation.
 
-  -char *string*: The grouping character (default U+23DF = ⏟ bottom
-  curly bracket). Use U+23DE for overbrace (⏞).
-  -pos *top|bot*: Position of the character (default "bot")
-  -vertJc *top|bot*: Vertical justification of the base relative to
-  the grouping character
+        -char *string*: The grouping character (default U+23DF = ⏟ bottom
+        curly bracket). Use U+23DE for overbrace (⏞).
+        -pos *top|bot*: Position of the character (default "bot")
+        -vertJc *top|bot*: Vertical justification of the base relative to
+        the grouping character
 
 **mmatrix** *?-option value ...?* *rowScripts*
 
@@ -443,24 +448,24 @@ the mark with the id *markid* inside the document.
   *levelDefinitions* argument is a list; each element defines one
   level using option/value pairs:
 
-      -numberFormat *format*: Numbering format (decimal, upperRoman,
-      lowerRoman, upperLetter, lowerLetter, bullet, etc.)
-      -levelText *string*: Level text template (e.g. "%1." or "%1.%2")
-      -align *alignment*: Number alignment (start, center, end, etc.)
-      -start *integer*: Starting number (default 1)
+        -numberFormat *format*: Numbering format (decimal, upperRoman,
+        lowerRoman, upperLetter, lowerLetter, bullet, etc.)
+        -levelText *string*: Level text template (e.g. "%1." or "%1.%2")
+        -align *alignment*: Number alignment (start, center, end, etc.)
+        -start *integer*: Starting number (default 1)
 
-  Paragraph and character options may also be given per level to
-  style the number and the paragraph.
+    Paragraph and character options may also be given per level to
+    style the number and the paragraph.
 
-  A corresponding w:num entry is automatically created with the
-  same numId as the abstractNumId.
+    A corresponding w:num entry is automatically created with the
+    same numId as the abstractNumId.
 
-  Example:
+     Example:
 
-      $doc numbering abstractNum 0 {
-          {-numberFormat decimal -levelText "%1." -align start}
-          {-numberFormat lowerLetter -levelText "%2)" -align start}
-      }
+         $doc numbering abstractNum 0 {
+             {-numberFormat decimal -levelText "%1." -align start}
+             {-numberFormat lowerLetter -levelText "%2)" -align start}
+         }
 
   **abstractNumIds**: Returns a sorted list of all abstractNum IDs.
 
@@ -469,54 +474,55 @@ the mark with the id *markid* inside the document.
 
 **pagebreak**
 
-Appends a page break to the document.
+: Appends a page break to the document.
 
 **pagesetup** *?-option value ...?*
 
-The allowed options are:
+: The allowed options are:
 
--margins keyValueList
+        -margins keyValueList
 
--paperSource keyValueList
+        -paperSource keyValueList
 
--sizeAndOrientation keyValueList
+        -sizeAndOrientation keyValueList
 
--defaultHeader id
--defaultFooter id
--firstHeader id
--firstFooter id
--evenHeader id
--evenFooter id
+        -defaultHeader id
+        -defaultFooter id
+        -firstHeader id
+        -firstFooter id
+        -evenHeader id
+        -evenFooter id
 
-Set the respectively header or footer. The expected id has to be returned
-from a header or footer method call.
+    The last block of options set the respectively header or footer.
+    The id has to be returned from a header or footer method
+    call.
 
--border
+         -border
 
--pageNumbering
+         -pageNumbering
 
--sectionType *(continuous|evenPage|nextColumn|nextPage|oddPage)*
+        -sectionType *(continuous|evenPage|nextColumn|nextPage|oddPage)*
 
-Specifies the type of the current section break. The default is
-*nextPage*. Use *continuous* to start a new section on the same page
-(e.g. for switching between single and multi-column layout).
+    Specifies the type of the current section break. The default is
+    *nextPage*. Use *continuous* to start a new section on the same page
+    (e.g. for switching between single and multi-column layout).
 
--docGrid *keyValueList*
+        -docGrid *keyValueList*
 
-Configures the document grid for the section, controlling line
-pitch and character spacing for CJK and other layout needs.
-The accepted keys are:
+    Configures the document grid for the section, controlling line
+    pitch and character spacing for CJK and other layout needs.
+    The accepted keys are:
 
-    type        Grid type: "default", "lines", "linesAndChars",
-                or "snapToChars".
-    linePitch   Distance between lines (integer, in twips).
-    charSpace   Additional character pitch (integer, in 4096ths
-                of a point).
+        type        Grid type: "default", "lines", "linesAndChars",
+                    or "snapToChars".
+        linePitch   Distance between lines (integer, in twips).
+        charSpace   Additional character pitch (integer, in 4096ths
+                    of a point).
 
--vAlign *(top|center|bottom|both)*
+        -vAlign *(top|center|bottom|both)*
 
-Vertical alignment of text on the page. The value *both* distributes
-text evenly between the top and bottom margins (justified).
+    Vertical alignment of text on the page. The value *both* distributes
+    text evenly between the top and bottom margins (justified).
 
 **paragraph** *text* *?-pstyle style? ?-cstyle style? ?-option value ...?*
 
@@ -528,7 +534,7 @@ text evenly between the top and bottom margins (justified).
   prefers an exact style-ID match and falls back to the display name.
   The other options
   may locally overwrite a style setting or add more properties. See
-  [PARAGRAPH OPTIONS](#paragraph) and [CHARACTER OPTIONS](#character)
+  [PARAGRAPH OPTIONS](#paragraph-options) and [CHARACTER OPTIONS](#character-options)
   for the valid options and the type of their argument.
 
 **readpart** *part* *filename*
@@ -541,14 +547,14 @@ text evenly between the top and bottom margins (justified).
 
 **replace** *from* *to* *?part_list?*
 
-Replaces every *from* substring in any text with *to*, Only uniformly
-styled text is replaced (if *from* spans over more than one text part
-it will not be recognized). Without the optional *part list* argument
-all parts of the document (the main documentbody, footnotes, comments
-pp.) will be processed. If the argument is given then only the named
-parts will be processed. The elements of the part list may be a Tcl
-glob expression. Part names given by the *part list* argument which
-are currently not exists in the object will be silently ignored.
+: Replaces every *from* substring in any text with *to*, Only uniformly
+  styled text is replaced (if *from* spans over more than one text part
+  it will not be recognized). Without the optional *part list* argument
+  all parts of the document (the main documentbody, footnotes, comments
+  pp.) will be processed. If the argument is given then only the named
+  parts will be processed. The elements of the part list may be a Tcl
+  glob expression. Part names given by the *part list* argument which
+  are currently not exists in the object will be silently ignored.
 
 **sectionend**
 
@@ -570,85 +576,85 @@ are currently not exists in the object will be silently ignored.
   called multiple times; each call updates or adds the specified
   settings without affecting those set by earlier calls.
 
-  Special option:
+    Special option:
 
-  -reset *onOffValue*: If on, resets all settings to defaults before
-  applying the remaining options.
+            -reset *onOffValue*: If on, resets all settings to defaults before
+            applying the remaining options.
 
-  Commonly used settings:
+    Commonly used settings:
 
-  -defaultTabStop *integer*: Default tab stop distance in twips.
-  -autoHyphenation *onOffValue*: Enable automatic hyphenation.
-  -evenAndOddHeaders *onOffValue*: Use different headers/footers for
-  even and odd pages.
-  -hideSpellingErrors *onOffValue*: Hide red squiggly underlines.
-  -hideGrammaticalErrors *onOffValue*: Hide grammar error marks.
-  -trackRevisions *onOffValue*: Enable revision tracking.
-  -mirrorMargins *onOffValue*: Mirror left/right margins for
-  facing pages.
-  -embedTrueTypeFonts *onOffValue*: Embed TrueType fonts.
-  -documentProtection *keyValueList*: Protect the document.
-  Keys: edit (readOnly|comments|trackedChanges|forms|none),
-  enforcement (on|off), formatting (on|off), plus optional
-  cryptographic parameters.
+           -defaultTabStop *integer*: Default tab stop distance in twips.
+           -autoHyphenation *onOffValue*: Enable automatic hyphenation.
+           -evenAndOddHeaders *onOffValue*: Use different headers/footers for
+           even and odd pages.
+           -hideSpellingErrors *onOffValue*: Hide red squiggly underlines.
+           -hideGrammaticalErrors *onOffValue*: Hide grammar error marks.
+           -trackRevisions *onOffValue*: Enable revision tracking.
+           -mirrorMargins *onOffValue*: Mirror left/right margins for
+           facing pages.
+           -embedTrueTypeFonts *onOffValue*: Embed TrueType fonts.
+           -documentProtection *keyValueList*: Protect the document.
+           Keys: edit (readOnly|comments|trackedChanges|forms|none),
+           enforcement (on|off), formatting (on|off), plus optional
+           cryptographic parameters.
 
   Many more settings are available. On/off settings use *onOffValue*.
   Refer to the property table in the source for the complete list.
 
 **selectNodes** *xpath* ?*part*? *?selectNodes options?*
 
-Returns the result of the *xpath* expression. If no other argument is
-given the context node will be the document element node of the
-word/document.xml part of the docx. If the *part* argument is given the
-context node of the expression will be the document element of the
-docx part identified by this argument. If *part* is a relative path
-inside the docx zip (example: _rels/.rels) then this is used. All
-parts of the docx inside the word directory may specified without the
-directory part and the .xml suffix. The optional *selectNodes options*
-are routed throw.
+: Returns the result of the *xpath* expression. If no other argument is
+  given the context node will be the document element node of the
+  word/document.xml part of the docx. If the *part* argument is given the
+  context node of the expression will be the document element of the
+  docx part identified by this argument. If *part* is a relative path
+  inside the docx zip (example: _rels/.rels) then this is used. All
+  parts of the docx inside the word directory may specified without the
+  directory part and the .xml suffix. The optional *selectNodes options*
+  are routed throw.
 
-All documents accessible by this have the following prefix namespace
-mappings predefined:
+    All documents accessible by this have the following prefix namespace
+    mappings predefined:
 
-Prefix   Namespace
-------   ---------
- a       http://schemas.openxmlformats.org/drawingml/2006/main|
- ct      http://schemas.openxmlformats.org/package/2006/content-types|
- m       http://schemas.openxmlformats.org/officeDocument/2006/math|
- mc      http://schemas.openxmlformats.org/markup-compatibility/2006|
- o       urn:schemas-microsoft-com:office:office|
- pic     http://schemas.openxmlformats.org/drawingml/2006/picture|
- r       http://schemas.openxmlformats.org/officeDocument/2006/relationships|
- rel     http://schemas.openxmlformats.org/package/2006/relationships|
- sl      http://schemas.openxmlformats.org/schemaLibrary/2006/main|
- v       urn:schemas-microsoft-com:vml|
- w       http://schemas.openxmlformats.org/wordprocessingml/2006/main|
- w10     urn:schemas-microsoft-com:office:word|
- w14     http://schemas.microsoft.com/office/word/2010/wordml|
- wp      http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing|
- wp14    http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing|
- wpg     http://schemas.microsoft.com/office/word/2010/wordprocessingGroup|
- wps     http://schemas.microsoft.com/office/word/2010/wordprocessingShape|
+    Prefix   Namespace
+    ------   ---------
+     a       http://schemas.openxmlformats.org/drawingml/2006/main|
+     ct      http://schemas.openxmlformats.org/package/2006/content-types|
+     m       http://schemas.openxmlformats.org/officeDocument/2006/math|
+     mc      http://schemas.openxmlformats.org/markup-compatibility/2006|
+     o       urn:schemas-microsoft-com:office:office|
+     pic     http://schemas.openxmlformats.org/drawingml/2006/picture|
+     r       http://schemas.openxmlformats.org/officeDocument/2006/relationships|
+     rel     http://schemas.openxmlformats.org/package/2006/relationships|
+     sl      http://schemas.openxmlformats.org/schemaLibrary/2006/main|
+     v       urn:schemas-microsoft-com:vml|
+     w       http://schemas.openxmlformats.org/wordprocessingml/2006/main|
+     w10     urn:schemas-microsoft-com:office:word|
+     w14     http://schemas.microsoft.com/office/word/2010/wordml|
+     wp      http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing|
+     wp14    http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing|
+     wpg     http://schemas.microsoft.com/office/word/2010/wordprocessingGroup|
+     wps     http://schemas.microsoft.com/office/word/2010/wordprocessingShape|
 
 
 **simplecomment** *comment* *?-option value ...?*
 
-This method creates a comment to the current point in the document.
-The text content of the comment will be what is given by the argument
-*comment*. For the allowed options see the method *comment*.
-Additionally to this options all [PARAGRAPH OPTIONS](#paragraph) and
-[CHARACTER OPTIONS](#character) are allowed. If given they are
-applied to format the comment text.
+: This method creates a comment to the current point in the document.
+  The text content of the comment will be what is given by the argument
+  *comment*. For the allowed options see the method *comment*.
+  Additionally to this options all [PARAGRAPH OPTIONS](#paragraph-options) and
+  [CHARACTER OPTIONS](#character-options) are allowed. If given they are
+  applied to format the comment text.
 
 **simplecommentrangeend** *id* *comment* *?-option value ...?*
 
-This method marks the end of a range of content in the document and
-creates a comment to this content range with comment content given by
-the *comment* argument. The *id* argument must be the id returned by
-the corresponding *commentrangestart* call. For the allowed options
-see the method *comment*. Additionally to this options all
-[PARAGRAPH OPTIONS](#paragraph) and [CHARACTER OPTIONS](#character) are
-allowed. If given they are applied to format the comment text.
+: This method marks the end of a range of content in the document and
+  creates a comment to this content range with comment content given by
+  the *comment* argument. The *id* argument must be the id returned by
+  the corresponding *commentrangestart* call. For the allowed options
+  see the method *comment*. Additionally to this options all
+  [PARAGRAPH OPTIONS](#paragraph-options) and [CHARACTER OPTIONS](#character-options) are
+  allowed. If given they are applied to format the comment text.
 
 
 **simpletable** *tabledata* *?-option value ...?*
@@ -656,32 +662,32 @@ allowed. If given they are applied to format the comment text.
 : Creates a table from a nested list. Each element of *tabledata* is a
   row; each element within a row is a cell's text content.
 
-  Example: `$doc simpletable {{A1 B1 C1} {A2 B2 C2}}`
+    Example: `$doc simpletable {{A1 B1 C1} {A2 B2 C2}}`
 
-  Options:
+    Options:
 
-  -columnwidths *list*: Column widths (measurements).
-  -firstStyle *styleName*: Character style for the first row.
-  -lastStyle *styleName*: Character style for the last row.
+        -columnwidths *list*: Column widths (measurements).
+        -firstStyle *styleName*: Character style for the first row.
+        -lastStyle *styleName*: Character style for the last row.
 
-  Table-level options (-style, -width, -align, -layout, -look,
-  -tableBorders, cell margins) are also accepted — see **table**.
+    Table-level options (-style, -width, -align, -layout, -look,
+    -tableBorders, cell margins) are also accepted — see **table**.
 
 **style** *subcommand* *args*
 
 : The supported subcommands are:
 
-    : **paragraphdefault** *?-option value ...?*
-    
-    : **characterdefault** *?-option value ...?*
-    
-    : **paragraph** *name* *?-option value ...?*
+        paragraphdefault ?-option value ...?
 
-    : **character** *name* *?-option value ...?*
+        characterdefault ?-option value ...?
 
-    : **table** *name* *?-option value ...?*
+        paragraph name ?-option value ...?
 
-    : The *name* argument is the display name of the style. The
+        character name ?-option value ...?
+
+        table name ?-option value ...?
+
+      The *name* argument is the display name of the style. The
       internal style ID (w:styleId) is derived from the name by
       stripping non-alphanumeric characters. Use the **-styleid**
       option to set the internal ID explicitly if the derived ID
@@ -690,32 +696,29 @@ allowed. If given they are applied to format the comment text.
 
       Additional style creation options:
 
-      -basedon *styleRef*: Parent style to inherit from. Accepts
+         -basedon styleRef:
+         
+      Parent style to inherit from. Accepts
       either an internal style ID or a display name (resolved to a
       style ID internally). The parent must be the same type as the
       style being created.
 
-      -conditional *keyValueList*: (Table styles only.) Conditional
-      formatting for table regions such as firstRow, lastRow,
-      firstColumn, lastColumn, band1Vert, band1Horz, etc.
+        -conditional keyValueList:
+        
+    (Table styles only.) Conditional formatting for table regions such
+      as firstRow, lastRow, firstColumn, lastColumn, band1Vert,
+      band1Horz, etc.
 
       All methods and options that reference a style (such as
       **-pstyle**, **-cstyle**, **-style**, **-basedon**,
       **-refstyle**) accept either the internal style ID (preferred,
       tried first) or the display name (fallback).
 
-    : **ids** *styletype*
+        ids styletype
     
-    : **names** *styletype*
+        names styletype
 
-    : **delete** *styletype* *name*
-
-### LOW-LEVEL TAG CONSTRUCTORS
-
-The package exports a broad family of `Tag_*` constructors as a low-level
-OOXML-building API. Not every exported constructor is used by the higher-level
-methods in this file, but they are intentionally kept available for callers
-that need to emit schema elements directly.
+        delete styletype name
 
 **tab** *?n?*
 
@@ -724,34 +727,34 @@ that need to emit schema elements directly.
 
 **table** *?-option value ...?* *creatingScript*
 
-Creates a table by defining every row and cell individually by the
-*creatingScript*. The recognized options are:
+: Creates a table by defining every row and cell individually by the
+  *creatingScript*. The recognized options are:
 
--columnwidths *list*: List of column widths (measurements).
+        -columnwidths *list*: List of column widths (measurements).
 
--style *styleRef*: Table style reference (style ID or display name).
+        -style *styleRef*: Table style reference (style ID or display name).
 
--width *keyValueList*: Table width. Keys: type (auto|dxa|pct|nil),
-value (measurement or percentage).
+        -width *keyValueList*: Table width. Keys: type (auto|dxa|pct|nil),
+        value (measurement or percentage).
 
--align *(center|end|left|right|start)*: Table alignment.
+        -align *(center|end|left|right|start)*: Table alignment.
 
--layout *keyValueList*: Table layout. Keys: type (autofit|fixed).
+        -layout *keyValueList*: Table layout. Keys: type (autofit|fixed).
 
--look *keyValueList*: Table conditional formatting flags. Keys:
-firstRow, lastRow, firstColumn, lastColumn, noHBand, noVBand
-(all on/off).
+        -look *keyValueList*: Table conditional formatting flags. Keys:
+        firstRow, lastRow, firstColumn, lastColumn, noHBand, noVBand
+        (all on/off).
 
--caption *string*: Table caption for accessibility.
+        -caption *string*: Table caption for accessibility.
 
--tableBorders: Table border options. For each border position
-(top, left, bottom, right, insideH, insideV), use
-`-<position>Border {type <borderType> color <hex> borderwidth <eighthPts> space <pts>}`.
+        -tableBorders: Table border options. For each border position
+        (top, left, bottom, right, insideH, insideV), use
+        `-<position>Border {type <borderType> color <hex> borderwidth <eighthPts> space <pts>}`.
 
--cellMarginTop, -cellMarginStart, -cellMarginLeft,
--cellMarginBottom, -cellMarginEnd, -cellMarginRight:
-Default cell margins. Each takes a *keyValueList* with keys
-type and value.
+        -cellMarginTop, -cellMarginStart, -cellMarginLeft,
+        -cellMarginBottom, -cellMarginEnd, -cellMarginRight:
+        Default cell margins. Each takes a *keyValueList* with keys
+        type and value.
 
 **tablecell** *?-option value ...?* *creatingScript*
 
@@ -759,59 +762,59 @@ type and value.
   *creatingScript* creates the cell content (paragraphs, nested
   tables, etc.).
 
-  Options:
+    Options:
 
-  -cellWidth *keyValueList*: Cell width. Keys: type (auto|dxa|pct|nil),
-  value (measurement or percentage).
+        -cellWidth *keyValueList*: Cell width. Keys: type (auto|dxa|pct|nil),
+        value (measurement or percentage).
 
-  -span *integer*: Number of grid columns this cell spans.
+        -span *integer*: Number of grid columns this cell spans.
 
-  -hspan *(restart|continue)*: Horizontal merge state.
+        -hspan *(restart|continue)*: Horizontal merge state.
 
-  -vspan *(restart|continue)*: Vertical merge state.
+        -vspan *(restart|continue)*: Vertical merge state.
 
-  -vAlign *(top|center|bottom|both)*: Vertical alignment of cell
-  content.
+        -vAlign *(top|center|bottom|both)*: Vertical alignment of cell
+        content.
 
-  -textDirection *direction*: Text direction within the cell.
+        -textDirection *direction*: Text direction within the cell.
 
-  -shading *keyValueList*: Cell shading pattern. Keys: type, color,
-  fill (same as paragraph shading). The options -shading and
-  -background are mutually exclusive.
+        -shading *keyValueList*: Cell shading pattern. Keys: type, color,
+        fill (same as paragraph shading). The options -shading and
+        -background are mutually exclusive.
 
-  -background *RRGGBB*: Shorthand for a solid background fill color.
-  The options -shading and -background are mutually exclusive.
+        -background *RRGGBB*: Shorthand for a solid background fill color.
+        The options -shading and -background are mutually exclusive.
 
-  -tcFitText *onOffValue*: Shrink text to fit cell width.
+        -tcFitText *onOffValue*: Shrink text to fit cell width.
 
-  Cell border options (-topBorder, -leftBorder, -bottomBorder,
-  -rightBorder, -tl2brBorder, -tr2blBorder) and cell margin
-  options are also accepted.
+    Cell border options (-topBorder, -leftBorder, -bottomBorder,
+    -rightBorder, -tl2brBorder, -tr2blBorder) and cell margin
+    options are also accepted.
 
 **tablerow** *?-option value ...?* *creatingScript*
 
 : Creates a table row within a **table** script. The *creatingScript*
   creates cells via **tablecell** calls.
 
-  Options:
+    Options:
 
-  -rowHeight *keyValueList*: Row height. Keys: value (measurement),
-  hRule (auto|exact|atLeast).
+        -rowHeight *keyValueList*: Row height. Keys: value (measurement),
+        hRule (auto|exact|atLeast).
 
-  -headerrow *onOffValue*: Mark this row as a header row that repeats
-  on each page.
+        -headerrow *onOffValue*: Mark this row as a header row that repeats
+        on each page.
 
-  -cantSplit *onOffValue*: Prevent the row from splitting across
-  pages.
+        -cantSplit *onOffValue*: Prevent the row from splitting across
+        pages.
 
-  -align *(center|end|left|right|start)*: Row alignment (overrides
-  table alignment).
+        -align *(center|end|left|right|start)*: Row alignment (overrides
+        table alignment).
 
-  -cellSpacing *keyValueList*: Cell spacing within the row. Keys:
-  type, value.
+        -cellSpacing *keyValueList*: Cell spacing within the row. Keys:
+        type, value.
 
-  -wBefore, -wAfter *keyValueList*: Width before/after the row
-  (for indented rows). Keys: type, value.
+        -wBefore, -wAfter *keyValueList*: Width before/after the row
+        (for indented rows). Keys: type, value.
 
 **textbox** *?-option value ...?* *creatingScript*
 
@@ -819,23 +822,29 @@ type and value.
   *creatingScript* creates the text box content (paragraphs, tables,
   etc.) inside the box.
 
-  Options:
+    Options:
+ 
+         -name *string*: Display name for the text box shape. Auto-generated
+         if omitted.
 
-  -name *string*: Display name for the text box shape. Auto-generated
-  if omitted.
+         -dimension *keyValueList*: Required. Sets the text box size. Keys:
+         width (EMU), height (EMU).
 
-  -dimension *keyValueList*: Required. Sets the text box size. Keys:
-  width (EMU), height (EMU).
+         -bodyAtts *keyValueList*: Text body attributes. Keys: wrap
+         (none|square), numCol (integer), and other wps:bodyPr attributes.
 
-  -bodyAtts *keyValueList*: Text body attributes. Keys: wrap
-  (none|square), numCol (integer), and other wps:bodyPr attributes.
-
-  Anchor positioning options (-anchorData, -positionH, -alignH,
-  -posOffsetH, -positionV, -alignV, -posOffsetV, -wrapMode,
-  -wrapData, -bwMode) are also accepted — see **image** anchor
-  options.
+     Anchor positioning options (-anchorData, -positionH, -alignH,
+     -posOffsetH, -positionV, -alignV, -posOffsetV, -wrapMode,
+     -wrapData, -bwMode) are also accepted — see **image** anchor
+     options.
 
 **url** *text* *url* *?-option value ...?*
+
+: Append *text* to the current paragrah and make that text an
+  hypherlink to *uri*. The option/value pairs control the appearance
+  of the *text* within the paragraph. See [CHARACTER
+  OPTIONS](#character-options) for the valid options and the type of
+  their value.
 
 **write** *?filename?*
 
@@ -849,14 +858,14 @@ type and value.
 
 **xpath** *xpath* *?part?* *?selectNodes options?*
 
-An alias for the method *selectNodes*. See there for the meaning of
-the arguments.
+: An alias for the method *selectNodes*. See there for the meaning of
+  the arguments.
 
 **xmlparts** *?pattern?*
 
-Returns the paths of the xml parts of the docx object. If the optional
-argument *pattern* is given only the xml parts of the docx docx object
-which match the *pattern* using glob style matching are returned.
+: Returns the paths of the xml parts of the docx object. If the optional
+  argument *pattern* is given only the xml parts of the docx docx object
+  which match the *pattern* using glob style matching are returned.
 
 
 # CHARACTER OPTIONS

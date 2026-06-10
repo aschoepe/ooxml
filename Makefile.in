@@ -66,8 +66,8 @@ manifest.txt: manifest manifest.uuid tools/mkversion.tcl
 
 havepandoc:
 	@if test "${HAVE_PANDOC}" != "yes" ; then \
-		@echo "No pandoc found in the path. Pandoc is needed to" ;\
-		@echo "build the nroff and html versions of the documentation." ;\
+		echo "No pandoc found in the path. Pandoc is needed to" ;\
+		echo "build the nroff and html versions of the documentation." ;\
 	fi
 
 doc/ooxml.html: doc/ooxml.md
@@ -81,7 +81,19 @@ doc/ooxml.n: doc/ooxml.md
 		pandoc --standalone -f markdown -t man doc/ooxml.md -o doc/ooxml.n ;\
 	fi
 
-doc: havepandoc doc/ooxml.html doc/ooxml.n
+doc/ooxml-docx.html: doc/ooxml-docx.md
+	@if test "${HAVE_PANDOC}" = "yes" ; then \
+		pandoc --template doc/ooxml-default.html -f markdown -t html doc/ooxml-docx.md \
+			--css tcl-docs.css -o doc/ooxml-docx.html;\
+	fi
+
+doc/ooxml-docx.n: doc/ooxml-docx.md
+	@if test "${HAVE_PANDOC}" = "yes" ; then \
+		pandoc --standalone -f markdown -t man doc/ooxml-docx.md \
+			-o doc/ooxml-docx.n ;\
+	fi
+
+doc: havepandoc doc/ooxml.html doc/ooxml.n doc/ooxml-docx.html doc/ooxml-docx.n
 
 all: havepandoc manifest.txt doc/ooxml.html doc/ooxml.n
 
@@ -97,7 +109,7 @@ archive:
 
 clean:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
-	-rm -rf doc/ooxml.html doc/ooxml.n
+	-rm -rf doc/ooxml.html doc/ooxml.n doc/ooxml-docx.html doc/ooxml-docx.n
 
 distclean: clean
 	-rm -f $(CONFIG_CLEAN_FILES)

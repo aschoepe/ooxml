@@ -1,0 +1,278 @@
+# math.test --
+#
+#   Tests for math zone entry/exit, math sub-methods, guard,
+#   valPrefix switching, and OMML structure.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+package require ooxml::docx
+
+# ──────────────────────────────────────────────────────────────────
+#  Math zone guard
+# ──────────────────────────────────────────────────────────────────
+
+test math-1.1 {mrun outside math raises error} -body {
+    withDoc doc {
+        $doc mrun "x"
+    }
+} -returnCodes error -match glob -result {*must be called from within a math zone*}
+
+test math-1.2 {mfrac outside math raises error} -body {
+    withDoc doc {
+        $doc mfrac { $doc mrun "a" } { $doc mrun "b" }
+    }
+} -returnCodes error -match glob -result {*must be called from within a math zone*}
+
+test math-1.3 {msub outside math raises error} -body {
+    withDoc doc {
+        $doc msub { $doc mrun "x" } { $doc mrun "i" }
+    }
+} -returnCodes error -match glob -result {*must be called from within a math zone*}
+
+test math-1.4 {mdelim outside math raises error} -body {
+    withDoc doc {
+        $doc mdelim { $doc mrun "x" }
+    }
+} -returnCodes error -match glob -result {*must be called from within a math zone*}
+
+test math-1.5 {mmatrix outside math raises error} -body {
+    withDoc doc {
+        $doc mmatrix {{ $doc mmatcell { $doc mrun "1" } }}
+    }
+} -returnCodes error -match glob -result {*must be called from within a math zone*}
+
+test math-1.6 {mlimupp outside math raises error} -body {
+    withDoc doc {
+        $doc mlimupp { $doc mrun "lim" } { $doc mrun "n→∞" }
+    }
+} -returnCodes error -match glob -result {*must be called from within a math zone*}
+
+# ──────────────────────────────────────────────────────────────────
+#  Inline math
+# ──────────────────────────────────────────────────────────────────
+
+test math-2.1 {inline math creates oMath} -body {
+    withDoc doc {
+        $doc paragraph "Equation: "
+        $doc math {
+            $doc mrun "x"
+        }
+        countNodes $doc {//m:oMath}
+    }
+} -result 1
+
+test math-2.2 {inline math does not create oMathPara} -body {
+    withDoc doc {
+        $doc paragraph "Eq: "
+        $doc math { $doc mrun "y" }
+        countNodes $doc {//m:oMathPara}
+    }
+} -result 0
+
+# ──────────────────────────────────────────────────────────────────
+#  Display math
+# ──────────────────────────────────────────────────────────────────
+
+test math-3.1 {display math creates oMathPara} -body {
+    withDoc doc {
+        $doc math -display 1 { $doc mrun "E=mc^2" }
+        countNodes $doc {//m:oMathPara}
+    }
+} -result 1
+
+test math-3.2 {display math with justification} -body {
+    withDoc doc {
+        $doc math -display 1 -jc left { $doc mrun "x" }
+        xpath $doc {string(//m:oMathParaPr/m:jc/@m:val)}
+    }
+} -result left
+
+# ──────────────────────────────────────────────────────────────────
+#  Math structures
+# ──────────────────────────────────────────────────────────────────
+
+test math-4.1 {fraction} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mfrac { $doc mrun "a" } { $doc mrun "b" }
+        }
+        countNodes $doc {//m:f}
+    }
+} -result 1
+
+test math-4.2 {subscript} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc msub { $doc mrun "x" } { $doc mrun "i" }
+        }
+        countNodes $doc {//m:sSub}
+    }
+} -result 1
+
+test math-4.3 {superscript} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc msup { $doc mrun "x" } { $doc mrun "2" }
+        }
+        countNodes $doc {//m:sSup}
+    }
+} -result 1
+
+test math-4.4 {sub+sup} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc msubsup { $doc mrun "x" } { $doc mrun "i" } { $doc mrun "2" }
+        }
+        countNodes $doc {//m:sSubSup}
+    }
+} -result 1
+
+test math-4.5 {square root} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc msqrt { $doc mrun "x" }
+        }
+        # degHide must be set
+        xpath $doc {string(//m:rad/m:radPr/m:degHide/@m:val)}
+    }
+} -result 1
+
+test math-4.6 {nth root} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mroot { $doc mrun "3" } { $doc mrun "x" }
+        }
+        countNodes $doc {//m:rad}
+    }
+} -result 1
+
+test math-4.7 {delimiter} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mdelim { $doc mrun "x+1" }
+        }
+        countNodes $doc {//m:d}
+    }
+} -result 1
+
+test math-4.8 {delimiter with multiple args} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mdelim -begChr "\[" -endChr "\]" {
+                $doc mdelimarg { $doc mrun "a" }
+                $doc mdelimarg { $doc mrun "b" }
+            }
+        }
+        countNodes $doc {//m:d/m:e}
+    }
+} -result 2
+
+test math-4.9 {accent} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc maccent { $doc mrun "x" }
+        }
+        countNodes $doc {//m:acc}
+    }
+} -result 1
+
+test math-4.10 {bar} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mbar -pos bot { $doc mrun "x" }
+        }
+        xpath $doc {string(//m:barPr/m:pos/@m:val)}
+    }
+} -result bot
+
+test math-4.11 {grouping character} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mgroupchr { $doc mrun "a+b" }
+        }
+        countNodes $doc {//m:groupChr}
+    }
+} -result 1
+
+test math-4.12 {matrix} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mmatrix {
+                {
+                    $doc mmatcell { $doc mrun "1" }
+                    $doc mmatcell { $doc mrun "0" }
+                }
+                {
+                    $doc mmatcell { $doc mrun "0" }
+                    $doc mmatcell { $doc mrun "1" }
+                }
+            }
+        }
+        set mrows [countNodes $doc {//m:mr}]
+        set mcells [countNodes $doc {//m:mr/m:e}]
+        list $mrows $mcells
+    }
+} -result {2 4}
+
+test math-4.13 {matrix requires at least one row} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mmatrix {}
+        }
+    }
+} -returnCodes error -match glob -result {*at least one row*}
+
+test math-4.14 {function} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mfunc { $doc mrun "sin" } { $doc mrun "x" }
+        }
+        countNodes $doc {//m:func}
+    }
+} -result 1
+
+test math-4.15 {nary (summation)} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mnary -char "\u2211" -sub { $doc mrun "i=1" } -sup { $doc mrun "n" } {
+                $doc mrun "i"
+            }
+        }
+        countNodes $doc {//m:nary}
+    }
+} -result 1
+
+test math-4.16 {lower limit} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mlimlow { $doc mrun "lim" } { $doc mrun "x→0" }
+        }
+        countNodes $doc {//m:limLow}
+    }
+} -result 1
+
+test math-4.17 {upper limit} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc mlimupp { $doc mrun "lim" } { $doc mrun "n→∞" }
+        }
+        countNodes $doc {//m:limUpp}
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  valPrefix restored after math error
+# ──────────────────────────────────────────────────────────────────
+
+test math-5.1 {valPrefix restored after math error} -body {
+    withDoc doc {
+        catch {
+            $doc math { error "boom" }
+        }
+        # After error, normal paragraph should still work
+        $doc paragraph "Still works" -bold on
+        xpath $doc {string(//w:r/w:rPr/w:b/@w:val)}
+    }
+} -result 1
+
+cleanupTests

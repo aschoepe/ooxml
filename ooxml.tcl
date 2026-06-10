@@ -543,7 +543,7 @@ proc ::ooxml::timet_to_dos {time_t} {
 #
 # Derived from tcllib / zipfile::mkzip::add_file_to_archive
 
-proc ::ooxml::add_str_to_archive {zipchan path data {comment {}}} {
+proc ::ooxml::add_str_to_archive {zipchan path data {comment {}} {isBin 0}} {
   set mtime [timet_to_dos [clock seconds]]
   set utfpath [encoding convertto utf-8 $path]
   set utfcomment [encoding convertto utf-8 $comment]
@@ -558,7 +558,12 @@ proc ::ooxml::add_str_to_archive {zipchan path data {comment {}}} {
   set seekable [expr {[tell $zipchan] != -1}]
   set attrex 0x81b60020  ;# 0o100666 (-rw-rw-rw-)
   
-  set utfdata [encoding convertto utf-8 $data]
+
+  if {$isBin} {
+    set utfdata $data
+  } else {
+    set utfdata [encoding convertto utf-8 $data]
+  }
   set size [string length $utfdata]
   
   set offset [tell $zipchan]
@@ -587,6 +592,107 @@ proc ::ooxml::add_str_to_archive {zipchan path data {comment {}}} {
   return $hdr
 }
 
+proc ::ooxml::add_file_with_path_to_archive {zipchan path filepath {comment ""}} {
+    set fullpath $filepath
+    set mtime [timet_to_dos [file mtime $fullpath]]
+    if {[file isdirectory $fullpath]} {
+        append path /
+    }
+    set utfpath [encoding convertto utf-8 $path]
+    set utfcomment [encoding convertto utf-8 $comment]
+    set flags [expr {(1<<11)}] ;# utf-8 comment and path
+    set method 0               ;# store 0, deflate 8
+    set attr 0                 ;# text or binary (default binary)
+    set version 20             ;# minumum version req'd to extract
+    set extra ""
+    set crc 0
+    set size 0
+    set csize 0
+    set data ""
+    set seekable [expr {[tell $zipchan] != -1}]
+    if {[file isdirectory $fullpath]} {
+        set attrex 0x41ff0010  ;# 0o040777 (drwxrwxrwx)
+    } elseif {[file executable $fullpath]} {
+        set attrex 0x81ff0080  ;# 0o100777 (-rwxrwxrwx)
+    } else {
+        set attrex 0x81b60020  ;# 0o100666 (-rw-rw-rw-)
+        if {[file extension $fullpath] in {".tcl" ".txt" ".c"}} {
+            set attr 1         ;# text
+        }
+    }
+
+    if {[file isfile $fullpath]} {
+        set size [file size $fullpath]
+        if {!$seekable} {set flags [expr {$flags | (1 << 3)}]}
+    }
+
+    set offset [tell $zipchan]
+    set local [binary format a4sssiiiiss PK\03\04 \
+                   $version $flags $method $mtime $crc $csize $size \
+                   [string length $utfpath] [string length $extra]]
+    append local $utfpath $extra
+    puts -nonewline $zipchan $local
+
+    if {[file isfile $fullpath]} {
+        # If the file is under 2MB then zip in one chunk, otherwize we use
+        # streaming to avoid requiring excess memory. This helps to prevent
+        # storing re-compressed data that may be larger than the source when
+        # handling PNG or JPEG or nested ZIP files.
+        if {$size < 0x00200000} {
+            set fin [::open $fullpath rb]
+            set data [::read $fin]
+            set crc [::zlib crc32 $data]
+            set cdata [::zlib deflate $data]
+            if {[string length $cdata] < $size} {
+                set method 8
+                set data $cdata
+            }
+            close $fin
+            set csize [string length $data]
+            puts -nonewline $zipchan $data
+        } else {
+            set method 8
+            set fin [::open $fullpath rb]
+            set zlib [::zlib stream deflate]
+            while {![eof $fin]} {
+                set data [read $fin 4096]
+                set crc [zlib crc32 $data $crc]
+                $zlib put $data
+                if {[string length [set zdata [$zlib get]]]} {
+                    incr csize [string length $zdata]
+                    puts -nonewline $zipchan $zdata
+                }
+            }
+            close $fin
+            $zlib finalize
+            set zdata [$zlib get]
+            incr csize [string length $zdata]
+            puts -nonewline $zipchan $zdata
+            $zlib close
+        }
+
+        if {$seekable} {
+            # update the header if the output is seekable
+            set local [binary format a4sssiiii PK\03\04 \
+                           $version $flags $method $mtime $crc $csize $size]
+            set current [tell $zipchan]
+            seek $zipchan $offset
+            puts -nonewline $zipchan $local
+            seek $zipchan $current
+        } else {
+            # Write a data descriptor record
+            set ddesc [binary format a4iii PK\7\8 $crc $csize $size]
+            puts -nonewline $zipchan $ddesc
+        }
+    }
+
+    set hdr [binary format a4ssssiiiisssssii PK\01\02 0x0317 \
+                 $version $flags $method $mtime $crc $csize $size \
+                 [string length $utfpath] [string length $extra]\
+                 [string length $utfcomment] 0 $attr $attrex $offset]
+    append hdr $utfpath $extra $utfcomment
+    return $hdr
+}
 
 proc ::ooxml::Default { name value } {
   variable defaults
@@ -924,6 +1030,44 @@ proc ::ooxml::ZipOpen {file} {
   }
 }
 
+proc ::ooxml::ZipMembers {} {
+  switch -exact -- $::ooxml::zipAccessMethod {
+    tcllib {
+      return [::zipfile::decode::files $::ooxml::zipdesc]
+    }
+    default {
+      # Tcl 9 zipfs or vfs::zip: traverse the mounted "${::ooxml::zipfs}xlsx"
+      package require fileutil::traverse
+      set base "${::ooxml::zipfs}xlsx"
+      if {![file exists $base]} { return {} }
+
+      set files {}
+      ::fileutil::traverse it $base
+      set baseLen [string length "$base/"]
+      it foreach f {
+        if {[file isdirectory $f]} continue
+        lappend files [string range $f $baseLen end]
+      }
+      it destroy
+      return $files
+    }
+  }
+}
+
+proc ::ooxml::ZipReadBinaryFile {path} {
+  switch -exact -- $::ooxml::zipAccessMethod {
+    tcllib {
+      return [::zipfile::decode::getfile $::ooxml::zipdesc $path]
+    }
+    default {
+      set fd [open ${::ooxml::zipfs}xlsx/$path rb]
+      set data [read $fd]
+      close $fd
+      return $data
+    }
+  }
+}
+
 #
 # ooxml::ZipReadParse
 #
@@ -940,7 +1084,7 @@ proc ::ooxml::ZipReadParse {file} {
       variable zipdesc
       try {
         set filedata [encoding convertfrom utf-8\
-            [::zipfile::decode::getfile $zipdesc $file]]
+                          [::zipfile::decode::getfile $zipdesc $file]]
       } trap {ZIP DECODE BAD PATH} {} {
         # File not found error is ok - return empty string
         return
@@ -966,7 +1110,7 @@ proc ::ooxml::ZipReadParse {file} {
   }
   # Parse the file data
   # This throws an error if parsing fails
-  return [dom parse $filedata]
+  return [dom parse -keepEmpties $filedata]
 }
 
 #

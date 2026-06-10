@@ -1,0 +1,32 @@
+# media.test --
+#
+#   Tests for image insertion and related package artifacts.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+package require ooxml::docx
+
+test media-1.1 {inline image writes media part and relationship} -body {
+    set img [writeTinyPng]
+    withDoc doc {
+        $doc paragraph "Image:"
+        $doc image $img inline -dimension {width 914400 height 914400}
+        set inlineCount [countNodes $doc {//wp:inline}]
+        set embed [xpath $doc {string(//a:blip/@r:embed)}]
+        set f [writedoc $doc]
+        set parts [ziplist $f]
+        set ct [zipread $f {[Content_Types].xml}]
+        set rels [zipread $f word/_rels/document.xml.rels]
+        expr {$inlineCount == 1 && $embed ne "" && "word/media/image1.png" in $parts && [string match *image/png* $ct] && [string match *media/image1.png* $rels]}
+    }
+} -result 1
+
+test media-1.2 {anchor image creates wp:anchor drawing} -body {
+    set img [writeTinyPng]
+    withDoc doc {
+        $doc image $img anchor -dimension {width 914400 height 914400}
+        list [countNodes $doc {//wp:anchor}] [countNodes $doc {//wp:inline}]
+    }
+} -result {1 0}
+
+cleanupTests

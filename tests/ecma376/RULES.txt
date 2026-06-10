@@ -1,0 +1,82 @@
+# ECMA-376 5th Edition / ISO 29500 — Validation Rules Reference
+#
+# This file documents the specific ECMA-376 constraints that
+# ecma376/validate.tcl checks. Each rule cites the normative
+# spec section.
+#
+# ══════════════════════════════════════════════════════════════
+#  OPC — Open Packaging Convention (Part 2)
+# ══════════════════════════════════════════════════════════════
+#
+#  §8.1.1    Every package SHALL contain [Content_Types].xml
+#  §8.1.3    The content type of each part SHALL be specified
+#            via either a Default or Override entry
+#  §9.1      Every package MAY contain package-level relationships
+#            stored in _rels/.rels
+#  §9.3.1    Each Relationship element SHALL have Id, Type, Target
+#  §9.3.2    Relationship Ids SHALL be unique within a .rels file
+#  §9.3.4    Internal targets SHALL resolve to existing parts
+#  §10.1.2.3 Override/@PartName SHALL be unique
+#  §10.1.2.4 Default/@Extension SHALL be unique
+#  §M.4.1    Part names SHALL NOT contain: whitespace, reserved
+#            URI characters outside percent-encoding
+#
+# ══════════════════════════════════════════════════════════════
+#  WML — WordprocessingML (Part 1)
+# ══════════════════════════════════════════════════════════════
+#
+#  §17.2.2   CT_Body: w:body contains block-level elements
+#            followed by optional w:sectPr as last child
+#  §17.2.3   CT_Document: w:document root element with exactly
+#            one w:body child
+#  §17.3.1.26 CT_P: w:p may contain at most one w:pPr (first child)
+#  §17.3.2.28 CT_R: w:r may contain at most one w:rPr (first child)
+#  §17.6.17  CT_SectPr: section properties, ordering of children
+#  §17.7.4.3 CT_Style.basedOn: must reference an existing styleId
+#            of the same type
+#  §17.7.4.17 CT_Style: required attributes w:type, w:styleId;
+#             w:type values: paragraph, character, numbering, table;
+#             styleId unique within type
+#  §17.11.3  w:footnote[@w:type='separator'] id=0 required
+#  §17.11.6  w:footnote[@w:type='continuationSeparator'] id=1 required
+#  §17.11.15 CT_FtnEdn: w:id required; user notes must contain w:p
+#
+# ══════════════════════════════════════════════════════════════
+#  Content Types (Part 1 §11.3.6, Part 2 §10.1.2)
+# ══════════════════════════════════════════════════════════════
+#
+#  Each known part type has a defined content type string.
+#  The validator checks Override entries against the normative
+#  content type values from ECMA-376 Part 1 §11.3.6.
+#
+# ══════════════════════════════════════════════════════════════
+#  Relationship Types (Part 1 §11.3, Part 2 §9.3)
+# ══════════════════════════════════════════════════════════════
+#
+#  Each relationship type has a normative URI.
+#  core-properties uses the package/ form (not officeDocument/).
+#  officeDocument relationship is required in _rels/.rels.
+#  Internal targets must resolve to existing zip entries.
+#  External targets must have TargetMode="External".
+
+# ══════════════════════════════════════════════════════════════
+#  Schema-derived checks (from wml.rnc + shared-commonSimpleTypes.rnc)
+# ══════════════════════════════════════════════════════════════
+#
+#  Element child ordering (Phase 7):
+#  - w:pPr children must follow CT_PPrBase sequence (§17.3.1.26)
+#  - w:rPr children must follow EG_RPrBase sequence (§17.3.2.28)
+#  - w:tblPr children must follow CT_TblPrBase sequence (§17.4.59)
+#
+#  95 enumeration types extracted from RNC schemas.
+#  62 attribute→enum mappings for output validation.
+#
+#  Attribute enum validation (Phase 8):
+#  - w:jc/@w:val checked against ST_Jc (12 values)
+#  - w:u/@w:val checked against ST_Underline (18 values)
+#  - w:highlight/@w:val checked against ST_HighlightColor (17 values)
+#  - w:vertAlign/@w:val checked against ST_VerticalAlignRun (3 values)
+#  - w:shd/@w:val checked against ST_Shd (38 values)
+#  - Border elements/@w:val checked against ST_Border (193 values)
+#  - w:type/@w:val in sectPr checked against ST_SectionMark (5 values)
+#  - w:pgSz/@w:orient checked against ST_PageOrientation (2 values)

@@ -1,0 +1,134 @@
+# write.test --
+#
+#   Tests for write, writepart, object reuse after write,
+#   atomic write behavior, and sectPr lifecycle.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+package require ooxml::docx
+
+# ──────────────────────────────────────────────────────────────────
+#  Basic write
+# ──────────────────────────────────────────────────────────────────
+
+test write-1.1 {write creates file} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set f [writedoc $doc]
+        expr {[file exists $f] && [file size $f] > 0}
+    }
+} -result 1
+
+test write-1.2 {write adds .docx extension} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set f [tmpfile ""]
+        set f [string trimright $f .]
+        $doc write $f
+        file exists "${f}.docx"
+    }
+} -result 1
+
+# ──────────────────────────────────────────────────────────────────
+#  Object reuse after write
+# ──────────────────────────────────────────────────────────────────
+
+test write-2.1 {add content after write} -body {
+    withDoc doc {
+        $doc paragraph "First"
+        writedoc $doc
+        $doc paragraph "Second"
+        countNodes $doc {//w:p}
+    }
+} -result 2
+
+test write-2.2 {second write produces larger file} -body {
+    withDoc doc {
+        $doc paragraph "First"
+        set f1 [writedoc $doc]
+        $doc paragraph "Second paragraph added"
+        set f2 [writedoc $doc]
+        expr {[file size $f2] > [file size $f1]}
+    }
+} -result 1
+
+test write-2.3 {sectPr not stale after write} -body {
+    # After write, no synthetic sectPr should remain as body's last child
+    # so new paragraphs don't end up after sectPr
+    withDoc doc {
+        $doc paragraph "Before write"
+        writedoc $doc
+        $doc paragraph "After write"
+        # The last paragraph should be a w:p, not followed by a stale sectPr
+        # (the sectPr will be added at next write time)
+        set lastChild [xpath $doc {local-name(//w:body/*[last()])}]
+        set lastChild
+    }
+} -result p
+
+test write-2.4 {repeated write cycle} -body {
+    withDoc doc {
+        for {set i 1} {$i <= 5} {incr i} {
+            $doc paragraph "Iteration $i"
+            writedoc $doc
+        }
+        countNodes $doc {//w:p}
+    }
+} -result 5
+
+# ──────────────────────────────────────────────────────────────────
+#  Write failure recovery
+# ──────────────────────────────────────────────────────────────────
+
+test write-3.1 {write to unwritable path fails gracefully} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set failed 0
+        catch {
+            $doc write "/no/such/directory/test.docx"
+        } err
+        set failed 1
+        # Object should still be usable
+        $doc paragraph "Still works"
+        countNodes $doc {//w:p}
+    }
+} -result 2
+
+# ──────────────────────────────────────────────────────────────────
+#  Atomic write (temp file)
+# ──────────────────────────────────────────────────────────────────
+
+test write-4.1 {no temp file remains after successful write} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set f [tmpfile]
+        $doc write $f
+        set dir [file dirname $f]
+        set tmps [glob -nocomplain -directory $dir *.tmp]
+        llength $tmps
+    }
+} -result 0
+
+# ──────────────────────────────────────────────────────────────────
+#  writepart
+# ──────────────────────────────────────────────────────────────────
+
+test write-5.1 {writepart writes XML part} -body {
+    withDoc doc {
+        $doc paragraph "Test"
+        set f [tmpfile .xml]
+        $doc writepart word/document.xml $f
+        set data [open $f r]
+        set xml [read $data]
+        close $data
+        expr {[string match *w:document* $xml]}
+    }
+} -result 1
+
+test write-5.2 {writepart unknown part raises error} -body {
+    withDoc doc {
+        $doc writepart word/nonexistent.xml /tmp/test.xml
+    }
+} -returnCodes error -match glob -result {*unknown part*}
+
+cleanupTests

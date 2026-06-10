@@ -870,6 +870,8 @@ test FormatCellReadWorkbook-9.1 {Read Workbook} {
 
 test FormatCellCheckBorders-9.2 {Check Borders} {
   set rc 1
+  unset -nocomplain r w
+    
   for {set i 0} {$i < $w_obj(borders)} {incr i} {
     set dw $w_borders($i)
     set dr $workbook(s,borders,$i)

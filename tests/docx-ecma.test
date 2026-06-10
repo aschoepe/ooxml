@@ -1,0 +1,374 @@
+# validate.test --
+#
+#   Structural validation of generated .docx files against
+#   ECMA-376 / ISO 29500 constraints.
+#
+#   Each test generates a document with specific features, writes
+#   it to disk, then runs the ECMA-376 structural validator.
+#   A passing test means zero validation errors.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+package require ooxml::docx
+
+# Load the validator
+source [file join [file dirname [info script]] ecma376 validate.tcl]
+
+# ── Helper ──────────────────────────────────────────────────────
+
+proc validateDocx {doc} {
+    set f [writedoc $doc]
+    set errors [ecma376::validate::docx $f]
+    return $errors
+}
+
+# ══════════════════════════════════════════════════════════════════
+#  Minimal document
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-1.1 {minimal document passes ECMA validation} -body {
+    withDoc doc {
+        $doc paragraph "Hello"
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-1.2 {empty paragraph document passes} -body {
+    withDoc doc {
+        $doc paragraph ""
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-1.3 {multiple paragraphs pass} -body {
+    withDoc doc {
+        $doc paragraph "One"
+        $doc paragraph "Two" -bold on
+        $doc paragraph "Three" -italic on -color FF0000
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Formatted content
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-2.1 {paragraph with all run formatting passes} -body {
+    withDoc doc {
+        $doc paragraph "Bold" -bold on
+        $doc paragraph "Italic" -italic on
+        $doc paragraph "Underline" -underline single
+        $doc paragraph "Strike" -strike on
+        $doc paragraph "Color" -color 00FF00
+        $doc paragraph "Size" -fontsize 48
+        $doc paragraph "Combo" -bold on -italic on -color FF0000 -fontsize 28
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-2.2 {paragraph with alignment and spacing} -body {
+    withDoc doc {
+        $doc paragraph "Left" -align start
+        $doc paragraph "Center" -align center
+        $doc paragraph "Right" -align end
+        $doc paragraph "Spaced" -spacing {before 240 after 120}
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-2.3 {append creates valid runs} -body {
+    withDoc doc {
+        $doc paragraph "Start "
+        $doc append "middle " -bold on
+        $doc append "end" -italic on
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Tables
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-3.1 {table structure valid} -body {
+    withDoc doc {
+        $doc table {
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "A" }
+                $doc tablecell { $doc paragraph "B" }
+            }
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "C" }
+                $doc tablecell { $doc paragraph "D" }
+            }
+        }
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-3.2 {simpletable valid} -body {
+    withDoc doc {
+        $doc simpletable {{A B C} {D E F}}
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Styles
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-4.1 {custom styles with inheritance pass} -body {
+    withDoc doc {
+        $doc style paragraph "Base" -bold on
+        $doc style paragraph "Child" -basedon "Base" -italic on
+        $doc style character "Emph" -color FF0000
+        $doc paragraph "Styled" -pstyle "Child"
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Footnotes and endnotes
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-5.1 {footnote has separators and valid structure} -body {
+    withDoc doc {
+        $doc paragraph "Text with footnote."
+        $doc footnote { $doc paragraph "The footnote text." }
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-5.2 {multiple footnotes valid} -body {
+    withDoc doc {
+        $doc paragraph "First."
+        $doc footnote { $doc paragraph "Note one." }
+        $doc paragraph "Second."
+        $doc footnote { $doc paragraph "Note two." }
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-5.3 {endnote valid} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc endnote { $doc paragraph "End note." }
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-5.4 {both footnotes and endnotes valid} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc footnote { $doc paragraph "Foot." }
+        $doc endnote { $doc paragraph "End." }
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Comments
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-6.1 {comment produces valid package} -body {
+    withDoc doc {
+        $doc paragraph "Commented."
+        $doc comment -author "Reviewer" { $doc paragraph "A comment." }
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-6.2 {range comment valid} -body {
+    withDoc doc {
+        $doc paragraph "Before"
+        set id [$doc commentrangestart]
+        $doc paragraph "Inside range"
+        $doc commentrangeend $id -author "R" { $doc paragraph "Range note." }
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Headers and footers
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-7.1 {header and footer produce valid package} -body {
+    withDoc doc {
+        set hId [$doc header { $doc paragraph "Header" }]
+        set fId [$doc footer { $doc paragraph "Footer" }]
+        $doc pagesetup -defaultHeader $hId -defaultFooter $fId
+        $doc paragraph "Body"
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Math
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-8.1 {inline math valid} -body {
+    withDoc doc {
+        $doc paragraph "Eq: "
+        $doc math {
+            $doc mfrac { $doc mrun "a" } { $doc mrun "b" }
+        }
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-8.2 {display math valid} -body {
+    withDoc doc {
+        $doc math -display 1 {
+            $doc msub { $doc mrun "x" } { $doc mrun "i" }
+        }
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Write + reuse
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-9.1 {second write still valid} -body {
+    withDoc doc {
+        $doc paragraph "First"
+        validateDocx $doc
+        $doc paragraph "Second"
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Complex document
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-10.1 {complex document with many features passes} -body {
+    withDoc doc {
+        $doc style paragraph "Heading1" -bold on -fontsize 32
+        $doc style character "Strong" -bold on -color 0000FF
+
+        set hId [$doc header { $doc paragraph "Doc Header" }]
+        set fId [$doc footer { $doc paragraph "Doc Footer" }]
+        $doc pagesetup -defaultHeader $hId -defaultFooter $fId
+
+        $doc paragraph "Introduction" -pstyle "Heading1"
+        $doc paragraph "This is the body text." -spacing {before 120 after 120}
+        $doc paragraph "A centered paragraph." -align center
+
+        $doc table {
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "Col A" }
+                $doc tablecell { $doc paragraph "Col B" }
+            }
+            $doc tablerow {
+                $doc tablecell { $doc paragraph "Data 1" }
+                $doc tablecell { $doc paragraph "Data 2" }
+            }
+        }
+
+        $doc paragraph "Text with a footnote."
+        $doc footnote { $doc paragraph "The footnote." }
+
+        $doc paragraph "Math: "
+        $doc math {
+            $doc mfrac { $doc mrun "x" } { $doc mrun "y" }
+        }
+
+        $doc paragraph "See "
+        $doc url "example" "https://example.com"
+
+        $doc paragraph "Comment target."
+        $doc comment -author "Reviewer" { $doc paragraph "Needs revision." }
+
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Schema: element ordering
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-11.1 {pPr children in schema order} -body {
+    withDoc doc {
+        # Exercise many pPr children to test ordering
+        $doc paragraph "Complex" \
+            -bold on -italic on -fontsize 28 \
+            -align center \
+            -spacing {before 240 after 120} \
+            -shading {type clear fill FFFF00}
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-11.2 {rPr children in schema order} -body {
+    withDoc doc {
+        $doc paragraph "Multi-formatted" \
+            -bold on -italic on -underline single -strike on \
+            -color FF0000 -fontsize 24 -highlight yellow
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-11.3 {settings children in schema order after multiple calls} -body {
+    withDoc doc {
+        $doc settings -defaultTabStop 720
+        $doc settings -hideSpellingErrors on
+        $doc settings -autoHyphenation off
+        $doc paragraph "Body"
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Schema: attribute enum values
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-12.1 {alignment values are valid ST_Jc} -body {
+    withDoc doc {
+        $doc paragraph "Left" -align start
+        $doc paragraph "Center" -align center
+        $doc paragraph "Right" -align end
+        $doc paragraph "Both" -align both
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-12.2 {underline values are valid ST_Underline} -body {
+    withDoc doc {
+        $doc paragraph "Single" -underline single
+        $doc paragraph "Double" -underline double
+        $doc paragraph "Dotted" -underline dotted
+        validateDocx $doc
+    }
+} -result {}
+
+test ecma-12.3 {shading values are valid ST_Shd} -body {
+    withDoc doc {
+        $doc paragraph "Clear" -shading {type clear fill CCCCCC}
+        $doc paragraph "Solid" -shading {type solid color 000000 fill FFFFFF}
+        validateDocx $doc
+    }
+} -result {}
+
+# ══════════════════════════════════════════════════════════════════
+#  Sweep: validate ALL .docx files produced by the entire test suite
+# ══════════════════════════════════════════════════════════════════
+
+test ecma-99.1 {all test-generated docx files pass ECMA validation} -body {
+    set allErrors [list]
+    set docxFiles [glob -nocomplain -directory $::docxtest::tmpdir *.docx]
+    set count 0
+    foreach f [lsort $docxFiles] {
+        incr count
+        set errors [ecma376::validate::docx $f]
+        if {[llength $errors]} {
+            lappend allErrors "[file tail $f]: [join $errors {; }]"
+        }
+    }
+    if {[llength $allErrors]} {
+        set allErrors
+    } else {
+        list
+    }
+} -result {}
+
+cleanupTests

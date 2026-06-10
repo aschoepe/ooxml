@@ -1,0 +1,154 @@
+# comments.test --
+#
+#   Tests for comment, commentrangestart/end, simplecomment,
+#   and transactional rollback.
+
+package require tcltest 2.5
+namespace import ::tcltest::*
+package require ooxml::docx
+
+# ──────────────────────────────────────────────────────────────────
+#  Basic comment creation
+# ──────────────────────────────────────────────────────────────────
+
+test comment-1.1 {comment creates comments part} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc comment -author "Tester" { $doc paragraph "A comment." }
+        haspart $doc word/comments.xml
+    }
+} -result 1
+
+test comment-1.2 {comment content} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc comment -author "Tester" { $doc paragraph "Review note." }
+        countNodes $doc {//w:comment} word/comments.xml
+    }
+} -result 1
+
+test comment-1.3 {comment reference in body} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc comment -author "Tester" { $doc paragraph "Note." }
+        countNodes $doc {//w:commentReference}
+    }
+} -result 1
+
+test comment-1.4 {comment author attribute} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc comment -author "John Doe" { $doc paragraph "Note." }
+        xpath $doc {string(//w:comment/@w:author)} word/comments.xml
+    }
+} -result {John Doe}
+
+# ──────────────────────────────────────────────────────────────────
+#  Range comments
+# ──────────────────────────────────────────────────────────────────
+
+test comment-2.1 {comment range start/end} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        set id [$doc commentrangestart]
+        $doc paragraph "Commented text"
+        $doc commentrangeend $id -author "Reviewer" {
+            $doc paragraph "Range comment."
+        }
+        set starts [countNodes $doc {//w:commentRangeStart}]
+        set ends [countNodes $doc {//w:commentRangeEnd}]
+        set refs [countNodes $doc {//w:commentReference}]
+        list $starts $ends $refs
+    }
+} -result {1 1 1}
+
+# ──────────────────────────────────────────────────────────────────
+#  Simple comments
+# ──────────────────────────────────────────────────────────────────
+
+test comment-3.1 {simplecomment} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        $doc simplecomment "Quick note" -author "Bot"
+        countNodes $doc {//w:comment} word/comments.xml
+    }
+} -result 1
+
+test comment-3.2 {simplecommentrangeend} -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        set id [$doc commentrangestart]
+        $doc paragraph "More text"
+        $doc simplecommentrangeend $id "Range note" -author "Bot"
+        set refs [countNodes $doc {//w:commentReference}]
+        set ends [countNodes $doc {//w:commentRangeEnd}]
+        list $refs $ends
+    }
+} -result {1 1}
+
+# ──────────────────────────────────────────────────────────────────
+#  Rollback on error
+# ──────────────────────────────────────────────────────────────────
+
+test comment-4.1 {comment rollback on script error} -constraints mutation -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        catch {
+            $doc comment -author "A" { error "boom" }
+        }
+        # No orphaned comment should remain
+        if {[haspart $doc word/comments.xml]} {
+            countNodes $doc {//w:comment} word/comments.xml
+        } else {
+            expr {0}
+        }
+    }
+} -result 0
+
+test comment-4.2 {comment rollback on invalid option} -constraints mutation -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        catch {
+            $doc comment -author "A" -bogusOption xyz {
+                $doc paragraph "Should not get here"
+            }
+        }
+        if {[haspart $doc word/comments.xml]} {
+            countNodes $doc {//w:comment} word/comments.xml
+        } else {
+            expr {0}
+        }
+    }
+} -result 0
+
+test comment-4.3 {simplecomment rollback on error} -constraints mutation -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        catch {
+            # Invalid date triggers error in CreateComment
+            $doc simplecomment "Note" -date "not-a-date"
+        }
+        if {[haspart $doc word/comments.xml]} {
+            countNodes $doc {//w:comment} word/comments.xml
+        } else {
+            expr {0}
+        }
+    }
+} -result 0
+
+test comment-4.4 {commentrangeend rollback on script error} -constraints mutation -body {
+    withDoc doc {
+        $doc paragraph "Text"
+        set id [$doc commentrangestart]
+        catch {
+            $doc commentrangeend $id -author "A" { error "boom" }
+        }
+        if {[haspart $doc word/comments.xml]} {
+            countNodes $doc {//w:comment} word/comments.xml
+        } else {
+            expr {0}
+        }
+    }
+} -result 0
+
+cleanupTests

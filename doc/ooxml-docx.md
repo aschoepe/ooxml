@@ -58,6 +58,16 @@ methods:
   the paragraph. See [CHARACTER OPTIONS](#character-options) for the valid
   options and the type of their value.
 
+**appendTo** *objectId* *creatingScript*
+
+: This method appends content to an already created table, table row
+  table cell, footer, header, footnote, endnote, comment or textbox.
+  The *objectId* has to be the id returned by the method which created
+  the object. The *creatingScript* is evaluated and creates the
+  appended object content. The resulting document is the same as if
+  the *creatingScript* would have been appended to the
+  *creatingScript* of the method which created the object.
+  
 **br** *?n?*
 
 : Inserts a line break into the current paragraph. The optional

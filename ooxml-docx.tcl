@@ -1433,6 +1433,7 @@ oo::class create ooxml::docx::docx {
         }
         set savedbody $body
         set body [$notesroot lastChild]
+        set objectId [my GetObjectId $types $body]
         if {[catch {uplevel 2 [list eval $script]} errMsg errVals]} {
             set body $savedbody
             my ProcessErrorinfo $type
@@ -1454,7 +1455,7 @@ oo::class create ooxml::docx::docx {
             }
         } [$firstp selectNodes {w:r[1]}]
         set body $savedbody
-        return $thisid
+        return [list $thisid $objectId]
     }
 
     method GetDocDefault {styles} {
@@ -1510,9 +1511,10 @@ oo::class create ooxml::docx::docx {
             my ProcessErrorinfo $what
             return -code error $errMsg
         }
+        set objectId [my GetObjectId $what $body $rId]
         set body $savedbody
         set context $savedcontext
-        return $rId
+        return [list $rId $objectId]
     }
 
     method Ignorable {{file ""}} {
@@ -1737,6 +1739,17 @@ oo::class create ooxml::docx::docx {
 
         # Return the next unique id
         return [incr id($domain)]
+    }
+
+    method GetObjectId {domain node {thisid ""}} {
+        my variable id
+        my variable objectId
+
+        if {$thisid eq ""} {
+            set thisid $id($domain)
+        }
+        set objectId($domain$thisid) $node
+        return $domain$thisid
     }
 
     method OneOff {opta optb} {
@@ -2053,6 +2066,48 @@ oo::class create ooxml::docx::docx {
         }
     }
 
+    method appendTo {id script} {
+        my variable body
+        my variable objectId
+        my variable tablecontext
+
+        if {![info exists objectId($id)]} {
+            return -code error "Unknown object id '$id'."
+        }
+        set savedbody $body
+        set body $objectId($id)
+        switch [$body localName] {
+            tbl {
+                set savedTablecontext $tablecontext
+                set tablecontext "table"
+            }
+            tc {
+                set savedTablecontext $tablecontext
+                set tablecontext ""
+            }
+            tr {
+                set savedTablecontext $tablecontext
+                set tablecontext "row"
+            }
+        }
+        try {
+            $body appendFromScript {
+                uplevel [list eval $script]
+            }
+        } on error {errMsg opts} {
+            return -code error $errMsg
+        } finally {
+            switch [$body localName] {
+                tbl -
+                tc -
+                tr {
+                    set tablecontext $savedTablecontext
+                }
+            }
+            set body $savedbody
+        }            
+    }
+
     method br {{n 1}} {
         my ControlChar br $n
     }
@@ -2090,6 +2145,7 @@ oo::class create ooxml::docx::docx {
                 Tag_w:commentReference w:id $id
             }
         }
+        return [my GetObjectId comments $comment $id]
     }
 
     method commentrangeend {id args} {
@@ -2131,6 +2187,7 @@ oo::class create ooxml::docx::docx {
             }
         }
         unset commentranges($id)
+        return [my GetObjectId comments $comment $id]
     }
 
 
@@ -2212,8 +2269,9 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "" "script"
-            set id [my FootnoteEndnote endnote \
-                        [my EatOption -refstyle RStyle] $script]
+            lassign [my FootnoteEndnote endnote \
+                         [my EatOption -refstyle RStyle] $script] \
+                id objectId
             set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:r {
@@ -2225,6 +2283,7 @@ oo::class create ooxml::docx::docx {
         } errMsg]} {
             return -code error $errMsg
         }
+        return $objectId
     }
 
     method field {field {switches ""} args} {
@@ -2289,12 +2348,15 @@ oo::class create ooxml::docx::docx {
         }
     }
 
-    method footer {script {returnvar ""}} {
+    method footer {script {returnvar ""} {objectIdVar ""}} {
         if {$returnvar ne ""} {
             upvar $returnvar result
         }
+        if {$objectIdVar ne ""} {
+            upvar $objectIdVar objectId
+        }
         if {[catch {
-            set result [my HeaderFooter footer $script]
+            lassign [my HeaderFooter footer $script] result objectId
         } errMsg]} {
             return -code error $errMsg
         }
@@ -2305,8 +2367,9 @@ oo::class create ooxml::docx::docx {
         if {[catch {
             set script [lindex $args end]
             OptVal [lrange $args 0 end-1] "" "script"
-            set id [my FootnoteEndnote footnote \
-                        [my EatOption -refstyle RStyle] $script]
+            lassign [my FootnoteEndnote footnote \
+                         [my EatOption -refstyle RStyle] $script] \
+                id objectId
             set p [my LastParagraph 1]
             $p appendFromScript {
                 Tag_w:r {
@@ -2318,14 +2381,18 @@ oo::class create ooxml::docx::docx {
         } errMsg]} {
             return -code error $errMsg
         }
+        return $objectId
     }
 
-    method header {script {returnvar ""}} {
+    method header {script {returnvar ""} {objectIdVar ""}} {
         if {$returnvar ne ""} {
             upvar $returnvar result
         }
+        if {$objectIdVar ne ""} {
+            upvar $objectIdVar objectId
+        }
         if {[catch {
-            set result [my HeaderFooter header $script]
+            lassign [my HeaderFooter header $script] result objectId
         } errMsg]} {
             return -code error $errMsg
         }
@@ -3162,6 +3229,8 @@ oo::class create ooxml::docx::docx {
                         }
                     }
                     uplevel [list eval $script]
+                    my NextId tables
+                    set objectId [my GetObjectId tables [dom fromScriptContext]]
                 }
             }
             my CheckRemainingOpts
@@ -3170,6 +3239,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
         set tablecontext ""
+        return $objectId
     }
 
     method tablecell {args} {
@@ -3196,6 +3266,8 @@ oo::class create ooxml::docx::docx {
                     my ProcessErrorinfo "tablecell"
                     error $errMsg
                 }
+                my NextId tablecells
+                set objectId [my GetObjectId tablecells $body]
                 set body $savedbody
             }
         } errMsg]} {
@@ -3203,6 +3275,7 @@ oo::class create ooxml::docx::docx {
             return -code error $errMsg
         }
         set tablecontext "row"
+        return $objectId
     }
 
     method tablerow {args} {
@@ -3225,12 +3298,15 @@ oo::class create ooxml::docx::docx {
                     my ProcessErrorinfo "tablerow"
                     error $errMsg
                 }
+                my NextId tablerows
+                set objectId [my GetObjectId tablerows [dom fromScriptContext]]
             }
         } errMsg]} {
             set tablecontext "table"
             return -code error $errMsg
         }
         set tablecontext "table"
+        return $objectId
     }
 
     method textbox {args} {
@@ -3272,6 +3348,7 @@ oo::class create ooxml::docx::docx {
                                         my ProcessErrorinfo "textbox"
                                         error $errMsg
                                     }
+                                    set objectId [my GetObjectId comments $body $name]
                                     set body $savedbody
                                 }
                             }
@@ -3325,6 +3402,7 @@ oo::class create ooxml::docx::docx {
         } errMsg]} {
             return -code error $errMsg
         }
+        return $objectId
     }
 
     method url {text url args} {

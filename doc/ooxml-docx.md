@@ -76,9 +76,10 @@ methods:
 **comment** *?-option value ...?* *creatingScript*
 
 : This method creates a comment to the current point in the document
-  with comment content created by the *creatingScript*. Although the
-  standard allows much more rich content most word processor support
-  only basic text formatting for comments.
+  with comment content created by the *creatingScript* and returns the
+  object id of the created comment. Although the standard allows much
+  more rich content most word processor support only basic text
+  formatting for comments.
 
     The allowed options are
 
@@ -92,9 +93,10 @@ methods:
 
 : This method marks the end of a range of content in the document and
   creates a comment to this content range with comment content created
-  by the *creatingScript*. The *id* argument must be the id returned by
-  the corresponding *commentrangestart* call. For the allowed options
-  see the method *comment*.
+  by the *creatingScript* and returns the object id of the created
+  comment. The *id* argument must be the id returned by the
+  corresponding *commentrangestart* call. For the allowed options see
+  the method *comment*.
 
 **commentrangestart** ?returnvar?
 
@@ -146,9 +148,10 @@ methods:
 
 **endnote** *?-option value ...?* *creatingScript*
 
-: Creates an endnote with content produced by *creatingScript*. A
-  reference mark is inserted at the current position in the document.
-  The allowed options are:
+: Creates an endnote with content produced by *creatingScript* and
+  returns the object id of the created endnote. A reference mark is
+  inserted at the current position in the document. The allowed
+  options are:
 
     -refstyle *styleRef*: Character style applied to the reference mark.
     The value may be either the internal style ID (*w:styleId*) or the
@@ -183,7 +186,8 @@ methods:
 
 **footnote** *?-option value ...?* *creatingScript*
 
-: Creates a footnote with content produced by *creatingScript*. A
+: Creates a footnote with content produced by *creatingScript* and
+  returns the object id of the created footnote. A
   reference mark is inserted at the current position in the document.
   The allowed options are:
 
@@ -191,12 +195,17 @@ methods:
         mark. The value may be either the internal style ID (*w:styleId*)
         or the display name (*w:name*).
 
-**footer** *creatingScript* ?returnvar?
-**header** *creatingScript* ?returnvar?
+**footer** *creatingScript* ?returnvar? ?objectIdvar?
+**header** *creatingScript* ?returnvar? ?objectIdvar?
 
 : Creates a new footer or header by evaluating the creating script.
   The id of the created footer or header is returned and, if given,
-  stored in the returnvar.
+  stored in the *returnvar*. This is the id to refer to the footer or
+  header to be used with the options *-defaultHeader*, *-firstHeader*,
+  *-evenHeader*, *-defaultFooter*, *-firstFooter* and *-evenFooter* of
+  the methods *pagesetup* and *sectionstart*. The object id of the
+  created footer or header is stored in the *objectIdvar*, if given.
+  This is the id to use with the method *appendTo*.
 
 **image** *file* *anchor|inline* *?-option value ...?*
 
@@ -738,7 +747,8 @@ the mark with the id *markid* inside the document.
 **table** *?-option value ...?* *creatingScript*
 
 : Creates a table by defining every row and cell individually by the
-  *creatingScript*. The recognized options are:
+  *creatingScript* and returns the object id of the created table. The
+  recognized options are:
 
         -columnwidths *list*: List of column widths (measurements).
 
@@ -768,9 +778,9 @@ the mark with the id *markid* inside the document.
 
 **tablecell** *?-option value ...?* *creatingScript*
 
-: Creates a table cell within a **tablerow** script. The
-  *creatingScript* creates the cell content (paragraphs, nested
-  tables, etc.).
+: Creates a table cell within a **tablerow** script and returns the
+  object id of the created table cell. The *creatingScript* creates
+  the cell content (paragraphs, nested tables, etc.).
 
     Options:
 
@@ -803,8 +813,9 @@ the mark with the id *markid* inside the document.
 
 **tablerow** *?-option value ...?* *creatingScript*
 
-: Creates a table row within a **table** script. The *creatingScript*
-  creates cells via **tablecell** calls.
+: Creates a table row within a **table** script and returns the object
+  id of the created table row. The *creatingScript* creates cells via
+  **tablecell** calls.
 
     Options:
 
@@ -828,9 +839,9 @@ the mark with the id *markid* inside the document.
 
 **textbox** *?-option value ...?* *creatingScript*
 
-: Creates an anchored text box at the current position. The
-  *creatingScript* creates the text box content (paragraphs, tables,
-  etc.) inside the box.
+: Creates an anchored text box at the current position and returns the
+  object id of the created text box. The *creatingScript* creates the
+  text box content (paragraphs, tables, etc.) inside the box.
 
     Options:
  

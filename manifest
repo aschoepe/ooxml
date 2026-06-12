@@ -1,5 +1,5 @@
-C Added\smethod\sappendTo.
-D 2026-06-12T22:38:29.337
+C More\sdoucmentation\schanges\sreleated\sto\sappendTo.
+D 2026-06-12T23:13:41.640
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -11,7 +11,7 @@ F configure b2add97b6f5454210ad7dfe98f246682d17cfc1a49826cd896424baff2ab51c8 x
 F configure.ac 05e0c4e8d49fbdd1e45656bd885a4e529244c77c28c697c4820f35c548bbf873
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml-docx-dev.md 456ae2a9c147597f7e0962b0ee15aa285093f111b870064faec31cecb54c5124
-F doc/ooxml-docx.md 507b9a2d4143e7eb4a9829d58c9c425c4e8fcf64db5bd1484ef891d85ea6cb98
+F doc/ooxml-docx.md d555c780fac7ff3fb2805a2b0ca1aa1d221d19f1d9f057ac8e77529e625f66c4
 F doc/ooxml.md 8e9af22574db8fdd0de01894d6f0cdb06a975c7e01bad5a024425d7fc0cf1c44
 F doc/tcl-docs.css 1864d346150f579ea5d9efaa9ca83c2078c8ed696c494f37e9f122d5f1d4350f
 F docxtest.tcl d55c5fbee8d7e3d7fcb7193578abf8d554c99f87c2d3eabc2d94b61856636f38
@@ -131,9 +131,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 42d8945c29e79b2343962f6aded5efee37f1f944b9c970b34b6111854817b819 6d706b1635ba69bb71e46533bc7685f0a0ba01abe01dc83137e27648384141ca
-R 1e59629d5627cc8cc1b2d670cb34b889
-T +closed 6d706b1635ba69bb71e46533bc7685f0a0ba01abe01dc83137e27648384141ca
+P 04c32588c75699ffe2db1ca23866dfe0ad69586fbdb281143c0379896f03083c
+R 74dfb28e8e62a2e0b91172beb5fa3a59
 U rolf
-Z 7b62d1499cf046e935d1fa68565160d9
+Z 4b6a69ccd884e9a7762b9e09d0aeb10b
 # Remove this line to create a well-formed Fossil manifest.

@@ -1511,10 +1511,10 @@ oo::class create ooxml::docx::docx {
             my ProcessErrorinfo $what
             return -code error $errMsg
         }
+        set objectId [my GetObjectId $what $body $rId]
         set body $savedbody
         set context $savedcontext
-        my NextId $what
-        return [list $rId [my GetObjectId $what $body]]
+        return [list $rId $objectId]
     }
 
     method Ignorable {{file ""}} {
@@ -2356,7 +2356,7 @@ oo::class create ooxml::docx::docx {
             upvar $objectIdVar objectId
         }
         if {[catch {
-            lappend [my HeaderFooter footer $script] result objectId
+            lassign [my HeaderFooter footer $script] result objectId
         } errMsg]} {
             return -code error $errMsg
         }

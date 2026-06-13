@@ -2,12 +2,15 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 
 set docx [docx new]
+
+featuresCovered "Import numbering styles from another .docx file, defining numbering styles."
 # Importing numbering definition from another docx
 $docx import numbering docx-example4-in.docx
 

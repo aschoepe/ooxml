@@ -2,12 +2,15 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 
 set docx [docx new -creator foo -created 2025-02-10]
+
+featuresCovered "Footnotes."
 
 $docx pagesetup -fn_numFmt lowerLetter
 

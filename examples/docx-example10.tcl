@@ -2,12 +2,14 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
 
+featuresCovered "The replace method."
 set docxname [file join [file dir [info script]] docx-example10]
 $docx paragraph $loreipsum
 $docx simplecomment $loreipsum

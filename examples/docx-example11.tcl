@@ -2,11 +2,14 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
+
+featuresCovered "Comment ranges."
 
 $docx paragraph "Some text "
 $docx commentrangestart mycommentid

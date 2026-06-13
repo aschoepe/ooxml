@@ -2,10 +2,15 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
+
+set docx [docx new -creator foo -created 2025-02-10]
+
+featuresCovered "Fields (page number, author etc.), document configuration."
 
 set fields {
     author
@@ -20,7 +25,6 @@ set fields {
     username
 }
   
-set docx [docx new -creator foo -created 2025-02-10]
 $docx sectionstart
 $docx paragraph $loreipsum\n
 foreach field $fields {

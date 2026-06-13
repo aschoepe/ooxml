@@ -2,12 +2,14 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
 
+featuresCovered "Page and section setup, header and footer, fields and textboxes."
 # The rId returned by the header/footer methods is needed later. You
 # may store it like:
 set defaultHeader [$docx header {

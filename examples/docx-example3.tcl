@@ -2,12 +2,14 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
 
+featuresCovered "Simple and complex tables, styling of tables."
 $docx settings -zoom {type bestFit percent 50%}
 
 set simpledata {{a b c} {1 2 3} {I II III}}
@@ -277,7 +279,7 @@ $docx style table myTable2  \
     firstCol {
         -color ffff00
         -bold off
-        -shading background ff0000
+        -background ff0000
     }
     lastCol {
         -color 00ffff

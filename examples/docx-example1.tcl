@@ -2,11 +2,14 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 set docx [docx new]
+
+featuresCovered "Text and paragraph formatting."
 
 # Set a default style
 $docx style paragraphdefault -spacing {before 240 after 120}

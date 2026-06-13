@@ -2,12 +2,14 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
 source strings.tcl
 namespace import ::ooxml::docx::docx
 
 set docx [docx new]
+featuresCovered "Images, placing, text flow around."
 $docx paragraph $loreipsum
 $docx image book.jpg anchor -anchorData {distL 3cm} -dimension {width 3cm height 3cm} -wrapMode square -wrapData {wrapText bothSides}
 

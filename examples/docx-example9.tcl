@@ -2,58 +2,62 @@
 #\
 exec tclsh8.6 "$0" "$@"
 
+cd [file dirname [info script]]
 source ../ooxml.tcl
 source ../ooxml-docx.tcl
+source strings.tcl
 namespace import ::ooxml::docx::docx
 
-set doc [docx new]
+set docx [docx new]
+
+featuresCovered "OMML related methods." 
 
 # Title
-$doc paragraph "OMML"
+$docx paragraph "OMML"
 
 # Inline: E = m c^2
-$doc paragraph ""
-$doc math {
-    $doc mrun "E = m"
-    $doc msup { $doc mrun "c" } { $doc mrun "2" }
+$docx paragraph ""
+$docx math {
+    $docx mrun "E = m"
+    $docx msup { $docx mrun "c" } { $docx mrun "2" }
 }
 
 # Display: Sum_{i=1}^{n} i^2
-$doc math -display 1 -jc center {
-    $doc mnary -char "∑" -limLoc undOvr \
-      -sub { $doc mrun "i=1" } \
-      -sup { $doc mrun "n" } {
-        $doc msup { $doc mrun "i" } { $doc mrun "2" }
+$docx math -display 1 -jc center {
+    $docx mnary -char "∑" -limLoc undOvr \
+      -sub { $docx mrun "i=1" } \
+      -sup { $docx mrun "n" } {
+        $docx msup { $docx mrun "i" } { $docx mrun "2" }
     } 
 }
 
 # Display: lim_{x->0} (sin x)/x
-$doc math -display 1 {
-    $doc mlimlow { $doc mrun "lim" } { $doc mrun "x→0" }
-    $doc mrun " "
-    $doc mfrac -type bar { $doc mfunc { $doc mrun "sin" } { $doc mrun "x" } } { $doc mrun "x" }
+$docx math -display 1 {
+    $docx mlimlow { $docx mrun "lim" } { $docx mrun "x→0" }
+    $docx mrun " "
+    $docx mfrac -type bar { $docx mfunc { $docx mrun "sin" } { $docx mrun "x" } } { $docx mrun "x" }
 }
 
 # Display: integral_0^π sin x dx
-$doc math -display 1 {
-    $doc mnary -char "∫" -limLoc subSup \
-      -sub { $doc mrun "0" } \
-      -sup { $doc mrun "π" } {
-        $doc mrun "sin "
-        $doc mrun "x "
-        $doc mrun "dx"
+$docx math -display 1 {
+    $docx mnary -char "∫" -limLoc subSup \
+      -sub { $docx mrun "0" } \
+      -sup { $docx mrun "π" } {
+        $docx mrun "sin "
+        $docx mrun "x "
+        $docx mrun "dx"
     }
 }
 
 # Display: nth-root(sin x)
-$doc math -display 1 {
-    $doc mroot { $doc mrun "n" } { $doc mfunc { $doc mrun "sin" } { $doc mrun "x" } }
+$docx math -display 1 {
+    $docx mroot { $docx mrun "n" } { $docx mfunc { $docx mrun "sin" } { $docx mrun "x" } }
 }
 
 # Display: lim^{n→∞}
-$doc math -display 1 {
-    $doc mlimupp { $doc mrun "lim" } { $doc mrun "n→∞" }
+$docx math -display 1 {
+    $docx mlimupp { $docx mrun "lim" } { $docx mrun "n→∞" }
 }
 
-$doc write docx-example9.docx
-$doc destroy
+$docx write docx-example9.docx
+$docx destroy

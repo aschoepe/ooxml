@@ -1110,7 +1110,12 @@ proc ::ooxml::ZipReadParse {file} {
   }
   # Parse the file data
   # This throws an error if parsing fails
-  return [dom parse -keepEmpties $filedata]
+  if {[package vsatisfies [package present tdom] 0.9.7-]} {
+    # Since tdom 0.9.7 xml:space='preserve' are respected
+    return [dom parse $filedata]
+  } else {
+    return [dom parse -keepEmpties $filedata]
+  }
 }
 
 #

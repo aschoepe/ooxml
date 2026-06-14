@@ -72,8 +72,8 @@ havepandoc:
 
 doc/ooxml.html: doc/ooxml.md
 	@if test "${HAVE_PANDOC}" = "yes" ; then \
-		pandoc --standalone -f markdown -t html doc/ooxml.md \
-			--css main.css -o doc/ooxml.html ;\
+		pandoc --template doc/ooxml-default.html -f markdown -t html doc/ooxml.md \
+			--css tcl-docs.css -o doc/ooxml.html;\
 	fi
 
 doc/ooxml.n: doc/ooxml.md

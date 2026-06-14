@@ -1085,11 +1085,15 @@ proc ::ooxml::docx::lib::CT_UnsignedInt {value} {
     return $value
 }
 
-proc ::ooxml::docx::lib::OptVal {arglist {prefix ""} {suffix ""}} {
+proc ::ooxml::docx::lib::OptVal {
+    arglist
+    {prefix ""}
+    {suffix ""}
+    {starttext "invalid arguments, expected:"}} {
     if {[llength $arglist] % 2 != 0} {
         if {$prefix ne ""} {append prefix " "}
         if {$suffix ne ""} {set suffix " $suffix"}
-        error "invalid arguments, expected: ${prefix}?-option value?\
+        error "$starttext ${prefix}?-option value?\
                ?-option value? ..$suffix"
     }
     uplevel "array set opts [list $arglist]"

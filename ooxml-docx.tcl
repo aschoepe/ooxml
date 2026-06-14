@@ -1970,7 +1970,7 @@ oo::class create ooxml::docx::docx {
                     error "unknown table overwrite style \"$type\", expected\
                            one of [AllowedValues $values]"
                 }
-                OptVal $styledata
+                OptVal $styledata "" "" "invalid value to the -conditional option value key $type, expected:"
                 array unset optsknown
                 Tag_w:tblStylePr w:type $type {
                     my PPr

@@ -1,6 +1,6 @@
 #!/bin/sh
 #\
-exec tclsh8.6 "$0" "$@"
+exec tclsh "$0" "$@"
 
 set auto_path [linsert $auto_path 0 ..]
 if {[catch {package require ooxml}]} {

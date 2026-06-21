@@ -1,6 +1,6 @@
 #!/bin/sh
 #\
-exec tclsh8.6 "$0" "$@"
+exec tclsh "$0" "$@"
 
 cd [file dirname [info script]]
 source ../ooxml.tcl

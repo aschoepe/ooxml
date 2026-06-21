@@ -1,6 +1,6 @@
 #!/bin/sh
 #\
-exec wish8.6 "$0" "$@"
+exec wish "$0" "$@"
 
 package require Tk
 package require tablelist

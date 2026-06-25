@@ -4705,7 +4705,7 @@ proc ::ooxml::build-info { {cmd {}} } {
   }
 }
 
-package provide ooxml 1.10
+package provide ooxml 1.11
 
 set ::ooxml::pkgPath [file dirname [info script]]
 

@@ -1,5 +1,5 @@
-C Switch\sto\stclsh\swhich\sshould\swork\sfor\sTcl\s9\sonly\ssystems\sas\swell.
-D 2026-06-21T23:43:52.020
+C Version-1.11
+D 2026-06-25T23:01:37.171
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -7,8 +7,8 @@ F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d50
 F Makefile.in e37cf39b507031efcc93f7691c6cc36f0d384bf44992def28c7c122793fdc369
 F README b55eabdf2b7071e5f61a99f35d3f905171a58dfcf111ca1a7a96408bd43da071
 F aclocal.m4 f416a9740ff524cbf7b8eaee5298836b095a4c34d9910d3d7d988ddd776e1d27
-F configure b2add97b6f5454210ad7dfe98f246682d17cfc1a49826cd896424baff2ab51c8 x
-F configure.ac 05e0c4e8d49fbdd1e45656bd885a4e529244c77c28c697c4820f35c548bbf873
+F configure 63cc46d7fec5397d23fba91d49a11cfd5d9ffc83c2bbbda6e1f6da3a92e921ed x
+F configure.ac d9c511b59cc82626df93c11cdb63d3a347baf20fbc43f04e7ec08919de5cc170
 F doc/main.css 4b090f665ce2463a4213fe7625caf13d671674e985fafa06fd7bf41cd5d92cbb
 F doc/ooxml-default.html 501e4a9e055ec2eba462c40b5882dfbd6b84a636938036898ff968a4c2381cca
 F doc/ooxml-docx-dev.md 456ae2a9c147597f7e0962b0ee15aa285093f111b870064faec31cecb54c5124
@@ -51,7 +51,7 @@ F ooxml-docx-lib.tcl 27d46e7d6f53f7026a748f9efff2d03cb0e6fe4f8fc1829556db9a9601f
 F ooxml-docx-math.tcl c1eccd73c7cd71c1e800fd09caf0ab14067ea58be69687909c13c543e53c26c8
 F ooxml-docx.tcl 9a299972cbc0f225634f4f90e85c9fa8cc812146039b9fd6842d9c637024d224
 F ooxml.code-workspace d7e95db5f18683291a3c38296e5e1926aa4011244e2c953ea81f86c702cf821a
-F ooxml.tcl ef717138bb8351f6ec7cc8a33bedfb777e3698b2040901a6b12e8cb71ce724e4
+F ooxml.tcl 4af44b32fa961dbf023f473091058ac197c3752b06bef3bc125b686891854866
 F pkgIndex.tcl.in c2fdcf3bca389bef6d9c349842f102ce228a17703dbf9691001815f7e555c43f
 F tclconfig/ChangeLog 5afc872331b2b8e3ecfdbd0e8222da460b071c2f815080e47e0a1f6c49843a7f
 F tclconfig/README.txt 8285d9bad9933ad1ca9fd89398e7f22bea1b96dc68fb3d1536d0b3922725b21d
@@ -132,8 +132,11 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 1017409f582278919d855fec032de04df98f431559252fe56287c68a737ab918
-R 14864022f8103278629137f88f3b1525
+P 7a00b49e67f6b3cb1bedd622e9cf03235c262f4a2ecc959231b628d2f82b57bf
+R 0dd646ca6e1de67e7c7f3d37832839d4
+T +bgcolor * #fea5f4
+T +sym-release *
+T +sym-version-1.11 *
 U rolf
-Z ab79e0d3caa0f2520a2ebee2e1f67951
+Z db8264802c54bb02447730ba73b6afe4
 # Remove this line to create a well-formed Fossil manifest.

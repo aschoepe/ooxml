@@ -1,5 +1,5 @@
-C Version-1.11
-D 2026-06-25T23:01:37.171
+C Added\sa\shelper\sscript\sto\screate\sdocx\stype\scheck\sprocs\sfrom\sxsd\senumeraton\stypes.
+D 2026-06-29T12:31:56.625
 F .fossil-settings/ignore-glob 90b386b45cfd67b7b1018be7f869f05722caa0a7c001b53d0adde95b864d8baf
 F .fossil-settings/manifest 4598ba9e1e19cdadf19aa4881b2cb5a74fe4813ceea9bfe7e2fe382904cd14fe
 F .fossil-settings/manifest.no-warn a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a
@@ -96,6 +96,7 @@ F tests/xlsx-printarea.test b786b6320be430c00225650963596bee80b66e0fcf968d261d92
 F tests/xlsx-readerror.test 28d07b6f22f1ac0d9fdd4bdcfc9161afd716d87f5e0a62a76403de3d36577e5c
 F tests/xlsx-simple.test 88cd5283edd5564ff0c5f41104f463267171c188f273e9b210f3a533649daf15
 F tools/archive.sh a3480600c3a5c54ec353d97c7ed777fefad5bddef3a091b9b8cec15c4e2a9a35 x
+F tools/createTypeCode.tcl 1ac80b06e3269290f05065e055c1a449bcb177dbf6c1acec21331a0461faba06 x
 F tools/debugging/builddiff.sh 109cbd277e478cb6949d41fbe644d72637f308f3ba665210dbcd648a3e43d476
 F tools/demo.xml 55f59231394d7d3ea6cbed36c1d6765b64df98bc7b8089c3c569fdd0331dfb91
 F tools/gendoc.tcl 23d9305b8730e37bbe3905b8679d9af1b363aabaf1ee16342cce227f3d13d359 x
@@ -132,11 +133,8 @@ F tools/xmltotdom.tcl 2f99796ee54518a1166e216e976e6b63ccd8a38773bf5e6821bcdd4a39
 F tools/xmltotdomnodecmd.tcl 4fcd7f81e031596d3eb380cb0c95b003457d70f10c688d4b2875ba602ed690ba x
 F uv/min-download.html 3f433be823b4caea9f81be7d618eaa05585b30129af73b728497bca29ccee847
 F uv/template-download.html e2d57ca4804a4e02a688779f9b1e4a1bebe865de508e45f68fff773a52341728
-P 7a00b49e67f6b3cb1bedd622e9cf03235c262f4a2ecc959231b628d2f82b57bf
-R 0dd646ca6e1de67e7c7f3d37832839d4
-T +bgcolor * #fea5f4
-T +sym-release *
-T +sym-version-1.11 *
+P c7ad036e839dd0c92348f665cf928d973554c145a9d324d52e55c63dea18454f
+R afe07c2dce8fa72be68ac23afa18f7c2
 U rolf
-Z db8264802c54bb02447730ba73b6afe4
+Z a53d04ce36d2830538401de42c702b61
 # Remove this line to create a well-formed Fossil manifest.
